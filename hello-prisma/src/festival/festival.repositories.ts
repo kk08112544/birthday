@@ -11,15 +11,36 @@ export class FestivalRepositories {
   //   return 'This action adds a new festival';
   // }
 
-  async findAll(): Promise<ResponseFestivalDto[]> {
+  async findAll(search?: string): Promise<ResponseFestivalDto[]> {
     const result = await this.prisma.festival.findMany({
       where: {
         deletedAt: null,
+       
+     
+    ...(search
+      ? {
+          wisher: {
+            some: {
+              deletedAt: null,
+              wishWord: {
+                contains: search,
+              },
+            },
+          },
+        }
+      : {}),
       },
       include: {
         wisher: {
           where: {
             deletedAt: null,
+            ...(search
+          ? {
+              wishWord: {
+                contains: search,
+              },
+            }
+          : {}),
           },
         },
         card: {
@@ -29,6 +50,7 @@ export class FestivalRepositories {
         },
       },
     });
+
     return result as unknown as ResponseFestivalDto[];
   }
 

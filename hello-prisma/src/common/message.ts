@@ -9,7 +9,7 @@ export const MESSAGE = {
     CREATE_FAIL: 'สร้างผู้ส่งคำอวยพรไม่สำเร็จ',
     GET_SUCCESS: 'ดึงข้อมูลผู้ส่งคำอวยพรสำเร็จ',
     NOT_FOUND: 'ไม่พบผู้ส่งคำอวยพร',
-    BAD_WORD_FOUND: 'พบคำไม่สุภาพในข้อมูลที่ส่งมา',
+    BAD_WORD_FOUND: 'ไม่บันทึกคำไม่สุภาพ',
   },
   UNPOLITE: {
     CREATE_SUCCESS: 'สร้างคำไม่สุภาพสำเร็จ',

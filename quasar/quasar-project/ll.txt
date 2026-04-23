@@ -1,70 +1,267 @@
 <template>
-  <!-- <q-page class="row items-center justify-evenly">
-       <div class="col-6">
-       <q-img :src="image">
-         
-      </q-img>
-      </div>
-  </q-page> -->
-  <q-page class="q-pa-none">
-    <!-- <q-img :src="image" style="width: 100%; height: 600px" fit="cover" /> -->
-     <q-img
-  :src="image"
-  style="width: 1590px; height:400px"
-  fit="cover"
-/>
-
-
-<q-toolbar class="row justify-center bg-primary text-black">
-  <div class="row q-gutter-md">
-    <q-toolbar-title>ร่วมส่งคำอวยพร</q-toolbar-title>
-    <q-toolbar-title>ผู้ร่วมส่งคำอวยพร</q-toolbar-title>
+  <q-page>
+    <div class="q-pa-md" style="max-width: 2000px">
+      <!-- <q-form @submit="onSubmit" @reset="onReset" class="q-gutter-md"> -->
+      <q-form class="q-gutter-md">
+        <div class="row justify-center">
+          <div style="width: 100%; max-width: 900px">
+            <div class="row items-center justify-center q-gutter-sm">
+  <div class="col-auto">
+    <q-btn
+      flat
+      round
+      dense
+      icon="chevron_left"
+      size="2em"
+      color="primary"
+      :disable="pagination.page === 1"
+      @click="$refs.myTable.prevPage()"
+    />
   </div>
-</q-toolbar>
+
+  <div class="col">
+    <q-table
+      ref="myTable"
+      grid
+      flat
+      :rows="rows"
+      :columns="columns"
+      row-key="url"
+      v-model:pagination="pagination"
+      hide-header
+      hide-bottom
+    >
+      <template v-slot:item="props">
+        <div class="q-pa-xs col-xs-6 col-sm-4">
+          <q-card
+            flat
+            bordered
+            class="cursor-pointer"
+            :class="selectedImage === props.row.url ? 'bg-blue-1' : ''"
+            @click="selectedImage = props.row.url"
+          >
+            <q-img :src="props.row.url"  :ratio="1" />
+            <q-inner-loading :showing="selectedImage === props.row.url">
+              <q-icon name="check_circle" color="primary" size="32px" />
+            </q-inner-loading>
+          </q-card>
+        </div>
+      </template>
+    </q-table>
+  </div>
+
+  <div class="col-auto">
+    <q-btn
+      flat
+      round
+      dense
+      icon="chevron_right"
+      size="2em"
+      color="primary"
+      :disable="pagination.page >= Math.ceil(rows.length / pagination.rowsPerPage)"
+      @click="$refs.myTable.nextPage()"
+    />
+  </div>
+</div>
+            <!-- <q-table
+              grid
+              flat
+              bordered
+              :rows="rows"
+              :columns="columns"
+              row-key="url"
+              :filter="filter"
+              hide-header
+              hide-bottom
+              class="q-mb-md"
+            >
+              <template v-slot:item="props">
+                <div class="q-pa-xs col-xs-6 col-sm-4">
+                  <q-card
+                    flat
+                    bordered
+                    class="cursor-pointer"
+                    :class="selectedImage === props.row.url ? 'bg-blue-1' : ''"
+                    @click="selectedImage = props.row.url"
+                  >
+                    <q-img :src="props.row.url" :ratio="1" />
+
+                    <q-inner-loading :showing="selectedImage === props.row.url">
+                      <q-icon name="check_circle" color="primary" size="32px" />
+                    </q-inner-loading>
+                  </q-card>
+                </div>
+              </template>
+            </q-table> -->
+          </div>
+        </div>
+        <q-select
+          filled
+          v-model="selectedWisher"
+          use-input
+          input-debounce="0"
+          label="เลือกคำอวยพร"
+          :options="options"
+          @filter="filterFn"
+          style="width: 100%; padding-bottom: 32px"
+          emit-value
+          map-options
+        >
+          <template v-slot:no-option>
+            <q-item>
+              <q-item-section class="text-grey"> ไม่พบข้อมูล </q-item-section>
+            </q-item>
+          </template>
+        </q-select>
+        <q-input
+          filled
+          type="text"
+          v-model="name"
+          label="ชื่อ-นามสกุล"
+          hint="ชื่อ-นามสกุล"
+          lazy-rules
+          :rules="[(val) => (val && val.length > 0) || 'ชื่อ-นามสกุล ต้องระบุ']"
+        />
+        <q-input
+          filled
+          type="text"
+          v-model="position"
+          label="ตำแหน่ง"
+          hint="ตำแหน่ง"
+          lazy-rules
+          :rules="[(val) => (val && val.length > 0) || 'ตำแหน่ง ต้องระบุ']"
+        />
+
+        <q-input
+          filled
+          type="text"
+          v-model="department"
+          label="กอง/สำนัก/ศูนย์"
+          hint="กอง/สำนัก/ศูนย์ บุคคลภายนอกโปรดระบุว่าเป็นบุคคลภายนอก"
+          lazy-rules
+          :rules="[
+            (val) =>
+              (val && val.length > 0) ||
+              'กอง/สำนัก/ศูนย์ ต้องระบุ บุคคลภายนอกโปรดระบุว่าเป็นบุคคลภายนอก',
+          ]"
+        />
+
+        <div>
+          <q-btn label="บันทึกผู้ส่ง" type="submit" color="primary" />
+          <q-btn label="ล้างข้อมูลผู้ส่ง" type="reset" color="primary" flat class="q-ml-sm" />
+        </div>
+      </q-form>
+    </div>
   </q-page>
 </template>
 
 <script setup lang="ts">
-// import type { Todo, Meta } from 'components/models';
-// import ExampleComponent from 'components/ExampleComponent.vue';
-// import { ref } from 'vue';
 import { ref, onMounted } from 'vue';
 import { api } from 'src/boot/axios';
 import { useQuasar } from 'quasar';
-const image = ref('');
-const birth = ref([]); // ✅ สร้าง state
+
+// --- State ---
+
+const wisherData = ref<{ label: string; value: number }[]>([]);
+const selectedWisher = ref(null); // ค่าที่เลือก
+const name = ref(null);
+const position = ref(null);
+const department = ref(null);
 
 const $q = useQuasar();
 
+const selectedImage = ref<string | null>(null); // ตัวแปรเจ้าปัญหาที่ต้องเพิ่ม
+const columns = [{ name: 'image', label: 'รูปภาพ', field: 'url' }];
+const rows = ref<{ url: string }[]>([]);
+// ตัวอย่างการใช้ Screen Plugin ของ Quasar (หากต้องการสลับ Logic บางอย่าง)
 if ($q.screen.lt.md) {
-  console.log('มือถือ');
+  // console.log('โหมดมือถือ/แท็บเล็ต');
 }
-const getImageUrl = (image: string) => {
-  return api(`/file/${image}`, {
-    responseType: 'blob', // รับข้อมูลเป็น Blob
-  })
-    .then((response) => {
-      return URL.createObjectURL(response.data); // สร้าง URL จาก Blob
-    })
-    .catch((error) => {
-      console.error('Error fetching image:', error);
-      return ''; // คืนค่าเป็น string ว่างในกรณีเกิดข้อผิดพลาด
-    });
+
+const pagination = ref({
+  page: 1,
+  rowsPerPage: 5 // ปรับจำนวนรูปที่ต้องการแสดงต่อหนึ่งหน้า
+});
+interface FestivalCard {
+  cId: number;
+  imageCard: string;
+  // เพิ่ม field อื่นๆ ถ้ามี เช่น cId: number;
+}
+// --- Functions ---
+type Wisher = {
+  wId: number;
+  wishWord: string;
 };
+type FilterUpdateFn = (callback: () => void) => void;
+
+// ฟังก์ชันดึง Blob URL จาก Backend
+const getImageUrl = async (imagePath: string): Promise<string> => {
+  try {
+    const response = await api(`/file/${imagePath}`, {
+      responseType: 'blob',
+    });
+    return URL.createObjectURL(response.data);
+  } catch (error) {
+    console.error('Error fetching image:', error);
+    // คืนค่า Placeholder Image ในกรณีผิดพลาด หรือ คืนค่าว่าง
+    return '';
+  }
+};
+const options = ref<{ label: string; value: number }[]>([]); // ตัวแปรสำหรับแสดงใน List (ตอน filter)
+const filterFn = (val: string, update: FilterUpdateFn) => {
+  if (val === '') {
+    update(() => {
+      options.value = wisherData.value;
+    });
+    return;
+  }
+
+  update(() => {
+    const needle = val.toLowerCase();
+    options.value = wisherData.value.filter((v) => v.label.toLowerCase().indexOf(needle) > -1);
+  });
+};
+// ฟังก์ชันดึงข้อมูลเทศกาล
 const fetchBirthCard = async () => {
+  // คววรแสดง Loading State ทั่วไปของ Quasar ขณะโหลด
+
   try {
     const response = await api.get('/festival/all');
-    console.log('Birth Card Data:', response.data.festival[0]);
-    birth.value = response.data.festival[0]; // ✅ ใช้ .value
-    image.value = response.data.festival[0]?.image;
-    if (image.value) {
-      image.value = await getImageUrl(image.value); // ✅ อัปเดต image ด้วย URL ที่ได้จาก getImageUrl
-      console.log(image.value);
+
+    if (response.data?.festival && response.data.festival.length > 0) {
+      const wisherList = response.data.festival[0]?.wisher as Wisher[];
+
+      wisherData.value = wisherList.map((item) => ({
+        label: item.wishWord,
+        value: item.wId,
+      }));
+
+      const cardList: FestivalCard[] = response.data.festival[0]?.card || [];
+
+      const imageUrls = await Promise.all(
+        cardList.map(async (c: FestivalCard) => {
+          if (!c.imageCard) return '';
+          return await getImageUrl(c.imageCard);
+        }),
+      );
+
+      // นำมาสร้างเป็น Rows สำหรับ Table
+      rows.value = imageUrls.filter((url) => url !== '').map((url) => ({ url })); // สร้าง Object { url: 'blob:...' }
     }
   } catch (error) {
     console.error('Error fetching birth card data:', error);
+    $q.notify({
+      color: 'negative',
+      message: 'ไม่สามารถโหลดข้อมูลได้',
+      icon: 'report_problem',
+    });
+  } finally {
+    // ปิด Loading เสมอไม่ว่าจะสำเร็จหรือล้มเหลว
+    $q.loading.hide();
   }
 };
+
+// --- Lifecycle ---
 onMounted(() => {
   void fetchBirthCard();
 });

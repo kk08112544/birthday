@@ -1,6 +1,7 @@
 <template>
-  <q-page class="q-pa-none bg-grey-1"> <div class="row flex-center q-pt-md"> 
-    <q-img
+  <q-page class="q-pa-none bg-grey-1">
+    <!-- <div class="row flex-center q-pt-md">  -->
+    <!-- <q-img
        :src="image"
         class="banner-image shadow-2 rounded-borders" 
         fit="cover"
@@ -32,8 +33,7 @@
 
     <div class="q-pa-md text-center text-grey-7">
       (พื้นที่สำหรับแสดงฟอร์มส่งคำอวยพร หรือ รายชื่อผู้ร่วมอวยพร)
-    </div>
-
+    </div> -->
   </q-page>
 </template>
 
@@ -65,17 +65,17 @@ const getImageUrl = async (imagePath: string): Promise<string> => {
   } catch (error) {
     console.error('Error fetching image:', error);
     // คืนค่า Placeholder Image ในกรณีผิดพลาด หรือ คืนค่าว่าง
-    return ''; 
+    return '';
   }
 };
 
 // ฟังก์ชันดึงข้อมูลเทศกาล
 const fetchBirthCard = async () => {
   // คววรแสดง Loading State ทั่วไปของ Quasar ขณะโหลด
-  
+
   try {
     const response = await api.get('/festival/all');
-    
+
     // ตรวจสอบข้อมูลก่อนใช้งาน
     if (response.data?.festival && response.data.festival.length > 0) {
       const data = response.data.festival[0];
@@ -93,7 +93,7 @@ const fetchBirthCard = async () => {
     $q.notify({
       color: 'negative',
       message: 'ไม่สามารถโหลดข้อมูลได้',
-      icon: 'report_problem'
+      icon: 'report_problem',
     });
   } finally {
     // ปิด Loading เสมอไม่ว่าจะสำเร็จหรือล้มเหลว
@@ -107,12 +107,12 @@ onMounted(() => {
 });
 </script>
 
-<style lang="scss" scoped>
+<!-- <style lang="scss" scoped>
 /* --- CSS สำหรับรูปภาพ Banner --- */
 .banner-image {
   /* 1. Responsive Width: ในจอเล็กจะเต็มจอ, ในจอใหญ่จะหดกลับมา */
   width: 100%;          /* ในมือถือ/แท็บเล็ต รูปจะกว้าง 90% ของหน้าจอ (เพื่อไม่ให้ชนขอบเกินไป) */
-  max-width: 1590px;   /* **สำคัญ** จำกัดความกว้างสูงสุดไว้ที่ 1590px ตามความต้องการเดิมของคุณ */
+  max-width: 1650px;   /* **สำคัญ** จำกัดความกว้างสูงสุดไว้ที่ 1590px ตามความต้องการเดิมของคุณ */
   
   /* 2. Responsive Height: ปรับความสูงตามความกว้างหน้าจอ */
   height: 40vh;        /* ในจอเล็ก ความสูงเป็น 40% ของความสูงหน้าจอ (Viewport Height) */
@@ -144,4 +144,4 @@ onMounted(() => {
 .q-separator {
   background-color: rgba(0,0,0,0.12);
 }
-</style>
+</style> -->
