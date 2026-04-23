@@ -7,11 +7,11 @@ import { MESSAGE } from 'src/common/message';
 @Injectable()
 export class AdminUnpoliteService {
   constructor(
-    private readonly unpoliteRepositories: AdminUnpoliteRepositories,
+    private readonly adminunpoliteRepositories: AdminUnpoliteRepositories,
   ) {}
 
   async create(createUnpoliteDto: CreateUnpoliteDto) {
-    const data = await this.unpoliteRepositories.create(createUnpoliteDto);
+    const data = await this.adminunpoliteRepositories.create(createUnpoliteDto);
     return {
       unpolite: data,
       status: STATUS.SUCCESS,

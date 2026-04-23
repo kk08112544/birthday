@@ -35,7 +35,7 @@ import { FestivalModule } from './festival/festival.module';
 import { SenderModule } from './sender/sender.module';
 
 import { AdminUnpoliteModule } from './admin/unpolite/unpolite.module';
-
+import { AdminFestivalModule } from './admin/festival/festival.module';
 import { FileModule } from './file/file.module';
 
 @Module({
@@ -47,7 +47,7 @@ import { FileModule } from './file/file.module';
     FestivalModule,
     SenderModule,
     AdminUnpoliteModule,
-
+    AdminFestivalModule,
     FileModule,
   ],
   controllers: [AppController],

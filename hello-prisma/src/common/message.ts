@@ -2,6 +2,7 @@ export const MESSAGE = {
   FESTIVAL: {
     GET_SUCCESS: 'ดึงข้อมูลเทศกาลสำเร็จ',
     GET_FAIL: 'ดึงข้อมูลเทศกาลไม่สำเร็จ',
+    CREATE_SUCCESS: 'สร้างเทศกาลสำเร็จ',
   },
   SENDER: {
     CREATE_SUCCESS: 'สร้างผู้ส่งคำอวยพรสำเร็จ',

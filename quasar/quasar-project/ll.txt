@@ -1,0 +1,71 @@
+<template>
+  <!-- <q-page class="row items-center justify-evenly">
+       <div class="col-6">
+       <q-img :src="image">
+         
+      </q-img>
+      </div>
+  </q-page> -->
+  <q-page class="q-pa-none">
+    <!-- <q-img :src="image" style="width: 100%; height: 600px" fit="cover" /> -->
+     <q-img
+  :src="image"
+  style="width: 1590px; height:400px"
+  fit="cover"
+/>
+
+
+<q-toolbar class="row justify-center bg-primary text-black">
+  <div class="row q-gutter-md">
+    <q-toolbar-title>ร่วมส่งคำอวยพร</q-toolbar-title>
+    <q-toolbar-title>ผู้ร่วมส่งคำอวยพร</q-toolbar-title>
+  </div>
+</q-toolbar>
+  </q-page>
+</template>
+
+<script setup lang="ts">
+// import type { Todo, Meta } from 'components/models';
+// import ExampleComponent from 'components/ExampleComponent.vue';
+// import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
+import { api } from 'src/boot/axios';
+import { useQuasar } from 'quasar';
+const image = ref('');
+const birth = ref([]); // ✅ สร้าง state
+
+const $q = useQuasar();
+
+if ($q.screen.lt.md) {
+  console.log('มือถือ');
+}
+const getImageUrl = (image: string) => {
+  return api(`/file/${image}`, {
+    responseType: 'blob', // รับข้อมูลเป็น Blob
+  })
+    .then((response) => {
+      return URL.createObjectURL(response.data); // สร้าง URL จาก Blob
+    })
+    .catch((error) => {
+      console.error('Error fetching image:', error);
+      return ''; // คืนค่าเป็น string ว่างในกรณีเกิดข้อผิดพลาด
+    });
+};
+const fetchBirthCard = async () => {
+  try {
+    const response = await api.get('/festival/all');
+    console.log('Birth Card Data:', response.data.festival[0]);
+    birth.value = response.data.festival[0]; // ✅ ใช้ .value
+    image.value = response.data.festival[0]?.image;
+    if (image.value) {
+      image.value = await getImageUrl(image.value); // ✅ อัปเดต image ด้วย URL ที่ได้จาก getImageUrl
+      console.log(image.value);
+    }
+  } catch (error) {
+    console.error('Error fetching birth card data:', error);
+  }
+};
+onMounted(() => {
+  void fetchBirthCard();
+});
+</script>
