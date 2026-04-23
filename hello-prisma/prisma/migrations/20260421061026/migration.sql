@@ -1,0 +1,22 @@
+BEGIN TRY
+
+BEGIN TRAN;
+
+-- DropForeignKey
+ALTER TABLE [dbo].[Sender] DROP CONSTRAINT [Sender_festivalId_fkey];
+
+-- AddForeignKey
+ALTER TABLE [dbo].[Sender] ADD CONSTRAINT [Sender_festivalId_fkey] FOREIGN KEY ([festivalId]) REFERENCES [dbo].[Festival]([fId]) ON DELETE NO ACTION ON UPDATE CASCADE;
+
+COMMIT TRAN;
+
+END TRY
+BEGIN CATCH
+
+IF @@TRANCOUNT > 0
+BEGIN
+    ROLLBACK TRAN;
+END;
+THROW
+
+END CATCH

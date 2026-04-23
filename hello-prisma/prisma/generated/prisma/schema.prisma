@@ -1,0 +1,72 @@
+generator client {
+  provider        = "prisma-client-js"
+  output          = "./generated/prisma"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "sqlserver"
+}
+
+model Sender {
+  sId        Int      @id @default(autoincrement())
+  fullName   String
+  position   String
+  department String
+  festivalId Int
+  cardId     Int
+  wishId     Int
+  createdAt  DateTime @default(now())
+  festival   Festival @relation(fields: [festivalId], references: [fId])
+  card       Card     @relation(fields: [cardId], references: [cId], onUpdate: NoAction)
+  wish       Wisher   @relation(fields: [wishId], references: [wId], onUpdate: NoAction)
+}
+
+model Wisher {
+  wId        Int       @id @default(autoincrement())
+  wishWord   String
+  festivalId Int
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  deletedAt  DateTime?
+  sender     Sender[]
+  festival   Festival  @relation(fields: [festivalId], references: [fId])
+}
+
+model Card {
+  cId        Int       @id @default(autoincrement())
+  imageCard  String
+  festivalId Int
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  deletedAt  DateTime?
+  festival   Festival  @relation(fields: [festivalId], references: [fId])
+  sender     Sender[]
+}
+
+model Festival {
+  fId          Int       @id @default(autoincrement())
+  festivalName String
+  image        String
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
+  card         Card[]
+  wisher       Wisher[]
+  sender       Sender[]
+}
+
+model Unpolite {
+  upId      Int       @id @default(autoincrement())
+  word      String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+}
+
+model User {
+  uId       Int    @id @default(autoincrement())
+  firstName String
+  userName  String @unique
+  password  String
+}
