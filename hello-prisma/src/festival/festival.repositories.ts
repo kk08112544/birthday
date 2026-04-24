@@ -1,46 +1,40 @@
 import { Injectable } from '@nestjs/common';
-// import { CreateFestivalDto } from './dto/create-festival.dto';
-// import { UpdateFestivalDto } from './dto/update-festival.dto';
 import { ResponseFestivalDto } from './dto/response-festival.dto';
 import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
 export class FestivalRepositories {
   constructor(private prisma: PrismaService) {}
-  // create(createFestivalDto: CreateFestivalDto) {
-  //   return 'This action adds a new festival';
-  // }
 
   async findAll(search?: string): Promise<ResponseFestivalDto[]> {
     const result = await this.prisma.festival.findMany({
       where: {
         deletedAt: null,
-       
-     
-    ...(search
-      ? {
-          wisher: {
-            some: {
-              deletedAt: null,
-              wishWord: {
-                contains: search,
+
+        ...(search
+          ? {
+              wisher: {
+                some: {
+                  deletedAt: null,
+                  wishWord: {
+                    contains: search,
+                  },
+                },
               },
-            },
-          },
-        }
-      : {}),
+            }
+          : {}),
       },
       include: {
         wisher: {
           where: {
             deletedAt: null,
             ...(search
-          ? {
-              wishWord: {
-                contains: search,
-              },
-            }
-          : {}),
+              ? {
+                  wishWord: {
+                    contains: search,
+                  },
+                }
+              : {}),
           },
         },
         card: {
@@ -57,10 +51,6 @@ export class FestivalRepositories {
   findOne(id: number) {
     return `This action returns a #${id} festival`;
   }
-
-  // update(id: number, updateFestivalDto: UpdateFestivalDto) {
-  //   return `This action updates a #${id} festival`;
-  // }
 
   remove(id: number) {
     return `This action removes a #${id} festival`;

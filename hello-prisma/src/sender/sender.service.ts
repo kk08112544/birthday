@@ -3,6 +3,7 @@ import { CreateSenderDto } from './dto/create-sender.dto';
 // import { UpdateSenderDto } from './dto/update-sender.dto';
 import { SenderRepositories } from './sender.repositories';
 import { UnpoliteRepositories } from 'src/unpolite/unpolite.repositories';
+import { PaginationSenderDto } from './dto/pagination-sender.dto';
 
 import { STATUS } from 'src/common/status';
 import { MESSAGE } from 'src/common/message';
@@ -42,8 +43,41 @@ export class SenderService {
     };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} sender`;
+  async findMany(dto: PaginationSenderDto) {
+    const { page, limit, search, fullname, position, department, month, year } =
+      dto;
+
+    const result = await this.senderRepositories.findManyPaginated({
+      page,
+      limit,
+      search,
+      fullname,
+      position,
+      department,
+      month,
+      year,
+    });
+    return {
+      sender: result,
+      action: STATUS.SUCCESS,
+      message: MESSAGE.SENDER.GET_SUCCESS,
+    };
+  }
+
+  async findById(id: number) {
+    const data = await this.senderRepositories.findById(id);
+    if (!data) {
+      // return {
+      //   status: STATUS.ERROR,
+      //   message: MESSAGE.SENDER.NOT_FOUND,
+      // };
+      this.exceptionsService.throwSenderNotFound();
+    }
+    return {
+      sender: data,
+      action: STATUS.SUCCESS,
+      message: MESSAGE.SENDER.GET_SUCCESS,
+    };
   }
 
   // update(id: number, updateSenderDto: UpdateSenderDto) {

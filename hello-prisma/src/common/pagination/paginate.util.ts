@@ -1,5 +1,5 @@
-// import { PaginationOptions, PaginatedResult } from "./pagination.interface";
 import { PaginationOptions, PaginatedResult } from './paginate.interface';
+
 export function calculatePagination(options: PaginationOptions) {
   const { page, limit } = options;
   const skip = (page - 1) * limit;
@@ -28,11 +28,22 @@ export function createPaginatedResult<T>(
 export async function paginate<T>(
   queryFn: (skip: number, take: number) => Promise<T[]>,
   countFn: () => Promise<number>,
-  options: PaginationOptions,
-): Promise<PaginatedResult<T>> {
-  const { skip, take } = calculatePagination(options);
+  options: { page?: number; limit?: number },
+) {
+  const page = Number(options.page) || 1;
+  const limit = Number(options.limit) || 10;
 
-  const [data, total] = await Promise.all([queryFn(skip, take), countFn()]);
+  const skip = (page - 1) * limit;
 
-  return createPaginatedResult(data, total, options);
+  const [data, total] = await Promise.all([queryFn(skip, limit), countFn()]);
+
+  const totalPages = Math.ceil(total / limit); // ✅ เพิ่มตรงนี้
+
+  return {
+    data,
+    total,
+    page,
+    limit,
+    totalPages, // ✅ ใส่เข้าไป
+  };
 }

@@ -1,6 +1,15 @@
-import { Controller, Get, Post, Body, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  Query,
+} from '@nestjs/common';
 import { SenderService } from './sender.service';
 import { CreateSenderDto } from './dto/create-sender.dto';
+import { PaginationSenderDto } from './dto/pagination-sender.dto';
 // import { UpdateSenderDto } from './dto/update-sender.dto';
 
 @Controller('sender')
@@ -12,14 +21,19 @@ export class SenderController {
     return this.senderService.create(createSenderDto);
   }
 
-  @Get()
+  @Get('all')
   findAll() {
     return this.senderService.findAll();
   }
 
+  @Get()
+  findMany(@Query() paginationDto: PaginationSenderDto) {
+    return this.senderService.findMany(paginationDto);
+  }
+
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.senderService.findOne(+id);
+  findById(@Param('id') id: number) {
+    return this.senderService.findById(id);
   }
 
   // @Patch(':id')
