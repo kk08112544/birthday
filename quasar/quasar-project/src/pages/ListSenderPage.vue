@@ -15,13 +15,12 @@
     >
       <!-- 🔍 Search -->
       <template v-slot:top>
-        <div class="row full-width justify-center items-center q-gutter-md">
-          <div class="col-12 col-sm-6 col-md-4">
+        <div class="row full-width justify-center items-center q-gutter-x-md q-gutter-y-sm">
+          <div class="col-12 col-sm">
             <q-input
               dense
               outlined
-              rounded
-              debounce="500"
+              debounce="200"
               v-model="fullname"
               placeholder="ค้นหาชื่อ-นามสกุล"
               @update:model-value="onSearch"
@@ -32,12 +31,12 @@
               </template>
             </q-input>
           </div>
-          <div class="col-12 col-sm-6 col-md-4">
+
+          <div class="col-12 col-sm">
             <q-input
               dense
               outlined
-              rounded
-              debounce="500"
+              debounce="200"
               v-model="position"
               placeholder="ค้นหาตำแหน่ง"
               @update:model-value="onSearch"
@@ -48,12 +47,12 @@
               </template>
             </q-input>
           </div>
-          <div class="col-12 col-sm-6 col-md-4">
+
+          <div class="col-12 col-sm">
             <q-input
               dense
               outlined
-              rounded
-              debounce="500"
+              debounce="200"
               v-model="department"
               placeholder="ค้นหากอง/สำนัก/ศูนย์"
               @update:model-value="onSearch"
@@ -63,6 +62,32 @@
                 <q-icon name="search" />
               </template>
             </q-input>
+          </div>
+          <div class="col-12 col-sm">
+            <q-select
+              v-model="selectedMonth"
+              :options="monthOptions"
+              label="เลือกเดือน"
+              outlined
+              dense
+              emit-value
+              map-options
+              bg-color="white"
+              @update:model-value="onSearch"
+            />
+          </div>
+          <div class="col-12 col-sm">
+            <q-select
+              v-model="selectedYear"
+              :options="yearOptions"
+              label="เลือกปี พ.ศ."
+              outlined
+              dense
+              emit-value
+              map-options
+              bg-color="white"
+              @update:model-value="onSearch"
+            />
           </div>
         </div>
       </template>
@@ -149,6 +174,26 @@ interface TableRow {
   url: string;
   wishWord: string; // 👈 เพิ่มส่วนนี้
 }
+const selectedMonth = ref(new Date().getMonth() + 1); // getMonth() เริ่มที่ 0 เลยต้อง +1
+
+// รายการเดือนสำหรับ q-select
+const monthOptions = [
+  { label: 'มกราคม', value: 1 },
+  { label: 'กุมภาพันธ์', value: 2 },
+  { label: 'มีนาคม', value: 3 },
+  { label: 'เมษายน', value: 4 },
+  { label: 'พฤษภาคม', value: 5 },
+  { label: 'มิถุนายน', value: 6 },
+  { label: 'กรกฎาคม', value: 7 },
+  { label: 'สิงหาคม', value: 8 },
+  { label: 'กันยายน', value: 9 },
+  { label: 'ตุลาคม', value: 10 },
+  { label: 'พฤศจิกายน', value: 11 },
+  { label: 'ธันวาคม', value: 12 },
+];
+// --- เพิ่ม 2 บรรทัดนี้ ---
+const selectedYear = ref(new Date().getFullYear()); // เก็บปีปัจจุบันเป็นค่าเริ่มต้น
+const yearOptions = ref<{ label: string; value: number }[]>([]);
 
 // ================= STATE =================
 const rows = ref<TableRow[]>([]); // ระบุ Type แทน any
@@ -177,7 +222,20 @@ const columns = [
   { name: 'department', label: 'แผนก', field: 'department' },
   { name: 'wishWord', label: 'คำอวยพร', field: 'wishWord' },
 ];
+// ตัวแปรเก็บปีที่เลือก (ค่าเริ่มต้นเป็นปีปัจจุบัน)
+const generateThaiYearOptions = () => {
+  const years = [];
+  const currentYearCE = new Date().getFullYear(); // 2026 (พ.ศ. 2569)
+  const targetYearCE = 2026; // ปีสุดท้ายที่อยากให้โชว์ (พ.ศ. 2569)
 
+  for (let year = currentYearCE; year >= targetYearCE; year--) {
+    years.push({
+      label: `ปี พ.ศ. ${year + 543}`,
+      value: year,
+    });
+  }
+  yearOptions.value = years;
+};
 const getImageUrl = async (imagePath: string): Promise<string> => {
   try {
     const response = await api.get(`/file/${imagePath}`, {
@@ -201,6 +259,8 @@ const fetchSender = async (): Promise<void> => {
         fullname: fullname.value,
         position: position.value,
         department: department.value,
+        month: selectedMonth.value,
+        year: selectedYear.value,
       },
     });
 
@@ -271,10 +331,7 @@ const fetchSenderById = async (id: number | string): Promise<void> => {
 };
 // ================= EVENTS =================
 // แก้ไข: ใส่ void หน้าฟังก์ชัน async ที่ไม่ได้ถูก await เพื่อบอก ESLint ว่าเราตั้งใจปล่อยมัน run ไป
-// const onRequest = (props: { pagination: typeof pagination.value }) => {
-//   pagination.value = props.pagination;
-//   void fetchSender(); // ✅ ใช้ void แก้ error no-floating-promises
-// };
+
 const onRequest: QTableProps['onRequest'] = (props) => {
   // อัปเดต pagination state ด้วยค่าที่ส่งมาจาก table
   pagination.value.page = props.pagination.page;
@@ -294,5 +351,6 @@ const onSearch = () => {
 // ================= INIT =================
 onMounted(() => {
   void fetchSender(); // ✅ ใช้ void
+  generateThaiYearOptions();
 });
 </script>
