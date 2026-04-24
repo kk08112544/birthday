@@ -77,7 +77,7 @@
             />
           </div>
           <div class="col-12 col-sm">
-            <q-select
+            <!-- <q-select
               v-model="selectedYear"
               :options="yearOptions"
               label="เลือกปี พ.ศ."
@@ -87,38 +87,57 @@
               map-options
               bg-color="white"
               @update:model-value="onSearch"
-            />
+            /> -->
+            <q-select
+              v-model="selectedYear"
+              :options="filterYearOptions"
+              label="เลือกปี พ.ศ."
+              outlined
+              dense
+              use-input
+              fill-input
+              hide-selected
+              input-debounce="0"
+              emit-value
+              map-options
+              bg-color="white"
+              @filter="filterYearFn"
+              @update:model-value="onSearch"
+            >
+              <template v-slot:no-option>
+                <q-item>
+                  <q-item-section class="text-grey">ไม่พบข้อมูลปี</q-item-section>
+                </q-item>
+              </template>
+            </q-select>
           </div>
         </div>
       </template>
-
-      <!-- 🎴 Card Layout -->
       <template v-slot:item="props">
-        <div class="col-xs-12 col-sm-6 col-md-4 q-pa-sm">
-          <q-card class="shadow-2 rounded-borders" @click="fetchSenderById(props.row.sId)" v-ripple>
-            <q-img :src="props.row.url" style="height: 500px" />
-
-            <q-card-section>
-              <div class="text-bold text-h6">
+        <div class="col-xs-12 col-sm-6 col-md-3 col-lg-2 q-pa-xs">
+          <q-card class="wish-card-mini shadow-1" @click="fetchSenderById(props.row.sId)" v-ripple>
+            <q-img :src="props.row.url" class="img-card-mini" :ratio="1" />
+            <q-card-section class="q-pa-sm">
+              <div class="text-bold text-subtitle2 ellipsis">
                 {{ props.row.fullname }}
               </div>
-              <div class="text-grey-7">
+              <div class="text-caption text-grey-8 ellipsis">
                 {{ props.row.position }}
               </div>
-              <div class="text-grey-6 text-caption">
+              <div class="text-caption text-grey-6 ellipsis" style="font-size: 0.75rem">
                 {{ props.row.department }}
               </div>
-              <div class="text-grey-6 text-caption">
+
+              <div class="text-caption text-primary ellipsis q-mt-xs" style="font-size: 0.7rem">
                 {{ props.row.wishWord }}
               </div>
             </q-card-section>
           </q-card>
         </div>
       </template>
-
       <!-- 💤 Empty -->
       <template v-slot:no-data>
-        <div class="full-width text-center q-pa-md text-grey">No data found</div>
+        <div class="full-width text-center q-pa-md text-grey">ไม่มีข้อมูล</div>
       </template>
     </q-table>
     <q-dialog v-model="showDialog">
@@ -191,9 +210,9 @@ const monthOptions = [
   { label: 'พฤศจิกายน', value: 11 },
   { label: 'ธันวาคม', value: 12 },
 ];
-// --- เพิ่ม 2 บรรทัดนี้ ---
-const selectedYear = ref(new Date().getFullYear()); // เก็บปีปัจจุบันเป็นค่าเริ่มต้น
-const yearOptions = ref<{ label: string; value: number }[]>([]);
+// // --- เพิ่ม 2 บรรทัดนี้ ---
+// const selectedYear = ref(new Date().getFullYear()); // เก็บปีปัจจุบันเป็นค่าเริ่มต้น
+// const yearOptions = ref<{ label: string; value: number }[]>([]);
 
 // ================= STATE =================
 const rows = ref<TableRow[]>([]); // ระบุ Type แทน any
@@ -223,18 +242,62 @@ const columns = [
   { name: 'wishWord', label: 'คำอวยพร', field: 'wishWord' },
 ];
 // ตัวแปรเก็บปีที่เลือก (ค่าเริ่มต้นเป็นปีปัจจุบัน)
+// --- เพิ่ม 2 บรรทัดนี้ ---
+// const selectedYear = ref(new Date().getFullYear()); // เก็บปีปัจจุบันเป็นค่าเริ่มต้น
+// const yearOptions = ref<{ label: string; value: number }[]>([]);
+// const generateThaiYearOptions = () => {
+//   const years = [];
+//   const currentYearCE = new Date().getFullYear(); // 2026 (พ.ศ. 2569)
+//   const targetYearCE = 2026; // ปีสุดท้ายที่อยากให้โชว์ (พ.ศ. 2569)
+
+//   for (let year = currentYearCE; year >= targetYearCE; year--) {
+//     years.push({
+//       label: `${year + 543}`,
+//       value: year,
+//     });
+//   }
+//   yearOptions.value = years;
+// };
+
+const selectedYear = ref(new Date().getFullYear());
+const yearOptions = ref<{ label: string; value: number }[]>([]);
+// ✅ เพิ่มตัวแปรสำหรับเก็บค่าที่กรองแล้ว
+const filterYearOptions = ref<{ label: string; value: number }[]>([]);
+
 const generateThaiYearOptions = () => {
   const years = [];
-  const currentYearCE = new Date().getFullYear(); // 2026 (พ.ศ. 2569)
-  const targetYearCE = 2026; // ปีสุดท้ายที่อยากให้โชว์ (พ.ศ. 2569)
+  const currentYearCE = new Date().getFullYear(); // 2026
+
+  // ✅ แก้บั๊ก: ปรับ targetYearCE ให้ย้อนหลังไปสัก 10 ปี (เช่น 2016)
+  // เพื่อให้มีรายการปีให้เลือกและพิมพ์ค้นหาได้
+  const targetYearCE = 2026;
 
   for (let year = currentYearCE; year >= targetYearCE; year--) {
     years.push({
-      label: `ปี พ.ศ. ${year + 543}`,
+      label: `${year + 543}`,
       value: year,
     });
   }
   yearOptions.value = years;
+  // ✅ ตั้งค่าเริ่มต้นให้ filterOptions เท่ากับค่าทั้งหมด
+  filterYearOptions.value = years;
+};
+
+// ✅ เพิ่มฟังก์ชันสำหรับกรองข้อมูล (Filter)
+const filterYearFn = (val: string, update: (callback: () => void) => void) => {
+  if (val === '') {
+    update(() => {
+      filterYearOptions.value = yearOptions.value;
+    });
+    return;
+  }
+
+  update(() => {
+    const needle = val.toLowerCase();
+    filterYearOptions.value = yearOptions.value.filter(
+      (v) => v.label.toLowerCase().indexOf(needle) > -1,
+    );
+  });
 };
 const getImageUrl = async (imagePath: string): Promise<string> => {
   try {

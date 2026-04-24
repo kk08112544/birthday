@@ -17,8 +17,12 @@ export class ExceptionsService {
   throwSenderNotFound(): never {
     throw new NotFoundException(MESSAGE.SENDER.NOT_FOUND);
   }
-  throwBadWordFound(): never {
+  throwFoundBadWord(): never {
     throw new BadRequestException(MESSAGE.SENDER.BAD_WORD_FOUND);
+  }
+
+  throwBadWordNotFound(): never {
+    throw new NotFoundException(MESSAGE.UNPOLITE.NOT_FOUND);
   }
 
   //   throwUserAlreadyExists(): never {

@@ -12,7 +12,7 @@
  Target Server Version : 17001000 (17.00.1000)
  File Encoding         : 65001
 
- Date: 23/04/2026 18:06:31
+ Date: 24/04/2026 14:21:16
 */
 
 
@@ -120,6 +120,21 @@ GO
 INSERT INTO [dbo].[Sender] ([sId], [position], [department], [cardId], [wishId], [createdAt], [festivalId], [fullname]) VALUES (N'32', N'dsfdsf', N'dfdsfsdf', N'8', N'2', N'2026-04-23 10:55:41.1950000', N'1', N'sdf')
 GO
 
+INSERT INTO [dbo].[Sender] ([sId], [position], [department], [cardId], [wishId], [createdAt], [festivalId], [fullname]) VALUES (N'33', N'dsfdsfdsf', N'dsfdsf', N'8', N'2', N'2026-04-24 02:05:16.2270000', N'1', N'sdfs')
+GO
+
+INSERT INTO [dbo].[Sender] ([sId], [position], [department], [cardId], [wishId], [createdAt], [festivalId], [fullname]) VALUES (N'34', N'นวก.คอม', N'ศทส', N'10', N'2', N'2026-04-24 02:14:20.0390000', N'1', N'นายเคเค ')
+GO
+
+INSERT INTO [dbo].[Sender] ([sId], [position], [department], [cardId], [wishId], [createdAt], [festivalId], [fullname]) VALUES (N'35', N'นักวิชาการคอมพิวเตอร์ปฏิบัติการ', N'ศทส', N'14', N'2', N'2026-04-24 02:16:57.8190000', N'1', N'นาย สุวรา สังข์ทอง')
+GO
+
+INSERT INTO [dbo].[Sender] ([sId], [position], [department], [cardId], [wishId], [createdAt], [festivalId], [fullname]) VALUES (N'36', N'นักวิชาการคอมพิวเตอร์ปฏิบัติการ', N'ศทส', N'8', N'2', N'2026-04-24 02:31:05.2130000', N'1', N'เคเค')
+GO
+
+INSERT INTO [dbo].[Sender] ([sId], [position], [department], [cardId], [wishId], [createdAt], [festivalId], [fullname]) VALUES (N'37', N'นักวิชาการแผนที่ชำนาญการ', N'ศทส', N'8', N'2', N'2026-04-24 06:23:35.1760000', N'1', N'นาย ข ค')
+GO
+
 SET IDENTITY_INSERT [dbo].[Sender] OFF
 GO
 
@@ -127,7 +142,7 @@ GO
 -- ----------------------------
 -- Auto increment value for Sender
 -- ----------------------------
-DBCC CHECKIDENT ('[dbo].[Sender]', RESEED, 32)
+DBCC CHECKIDENT ('[dbo].[Sender]', RESEED, 37)
 GO
 
 

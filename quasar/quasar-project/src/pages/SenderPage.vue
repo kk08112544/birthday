@@ -93,62 +93,65 @@
             </div>
           </div>
         </div>
-
-        <q-select
-          filled
-          v-model="selectedWisher"
-          label="เลือกคำอวยพร"
-          :options="options"
-          @filter="filterFn"
-          style="width: 100%; padding-bottom: 32px"
-          emit-value
-          map-options
-          lazy-rules
-          :rules="[(val) => (val !== null && val !== '') || 'กรุณาเลือกคำอวยพร']"
-        >
-          <!-- <template v-slot:no-option>
+        <div class="row justify-center q-pa-md">
+          <div class="col-12 col-sm-8 col-md-6" style="max-width: 600px">
+            <q-select
+              filled
+              v-model="selectedWisher"
+              label="เลือกคำอวยพร"
+              :options="options"
+              @filter="filterFn"
+              style="width: 100%; padding-bottom: 32px"
+              emit-value
+              map-options
+              lazy-rules
+              :rules="[(val) => (val !== null && val !== '') || 'กรุณาเลือกคำอวยพร']"
+            >
+              <!-- <template v-slot:no-option>
             <q-item>
               <q-item-section class="text-grey"> ไม่พบข้อมูล </q-item-section>
             </q-item>
           </template> -->
-        </q-select>
+            </q-select>
 
-        <q-input
-          filled
-          type="text"
-          v-model="name"
-          label="ชื่อ-นามสกุล"
-          hint="ชื่อ-นามสกุล"
-          lazy-rules
-          :rules="[(val) => (val && val.length > 0) || 'ชื่อ-นามสกุล ต้องระบุ']"
-        />
-        <q-input
-          filled
-          type="text"
-          v-model="position"
-          label="ตำแหน่ง"
-          hint="ตำแหน่ง"
-          lazy-rules
-          :rules="[(val) => (val && val.length > 0) || 'ตำแหน่ง ต้องระบุ']"
-        />
+            <q-input
+              filled
+              type="text"
+              v-model="name"
+              label="ชื่อ-นามสกุล"
+              hint="ชื่อ-นามสกุล"
+              lazy-rules
+              :rules="[(val) => (val && val.length > 0) || 'ชื่อ-นามสกุล ต้องระบุ']"
+            />
+            <q-input
+              filled
+              type="text"
+              v-model="position"
+              label="ตำแหน่ง"
+              hint="ตำแหน่ง"
+              lazy-rules
+              :rules="[(val) => (val && val.length > 0) || 'ตำแหน่ง ต้องระบุ']"
+            />
 
-        <q-input
-          filled
-          type="text"
-          v-model="department"
-          label="กอง/สำนัก/ศูนย์"
-          hint="กอง/สำนัก/ศูนย์ บุคคลภายนอกโปรดระบุว่าเป็นบุคคลภายนอก"
-          lazy-rules
-          :rules="[
-            (val) =>
-              (val && val.length > 0) ||
-              'กอง/สำนัก/ศูนย์ ต้องระบุ บุคคลภายนอกโปรดระบุว่าเป็นบุคคลภายนอก',
-          ]"
-        />
-
-        <div>
-          <q-btn label="บันทึกผู้ส่ง" type="submit" color="primary" />
-          <q-btn label="ล้างข้อมูลผู้ส่ง" type="reset" color="primary" flat class="q-ml-sm" />
+            <q-input
+              filled
+              type="text"
+              v-model="department"
+              label="กอง/สำนัก/ศูนย์"
+              hint="กอง/สำนัก/ศูนย์ บุคคลภายนอกโปรดระบุว่าเป็นบุคคลภายนอก"
+              lazy-rules
+              :rules="[
+                (val) =>
+                  (val && val.length > 0) ||
+                  'กอง/สำนัก/ศูนย์ ต้องระบุ บุคคลภายนอกโปรดระบุว่าเป็นบุคคลภายนอก',
+              ]"
+            />
+            <br />
+            <div>
+              <q-btn label="บันทึกผู้ส่ง" type="submit" color="primary" />
+              <q-btn label="ล้างข้อมูลผู้ส่ง" type="reset" color="primary" flat class="q-ml-sm" />
+            </div>
+          </div>
         </div>
       </q-form>
     </div>

@@ -24,7 +24,7 @@ export class SenderService {
       //   status: STATUS.ERROR,
       //   message: MESSAGE.SENDER.BAD_WORD_FOUND,
       // };
-      this.exceptionsService.throwBadWordFound();
+      this.exceptionsService.throwFoundBadWord();
     }
     const data = await this.senderRepositories.create(createSenderDto);
     return {
