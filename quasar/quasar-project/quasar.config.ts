@@ -62,7 +62,9 @@ export default defineConfig((ctx) => {
 
       // extendViteConf (viteConf) {},
       // viteVuePluginOptions: {},
-
+      env: {
+        API_URL: process.env.API_URL
+      },
       vitePlugins: [
         [
           '@intlify/unplugin-vue-i18n/vite',
