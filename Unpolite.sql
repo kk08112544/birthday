@@ -12,7 +12,7 @@
  Target Server Version : 17001000 (17.00.1000)
  File Encoding         : 65001
 
- Date: 24/04/2026 14:21:50
+ Date: 24/04/2026 16:28:33
 */
 
 
@@ -45,7 +45,7 @@ GO
 INSERT INTO [dbo].[Unpolite] ([upId], [word], [createdAt], [updatedAt], [deletedAt]) VALUES (N'1', N'你爸爸死', N'2026-04-21 07:21:57.5970000', N'2026-04-21 07:21:57.5970000', NULL)
 GO
 
-INSERT INTO [dbo].[Unpolite] ([upId], [word], [createdAt], [updatedAt], [deletedAt]) VALUES (N'2', N'草泥马', N'2026-04-21 09:47:43.1290000', N'2026-04-21 09:47:43.1290000', NULL)
+INSERT INTO [dbo].[Unpolite] ([upId], [word], [createdAt], [updatedAt], [deletedAt]) VALUES (N'2', N'草泥马', N'2026-04-21 09:47:43.1290000', N'2026-04-24 08:51:58.0670000', N'2026-04-24 08:51:58.0520000')
 GO
 
 INSERT INTO [dbo].[Unpolite] ([upId], [word], [createdAt], [updatedAt], [deletedAt]) VALUES (N'3', N'操你妈', N'2026-04-21 09:47:57.2990000', N'2026-04-21 09:47:57.2990000', NULL)
