@@ -28,7 +28,7 @@
             clickable
             to="/"
             class="flex flex-center text-center wish-link"
-            active-class="wish-active"
+            :class="{ 'wish-active': route.path === '/' }"
           >
             ร่วมส่งคำอวยพร
           </q-item>
@@ -41,8 +41,9 @@
             clickable
             to="/list"
             class="flex flex-center text-center wish-link"
-            active-class="wish-active"
+            :class="{ 'wish-active': route.path === '/list' }"
           >
+            <!-- active-class="wish-active" -->
             รายชื่อผู้ร่วมอวยพร
           </q-item>
         </q-toolbar-title>
@@ -71,7 +72,9 @@ const image = ref('');
 const festivalId = ref();
 const birthData = ref(null); // เปลี่ยนชื่อให้สื่อความหมาย และค่าเริ่มต้นเป็น null
 const festivalName = ref('');
+import { useRoute } from 'vue-router';
 
+const route = useRoute();
 const $q = useQuasar();
 $q.loading.show();
 // ตัวอย่างการใช้ Screen Plugin ของ Quasar (หากต้องการสลับ Logic บางอย่าง)

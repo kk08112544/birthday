@@ -1,147 +1,298 @@
 <template>
   <q-page class="q-pa-none bg-grey-1">
-    <!-- <div class="row flex-center q-pt-md">  -->
-    <!-- <q-img
-       :src="image"
-        class="banner-image shadow-2 rounded-borders" 
-        fit="cover"
-      >
-        <template v-slot:loading>
-          <q-spinner-gears color="primary" size="3rem" />
-        </template>
-        <template v-slot:error>
-          <div class="absolute-full flex flex-center bg-negative text-white">
-            ไม่สามารถโหลดรูปภาพได้
+    <q-table
+      grid
+      flat
+      bordered
+      :rows="rows"
+      :columns="columns"
+      title="รายการผู้ร่วมส่งคำอวยพร"
+      row-key="sId"
+      v-model:pagination="pagination"
+      :loading="loading"
+      @request="onRequest"
+      hide-header
+    >
+      <!-- 🔍 Search -->
+      <template v-slot:top>
+        <div class="row full-width justify-center items-center q-gutter-md">
+          <div class="col-12 col-sm-6 col-md-4">
+            <q-input
+              dense
+              outlined
+              rounded
+              debounce="500"
+              v-model="fullname"
+              placeholder="ค้นหาชื่อ-นามสกุล"
+              @update:model-value="onSearch"
+              bg-color="white"
+            >
+              <template v-slot:append>
+                <q-icon name="search" />
+              </template>
+            </q-input>
           </div>
-        </template>
-      </q-img>
-    </div>
+          <div class="col-12 col-sm-6 col-md-4">
+            <q-input
+              dense
+              outlined
+              rounded
+              debounce="500"
+              v-model="position"
+              placeholder="ค้นหาตำแหน่ง"
+              @update:model-value="onSearch"
+              bg-color="white"
+            >
+              <template v-slot:append>
+                <q-icon name="search" />
+              </template>
+            </q-input>
+          </div>
+          <div class="col-12 col-sm-6 col-md-4">
+            <q-input
+              dense
+              outlined
+              rounded
+              debounce="500"
+              v-model="department"
+              placeholder="ค้นหากอง/สำนัก/ศูนย์"
+              @update:model-value="onSearch"
+              bg-color="white"
+            >
+              <template v-slot:append>
+                <q-icon name="search" />
+              </template>
+            </q-input>
+          </div>
+        </div>
+      </template>
 
-    <q-toolbar class="wish-toolbar text-black q-mt-md shadow-1">
-      <div class="row flex-center full-width q-gutter-x-md q-gutter-y-xs">
-        <q-toolbar-title class="wish-title text-weight-bold">
-          ร่วมส่งคำอวยพร
-        </q-toolbar-title>
-        
-        <q-separator vertical dark class="gt-sm" />
+      <!-- 🎴 Card Layout -->
+      <template v-slot:item="props">
+        <div class="col-xs-12 col-sm-6 col-md-4 q-pa-sm">
+          <q-card class="shadow-2 rounded-borders" @click="fetchSenderById(props.row.sId)" v-ripple>
+            <q-img :src="props.row.url" style="height: 500px" />
 
-        <q-toolbar-title class="wish-title text-weight-regular text-subtitle1">
-          ผู้ร่วมส่งคำอวยพร
-        </q-toolbar-title>
-      </div>
-    </q-toolbar>
+            <q-card-section>
+              <div class="text-bold text-h6">
+                {{ props.row.fullname }}
+              </div>
+              <div class="text-grey-7">
+                {{ props.row.position }}
+              </div>
+              <div class="text-grey-6 text-caption">
+                {{ props.row.department }}
+              </div>
+              <div class="text-grey-6 text-caption">
+                {{ props.row.wishWord }}
+              </div>
+            </q-card-section>
+          </q-card>
+        </div>
+      </template>
 
-    <div class="q-pa-md text-center text-grey-7">
-      (พื้นที่สำหรับแสดงฟอร์มส่งคำอวยพร หรือ รายชื่อผู้ร่วมอวยพร)
-    </div> -->
+      <!-- 💤 Empty -->
+      <template v-slot:no-data>
+        <div class="full-width text-center q-pa-md text-grey">No data found</div>
+      </template>
+    </q-table>
+    <q-dialog v-model="showDialog">
+      <q-card style="width: 500px; max-width: 90vw">
+        <q-img :src="selectedSender?.url" />
+
+        <q-card-section>
+          <div class="text-h6">{{ selectedSender?.fullname }}</div>
+          <div class="text-subtitle2 text-grey-8">{{ selectedSender?.position }}</div>
+          <div class="text-caption text-grey">{{ selectedSender?.department }}</div>
+        </q-card-section>
+
+        <q-separator />
+
+        <q-card-section class="bg-blue-1">
+          <div class="text-weight-medium text-blue-9">คำอวยพร:</div>
+          <div class="text-body1 italic">{{ selectedSender?.wishWord }}</div>
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn flat label="ปิด" color="primary" v-close-popup />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </q-page>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { api } from 'src/boot/axios';
-import { useQuasar } from 'quasar';
+import type { QTableProps } from 'quasar'; // นำเข้า Type จาก Quasar
 
-// --- State ---
-const image = ref('');
-const birthData = ref(null); // เปลี่ยนชื่อให้สื่อความหมาย และค่าเริ่มต้นเป็น null
-
-const $q = useQuasar();
-
-// ตัวอย่างการใช้ Screen Plugin ของ Quasar (หากต้องการสลับ Logic บางอย่าง)
-if ($q.screen.lt.md) {
-  // console.log('โหมดมือถือ/แท็บเล็ต');
+// 1. กำหนด Interface ให้ชัดเจน
+interface SenderItem {
+  sId: number | string;
+  fullname: string;
+  position: string;
+  department: string;
+  card?: {
+    imageCard: string;
+  };
+  wish?: {
+    // 👈 เพิ่มส่วนนี้
+    wishWord: string;
+  };
 }
 
-// --- Functions ---
+interface TableRow {
+  sId: number | string;
+  fullname: string;
+  position: string;
+  department: string;
+  url: string;
+  wishWord: string; // 👈 เพิ่มส่วนนี้
+}
 
-// ฟังก์ชันดึง Blob URL จาก Backend
+// ================= STATE =================
+const rows = ref<TableRow[]>([]); // ระบุ Type แทน any
+const filter = ref('');
+const loading = ref(false);
+const fullname = ref(null);
+const position = ref(null);
+const department = ref(null);
+// const pagination = ref({
+//   page: 1,
+//   rowsPerPage: 10,
+//   rowsNumber: 0,
+// });
+const pagination = ref({
+  page: 1,
+  rowsPerPage: 10,
+  rowsNumber: 0, // หรือใส่เป็น 0 ไว้ก่อน
+  sortBy: '', // เพิ่มเพื่อให้ Type ตรงกัน
+  descending: false,
+});
+
+// ================= COLUMNS =================
+const columns = [
+  { name: 'fullname', label: 'ชื่อ', field: 'fullname' },
+  { name: 'position', label: 'ตำแหน่ง', field: 'position' },
+  { name: 'department', label: 'แผนก', field: 'department' },
+  { name: 'wishWord', label: 'คำอวยพร', field: 'wishWord' },
+];
+
 const getImageUrl = async (imagePath: string): Promise<string> => {
   try {
-    const response = await api(`/file/${imagePath}`, {
+    const response = await api.get(`/file/${imagePath}`, {
       responseType: 'blob',
     });
-    return URL.createObjectURL(response.data);
+    return URL.createObjectURL(response.data as Blob);
   } catch (error) {
     console.error('Error fetching image:', error);
-    // คืนค่า Placeholder Image ในกรณีผิดพลาด หรือ คืนค่าว่าง
     return '';
   }
 };
 
-// ฟังก์ชันดึงข้อมูลเทศกาล
-const fetchBirthCard = async () => {
-  // คววรแสดง Loading State ทั่วไปของ Quasar ขณะโหลด
-
+const fetchSender = async (): Promise<void> => {
+  loading.value = true;
   try {
-    const response = await api.get('/festival/all');
-
-    // ตรวจสอบข้อมูลก่อนใช้งาน
-    if (response.data?.festival && response.data.festival.length > 0) {
-      const data = response.data.festival[0];
-      birthData.value = data;
-      image.value = response.data.festival[0]?.image;
-      if (image.value) {
-        image.value = await getImageUrl(data.image);
-      } else {
-        // หากไม่มีชื่อรูปใน DB ให้ใช้รูป default
-        image.value = '';
-      }
-    }
-  } catch (error) {
-    console.error('Error fetching birth card data:', error);
-    $q.notify({
-      color: 'negative',
-      message: 'ไม่สามารถโหลดข้อมูลได้',
-      icon: 'report_problem',
+    const response = await api.get('/sender', {
+      params: {
+        page: pagination.value.page,
+        limit: pagination.value.rowsPerPage,
+        search: filter.value,
+        fullname: fullname.value,
+        position: position.value,
+        department: department.value,
+      },
     });
+
+    const res = response.data;
+    // กำหนด Type ให้ list
+    const list: SenderItem[] = res.sender?.data ?? [];
+
+    const formattedRows: TableRow[] = await Promise.all(
+      list.map(async (item: SenderItem) => {
+        let finalUrl = '';
+
+        if (item.card?.imageCard) {
+          const blobUrl = await getImageUrl(item.card.imageCard);
+          if (blobUrl) finalUrl = blobUrl;
+        }
+
+        return {
+          sId: item.sId,
+          fullname: item.fullname || '-',
+          position: item.position || '-',
+          department: item.department || '-',
+          url: finalUrl,
+          wishWord: item.wish?.wishWord || '',
+        };
+      }),
+    );
+
+    rows.value = formattedRows;
+    pagination.value.rowsNumber = res.sender?.total ?? 0;
+  } catch (error) {
+    console.error('FETCH ERROR:', error);
+    rows.value = [];
   } finally {
-    // ปิด Loading เสมอไม่ว่าจะสำเร็จหรือล้มเหลว
-    $q.loading.hide();
+    loading.value = false;
   }
 };
+const showDialog = ref(false);
+const selectedSender = ref<TableRow | null>(null);
+// แก้ไขฟังก์ชัน fetchSenderById
+const fetchSenderById = async (id: number | string): Promise<void> => {
+  loading.value = true;
+  try {
+    const response = await api.get(`/sender/${id}`);
+    const data = response.data.sender;
 
-// --- Lifecycle ---
+    // แปลงรูปภาพเหมือนที่ทำใน List
+    let finalUrl = '';
+    if (data.card?.imageCard) {
+      finalUrl = await getImageUrl(data.card.imageCard);
+    }
+
+    // เก็บลง State
+    selectedSender.value = {
+      sId: data.sId,
+      fullname: data.fullname,
+      position: data.position,
+      department: data.department,
+      url: finalUrl,
+      wishWord: data.wish?.wishWord || '',
+    };
+
+    showDialog.value = true; // เปิดหน้าต่างโชว์ข้อมูล
+  } catch (error) {
+    console.error('Error fetching by ID:', error);
+  } finally {
+    loading.value = false;
+  }
+};
+// ================= EVENTS =================
+// แก้ไข: ใส่ void หน้าฟังก์ชัน async ที่ไม่ได้ถูก await เพื่อบอก ESLint ว่าเราตั้งใจปล่อยมัน run ไป
+// const onRequest = (props: { pagination: typeof pagination.value }) => {
+//   pagination.value = props.pagination;
+//   void fetchSender(); // ✅ ใช้ void แก้ error no-floating-promises
+// };
+const onRequest: QTableProps['onRequest'] = (props) => {
+  // อัปเดต pagination state ด้วยค่าที่ส่งมาจาก table
+  pagination.value.page = props.pagination.page;
+  pagination.value.rowsPerPage = props.pagination.rowsPerPage;
+  pagination.value.sortBy = props.pagination.sortBy;
+  pagination.value.descending = props.pagination.descending;
+
+  // เรียกข้อมูลใหม่
+  void fetchSender();
+};
+
+const onSearch = () => {
+  pagination.value.page = 1;
+  void fetchSender(); // ✅ ใช้ void
+};
+
+// ================= INIT =================
 onMounted(() => {
-  void fetchBirthCard();
+  void fetchSender(); // ✅ ใช้ void
 });
 </script>
-
-<!-- <style lang="scss" scoped>
-/* --- CSS สำหรับรูปภาพ Banner --- */
-.banner-image {
-  /* 1. Responsive Width: ในจอเล็กจะเต็มจอ, ในจอใหญ่จะหดกลับมา */
-  width: 100%;          /* ในมือถือ/แท็บเล็ต รูปจะกว้าง 90% ของหน้าจอ (เพื่อไม่ให้ชนขอบเกินไป) */
-  max-width: 1650px;   /* **สำคัญ** จำกัดความกว้างสูงสุดไว้ที่ 1590px ตามความต้องการเดิมของคุณ */
-  
-  /* 2. Responsive Height: ปรับความสูงตามความกว้างหน้าจอ */
-  height: 40vh;        /* ในจอเล็ก ความสูงเป็น 40% ของความสูงหน้าจอ (Viewport Height) */
-  min-height: 250px;   /* ไม่ให้เตี้ยเกินไปในมือถือแนวตั้ง */
-  max-height: 400px;   /* **สำคัญ** จำกัดความสูงสูงสุดไว้ที่ 400px ในจอคอมพิวเตอร์ใหญ่ */
-
-  margin: 0 auto;       /* จัดกึ่งกลาง (Fallback เผื่อ row flex-center ไม่ทำงาน) */
-}
-
-/* --- CSS สำหรับ Toolbar --- */
-.wish-toolbar {
-  background-color: #fff; /* หรือ color จาก palette เช่น $primary */
-  border-top: 2px solid $primary; /* เพิ่มเส้นขอบบนให้ดูมีสไตล์ */
-  padding: 10px 0;
-}
-
-.wish-title {
-  /* ปรับขนาดตัวอักษรให้ Responsive ตามขนาดหน้าจอ */
-  font-size: clamp(1.1rem, 4vw, 1.5rem); /* min, preferred, max */
-  text-align: center;
-  padding: 0 10px;
-  
-  /* ในจอมือถือเล็กๆ ข้อความอาจจะยาวเกิน ให้ขึ้นบรรทัดใหม่ */
-  white-space: normal; 
-  line-height: 1.2;
-}
-
-// ปรับปรุง Divider ให้สวยงาม
-.q-separator {
-  background-color: rgba(0,0,0,0.12);
-}
-</style> -->

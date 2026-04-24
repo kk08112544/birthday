@@ -27,10 +27,10 @@
                   size="2em"
                   color="primary"
                   :disable="pagination.page === 1"
-                  @click="$refs.myTable.prevPage()"
+                  @click="myTable?.prevPage()"
                 />
               </div>
-
+              <!-- @click="$refs.myTable.prevPage()" -->
               <div class="col">
                 <q-table
                   ref="myTable"
@@ -86,8 +86,9 @@
                   size="2em"
                   color="primary"
                   :disable="pagination.page >= Math.ceil(rows.length / pagination.rowsPerPage)"
-                  @click="$refs.myTable.nextPage()"
+                  @click="myTable?.nextPage()"
                 />
+                <!-- @click="$refs.myTable.nextPage()" -->
               </div>
             </div>
           </div>
@@ -158,21 +159,25 @@
 import { ref, onMounted } from 'vue';
 import { api } from 'src/boot/axios';
 import { useQuasar } from 'quasar';
-
+import type { QTable } from 'quasar';
+import type { AxiosError } from 'axios';
 // --- State ---
-
+const myTable = ref<InstanceType<typeof QTable> | null>(null);
 const wisherData = ref<{ label: string; value: number }[]>([]);
 const selectedWisher = ref(null); // ค่าที่เลือก
 const name = ref(null);
 const position = ref(null);
 const department = ref(null);
-
+interface CardRow {
+  cId: number;
+  url: string;
+}
 const $q = useQuasar();
 const selectedCardId = ref<number | null>(null); // เพิ่มตัวแปรสำหรับเก็บ ID โดยเฉพาะ
 const selectedImage = ref<string | null>(null);
-
+const rows = ref<CardRow[]>([]);
 const columns = [{ name: 'image', label: 'รูปภาพ', field: 'url' }];
-const rows = ref<{ url: string }[]>([]);
+// const rows = ref<{ url: string }[]>([]);
 const festivalId = Number(localStorage.getItem('festivalId'));
 // ตัวอย่างการใช้ Screen Plugin ของ Quasar (หากต้องการสลับ Logic บางอย่าง)
 if ($q.screen.lt.md) {
@@ -181,7 +186,7 @@ if ($q.screen.lt.md) {
 
 const pagination = ref({
   page: 1,
-  rowsPerPage: 3, // ปรับจำนวนรูปที่ต้องการแสดงต่อหนึ่งหน้าให้เหมาะสม
+  rowsPerPage: 4, // ปรับจำนวนรูปที่ต้องการแสดงต่อหนึ่งหน้าให้เหมาะสม
 });
 
 interface FestivalCard {
@@ -229,9 +234,9 @@ const filterFn = (val: string, update: FilterUpdateFn) => {
 
 // ฟังก์ชันดึงข้อมูลเทศกาล
 const fetchBirthCard = async () => {
-  $q.loading.show({
-    message: 'กำลังโหลดข้อมูล...',
-  });
+  // $q.loading.show({
+  //   message: 'กำลังโหลดข้อมูล...',
+  // });
 
   try {
     const response = await api.get('/festival/all');
@@ -247,20 +252,6 @@ const fetchBirthCard = async () => {
 
       const cardList: FestivalCard[] = currentFestival?.card || [];
 
-      // const imageUrls = await Promise.all(
-      //   cardList.map(async (c: FestivalCard) => {
-      //     if (!c.imageCard) return '';
-      //     return await getImageUrl(c.imageCard);
-      //   }),
-      // );
-
-      // // นำมาสร้างเป็น Rows สำหรับ Table
-      // rows.value = imageUrls.filter((url) => url !== '').map((url) => ({ url })); // สร้าง Object { url: 'blob:...' }
-
-      // // เลือกรูปแรกเป็นค่าเริ่มต้นถ้ามีข้อมูล
-      // if (rows.value.length > 0) {
-      //   selectedImage.value = rows.value[0].url;
-      // }
       // ปรับปรุงการสร้าง rows ให้มี cId ติดไปด้วย
       const validCards = await Promise.all(
         cardList.map(async (c: FestivalCard) => {
@@ -272,11 +263,14 @@ const fetchBirthCard = async () => {
 
       // กรองตัวที่เป็น null ออก
       rows.value = validCards.filter((card) => card !== null) as CardRow[];
+      const first = rows.value[0];
 
       // ตั้งค่าเริ่มต้น (ถ้ามีข้อมูล)
-      if (rows.value.length > 0) {
-        selectedCardId.value = rows.value[0].cId;
-        selectedImage.value = rows.value[0].url;
+      if (first) {
+        // selectedCardId.value = rows.value[0].cId;
+        // selectedImage.value = rows.value[0].url;
+        selectedCardId.value = first.cId;
+        selectedImage.value = first.url;
       }
     }
   } catch (error) {
@@ -300,9 +294,15 @@ const resetForm = () => {
   selectedWisher.value = null;
 
   // รีเซ็ตการเลือกการ์ด (ถ้าต้องการให้กลับไปเลือกใบแรก)
-  if (rows.value.length > 0) {
-    selectedCardId.value = rows.value[0].cId;
-    selectedImage.value = rows.value[0].url;
+  // if (rows.value.length > 0) {
+  //   selectedCardId.value = rows.value[0].cId;
+  //   selectedImage.value = rows.value[0].url;
+  // }
+  const first = rows.value[0];
+
+  if (first) {
+    selectedCardId.value = first.cId;
+    selectedImage.value = first.url;
   } else {
     selectedCardId.value = null;
     selectedImage.value = null;
@@ -333,14 +333,6 @@ const postSender = async () => {
         window.location.reload();
       }, 1000);
     }
-
-    // if (response.status === 400) {
-    //   $q.notify({
-    //     color: 'negative',
-    //     message: response.data[0].message,
-    //     icon: 'error',
-    //   });
-    // }
   } catch (err: unknown) {
     // เปลี่ยนจาก any เป็น unknown
     const error = err as AxiosError<{ message: string }>; // Casting ประเภทข้อมูล
@@ -362,25 +354,7 @@ const postSender = async () => {
     console.error('Post Sender Error:', error);
   }
 };
-// const postSender = async () => {
-//   const senderData = {
-//     fullname: name.value,
-//     position: position.value,
-//     department: department.value,
-//     wId: selectedWisher.value,
-//     image: selectedImage.value, // สมมติว่า backend รองรับการรับ URL ของ
-//   };
-//   try {
-//     const response = await api.post('/sender', senderData);
-//     if (response.status === 201) {
-//       $q.notify({
-//         color: 'positive',
-//         message: response.data.message,
-//         icon: 'check_circle',
-//       });
-//     }
-//   } catch (error) {}
-// };
+
 // --- Lifecycle ---
 onMounted(() => {
   void fetchBirthCard();
