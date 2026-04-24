@@ -201,45 +201,6 @@ export class SenderRepositories {
         },
       });
     };
-    // const queryFn = (skip?: number, take?: number) => {
-    //   return this.prisma.sender.findMany({
-    //     where: whereCondition,
-    //     skip,
-    //     take,
-    //     orderBy: {
-    //       createdAt: "desc",
-    //     },
-    //      select: {
-    //     sId: true,
-    //     fullname: true,
-    //     position: true,
-    //     department: true,
-    //     festivalId: true,
-    //     cardId: true,
-    //     wishId: true,
-    //     createdAt: true,
-
-    //     card: {
-    //       select: {
-    //         cId: true,
-    //         imageCard: true,
-    //       },
-    //     },
-    //     wish: {
-    //       select: {
-    //         wId: true,
-    //         wishWord: true,
-    //       },
-    //     },
-    //     festival: {
-    //       select: {
-    //         fId: true,
-    //         festivalName: true,
-    //       },
-    //     },
-    //   },
-    //   });
-    // };
 
     // ✅ FIX: countFn ต้องเป็น function
     const countFn = () => {
