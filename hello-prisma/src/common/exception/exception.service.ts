@@ -1,7 +1,7 @@
 import {
   Injectable,
   //   ConflictException,
-  //   UnauthorizedException,
+  UnauthorizedException,
   BadRequestException,
   NotFoundException,
   //   ForbiddenException,
@@ -24,7 +24,15 @@ export class ExceptionsService {
   throwBadWordNotFound(): never {
     throw new NotFoundException(MESSAGE.UNPOLITE.NOT_FOUND);
   }
-
+  throwInvalidUserName(): never {
+    throw new NotFoundException(MESSAGE.AUTH.INVALID_USERNAME);
+  }
+  throwInvalidPassword(): never {
+    throw new NotFoundException(MESSAGE.AUTH.INVALID_PASSWORD);
+  }
+  throwInvalidRenewToken(): never {
+    throw new UnauthorizedException(MESSAGE.AUTH.INVALID_RENEW_TOKEN);
+  }
   //   throwUserAlreadyExists(): never {
   //     throw new ConflictException(this.i18n.translate("common.messages.emailExists"));
   //   }

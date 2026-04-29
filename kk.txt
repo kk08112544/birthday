@@ -1,0 +1,27 @@
+import { createRouter, createWebHistory } from 'vue-router'
+import routes from './routes'
+
+const router = createRouter({
+  history: createWebHistory(),
+  routes
+})
+
+// ✅ ตรวจสอบ token ก่อนเข้าหน้า protected
+router.beforeEach((to, from, next) => {
+  const accessToken = localStorage.getItem('accessToken') // หรือ sessionStorage
+  const refreshToken = localStorage.getItem('refreshToken');
+
+  
+  // ตรวจสอบเฉพาะ route ที่ requiresAuth = true
+  if (to.matched.some(record => (record.meta as { requiresAuth?: boolean }).requiresAuth)) {
+  
+    if (to.path.startsWith('/admin') && (!accessToken || !refreshToken) ) {
+          return next('/login'); // ไม่ใช่ admin → ไป login
+    }
+    // else{
+    //   return next('/')  // ถ้าไม่มี token → ไปหน้า login
+    // }
+  }
+
+  next() // ผ่านได้
+})

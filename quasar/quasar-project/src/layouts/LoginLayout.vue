@@ -83,61 +83,6 @@
         <q-toolbar-title>Footer</q-toolbar-title>
       </q-toolbar>
     </q-footer> -->
-    <q-footer class="footer-bg text-white q-pt-xl q-pb-md">
-      <div class="container q-px-md" style="max-width: 1200px; margin: 0 auto">
-        <div class="row q-col-gutter-lg">
-          <div class="col-12 col-md-5">
-            <div class="flex items-center q-mb-md">
-              <q-icon name="festival" size="sm" class="q-mr-sm" />
-              <div class="text-h6 text-weight-bold">Festival Greeting LDD</div>
-            </div>
-            <p class="text-body2 opacity-80" style="line-height: 1.6">
-              ร่วมเฉลิมฉลองเนื่องในโอกาสต่างๆ ด้วยคำอวยพร ความสุข และพลังใจดีๆ ให้แก่ผู้บริหาร
-              บุคลากร และเครือข่าย ของกรมพัฒนาที่ดิน
-            </p>
-          </div>
-
-          <div class="col-12 col-sm-6 col-md-3">
-            <div class="text-subtitle1 text-weight-bold q-mb-md">เมนูทางลัด</div>
-            <div class="column q-gutter-y-sm">
-              <router-link to="/" class="footer-link">ร่วมส่งคำอวยพร</router-link>
-              <router-link to="/list" class="footer-link">รายชื่อผู้ร่วมอวยพร</router-link>
-              <router-link to="/login" class="footer-link">แอดมิน</router-link>
-            </div>
-          </div>
-
-          <div class="col-12 col-sm-6 col-md-4">
-            <div class="text-subtitle1 text-weight-bold q-mb-md">ติดต่อสอบถาม</div>
-            <div class="column q-gutter-y-sm">
-              <div class="flex items-start no-wrap">
-                <q-icon name="apartment" size="xs" class="q-mr-sm q-mt-xs" />
-                <a
-                  href="https://webapp.ldd.go.th/ICTWeb/index.php"
-                  target="_blank"
-                  class="text-body2 footer-link flex items-start no-wrap"
-                >
-                  <span class="text-body2">ศูนย์เทคโนโลยีสารสนเทศและการสื่อสาร กรมพัฒนาที่ดิน</span>
-                </a>
-              </div>
-              <div class="flex items-center no-wrap">
-                <q-icon name="account_circle" size="xs" class="q-mr-sm" />
-                <span class="text-body2">กลุ่มฐานข้อมูลสารสนเทศ</span>
-              </div>
-              <div class="flex items-center no-wrap">
-                <q-icon name="call" size="xs" class="q-mr-sm" />
-                <span class="text-body2">02-562-5100 ต่อ 1328</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <q-separator dark class="q-my-lg opacity-20" />
-
-        <div class="text-center opacity-70 text-body2">
-          กรมพัฒนาที่ดิน ถนนพหลโยธิน แขวงลาดยาว เขตจตุจักร กรุงเทพฯ 10900 โทร. 1760 ต่อ 1275
-        </div>
-      </div>
-    </q-footer>
   </q-layout>
 </template>
 

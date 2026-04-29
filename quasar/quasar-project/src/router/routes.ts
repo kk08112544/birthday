@@ -9,7 +9,20 @@ const routes: RouteRecordRaw[] = [
       { path: 'list', component: () => import('pages/ListSenderPage.vue') },
     ],
   },
-
+  {
+    path: '/',
+    component: () => import('src/layouts/LoginLayout.vue'),
+    children: [{ path: 'login', component: () => import('pages/admin/LoginPage.vue') }],
+  },
+  {
+    path: '/admin',
+    component: () => import('src/layouts/MainLayout.vue'),
+    meta: { requiresAuth: true },
+    children: [
+      { path: 'festival', component: () => import('pages/admin/FestivalPage.vue') },
+      { path: 'unpolite', component: () => import('pages/admin/UnpolitePage.vue') },
+    ],
+  },
   // Always leave this as last one,
   // but you can also remove it
   {

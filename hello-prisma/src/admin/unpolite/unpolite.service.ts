@@ -53,7 +53,7 @@ export class AdminUnpoliteService {
       search,
     });
     return {
-      sender: result,
+      unpolite: result,
       action: STATUS.SUCCESS,
       message: MESSAGE.UNPOLITE.GET_SUCCESS,
     };

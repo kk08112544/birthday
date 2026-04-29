@@ -18,4 +18,11 @@ export const MESSAGE = {
     DELETE_SUCCESS: 'ลบคำไม่สุภาพสำเร็จแล้ว',
     UPDATE_SUCCESS: 'แก้ไขคำไม่สุภาพสำเร็จแล้ว',
   },
+  AUTH: {
+    INVALID_USERNAME: 'ไม่มีชื่อผู้ใช้นี้ในระบบ',
+    INVALID_PASSWORD: 'รหัสผ่านไม่ถูกต้อง',
+    INVALID_RENEW_TOKEN: 'รีนิวโทเค็นไม่ถูกต้อง',
+    LOGIN_SUCCESS: 'เข้าสู่ระบบสำเร็จ',
+    RENEW_TOKEN_SUCCESS: 'รีนิวโทเค็นสำเร็จ',
+  },
 };

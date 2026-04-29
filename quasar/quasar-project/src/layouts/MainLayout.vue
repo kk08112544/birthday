@@ -6,25 +6,22 @@
         <!-- <q-btn flat dense round icon="menu" aria-label="Menu" @click="toggleLeftDrawer" /> -->
 
         <q-toolbar-title> {{ festivalName }}</q-toolbar-title>
+
+        <!-- ตัวช่วยดันเนื้อหาถัดไปไปทางขวาสุด -->
+        <q-space />
+
+        <!-- ฝั่งขวา: ปุ่ม Logout -->
+        <q-icon
+          name="logout"
+          size="md"
+          color="white"
+          class="q-mr-md cursor-pointer"
+          @click="handleLogout"
+        />
       </q-toolbar>
     </q-header>
-    <!-- <q-img :src="image" class="banner-image shadow-2 rounded-borders" fit="cover">
-      <template v-slot:loading>
-        <q-spinner-gears color="primary" size="3rem" />
-      </template>
-      <template v-slot:error>
-        <div class="absolute-full flex flex-center bg-negative text-white">
-          ไม่สามารถโหลดรูปภาพได้
-        </div>
-      </template>
-    </q-img> -->
+
     <div class="row flex-center q-pt-md">
-      <!-- <q-img 
-      :src="image" 
-      class="banner-image shadow-2" 
-      fit="cover"
-      native-context-menu
-    > -->
       <q-img
         :src="image"
         :class="[$q.screen.gt.sm ? 'banner-desktop' : 'banner-mobile', 'shadow-2 rounded-borders']"
@@ -49,11 +46,11 @@
           </q-item> -->
           <q-item
             clickable
-            to="/"
+            to="/admin/festival"
             class="flex flex-center text-center wish-link"
-            :class="{ 'wish-active': route.path === '/' }"
+            :class="{ 'wish-active': route.path === '/admin/festival' }"
           >
-            ร่วมส่งคำอวยพร
+            เทศกาล,ภาพและคำอวยพร
           </q-item>
         </q-toolbar-title>
 
@@ -62,12 +59,12 @@
         <q-toolbar-title class="wish-title text-weight-bold">
           <q-item
             clickable
-            to="/list"
+            to="/admin/unpolite"
             class="flex flex-center text-center wish-link"
-            :class="{ 'wish-active': route.path === '/list' }"
+            :class="{ 'wish-active': route.path === '/admin/unpolite' }"
           >
             <!-- active-class="wish-active" -->
-            รายชื่อผู้ร่วมอวยพร
+            รายการคำต้องห้าม
           </q-item>
         </q-toolbar-title>
       </div>
@@ -78,11 +75,7 @@
     </q-page-container>
 
     <!-- ✅ ใส่ footer ตรงนี้ -->
-    <!-- <q-footer elevated>
-      <q-toolbar class="primary">
-        <q-toolbar-title>Footer</q-toolbar-title>
-      </q-toolbar>
-    </q-footer> -->
+
     <q-footer class="footer-bg text-white q-pt-xl q-pb-md">
       <div class="container q-px-md" style="max-width: 1200px; margin: 0 auto">
         <div class="row q-col-gutter-lg">
@@ -145,7 +138,7 @@
 import { ref, onMounted } from 'vue';
 import { useQuasar } from 'quasar';
 import { api } from 'src/boot/axios';
-
+import { useRouter } from 'vue-router';
 const image = ref('');
 const festivalId = ref();
 const birthData = ref(null); // เปลี่ยนชื่อให้สื่อความหมาย และค่าเริ่มต้นเป็น null
@@ -154,11 +147,57 @@ import { useRoute } from 'vue-router';
 
 const route = useRoute();
 const $q = useQuasar();
+const router = useRouter();
+
 $q.loading.show();
 // ตัวอย่างการใช้ Screen Plugin ของ Quasar (หากต้องการสลับ Logic บางอย่าง)
 if ($q.screen.lt.md) {
   console.log('โหมดมือถือ/แท็บเล็ต');
 }
+
+let refreshTimer: ReturnType<typeof setTimeout> | null = null;
+
+const startRefreshTimer = () => {
+  // เคลียร์ Timer เก่าก่อน (ถ้ามี)
+  if (refreshTimer) clearTimeout(refreshTimer);
+
+  const fiftyFiveMinutes = 55 * 60 * 1000;
+
+  refreshTimer = setTimeout(() => {
+    void refreshAccessToken();
+  }, fiftyFiveMinutes);
+};
+
+const refreshAccessToken = async () => {
+  try {
+    const refreshToken = localStorage.getItem('refreshToken');
+    if (!refreshToken) return;
+
+    // ยิง API ไปยัง Endpoint ของคุณที่ใช้สำหรับ Refresh Token
+    const response = await api.post('/auth/renew', {
+      refreshToken: refreshToken,
+    });
+
+    if (response.data.token) {
+      const accessToken = response.data.token.accessToken;
+      console.log(accessToken);
+      localStorage.setItem('accessToken', accessToken);
+      const refreshToken = response.data.token.refreshToken;
+      localStorage.setItem('refreshToken', refreshToken);
+      // อัปเดต Header ของ Axios สำหรับการยิงครั้งต่อๆ ไป
+      api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
+
+      console.log('Token refreshed successfully');
+
+      // ตั้งเวลาสำหรับรอบถัดไป (55 นาที)
+      startRefreshTimer();
+    }
+  } catch (error) {
+    console.error('Failed to refresh token:', error);
+    // ถ้า Refresh ไม่ผ่าน (เช่น Refresh Token หมดอายุ) ให้ Logout ทันที
+    handleLogout();
+  }
+};
 
 const getImageUrl = async (imagePath: string): Promise<string> => {
   try {
@@ -205,7 +244,28 @@ const fetchFestival = async () => {
 };
 onMounted(() => {
   void fetchFestival();
+  if (localStorage.getItem('accessToken')) {
+    startRefreshTimer();
+  }
 });
+const handleLogout = () => {
+  localStorage.removeItem('accessToken');
+  localStorage.removeItem('refreshToken');
+  localStorage.removeItem('username'); // ตรวจสอบชื่อ Key ให้ตรงกับที่ set ไว้ตอน Login
+  localStorage.setItem('firstName', ''); // หรือจะใช้ removeItem ก็ได้
+  localStorage.removeItem('userId'); // หรือ 'uId' ตามที่คุณตั้งชื่อไว้ตอนแรก
+  //    localStorage.setItem('accessToken',accessToken);
+  //         console.log("accessToken : " , accessToken);
+  //         localStorage.setItem('refreshToken',refreshToken);
+  //         console.log("refreshToken : " , refreshToken);
+  //         localStorage.setItem('userId',userId);
+  //         console.log("userId : " , userId);
+  //         localStorage.setItem('firstName',firstName);
+  //         console.log("firstName : " , firstName);
+  //         localStorage.setItem(' username', username);
+  //         console.log("username : " ,  username);
+  router.push('/login').catch((err) => console.error(err));
+};
 </script>
 <style lang="scss" scoped>
 /* --- CSS สำหรับรูปภาพ Banner --- */

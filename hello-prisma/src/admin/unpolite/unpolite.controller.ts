@@ -7,12 +7,15 @@ import {
   Param,
   Delete,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { AdminUnpoliteService } from './unpolite.service';
 import { CreateUnpoliteDto } from './dto/create-unpolite.dto';
 import { UpdateUnpoliteDto } from './dto/update-unpolite.dto';
 import { PaginationUnpoliteDto } from './dto/pagination-unpolite.dto';
+import { JwtAuthGuard } from 'src/common/guard/jwt/jwt-auth.guard';
 
+@UseGuards(JwtAuthGuard)
 @Controller('admin/unpolite')
 export class AdminUnpoliteController {
   constructor(private readonly unpoliteService: AdminUnpoliteService) {}

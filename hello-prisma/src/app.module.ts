@@ -9,6 +9,7 @@ import { SenderModule } from './sender/sender.module';
 import { AdminUnpoliteModule } from './admin/unpolite/unpolite.module';
 import { AdminFestivalModule } from './admin/festival/festival.module';
 import { FileModule } from './file/file.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { FileModule } from './file/file.module';
     AdminUnpoliteModule,
     AdminFestivalModule,
     FileModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
