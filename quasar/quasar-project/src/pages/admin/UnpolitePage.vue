@@ -11,6 +11,8 @@
         <q-btn color="primary" icon="add" label="เพิ่มคำใหม่" @click="onAdd" />
       </div>
       <q-table
+      style="max-width: 1000px; margin: 0 auto;"
+      dense
         flat
         bordered
         ref="tableRef"
