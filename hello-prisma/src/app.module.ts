@@ -5,11 +5,13 @@ import { AppService } from './app.service';
 
 import { FestivalModule } from './festival/festival.module';
 import { SenderModule } from './sender/sender.module';
-
+import { AdminCardModule } from './admin/card/card.module';
 import { AdminUnpoliteModule } from './admin/unpolite/unpolite.module';
 import { AdminFestivalModule } from './admin/festival/festival.module';
-import { FileModule } from './file/file.module';
+import { AdminWisherModule } from './admin/wisher/wisher.module';
+import { UploadModule } from './upload/upload.module';
 import { AuthModule } from './auth/auth.module';
+
 
 @Module({
   imports: [
@@ -21,8 +23,11 @@ import { AuthModule } from './auth/auth.module';
     SenderModule,
     AdminUnpoliteModule,
     AdminFestivalModule,
-    FileModule,
+    AdminWisherModule,
+    AdminCardModule,
+    UploadModule,
     AuthModule,
+
   ],
   controllers: [AppController],
   providers: [AppService],

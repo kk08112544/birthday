@@ -5,5 +5,18 @@ export class ResponseFestivalDto {
   image!: string;
   createdAt!: Date;
   updatedAt!: Date;
-  deleteAt!: Date | null;
+  deletedAt!: Date | null;
+  // // ใน Schema คือ Wisher[] ดังนั้นต้องเป็น Array ของ Object
+  // wisher!: {
+  //   wId: number;
+  //   wishWord: string;
+  //   festivalId: number;
+  // }[];
+
+  // // ใน Schema คือ Card[] ดังนั้นต้องเป็น Array ของ Object
+  // card!: {
+  //   cId: number;
+  //   imageCard: string;
+  //   festivalId: number;
+  // }[];
 }

@@ -1,27 +1,69 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import routes from './routes'
+<div class="row justify-center q-mb-md text-h5 text-weight-bold">รายการคำไม่พึงประสงค์</div>
+    <div class="q-pa-md">
+      <div class="row justify-end q-mb-md">
+        <q-btn color="primary" icon="add" label="เพิ่มคำใหม่"  />
+        <!-- @click="onAdd" -->
+      </div>
+      <q-table
+        flat
+        bordered
+        ref="tableRef"
+        title="รายการคำไม่พึงประสงค์"
+        :rows="wishes"
+        :columns="columns"
+        row-key="id"
+        v-model:pagination="pagination"
+        :loading="loading"
+        :filter="search"
+        binary-state-sort
+        @request="onRequest"
+      >
+        <template v-slot:top-right>
+          <!-- เปลี่ยน v-model จาก filter เป็น search -->
+          <q-input
+            borderless
+            dense
+            debounce="300"
+            v-model="search"
+            placeholder="Search"
+            @update:model-value="onSearch"
+          >
+            <template v-slot:append>
+              <q-icon name="search" />
+            </template>
+          </q-input>
+        </template>
 
-const router = createRouter({
-  history: createWebHistory(),
-  routes
-})
+        <template v-slot:body-cell-actions="props">
+          <q-td :props="props">
+            <div class="q-gutter-sm">
+              <!-- ปุ่ม Update -->
+              <q-btn
+                v-if="props.row.actions.update"
+                flat
+                round
+                dense
+                color="orange"
+                icon="edit"
+               
+              />
+ <!-- @click="onEdit(props.row)" -->
+              <!-- ปุ่ม Delete -->
+              <q-btn
+                v-if="props.row.actions.delete"
+                flat
+                round
+                dense
+                color="negative"
+                icon="delete"
+               
+              />
+               <!-- @click="onDelete(props.row)" -->
+            </div>
+          </q-td>
+        </template>
+      </q-table>
 
-// ✅ ตรวจสอบ token ก่อนเข้าหน้า protected
-router.beforeEach((to, from, next) => {
-  const accessToken = localStorage.getItem('accessToken') // หรือ sessionStorage
-  const refreshToken = localStorage.getItem('refreshToken');
 
-  
-  // ตรวจสอบเฉพาะ route ที่ requiresAuth = true
-  if (to.matched.some(record => (record.meta as { requiresAuth?: boolean }).requiresAuth)) {
-  
-    if (to.path.startsWith('/admin') && (!accessToken || !refreshToken) ) {
-          return next('/login'); // ไม่ใช่ admin → ไป login
-    }
-    // else{
-    //   return next('/')  // ถ้าไม่มี token → ไปหน้า login
-    // }
-  }
-
-  next() // ผ่านได้
-})
+    </div>
+    </div>

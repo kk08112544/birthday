@@ -1,13 +1,21 @@
 import { Injectable } from '@nestjs/common';
 import { CreateFestivalDto } from './dto/create-festival.dto';
-// import { UpdateFestivalDto } from './dto/update-festival.dto';
+import { UpdateFestivalDto } from './dto/update-festival.dto';
 import { AdminFestivalRepositories } from './festival.repositories';
 import { STATUS } from 'src/common/status';
 import { MESSAGE } from 'src/common/message';
+import { ExceptionsService } from 'src/common/exception/exception.service';
 @Injectable()
 export class AdminFestivalService {
-  constructor(private adminFestivalRepositories: AdminFestivalRepositories) {}
+  constructor(
+    private adminFestivalRepositories: AdminFestivalRepositories,
+    private exceptionService: ExceptionsService,
+  ) {}
   async create(createFestivalDto: CreateFestivalDto) {
+    const check = await this.adminFestivalRepositories.findAll();
+    if (check) {
+      this.exceptionService.throwFestivalConflict();
+    }
     // return 'This action adds a new festival';
     const data = await this.adminFestivalRepositories.create(createFestivalDto);
     return {
@@ -17,19 +25,53 @@ export class AdminFestivalService {
     };
   }
 
-  findAll() {
-    return `This action returns all festival`;
+  async findAll() {
+    const data = await this.adminFestivalRepositories.findAll();
+    return {
+      festival: data,
+      action: STATUS.SUCCESS,
+      message: MESSAGE.FESTIVAL.GET_SUCCESS, // ใช้ตัวแปร MESSAGE
+    };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} festival`;
+  async findById(id: number) {
+    const data = await this.adminFestivalRepositories.findById(id);
+    if (!data) {
+      this.exceptionService.throwInvalidFestival();
+    }
+    return {
+      festival: data,
+      action: STATUS.SUCCESS,
+      message: MESSAGE.FESTIVAL.GET_SUCCESS, // ใช้ตัวแปร MESSAGE
+    };
   }
 
-  // update(id: number, updateFestivalDto: UpdateFestivalDto) {
-  //   return `This action updates a #${id} festival`;
-  // }
+  async update(id: number, updateFestivalDto: UpdateFestivalDto) {
+    const check = await this.adminFestivalRepositories.findById(id);
+    if (!check) {
+      this.exceptionService.throwInvalidFestival();
+    }
+    const data = await this.adminFestivalRepositories.update(
+      id,
+      updateFestivalDto,
+    );
+    return {
+      festival: data,
+      action: STATUS.SUCCESS,
+      message: MESSAGE.FESTIVAL.GET_SUCCESS, // ใช้ตัวแปร MESSAGE
+    };
+  }
 
-  remove(id: number) {
-    return `This action removes a #${id} festival`;
+  async delete(id: number) {
+    const check = await this.adminFestivalRepositories.findById(id);
+    if (!check) {
+      this.exceptionService.throwInvalidFestival();
+    }
+    const data = await this.adminFestivalRepositories.delete(id);
+    return {
+      festival: data,
+      action: STATUS.SUCCESS,
+      message: MESSAGE.FESTIVAL.DELETE_SUCCESS,
+    };
   }
 }

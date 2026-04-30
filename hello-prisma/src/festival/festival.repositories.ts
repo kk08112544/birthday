@@ -48,11 +48,4 @@ export class FestivalRepositories {
     return result as unknown as ResponseFestivalDto[];
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} festival`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} festival`;
-  }
 }

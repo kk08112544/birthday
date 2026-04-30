@@ -1,6 +1,15 @@
 <template>
   <q-page class="q-pa-none bg-grey-1">
+    <!-- <div class="row justify-center q-mb-md text-h5 text-weight-bold">รายการคำไม่พึงประสงค์</div> -->
+    <div
+      class="col-12 col-sm-6 text-h5 text-weight-bold text-center text-sm-left q-mb-sm-none q-mb-md"
+    >
+      รายการคำไม่พึงประสงค์
+    </div>
     <div class="q-pa-md">
+      <div class="row justify-end q-mb-md">
+        <q-btn color="primary" icon="add" label="เพิ่มคำใหม่" @click="onAdd" />
+      </div>
       <q-table
         flat
         bordered
@@ -30,20 +39,10 @@
             </template>
           </q-input>
         </template>
+
         <template v-slot:body-cell-actions="props">
           <q-td :props="props">
             <div class="q-gutter-sm">
-              <!-- ปุ่ม View -->
-              <!-- <q-btn
-                v-if="props.row.actions.view"
-                flat
-                round
-                dense
-                color="primary"
-                icon="visibility"
-                @click="onView(props.row)"
-              /> -->
-
               <!-- ปุ่ม Update -->
               <q-btn
                 v-if="props.row.actions.update"
@@ -68,64 +67,85 @@
             </div>
           </q-td>
         </template>
-       
       </q-table>
-       <q-dialog v-model="editDialog" persistent>
-      <q-card style="min-width: 350px">
-        <q-card-section class="row items-center">
-          <div class="text-h6">แก้ไขคำไม่พึงประสงค์</div>
-          <q-space />
-          <q-btn icon="close" flat round dense v-close-popup />
-        </q-card-section>
-
-        <q-form @submit="submitEdit">
-          <q-card-section class="q-pt-none">
-            <q-input
-              v-model="editForm.word"
-              label="คำไม่สุภาพ"
-              outlined
-              dense
-              autofocus
-              :rules="[val => !!val || 'กรุณากรอกข้อมูล']"
-            />
+      <q-dialog v-model="addDialog" persistent>
+        <q-card style="min-width: 350px">
+          <q-card-section class="row items-center">
+            <div class="text-h6">เพิ่มคำไม่พึงประสงค์</div>
+            <q-space />
+            <q-btn icon="close" flat round dense v-close-popup />
           </q-card-section>
 
-          <q-card-actions align="right" class="text-primary">
-            <q-btn flat label="ยกเลิก" v-close-popup />
-            <q-btn 
-              color="primary" 
-              label="บันทึก" 
-              type="submit" 
-              :loading="isSubmitting" 
+          <q-form @submit="submitAdd">
+            <q-card-section class="q-pt-none">
+              <q-input
+                v-model="addForm.word"
+                label="คำไม่สุภาพ"
+                outlined
+                dense
+                autofocus
+                :rules="[(val) => !!val || 'กรุณากรอกข้อมูล']"
+              />
+            </q-card-section>
+
+            <q-card-actions align="right" class="text-primary">
+              <q-btn flat label="ยกเลิก" v-close-popup />
+              <q-btn color="primary" label="บันทึก" type="submit" :loading="isSubmitting" />
+            </q-card-actions>
+          </q-form>
+        </q-card>
+      </q-dialog>
+      <q-dialog v-model="editDialog" persistent>
+        <q-card style="min-width: 350px">
+          <q-card-section class="row items-center">
+            <div class="text-h6">แก้ไขคำไม่พึงประสงค์</div>
+            <q-space />
+            <q-btn icon="close" flat round dense v-close-popup />
+          </q-card-section>
+
+          <q-form @submit="submitEdit">
+            <q-card-section class="q-pt-none">
+              <q-input
+                v-model="editForm.word"
+                label="คำไม่สุภาพ"
+                outlined
+                dense
+                autofocus
+                :rules="[(val) => !!val || 'กรุณากรอกข้อมูล']"
+              />
+            </q-card-section>
+
+            <q-card-actions align="right" class="text-primary">
+              <q-btn flat label="ยกเลิก" v-close-popup />
+              <q-btn color="primary" label="บันทึก" type="submit" :loading="isSubmitting" />
+            </q-card-actions>
+          </q-form>
+        </q-card>
+      </q-dialog>
+
+      <q-dialog v-model="deleteDialog" persistent>
+        <q-card>
+          <q-card-section class="row items-center">
+            <q-avatar icon="delete" color="negative" text-color="white" />
+            <span class="q-ml-sm text-h6">ยืนยันการลบข้อมูล</span>
+          </q-card-section>
+
+          <q-card-section class="q-pt-none">
+            คุณต้องการลบคำว่า <b class="text-negative">"{{ itemToDelete?.word }}"</b> ใช่หรือไม่?
+            การดำเนินการนี้ไม่สามารถย้อนกลับได้
+          </q-card-section>
+
+          <q-card-actions align="right">
+            <q-btn flat label="ยกเลิก" color="primary" v-close-popup />
+            <q-btn
+              label="ยืนยันการลบ"
+              color="negative"
+              @click="confirmDelete"
+              :loading="isSubmitting"
             />
           </q-card-actions>
-        </q-form>
-      </q-card>
-    </q-dialog>
-
-    <q-dialog v-model="deleteDialog" persistent>
-      <q-card>
-        <q-card-section class="row items-center">
-          <q-avatar icon="delete" color="negative" text-color="white" />
-          <span class="q-ml-sm text-h6">ยืนยันการลบข้อมูล</span>
-        </q-card-section>
-
-        <q-card-section class="q-pt-none">
-          คุณต้องการลบคำว่า <b class="text-negative">"{{ itemToDelete?.word }}"</b> ใช่หรือไม่?
-          การดำเนินการนี้ไม่สามารถย้อนกลับได้
-        </q-card-section>
-
-        <q-card-actions align="right">
-          <q-btn flat label="ยกเลิก" color="primary" v-close-popup />
-          <q-btn 
-            label="ยืนยันการลบ" 
-            color="negative" 
-            @click="confirmDelete" 
-            :loading="isSubmitting" 
-          />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
+        </q-card>
+      </q-dialog>
     </div>
   </q-page>
 </template>
@@ -150,7 +170,6 @@ interface TableRow {
   word: string;
   actions: {
     create: boolean;
-    view: boolean;
     update: boolean;
     delete: boolean;
   };
@@ -161,7 +180,7 @@ const rows = ref<TableRow[]>([]); // ระบุ Type แทน any
 
 const loading = ref(false);
 const search = ref(''); // เปลี่ยนจาก null เป็น ''
-
+const isSubmitting = ref(false);
 const pagination = ref({
   page: 1,
   rowsPerPage: 10,
@@ -175,20 +194,20 @@ const columns: QTableColumn[] = [
     name: 'no',
     label: 'ลำดับ',
     field: 'displayIndex', // ใช้ค่าที่เราคำนวณ (startIndex + index + 1)
-    align: 'center',
+    align: 'left',
   },
   {
     name: 'word',
     label: 'คำไม่สุภาพ',
     field: 'word',
-    align: 'left',
+    align: 'center',
   },
   // เพิ่มคอลัมน์ Action ตรงนี้
   {
     name: 'actions',
     label: 'จัดการ',
     field: 'actions',
-    align: 'center',
+    align: 'right',
   },
 ];
 
@@ -243,24 +262,58 @@ const fetchUnpolite = async (): Promise<void> => {
 // const selectedUnpolite = ref<TableRow | null>(null);
 
 // ================= DIALOG STATE =================
+const addDialog = ref(false);
 const editDialog = ref(false);
 const deleteDialog = ref(false);
-const isSubmitting = ref(false);
+
+const addForm = ref({
+  word: '',
+});
 
 // Form สำหรับ Edit
 const editForm = ref({
   upId: '' as string | number,
-  word: ''
+  word: '',
 });
 
 // เก็บข้อมูลที่จะลบชั่วคราว
 const itemToDelete = ref<TableRow | null>(null);
 
-  // --- Edit Logic ---
+const onAdd = () => {
+  // สำคัญ: ต้องมี .value ก่อนเข้าถึง property ข้างใน
+  addForm.value.word = '';
+  addDialog.value = true;
+};
+
+const submitAdd = async () => {
+  isSubmitting.value = true;
+  const accessToken = localStorage.getItem('accessToken');
+  try {
+    const response = await api.post(
+      `/admin/unpolite`,
+      { word: addForm.value.word },
+      { headers: { Authorization: `Bearer ${accessToken}` } },
+    );
+
+    $q.notify({ color: 'positive', message: response.data.message, icon: 'check' });
+    addDialog.value = false;
+    void fetchUnpolite(); // โหลดข้อมูลใหม่
+  } catch {
+    $q.notify({
+      color: 'negative',
+      message: 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ',
+      icon: 'error',
+    });
+  } finally {
+    isSubmitting.value = false;
+  }
+};
+
+// --- Edit Logic ---
 const onEdit = (row: TableRow) => {
   editForm.value = {
     upId: row.upId,
-    word: row.word
+    word: row.word,
   };
   editDialog.value = true;
 };
@@ -269,17 +322,18 @@ const submitEdit = async () => {
   isSubmitting.value = true;
   const accessToken = localStorage.getItem('accessToken');
   try {
-    const response = await api.patch(`/admin/unpolite/${editForm.value.upId}`, 
+    const response = await api.patch(
+      `/admin/unpolite/${editForm.value.upId}`,
       { word: editForm.value.word },
-      { headers: { Authorization: `Bearer ${accessToken}` } }
+      { headers: { Authorization: `Bearer ${accessToken}` } },
     );
-    
+
     $q.notify({ color: 'positive', message: response.data.message, icon: 'check' });
     editDialog.value = false;
     void fetchUnpolite(); // โหลดข้อมูลใหม่
   } catch (err: unknown) {
     // $q.notify({ color: 'negative', message: 'แก้ไขข้อมูลไม่สำเร็จ', icon: 'error' });
-     const error = err as AxiosError<{ message: string }>; // Casting ประเภทข้อมูล
+    const error = err as AxiosError<{ message: string }>; // Casting ประเภทข้อมูล
     const errorResponse = error.response;
 
     if (errorResponse && errorResponse.status === 404) {
@@ -308,20 +362,20 @@ const onDelete = (row: TableRow) => {
 
 const confirmDelete = async () => {
   if (!itemToDelete.value) return;
-  
+
   isSubmitting.value = true;
   const accessToken = localStorage.getItem('accessToken');
   try {
     const response = await api.delete(`/admin/unpolite/${itemToDelete.value.upId}`, {
-      headers: { Authorization: `Bearer ${accessToken}` }
+      headers: { Authorization: `Bearer ${accessToken}` },
     });
-     $q.notify({ color: 'positive', message: response.data.message, icon: 'delete' });
+    $q.notify({ color: 'positive', message: response.data.message, icon: 'delete' });
     // $q.notify({ color: 'positive', message: 'ลบข้อมูลสำเร็จ', icon: 'delete' });
     deleteDialog.value = false;
     void fetchUnpolite();
-  } catch (err:unknown) {
+  } catch (err: unknown) {
     // $q.notify({ color: 'negative', message: 'ลบข้อมูลไม่สำเร็จ', icon: 'error' });
-      const error = err as AxiosError<{ message: string }>; // Casting ประเภทข้อมูล
+    const error = err as AxiosError<{ message: string }>; // Casting ประเภทข้อมูล
     const errorResponse = error.response;
 
     if (errorResponse && errorResponse.status === 404) {
@@ -342,79 +396,6 @@ const confirmDelete = async () => {
     itemToDelete.value = null;
   }
 };
-// const fetchUnpoliteById = async (id: number | string): Promise<void> => {
-//   loading.value = true;
-//   const accessToken = localStorage.getItem('accessToken');
-//   try {
-//     const response = await api.get(`/admin/unpolite/${id}`, {
-//       headers: { Authorization: `Bearer ${accessToken}` },
-//     });
-//     const data = response.data.unpolite;
-
-//     // เก็บลง State
-//     selectedUnpolite.value = {
-//       upId: data.upId,
-//       word: data.word,
-//       actions: {
-//         create: false,
-//         view: true,
-//         update: true,
-//         delete: true,
-//       },
-//     };
-
-//     showDialog.value = true; // เปิดหน้าต่างโชว์ข้อมูล
-//   } catch (error) {
-//     console.error('Error fetching by ID:', error);
-//   } finally {
-//     loading.value = false;
-//   }
-// };
-
-// const deleteUnpoliteById = async (id: number | string): Promise<void> => {
-//   loading.value = true;
-//   const accessToken = localStorage.getItem('accessToken');
-//   try {
-//     const response = await api.delete(`/admin/unpolite/${id}`, {
-//       headers: { Authorization: `Bearer ${accessToken}` },
-//     });
-//     const data = response.data.unpolite;
-
-//     // เก็บลง State
-//     selectedUnpolite.value = {
-//       upId: data.upId,
-//       word: data.word,
-//       actions: {
-//         create: false,
-//         view: true,
-//         update: true,
-//         delete: true,
-//       },
-//     };
-
-//     showDialog.value = false; // เปิดหน้าต่างโชว์ข้อมูล
-//   } catch (err: unknown) {
-//     // $q.notify({ color: 'red-5', textColor: 'white', icon: 'warning', message: 'Login failed' });
-//     // console.error(error);
-//     const error = err as AxiosError<{ message: string }>; // Casting ประเภทข้อมูล
-//     const errorResponse = error.response;
-
-//     if (errorResponse && errorResponse.status === 404) {
-//       $q.notify({
-//         color: 'negative',
-//         message: errorResponse.data?.message,
-//         icon: 'error',
-//       });
-//     } else {
-//       $q.notify({
-//         color: 'negative',
-//         message: 'เกิดข้อผิดพลาดในการลบคำไม่พึงประสงค์',
-//         icon: 'error',
-//       });
-//     }
-//     console.error('Post Sender Error:', error);
-//   }
-// };
 
 const onRequest: QTableProps['onRequest'] = (props) => {
   // ตรวจสอบว่าเป็นการเปลี่ยนหน้า หรือเป็นการค้นหาใหม่
@@ -435,21 +416,6 @@ const onRequest: QTableProps['onRequest'] = (props) => {
   void fetchUnpolite();
 };
 
-// const onView = (row: TableRow) => {
-//   console.log('View ID:', row.upId);
-//   void fetchUnpoliteById(row.upId);
-//   // ใส่ Code สำหรับเปิด Modal หรือไปหน้าอื่นที่นี่
-// };
-
-// const onEdit = (row: TableRow) => {
-//   console.log('Edit ID:', row.upId);
-// };
-
-// const onDelete = (row: TableRow) => {
-//   console.log('Delete ID:', row.upId);
-//   void deleteUnpoliteById(row.upId);
-//   // ใส่ Code สำหรับยืนยันการลบที่นี่
-// };
 const onSearch = () => {
   pagination.value.page = 1;
   void fetchUnpolite(); // ✅ ใช้ void

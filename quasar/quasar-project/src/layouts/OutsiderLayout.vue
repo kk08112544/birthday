@@ -145,12 +145,11 @@
 import { ref, onMounted } from 'vue';
 import { useQuasar } from 'quasar';
 import { api } from 'src/boot/axios';
-
+import { useRoute } from 'vue-router';
 const image = ref('');
 const festivalId = ref();
 const birthData = ref(null); // เปลี่ยนชื่อให้สื่อความหมาย และค่าเริ่มต้นเป็น null
 const festivalName = ref('');
-import { useRoute } from 'vue-router';
 
 const route = useRoute();
 const $q = useQuasar();

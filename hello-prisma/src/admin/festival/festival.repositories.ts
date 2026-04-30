@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { CreateFestivalDto } from './dto/create-festival.dto';
-// import { UpdateFestivalDto } from './dto/update-festival.dto';
+import { UpdateFestivalDto } from './dto/update-festival.dto';
 import { PrismaService } from 'src/prisma.service';
 import { ResponseFestivalDto } from './dto/response-festival.dto';
 
@@ -16,19 +16,96 @@ export class AdminFestivalRepositories {
     return result as unknown as ResponseFestivalDto;
   }
 
-  findAll() {
-    return `This action returns all festival`;
+  async findAll(): Promise<ResponseFestivalDto[]> {
+    const result = await this.prisma.festival.findMany({
+      where: {
+        deletedAt: null, // ดึงเฉพาะ Festival ที่ยังไม่ถูกลบ
+      },
+      include: {
+        wisher: {
+          where: {
+            deletedAt: null, // ดึงเฉพาะ wisher ที่ยังไม่ถูกลบ
+          },
+        },
+        card: {
+          where: {
+            deletedAt: null, // ดึงเฉพาะ card ที่ยังไม่ถูกลบ
+          },
+        },
+      },
+    });
+
+    return result as unknown as ResponseFestivalDto[];
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} festival`;
+  async findById(id: number): Promise<ResponseFestivalDto | null> {
+    const data = await this.prisma.festival.findUnique({
+      where: {
+        fId: Number(id),
+        deletedAt: null,
+      },
+      include: {
+        wisher: {
+          where: {
+            deletedAt: null, // ดึงเฉพาะ wisher ที่ยังไม่ถูกลบ
+          },
+        },
+        card: {
+          where: {
+            deletedAt: null, // ดึงเฉพาะ card ที่ยังไม่ถูกลบ
+          },
+        },
+      },
+    });
+    return data;
   }
 
-  // update(id: number, updateFestivalDto: UpdateFestivalDto) {
-  //   return `This action updates a #${id} festival`;
-  // }
+  async update(
+    id: number,
+    updateFestivalDto: UpdateFestivalDto,
+  ): Promise<ResponseFestivalDto> {
+    const data = await this.prisma.festival.update({
+      where: {
+        fId: Number(id),
+        deletedAt: null,
+      },
+      data: {
+        festivalName: updateFestivalDto.festivalName,
+      },
+      include: {
+        wisher: {
+          where: {
+            deletedAt: null, // ดึงเฉพาะ wisher ที่ยังไม่ถูกลบ
+          },
+        },
+        card: {
+          where: {
+            deletedAt: null, // ดึงเฉพาะ card ที่ยังไม่ถูกลบ
+          },
+        },
+      },
+    });
+    return data;
+  }
 
-  remove(id: number) {
-    return `This action removes a #${id} festival`;
+  async delete(id: number): Promise<ResponseFestivalDto> {
+    const data = await this.prisma.festival.delete({
+      where: {
+        fId: Number(id),
+      },
+      include: {
+        wisher: {
+          where: {
+            deletedAt: null, // ดึงเฉพาะ wisher ที่ยังไม่ถูกลบ
+          },
+        },
+        card: {
+          where: {
+            deletedAt: null, // ดึงเฉพาะ card ที่ยังไม่ถูกลบ
+          },
+        },
+      },
+    });
+    return data;
   }
 }

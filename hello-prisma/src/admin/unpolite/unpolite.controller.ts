@@ -18,26 +18,26 @@ import { JwtAuthGuard } from 'src/common/guard/jwt/jwt-auth.guard';
 @UseGuards(JwtAuthGuard)
 @Controller('admin/unpolite')
 export class AdminUnpoliteController {
-  constructor(private readonly unpoliteService: AdminUnpoliteService) {}
+  constructor(private readonly adminunpoliteService: AdminUnpoliteService) {}
 
   @Post()
   create(@Body() createUnpoliteDto: CreateUnpoliteDto) {
-    return this.unpoliteService.create(createUnpoliteDto);
+    return this.adminunpoliteService.create(createUnpoliteDto);
   }
 
   @Get('all')
   findAll() {
-    return this.unpoliteService.findAll();
+    return this.adminunpoliteService.findAll();
   }
 
   @Get()
   findMany(@Query() paginationDto: PaginationUnpoliteDto) {
-    return this.unpoliteService.findMany(paginationDto);
+    return this.adminunpoliteService.findMany(paginationDto);
   }
 
   @Get(':id')
   async findById(@Param('id') id: number) {
-    return this.unpoliteService.findById(id);
+    return this.adminunpoliteService.findById(id);
   }
 
   @Patch(':id')
@@ -45,11 +45,11 @@ export class AdminUnpoliteController {
     @Param('id') id: number,
     @Body() updateUnpoliteDto: UpdateUnpoliteDto,
   ) {
-    return this.unpoliteService.update(id, updateUnpoliteDto);
+    return this.adminunpoliteService.update(id, updateUnpoliteDto);
   }
 
   @Delete(':id')
   delete(@Param('id') id: number) {
-    return this.unpoliteService.delete(id);
+    return this.adminunpoliteService.delete(id);
   }
 }

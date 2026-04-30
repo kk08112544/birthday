@@ -3,43 +3,46 @@ import {
   Get,
   Post,
   Body,
-  // Patch,
+  Patch,
   Param,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { AdminFestivalService } from './festival.service';
 import { CreateFestivalDto } from './dto/create-festival.dto';
-// import { UpdateFestivalDto } from './dto/update-festival.dto';
+import { UpdateFestivalDto } from './dto/update-festival.dto';
+import { JwtAuthGuard } from 'src/common/guard/jwt/jwt-auth.guard';
 
+@UseGuards(JwtAuthGuard)
 @Controller('admin/festival')
 export class AdminFestivalController {
-  constructor(private readonly festivalService: AdminFestivalService) {}
+  constructor(private readonly adminfestivalService: AdminFestivalService) {}
 
   @Post()
   create(@Body() createFestivalDto: CreateFestivalDto) {
-    return this.festivalService.create(createFestivalDto);
+    return this.adminfestivalService.create(createFestivalDto);
   }
 
-  @Get()
+  @Get('all')
   findAll() {
-    return this.festivalService.findAll();
+    return this.adminfestivalService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.festivalService.findOne(+id);
+  findฺById(@Param('id') id: number) {
+    return this.adminfestivalService.findById(id);
   }
 
-  // @Patch(':id')
-  // update(
-  //   @Param('id') id: string,
-  //   @Body() updateFestivalDto: UpdateFestivalDto,
-  // ) {
-  //   return this.festivalService.update(+id, updateFestivalDto);
-  // }
+  @Patch(':id')
+  update(
+    @Param('id') id: number,
+    @Body() updateFestivalDto: UpdateFestivalDto,
+  ) {
+    return this.adminfestivalService.update(id, updateFestivalDto);
+  }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.festivalService.remove(+id);
+  async delete(@Param('id') id: number) {
+    return this.adminfestivalService.delete(id);
   }
 }

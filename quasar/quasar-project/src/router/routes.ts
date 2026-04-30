@@ -3,7 +3,7 @@ import type { RouteRecordRaw } from 'vue-router';
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
-    component: () => import('src/layouts/NavFooter.vue'),
+    component: () => import('src/layouts/OutsiderLayout.vue'),
     children: [
       { path: '', component: () => import('pages/SenderPage.vue') },
       { path: 'list', component: () => import('pages/ListSenderPage.vue') },
@@ -16,7 +16,7 @@ const routes: RouteRecordRaw[] = [
   },
   {
     path: '/admin',
-    component: () => import('src/layouts/MainLayout.vue'),
+    component: () => import('src/layouts/AdminLayout.vue'),
     meta: { requiresAuth: true },
     children: [
       { path: 'festival', component: () => import('pages/admin/FestivalPage.vue') },

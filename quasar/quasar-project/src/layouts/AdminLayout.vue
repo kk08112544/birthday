@@ -139,11 +139,11 @@ import { ref, onMounted } from 'vue';
 import { useQuasar } from 'quasar';
 import { api } from 'src/boot/axios';
 import { useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
 const image = ref('');
 const festivalId = ref();
 const birthData = ref(null); // เปลี่ยนชื่อให้สื่อความหมาย และค่าเริ่มต้นเป็น null
 const festivalName = ref('');
-import { useRoute } from 'vue-router';
 
 const route = useRoute();
 const $q = useQuasar();
@@ -161,7 +161,7 @@ const startRefreshTimer = () => {
   // เคลียร์ Timer เก่าก่อน (ถ้ามี)
   if (refreshTimer) clearTimeout(refreshTimer);
 
-  const fiftyFiveMinutes = 55 * 60 * 1000;
+  const fiftyFiveMinutes = 2 * 60 * 1000;
 
   refreshTimer = setTimeout(() => {
     void refreshAccessToken();
@@ -254,67 +254,10 @@ const handleLogout = () => {
   localStorage.removeItem('username'); // ตรวจสอบชื่อ Key ให้ตรงกับที่ set ไว้ตอน Login
   localStorage.setItem('firstName', ''); // หรือจะใช้ removeItem ก็ได้
   localStorage.removeItem('userId'); // หรือ 'uId' ตามที่คุณตั้งชื่อไว้ตอนแรก
-  //    localStorage.setItem('accessToken',accessToken);
-  //         console.log("accessToken : " , accessToken);
-  //         localStorage.setItem('refreshToken',refreshToken);
-  //         console.log("refreshToken : " , refreshToken);
-  //         localStorage.setItem('userId',userId);
-  //         console.log("userId : " , userId);
-  //         localStorage.setItem('firstName',firstName);
-  //         console.log("firstName : " , firstName);
-  //         localStorage.setItem(' username', username);
-  //         console.log("username : " ,  username);
   router.push('/login').catch((err) => console.error(err));
 };
 </script>
 <style lang="scss" scoped>
-/* --- CSS สำหรับรูปภาพ Banner --- */
-// .banner-image {
-//   /* 1. Responsive Width: ในจอเล็กจะเต็มจอ, ในจอใหญ่จะหดกลับมา */
-//   width: 100%; /* ในมือถือ/แท็บเล็ต รูปจะกว้าง 90% ของหน้าจอ (เพื่อไม่ให้ชนขอบเกินไป) */
-//   max-width: 1650px; /* **สำคัญ** จำกัดความกว้างสูงสุดไว้ที่ 1590px ตามความต้องการเดิมของคุณ */
-
-//   /* 2. Responsive Height: ปรับความสูงตามความกว้างหน้าจอ */
-//   height: 60vh; /* ในจอเล็ก ความสูงเป็น 40% ของความสูงหน้าจอ (Viewport Height) */
-//   min-height: 250px; /* ไม่ให้เตี้ยเกินไปในมือถือแนวตั้ง */
-//   max-height: 400px; /* **สำคัญ** จำกัดความสูงสูงสุดไว้ที่ 400px ในจอคอมพิวเตอร์ใหญ่ */
-
-//   margin: 0 auto; /* จัดกึ่งกลาง (Fallback เผื่อ row flex-center ไม่ทำงาน) */
-// }
-/* --- CSS สำหรับรูปภาพ Banner แบบ Responsive --- */
-// .banner-image {
-//   width: 100%;
-//   max-width: 1650px; /* จำกัดความกว้างสูงสุด */
-//   margin: 0 auto;
-//   display: block;
-
-//   /* ใช้ Aspect Ratio เพื่อให้รูปคงสัดส่วนเดิมในทุกหน้าจอ */
-//   /* เช่น ถ้ารูปต้นฉบับคือ 16:9 ให้ใช้ aspect-ratio: 16 / 9 */
-//   aspect-ratio: 16 / 6;
-
-//   /* ปรับความสูงสำหรับหน้าจอขนาดต่างๆ */
-//   height: auto;
-//   min-height: 200px; /* กันรูปแบนเกินไปในมือถือ */
-//   max-height: 450px; /* กันรูปสูงเกินไปในจอ Desktop */
-
-//   /* ตกแต่งเพิ่มเติม */
-//   border-radius: 8px;
-//   overflow: hidden;
-// }
-
-// .banner-image :deep(.q-img__image) {
-//   object-position: 50% 50%; /* จัดกึ่งกลางรูป */
-// }
-
-// /* ปรับแต่งพิเศษสำหรับหน้าจอเล็ก (Mobile) */
-// @media (max-width: $breakpoint-xs-max) {
-//   .banner-image {
-//     aspect-ratio: 4 / 3; /* ในมือถือให้รูปดู "สูงขึ้น" เล็กน้อยเพื่อให้เห็นรายละเอียด */
-//     max-height: 300px;
-//     border-radius: 0; /* มือถือมักจะให้รูปชิดขอบจอ */
-//   }
-// }
-
 .banner-desktop,
 .banner-mobile {
   width: 100%;
