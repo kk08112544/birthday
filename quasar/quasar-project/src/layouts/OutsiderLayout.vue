@@ -128,7 +128,12 @@ const image = ref('');
 const festivalName = ref('');
 
 // 1. ดึง ID จาก URL และให้ Default เป็น 1
-const currentId = computed(() => (route.params.id as string) || '1');
+// const currentId = computed(() => (route.params.id as string) || '1');
+const currentId = computed(() => {
+  return (route.params.id as string) 
+    || localStorage.getItem('festivalId') 
+    || '1';
+});
 
 // 2. Logic การเช็ค Active เมนู
 // const isListActive = computed(() => route.path.startsWith('/list'));
@@ -178,15 +183,34 @@ const fetchFestival = async (id: string) => {
 };
 
 // 4. Watch การเปลี่ยนแปลงของ currentId (เผื่อผู้ใช้เปลี่ยนเลข ID ใน URL)
+// watch(
+//   currentId,
+//   (newId) => {
+//     if (newId) {
+//       void fetchFestival(newId);
+//     }
+//   },
+//   { immediate: true },
+// ); // immediate: true จะรันครั้งแรกทันทีเมื่อ component ถูกสร้าง (แทน onMounted)
 watch(
-  currentId,
+  () => route.params.id,
   (newId) => {
-    if (newId) {
-      void fetchFestival(newId);
+    const storedId = localStorage.getItem('festivalId');
+
+    // ✅ ถ้า URL มี id และไม่ตรงกับที่เก็บ → อัปเดตใหม่
+    if (newId && newId !== storedId) {
+      localStorage.setItem('festivalId', newId);
+    }
+
+    // ✅ ถ้าไม่มี id → ใช้ตัวที่เก็บไว้
+    const finalId = (newId as string) || storedId || '1';
+
+    if (finalId) {
+      void fetchFestival(finalId);
     }
   },
-  { immediate: true },
-); // immediate: true จะรันครั้งแรกทันทีเมื่อ component ถูกสร้าง (แทน onMounted)
+  { immediate: true }
+);
 </script>
 
 <style lang="scss" scoped>

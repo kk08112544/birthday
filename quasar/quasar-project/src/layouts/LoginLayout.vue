@@ -40,13 +40,10 @@
         </template>
       </q-img>
     </div>
-    <q-toolbar class="wish-toolbar text-black q-mt-md shadow-1">
+    <!-- <q-toolbar class="wish-toolbar text-black q-mt-md shadow-1">
       <div class="row flex-center full-width q-gutter-x-md q-gutter-y-xs">
         <q-toolbar-title class="wish-title text-weight-bold">
-          <!-- ร่วมส่งคำอวยพร -->
-          <!-- <q-item clickable to="/" class="flex flex-center text-center">
-            ร่วมส่งคำอวยพร
-          </q-item> -->
+          
           <q-item
             clickable
             to="/"
@@ -66,13 +63,39 @@
             class="flex flex-center text-center wish-link"
             :class="{ 'wish-active': route.path === '/list' }"
           >
-            <!-- active-class="wish-active" -->
+           
+            รายชื่อผู้ร่วมอวยพร
+          </q-item>
+        </q-toolbar-title>
+      </div>
+    </q-toolbar> -->
+    <q-toolbar class="wish-toolbar text-black q-mt-md shadow-1">
+      <div class="row flex-center full-width q-gutter-x-md q-gutter-y-xs">
+        <q-toolbar-title class="wish-title text-weight-bold">
+          <q-item
+            clickable
+            :to="`/${id}`"
+            class="flex flex-center text-center wish-link"
+            :class="{ 'wish-active': isHomeActive }"
+          >
+            ร่วมส่งคำอวยพร
+          </q-item>
+        </q-toolbar-title>
+
+        <q-separator vertical dark class="gt-sm" />
+
+        <q-toolbar-title class="wish-title text-weight-bold">
+          <q-item
+            clickable
+            :to="`/${id}/list`"
+            class="flex flex-center text-center wish-link"
+            :class="{ 'wish-active': isListActive }"
+          >
             รายชื่อผู้ร่วมอวยพร
           </q-item>
         </q-toolbar-title>
       </div>
     </q-toolbar>
-
     <q-page-container>
       <router-view />
     </q-page-container>
@@ -87,7 +110,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref,computed, onMounted } from 'vue';
 import { useQuasar } from 'quasar';
 import { api } from 'src/boot/axios';
 
@@ -104,7 +127,16 @@ $q.loading.show();
 if ($q.screen.lt.md) {
   console.log('โหมดมือถือ/แท็บเล็ต');
 }
+// const currentId = computed(() => {
+//   return (route.params.id as string) 
+//     || localStorage.getItem('festivalId') 
+//     || '1';
+// });
+const id = localStorage.getItem('festivalId')
 
+const isListActive = computed(() => route.path.startsWith(`/${id}/list`));
+
+const isHomeActive = computed(() => route.path === `/${id}`);
 const getImageUrl = async (imagePath: string): Promise<string> => {
   try {
     const response = await api(`/upload/${imagePath}`, {
