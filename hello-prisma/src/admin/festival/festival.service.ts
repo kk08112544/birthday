@@ -5,6 +5,7 @@ import { AdminFestivalRepositories } from './festival.repositories';
 import { STATUS } from 'src/common/status';
 import { MESSAGE } from 'src/common/message';
 import { ExceptionsService } from 'src/common/exception/exception.service';
+import { PaginationFestivalDto } from './dto/pagination-festival.dto';
 @Injectable()
 export class AdminFestivalService {
   constructor(
@@ -29,6 +30,21 @@ export class AdminFestivalService {
     const data = await this.adminFestivalRepositories.findAll();
     return {
       festival: data,
+      action: STATUS.SUCCESS,
+      message: MESSAGE.FESTIVAL.GET_SUCCESS, // ใช้ตัวแปร MESSAGE
+    };
+  }
+
+  async findMany(dto: PaginationFestivalDto) {
+    const { page, limit, search } = dto;
+
+    const result = await this.adminFestivalRepositories.findManyPaginated({
+      page,
+      limit,
+      search,
+    });
+    return {
+      festival: result,
       action: STATUS.SUCCESS,
       message: MESSAGE.FESTIVAL.GET_SUCCESS, // ใช้ตัวแปร MESSAGE
     };

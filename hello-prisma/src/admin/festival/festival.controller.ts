@@ -7,11 +7,13 @@ import {
   Param,
   Delete,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { AdminFestivalService } from './festival.service';
 import { CreateFestivalDto } from './dto/create-festival.dto';
 import { UpdateFestivalDto } from './dto/update-festival.dto';
 import { JwtAuthGuard } from 'src/common/guard/jwt/jwt-auth.guard';
+import { PaginationFestivalDto } from './dto/pagination-festival.dto';
 
 @UseGuards(JwtAuthGuard)
 @Controller('admin/festival')
@@ -26,6 +28,11 @@ export class AdminFestivalController {
   @Get('all')
   findAll() {
     return this.adminfestivalService.findAll();
+  }
+
+  @Get()
+  findMany(@Query() paginationDto: PaginationFestivalDto) {
+    return this.adminfestivalService.findMany(paginationDto);
   }
 
   @Get(':id')

@@ -3,7 +3,10 @@ import { CreateFestivalDto } from './dto/create-festival.dto';
 import { UpdateFestivalDto } from './dto/update-festival.dto';
 import { PrismaService } from 'src/prisma.service';
 import { ResponseFestivalDto } from './dto/response-festival.dto';
-
+import { PaginationFestivalDto } from './dto/pagination-festival.dto';
+import { PaginatedResult } from 'src/common/pagination/paginate.interface';
+import { Prisma } from '@prisma/client';
+import { paginate } from 'src/common/pagination/paginate.util';
 @Injectable()
 export class AdminFestivalRepositories {
   constructor(private prisma: PrismaService) {}
@@ -36,6 +39,54 @@ export class AdminFestivalRepositories {
     });
 
     return result as unknown as ResponseFestivalDto[];
+  }
+
+  async findManyPaginated(
+    options: PaginationFestivalDto,
+  ): Promise<PaginatedResult<ResponseFestivalDto>> {
+    const whereCondition: Prisma.FestivalWhereInput = {
+      deletedAt: null,
+    };
+
+    if (options.search) {
+      whereCondition.OR = [
+        {
+          festivalName: {
+            contains: options.search,
+          },
+        },
+      ];
+    }
+
+    const queryFn = (skip: number, take: number) => {
+      return this.prisma.festival.findMany({
+        where: whereCondition,
+        skip, // ✅ ต้องมีค่าเสมอ
+        take, // ✅ ต้องมีค่าเสมอ
+        orderBy: {
+          createdAt: 'desc',
+        },
+        include: {
+          wisher: {
+            where: {
+              deletedAt: null, // ดึงเฉพาะ wisher ที่ยังไม่ถูกลบ
+            },
+          },
+          card: {
+            where: {
+              deletedAt: null, // ดึงเฉพาะ card ที่ยังไม่ถูกลบ
+            },
+          },
+        },
+      });
+    };
+    const countFn = () => {
+      return this.prisma.festival.count({
+        where: whereCondition,
+      });
+    };
+
+    return paginate(queryFn, countFn, options);
   }
 
   async findById(id: number): Promise<ResponseFestivalDto | null> {

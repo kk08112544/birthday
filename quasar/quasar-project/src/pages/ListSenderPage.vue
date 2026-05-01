@@ -17,6 +17,44 @@
       <template v-slot:top>
         <div class="row full-width justify-center items-center q-gutter-x-md q-gutter-y-sm">
           <div class="col-12 col-sm">
+            <q-select
+              v-model="selectedMonth"
+              :options="monthOptions"
+              label="เลือกเดือน"
+              outlined
+              dense
+              emit-value
+              map-options
+              bg-color="white"
+              @update:model-value="onSearch"
+            />
+          </div>
+          <div class="col-12 col-sm">
+            <q-select
+              v-model="selectedYear"
+              :options="filterYearOptions"
+              label="เลือกปี พ.ศ."
+              outlined
+              dense
+              use-input
+              fill-input
+              hide-selected
+              input-debounce="0"
+              emit-value
+              map-options
+              bg-color="white"
+              @filter="filterYearFn"
+              @update:model-value="onSearch"
+            >
+              <template v-slot:no-option>
+                <q-item>
+                  <q-item-section class="text-grey">ไม่พบข้อมูลปี</q-item-section>
+                </q-item>
+              </template>
+            </q-select>
+          </div>
+
+          <div class="col-12 col-sm">
             <q-input
               dense
               outlined
@@ -63,31 +101,9 @@
               </template>
             </q-input>
           </div>
-          <div class="col-12 col-sm">
-            <q-select
-              v-model="selectedMonth"
-              :options="monthOptions"
-              label="เลือกเดือน"
-              outlined
-              dense
-              emit-value
-              map-options
-              bg-color="white"
-              @update:model-value="onSearch"
-            />
-          </div>
-          <div class="col-12 col-sm">
-            <!-- <q-select
-              v-model="selectedYear"
-              :options="yearOptions"
-              label="เลือกปี พ.ศ."
-              outlined
-              dense
-              emit-value
-              map-options
-              bg-color="white"
-              @update:model-value="onSearch"
-            /> -->
+
+          <!-- <div class="col-12 col-sm">
+          
             <q-select
               v-model="selectedYear"
               :options="filterYearOptions"
@@ -110,7 +126,7 @@
                 </q-item>
               </template>
             </q-select>
-          </div>
+          </div> -->
         </div>
       </template>
       <template v-slot:item="props">
