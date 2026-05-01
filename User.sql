@@ -12,7 +12,7 @@
  Target Server Version : 17001000 (17.00.1000)
  File Encoding         : 65001
 
- Date: 24/04/2026 16:28:41
+ Date: 01/05/2026 16:49:09
 */
 
 
@@ -32,16 +32,6 @@ CREATE TABLE [dbo].[User] (
 GO
 
 ALTER TABLE [dbo].[User] SET (LOCK_ESCALATION = TABLE)
-GO
-
-
--- ----------------------------
--- Records of User
--- ----------------------------
-SET IDENTITY_INSERT [dbo].[User] ON
-GO
-
-SET IDENTITY_INSERT [dbo].[User] OFF
 GO
 
 

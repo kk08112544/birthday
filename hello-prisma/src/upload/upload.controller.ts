@@ -1,4 +1,3 @@
-
 import {
   Controller,
   Get,
@@ -17,7 +16,7 @@ interface RequestWithFile extends Request {
   uploadedFileName?: string;
 }
 
-@Controller('file')
+@Controller('upload')
 export class UploadController {
   @Post()
   @UseInterceptors(

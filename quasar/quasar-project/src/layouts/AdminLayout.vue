@@ -50,7 +50,7 @@
             class="flex flex-center text-center wish-link"
             :class="{ 'wish-active': route.path === '/admin/festival' }"
           >
-            เทศกาล,ภาพและคำอวยพร
+            เทศกาล
           </q-item>
         </q-toolbar-title>
 
@@ -201,7 +201,7 @@ const refreshAccessToken = async () => {
 
 const getImageUrl = async (imagePath: string): Promise<string> => {
   try {
-    const response = await api(`/file/${imagePath}`, {
+    const response = await api(`/upload/${imagePath}`, {
       responseType: 'blob',
     });
     return URL.createObjectURL(response.data);

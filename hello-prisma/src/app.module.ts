@@ -12,7 +12,6 @@ import { AdminWisherModule } from './admin/wisher/wisher.module';
 import { UploadModule } from './upload/upload.module';
 import { AuthModule } from './auth/auth.module';
 
-
 @Module({
   imports: [
     // ต้องอยู่บนสุด เพื่อให้ตัวอื่นเห็นค่าใน .env
@@ -27,7 +26,6 @@ import { AuthModule } from './auth/auth.module';
     AdminCardModule,
     UploadModule,
     AuthModule,
-
   ],
   controllers: [AppController],
   providers: [AppService],

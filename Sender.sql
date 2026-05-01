@@ -12,7 +12,7 @@
  Target Server Version : 17001000 (17.00.1000)
  File Encoding         : 65001
 
- Date: 24/04/2026 16:28:26
+ Date: 01/05/2026 16:48:48
 */
 
 
@@ -135,6 +135,27 @@ GO
 INSERT INTO [dbo].[Sender] ([sId], [position], [department], [cardId], [wishId], [createdAt], [festivalId], [fullname]) VALUES (N'37', N'นักวิชาการแผนที่ชำนาญการ', N'ศทส', N'8', N'2', N'2026-04-24 06:23:35.1760000', N'1', N'นาย ข ค')
 GO
 
+INSERT INTO [dbo].[Sender] ([sId], [position], [department], [cardId], [wishId], [createdAt], [festivalId], [fullname]) VALUES (N'38', N'นักวิชาการคอมพิวเตอร์ชำนาญการ', N'ศทส', N'8', N'2', N'2026-04-24 09:31:34.5510000', N'1', N'นางสาว เอ บี')
+GO
+
+INSERT INTO [dbo].[Sender] ([sId], [position], [department], [cardId], [wishId], [createdAt], [festivalId], [fullname]) VALUES (N'39', N'นวก คอม', N'ศทส', N'8', N'5', N'2026-04-30 04:08:56.6870000', N'1', N'เคเค')
+GO
+
+INSERT INTO [dbo].[Sender] ([sId], [position], [department], [cardId], [wishId], [createdAt], [festivalId], [fullname]) VALUES (N'40', N'นักวิชาการคอมพิวเตอร์ปฏิบัติการ', N'ศทส', N'8', N'5', N'2026-05-01 01:38:25.6140000', N'1', N'นาย สุวรา สังข์ทอง')
+GO
+
+INSERT INTO [dbo].[Sender] ([sId], [position], [department], [cardId], [wishId], [createdAt], [festivalId], [fullname]) VALUES (N'41', N'นวก คอม', N'ศทส', N'8', N'2', N'2026-05-01 02:12:38.4450000', N'1', N'เคเค')
+GO
+
+INSERT INTO [dbo].[Sender] ([sId], [position], [department], [cardId], [wishId], [createdAt], [festivalId], [fullname]) VALUES (N'42', N'นวก เกษตร', N'กวจ', N'14', N'8', N'2026-05-01 02:14:14.8490000', N'1', N'นาย ก ข')
+GO
+
+INSERT INTO [dbo].[Sender] ([sId], [position], [department], [cardId], [wishId], [createdAt], [festivalId], [fullname]) VALUES (N'43', N'นวกแผนที่', N'ศทส', N'8', N'5', N'2026-05-01 06:30:08.0880000', N'1', N'นาย ก')
+GO
+
+INSERT INTO [dbo].[Sender] ([sId], [position], [department], [cardId], [wishId], [createdAt], [festivalId], [fullname]) VALUES (N'44', N'หกดหก', N'ดหกด', N'8', N'2', N'2026-05-01 08:26:06.1530000', N'1', N'กหก')
+GO
+
 SET IDENTITY_INSERT [dbo].[Sender] OFF
 GO
 
@@ -142,7 +163,7 @@ GO
 -- ----------------------------
 -- Auto increment value for Sender
 -- ----------------------------
-DBCC CHECKIDENT ('[dbo].[Sender]', RESEED, 37)
+DBCC CHECKIDENT ('[dbo].[Sender]', RESEED, 44)
 GO
 
 

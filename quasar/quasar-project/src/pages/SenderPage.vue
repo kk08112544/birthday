@@ -159,160 +159,149 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, watch } from 'vue'; // เพิ่ม watch
 import { api } from 'src/boot/axios';
 import { useQuasar } from 'quasar';
 import type { QTable } from 'quasar';
 import type { AxiosError } from 'axios';
-// --- State ---
+
+// --- 1. รับ ID จาก Props ---
+const props = defineProps({
+  id: {
+    type: String,
+    required: true,
+  },
+});
+
+const $q = useQuasar();
 const myTable = ref<InstanceType<typeof QTable> | null>(null);
 const wisherData = ref<{ label: string; value: number }[]>([]);
-const selectedWisher = ref(null); // ค่าที่เลือก
+const selectedWisher = ref(null);
 const name = ref(null);
 const position = ref(null);
 const department = ref(null);
+
 interface CardRow {
   cId: number;
   url: string;
 }
-const $q = useQuasar();
-const selectedCardId = ref<number | null>(null); // เพิ่มตัวแปรสำหรับเก็บ ID โดยเฉพาะ
+
+const selectedCardId = ref<number | null>(null);
 const selectedImage = ref<string | null>(null);
 const rows = ref<CardRow[]>([]);
 const columns = [{ name: 'image', label: 'รูปภาพ', field: 'url' }];
-// const rows = ref<{ url: string }[]>([]);
-const festivalId = Number(localStorage.getItem('festivalId'));
-// ตัวอย่างการใช้ Screen Plugin ของ Quasar (หากต้องการสลับ Logic บางอย่าง)
-if ($q.screen.lt.md) {
-  // console.log('โหมดมือถือ/แท็บเล็ต');
-}
 
 const pagination = ref({
   page: 1,
-  rowsPerPage: 4, // ปรับจำนวนรูปที่ต้องการแสดงต่อหนึ่งหน้าให้เหมาะสม
+  rowsPerPage: 4,
 });
 
-interface FestivalCard {
-  cId: number;
-  imageCard: string;
-  // เพิ่ม field อื่นๆ ถ้ามี เช่น cId: number;
-}
+// interface FestivalCard {
+//   cId: number;
+//   imageCard: string;
+// }
 
-// --- Functions ---
+// type Wisher = {
+//   wId: number;
+//   wishWord: string;
+// };
 type Wisher = {
   wId: number;
   wishWord: string;
 };
-type FilterUpdateFn = (callback: () => void) => void;
 
-// ฟังก์ชันดึง Blob URL จาก Backend
+type FestivalCard = {
+  cId: number;
+  imageCard: string;
+};
+
+type FestivalResponse = {
+  fId: number;
+  wisher: Wisher[];
+  card: FestivalCard[];
+};
+// --- Functions ---
+
 const getImageUrl = async (imagePath: string): Promise<string> => {
   try {
-    // สมมติว่า api คือ axios instance ที่ตั้งค่าไว้แล้ว
-    const response = await api(`/file/${imagePath}`, {
-      responseType: 'blob',
-    });
+    const response = await api(`/upload/${imagePath}`, { responseType: 'blob' });
     return URL.createObjectURL(response.data);
   } catch (error) {
     console.error('Error fetching image:', error);
-    // คืนค่า Placeholder Image ในกรณีผิดพลาด หรือ คืนค่าว่าง
-    return ''; // คืนค่า placeholder เมื่อโหลดรูปไม่ได้
+    return '';
   }
 };
 
-const options = ref<{ label: string; value: number }[]>([]); // ตัวแปรสำหรับแสดงใน List (ตอน filter)
-const filterFn = (val: string, update: FilterUpdateFn) => {
+const options = ref<{ label: string; value: number }[]>([]);
+const filterFn = (val: string, update: (callback: () => void) => void) => {
   if (val === '') {
     update(() => {
       options.value = wisherData.value;
     });
     return;
   }
-
   update(() => {
     const needle = val.toLowerCase();
     options.value = wisherData.value.filter((v) => v.label.toLowerCase().indexOf(needle) > -1);
   });
 };
 
-// ฟังก์ชันดึงข้อมูลเทศกาล
-const fetchBirthCard = async () => {
-  // $q.loading.show({
-  //   message: 'กำลังโหลดข้อมูล...',
-  // });
-
+const fetchBirthCard = async (targetId: string): Promise<void> => {
+  $q.loading.show();
   try {
-    const response = await api.get('/festival/all');
+    const response = await api.get<{ festival: FestivalResponse }>(`/festival/${Number(targetId)}`);
 
-    if (response.data?.festival && response.data.festival.length > 0) {
-      const currentFestival = response.data.festival[0];
-      const wisherList = currentFestival?.wisher as Wisher[];
+    const currentFestival = response.data?.festival;
 
+    if (currentFestival && currentFestival.fId) {
+      // ✅ ใช้ type จริงแทน any
+      const wisherList: Wisher[] = currentFestival.wisher || [];
       wisherData.value = wisherList.map((item) => ({
         label: item.wishWord,
         value: item.wId,
       }));
 
-      const cardList: FestivalCard[] = currentFestival?.card || [];
+      const cardList: FestivalCard[] = currentFestival.card || [];
 
-      // ปรับปรุงการสร้าง rows ให้มี cId ติดไปด้วย
       const validCards = await Promise.all(
-        cardList.map(async (c: FestivalCard) => {
+        cardList.map(async (c) => {
           if (!c.imageCard) return null;
           const url = await getImageUrl(c.imageCard);
-          return { cId: c.cId, url: url }; // คืนค่าเป็น object ที่มีทั้ง ID และ URL
+          return { cId: c.cId, url };
         }),
       );
 
-      // กรองตัวที่เป็น null ออก
-      rows.value = validCards.filter((card) => card !== null) as CardRow[];
-      const first = rows.value[0];
+      // 👇 กัน null แบบ type-safe
+      rows.value = validCards.filter((card): card is CardRow => card !== null);
 
-      // ตั้งค่าเริ่มต้น (ถ้ามีข้อมูล)
-      if (first) {
-        // selectedCardId.value = rows.value[0].cId;
-        // selectedImage.value = rows.value[0].url;
+      if (rows.value.length > 0) {
+        const first = rows.value[0];
         selectedCardId.value = first.cId;
         selectedImage.value = first.url;
       }
+    } else {
+      console.warn('ไม่พบข้อมูลเทศกาลในระบบ');
     }
   } catch (error) {
-    console.error('Error fetching birth card data:', error);
-    $q.notify({
-      color: 'negative',
-      message: 'ไม่สามารถโหลดข้อมูลได้',
-      icon: 'report_problem',
-    });
+    console.error('Error fetching data:', error);
+    $q.notify({ color: 'negative', message: 'ไม่สามารถโหลดข้อมูลได้' });
   } finally {
-    // ปิด Loading เสมอไม่ว่าจะสำเร็จหรือล้มเหลว
     $q.loading.hide();
   }
 };
 
-// ฟังก์ชันสำหรับล้างค่าใน Form
 const resetForm = () => {
   name.value = null;
   position.value = null;
   department.value = null;
   selectedWisher.value = null;
 
-  // รีเซ็ตการเลือกการ์ด (ถ้าต้องการให้กลับไปเลือกใบแรก)
-  // if (rows.value.length > 0) {
-  //   selectedCardId.value = rows.value[0].cId;
-  //   selectedImage.value = rows.value[0].url;
-  // }
-  const first = rows.value[0];
-
-  if (first) {
-    selectedCardId.value = first.cId;
-    selectedImage.value = first.url;
-  } else {
-    selectedCardId.value = null;
-    selectedImage.value = null;
+  if (rows.value.length > 0) {
+    selectedCardId.value = rows.value[0]?.cId || null;
+    selectedImage.value = rows.value[0]?.url || null;
   }
-
-  // หากมีการใช้ Quasar Form Validation แนะนำให้เรียก resetValidation ด้วย (ถ้าจำเป็น)
 };
+
 const postSender = async () => {
   const senderData = {
     fullname: name.value,
@@ -320,50 +309,41 @@ const postSender = async () => {
     department: department.value,
     wishId: selectedWisher.value,
     cardId: selectedCardId.value,
-    festivalId: festivalId,
+    festivalId: Number(props.id), // ใช้ ID จาก props แทน localStorage
   };
-  console.log('Sender Data :', senderData);
+
   try {
     const response = await api.post('/sender', senderData);
     if (response.status === 201) {
-      $q.notify({
-        color: 'positive',
-        message: response.data.message,
-        icon: 'check_circle',
-      });
+      $q.notify({ color: 'positive', message: response.data.message });
       resetForm();
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
+      // ไม่แนะนำให้ใช้ reload() ถ้าเป็นไปได้ ให้ใช้การอัปเดต state แทน
     }
   } catch (err: unknown) {
-    // เปลี่ยนจาก any เป็น unknown
-    const error = err as AxiosError<{ message: string }>; // Casting ประเภทข้อมูล
-    const errorResponse = error.response;
-
-    if (errorResponse && errorResponse.status === 400) {
-      $q.notify({
-        color: 'negative',
-        message: errorResponse.data?.message || 'พบคำไม่สุภาพหรือข้อมูลไม่ถูกต้อง',
-        icon: 'error',
-      });
-    } else {
-      $q.notify({
-        color: 'negative',
-        message: 'เกิดข้อผิดพลาดในการบันทึกข้อมูล',
-        icon: 'error',
-      });
-    }
-    console.error('Post Sender Error:', error);
+    const error = err as AxiosError<{ message: string }>;
+    $q.notify({
+      color: 'negative',
+      message: error.response?.data?.message || 'เกิดข้อผิดพลาดในการบันทึก',
+    });
   }
 };
 
-// --- Lifecycle ---
-onMounted(() => {
-  void fetchBirthCard();
-});
+// // --- 2. Watch ID แทน onMounted ---
+// watch(() => props.id, (newId) => {
+//   if (newId) {
+//     fetchBirthCard(newId);
+//   }
+// }, { immediate: true });
+watch(
+  () => props.id,
+  (newId) => {
+    if (newId) {
+      void fetchBirthCard(newId);
+    }
+  },
+  { immediate: true },
+);
 </script>
-
 <style scoped>
 .transition-generic {
   transition: all 0.3s ease-in-out;

@@ -107,7 +107,7 @@ if ($q.screen.lt.md) {
 
 const getImageUrl = async (imagePath: string): Promise<string> => {
   try {
-    const response = await api(`/file/${imagePath}`, {
+    const response = await api(`/upload/${imagePath}`, {
       responseType: 'blob',
     });
     return URL.createObjectURL(response.data);

@@ -11,8 +11,8 @@
         <q-btn color="primary" icon="add" label="เพิ่มคำใหม่" @click="onAdd" />
       </div>
       <q-table
-      style="max-width: 1000px; margin: 0 auto;"
-      dense
+        style="max-width: 1000px; margin: 0 auto"
+        dense
         flat
         bordered
         ref="tableRef"
@@ -41,7 +41,13 @@
             </template>
           </q-input>
         </template>
-
+        <template v-slot:body-cell-word="props">
+          <q-td :props="props">
+            <div class="text-wrap">
+              {{ props.row.word }}
+            </div>
+          </q-td>
+        </template>
         <template v-slot:body-cell-actions="props">
           <q-td :props="props">
             <div class="q-gutter-sm">
@@ -195,7 +201,7 @@ const columns: QTableColumn[] = [
   {
     name: 'no',
     label: 'ลำดับ',
-    field: 'displayIndex', // ใช้ค่าที่เราคำนวณ (startIndex + index + 1)
+    field: 'displayIndex',
     align: 'left',
   },
   {
@@ -203,8 +209,8 @@ const columns: QTableColumn[] = [
     label: 'คำไม่สุภาพ',
     field: 'word',
     align: 'center',
+    style: 'white-space: normal; word-break: break-word; max-width: 400px;',
   },
-  // เพิ่มคอลัมน์ Action ตรงนี้
   {
     name: 'actions',
     label: 'จัดการ',

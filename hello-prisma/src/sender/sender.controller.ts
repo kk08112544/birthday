@@ -26,9 +26,12 @@ export class SenderController {
     return this.senderService.findAll();
   }
 
-  @Get()
-  findMany(@Query() paginationDto: PaginationSenderDto) {
-    return this.senderService.findMany(paginationDto);
+  @Get('paginate/:id')
+  findMany(
+    @Param('id') id: number,
+    @Query() paginationDto: PaginationSenderDto,
+  ) {
+    return this.senderService.findMany(id, paginationDto);
   }
 
   @Get(':id')

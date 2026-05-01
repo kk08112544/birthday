@@ -2,9 +2,11 @@
   <q-page class="q-pa-md bg-grey-1">
     <!-- ส่วนบน: Banner Festival -->
     <div class="row q-col-gutter-md justify-center q-mb-xl">
+      <!-- <div class="row justify-end q-mb-md">
+          <q-btn color="primary" icon="add" label="เพิ่่มเทศกาล" @click="onAddFestival" />
+        </div> -->
       <div class="col-12 col-md-10 col-lg-8">
         <q-card class="my-card shadow-2 overflow-hidden">
-          <!-- ปรับ height เป็น auto และใช้ aspect-ratio เพื่อให้รูปไม่เบี้ยวบนมือถือ -->
           <q-img :src="image" class="responsive-banner">
             <template v-slot:error>
               <div class="absolute-full flex flex-center bg-grey-3 text-grey-7">
@@ -13,7 +15,9 @@
             </template>
 
             <div class="absolute-bottom text-h6 text-white text-center shadow-text">
-              {{ festivalName || 'กำลังโหลดข้อมูล...' }}
+              <q-item clickable :to="`/${fId}`" class="flex flex-center text-center wish-link">
+                {{ festivalName || 'กำลังโหลดข้อมูล...' }}
+              </q-item>
             </div>
           </q-img>
         </q-card>
@@ -41,65 +45,7 @@
         <div class="row justify-end q-mb-md">
           <q-btn color="primary" icon="add" label="เพิ่มคำใหม่" @click="onAdd" />
         </div>
-        <!-- <q-table
-          flat
-          bordered
-          ref="tableRef"
-          :rows="wishes"
-          :columns="columns"
-          row-key="id"
-          v-model:pagination="pagination"
-          :loading="loading"
-          :filter="search"
-          binary-state-sort
-          @request="onRequest"
-        
-          :grid="$q.screen.lt.sm"
-          class="my-sticky-header-table shadow-1"
-        >
-          <template v-slot:top-right>
-            <q-input
-              borderless
-              dense
-              debounce="300"
-              v-model="search"
-              placeholder="ค้นหา..."
-              @update:model-value="onSearch"
-              class="bg-grey-2 q-px-sm rounded-borders full-width-xs"
-            >
-              <template v-slot:append>
-                <q-icon name="search" />
-              </template>
-            </q-input>
-          </template>
 
-          <template v-slot:body-cell-actions="props">
-            <q-td :props="props">
-              <div class="q-gutter-xs">
-                <q-btn flat round dense color="orange" icon="edit" />
-                <q-btn flat round dense color="negative" icon="delete" />
-              </div>
-            </q-td>
-          </template>
-
-        
-          <template v-slot:item="props">
-            <div class="q-pa-xs col-xs-12">
-              <q-card flat bordered class="q-pa-sm">
-                <q-card-section class="row items-center">
-                  <div class="col">
-                    <div class="text-caption text-grey">ลำดับ {{ props.row.displayIndex }}</div>
-                    <div class="text-subtitle1 text-weight-bold">{{ props.row.wishWord }}</div>
-                  </div>
-                  <div class="col-auto">
-                    <q-btn flat round dense color="orange" icon="edit" class="q-mr-sm" />
-                    <q-btn flat round dense color="negative" icon="delete" />
-                  </div>
-                </q-card-section>
-              </q-card>
-            </div>
-          </template>
-        </q-table> -->
         <q-table
           flat
           bordered
@@ -246,12 +192,13 @@
 import { ref, onMounted } from 'vue';
 import { useQuasar } from 'quasar';
 import { api } from 'src/boot/axios';
-
+// import { useRoute } from 'vue-router';
 import type { AxiosError } from 'axios';
 import type { QTableProps } from 'quasar'; // นำเข้า Type จาก Quasar
 import type { QTableColumn } from 'quasar';
 
 const $q = useQuasar();
+// const route = useRoute();
 
 // --- Interfaces ---
 
@@ -304,21 +251,23 @@ const columns: QTableColumn[] = [
   {
     name: 'no',
     label: 'ลำดับ',
-    field: 'displayIndex', // ใช้ค่าที่เราคำนวณ (startIndex + index + 1)
+    field: 'displayIndex',
     align: 'left',
+    style: 'width: 80px;',
   },
   {
     name: 'wishWord',
     label: 'คำอวยพร',
     field: 'wishWord',
     align: 'center',
+    style: 'max-width: 400px; white-space: normal; word-break: break-word;',
   },
-  // เพิ่มคอลัมน์ Action ตรงนี้
   {
     name: 'actions',
     label: 'จัดการ',
     field: 'actions',
     align: 'right',
+    style: 'width: 120px;',
   },
 ];
 
@@ -326,7 +275,7 @@ const columns: QTableColumn[] = [
 const getImageUrl = async (imagePath: string): Promise<string> => {
   if (!imagePath) return '';
   try {
-    const response = await api(`/file/${imagePath}`, {
+    const response = await api(`/upload/${imagePath}`, {
       responseType: 'blob',
     });
     return URL.createObjectURL(response.data);
@@ -349,6 +298,7 @@ const fetchFestival = async () => {
       // 1. เลือกข้อมูลเทศกาลตัวแรกมาแสดงผลหลัก
       const data = response.data.festival[0];
 
+      console.log('Festival', data);
       fId.value = data.fId;
       festivalName.value = data.festivalName;
       localStorage.setItem('festivalId', String(data.fId));
@@ -414,52 +364,6 @@ const fetchWish = async (): Promise<void> => {
     loading.value = false;
   }
 };
-// const fetchWish = async (): Promise<void> => {
-//   loading.value = true;
-//   const accessToken = localStorage.getItem('accessToken');
-
-//   try {
-//     const response = await api.get('/admin/wisher', {
-//       headers: { Authorization: `Bearer ${accessToken}` },
-//       params: {
-//         page: pagination.value.page,
-//         limit: pagination.value.rowsPerPage, // ค่านี้คือ 5 ตามในรูป
-//         search: search.value,
-//       },
-//     });
-
-//     const res = response.data;
-//     const list: WishItem[] = res.wisher?.data ?? [];
-
-//     // --- ส่วนที่แก้ไข: คำนวณลำดับให้ต่อเนื่อง ---
-//     // สูตร: (หน้าปัจจุบัน - 1) * จำนวนต่อหน้า
-//     // const startIndex = (pagination.value.page - 1) * pagination.value.rowsPerPage;
-
-//     wishes.value = list.map((item: WishItem, index: number) => {
-//       const startIndex = (pagination.value.page - 1) * pagination.value.rowsPerPage;
-//       return {
-//         displayIndex: startIndex + index + 1,
-//         wId: item.wId,
-//         wishWord: item.wishWord || '-',
-//         // --- เพิ่มส่วนนี้เข้าไป ---
-//         actions: {
-//           create: false,
-//           view: true,
-//           update: true,
-//           delete: true,
-//         },
-//       };
-//     });
-//     // ---------------------------------------
-
-//     pagination.value.rowsNumber = res.wishes?.total ?? 0;
-//   } catch (error) {
-//     console.error('FETCH ERROR:', error);
-//     wishes.value = [];
-//   } finally {
-//     loading.value = false;
-//   }
-// };
 
 // ================= DIALOG STATE =================
 const addDialog = ref(false);

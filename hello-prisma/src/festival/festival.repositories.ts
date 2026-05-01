@@ -48,4 +48,25 @@ export class FestivalRepositories {
     return result as unknown as ResponseFestivalDto[];
   }
 
+  async findById(id: number): Promise<ResponseFestivalDto | null> {
+    const data = await this.prisma.festival.findUnique({
+      where: {
+        fId: Number(id),
+        deletedAt: null,
+      },
+      include: {
+        wisher: {
+          where: {
+            deletedAt: null, // ดึงเฉพาะ wisher ที่ยังไม่ถูกลบ
+          },
+        },
+        card: {
+          where: {
+            deletedAt: null, // ดึงเฉพาะ card ที่ยังไม่ถูกลบ
+          },
+        },
+      },
+    });
+    return data;
+  }
 }

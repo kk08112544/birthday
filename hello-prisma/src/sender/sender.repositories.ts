@@ -87,11 +87,13 @@ export class SenderRepositories {
     return data;
   }
   async findManyPaginated(
+    id: number,
     options: PaginationSenderDto,
   ): Promise<PaginatedResult<ResponseSenderDto>> {
     const andConditions: Prisma.SenderWhereInput[] = [];
 
     const whereCondition: Prisma.SenderWhereInput = {
+      festivalId: Number(id),
       festival: {
         deletedAt: null,
       },

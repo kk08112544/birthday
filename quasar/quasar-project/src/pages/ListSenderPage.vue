@@ -164,7 +164,7 @@
     </q-dialog>
   </q-page>
 </template>
-
+<!-- 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { api } from 'src/boot/axios';
@@ -328,8 +328,10 @@ const fetchSender = async (): Promise<void> => {
     });
 
     const res = response.data;
+   
     // กำหนด Type ให้ list
     const list: SenderItem[] = res.sender?.data ?? [];
+    console.log(list)
 
     const formattedRows: TableRow[] = await Promise.all(
       list.map(async (item: SenderItem) => {
@@ -416,4 +418,272 @@ onMounted(() => {
   void fetchSender(); // ✅ ใช้ void
   generateThaiYearOptions();
 });
+</script> -->
+<script setup lang="ts">
+import { ref, onMounted, watch } from 'vue';
+import { api } from 'src/boot/axios';
+import type { QTableProps } from 'quasar';
+
+// ================= PROPS =================
+const props = defineProps<{
+  id: string;
+}>();
+
+// ================= TYPES =================
+interface SenderItem {
+  sId: number | string;
+  fullname: string;
+  position: string;
+  department: string;
+  card?: {
+    imageCard: string;
+  };
+  wish?: {
+    wishWord: string;
+  };
+}
+
+interface TableRow {
+  sId: number | string;
+  fullname: string;
+  position: string;
+  department: string;
+  url: string;
+  wishWord: string;
+}
+
+// ================= COLUMNS =================
+const columns = [
+  { name: 'fullname', label: 'ชื่อ', field: 'fullname' },
+  { name: 'position', label: 'ตำแหน่ง', field: 'position' },
+  { name: 'department', label: 'แผนก', field: 'department' },
+  { name: 'wishWord', label: 'คำอวยพร', field: 'wishWord' },
+];
+
+// ================= FILTER =================
+const selectedMonth = ref<number | null>(null);
+const selectedYear = ref<number | null>(null);
+
+const monthOptions = [
+  { label: 'มกราคม', value: 1 },
+  { label: 'กุมภาพันธ์', value: 2 },
+  { label: 'มีนาคม', value: 3 },
+  { label: 'เมษายน', value: 4 },
+  { label: 'พฤษภาคม', value: 5 },
+  { label: 'มิถุนายน', value: 6 },
+  { label: 'กรกฎาคม', value: 7 },
+  { label: 'สิงหาคม', value: 8 },
+  { label: 'กันยายน', value: 9 },
+  { label: 'ตุลาคม', value: 10 },
+  { label: 'พฤศจิกายน', value: 11 },
+  { label: 'ธันวาคม', value: 12 },
+];
+
+// ================= STATE =================
+const rows = ref<TableRow[]>([]);
+const loading = ref(false);
+
+const fullname = ref<string | null>(null);
+const position = ref<string | null>(null);
+const department = ref<string | null>(null);
+
+const pagination = ref({
+  page: 1,
+  rowsPerPage: 10,
+  rowsNumber: 0,
+  sortBy: '',
+  descending: false,
+});
+
+// ================= YEAR =================
+const yearOptions = ref<{ label: string; value: number }[]>([]);
+const filterYearOptions = ref<{ label: string; value: number }[]>([]);
+
+// const generateThaiYearOptions = () => {
+//   const years = [];
+//   const currentYearCE = new Date().getFullYear();
+//   const targetYearCE = currentYearCE - 10;
+
+//   for (let year = currentYearCE; year >= targetYearCE; year--) {
+//     years.push({
+//       label: `${year + 543}`,
+//       value: year,
+//     });
+//   }
+
+//   yearOptions.value = years;
+//   filterYearOptions.value = years;
+// };
+const generateThaiYearOptions = () => {
+  const years = [];
+  const currentYearCE = new Date().getFullYear();
+  const targetYearCE = currentYearCE - 10;
+
+  for (let year = currentYearCE; year >= targetYearCE; year--) {
+    years.push({
+      label: `${year + 543}`, // ปี พ.ศ.
+      value: year, // เก็บค่า ค.ศ.
+    });
+  }
+
+  yearOptions.value = years;
+  filterYearOptions.value = years;
+
+  // ✅ ตั้งค่า default เป็นปีปัจจุบัน
+  selectedYear.value = currentYearCE;
+};
+const filterYearFn = (val: string, update: (fn: () => void) => void) => {
+  if (val === '') {
+    update(() => {
+      filterYearOptions.value = yearOptions.value;
+    });
+    return;
+  }
+
+  update(() => {
+    const needle = val.toLowerCase();
+    filterYearOptions.value = yearOptions.value.filter((v) =>
+      v.label.toLowerCase().includes(needle),
+    );
+  });
+};
+
+// ================= IMAGE =================
+const getImageUrl = async (imagePath: string): Promise<string> => {
+  try {
+    const response = await api.get(`/upload/${imagePath}`, {
+      responseType: 'blob',
+    });
+    return URL.createObjectURL(response.data as Blob);
+  } catch (error) {
+    console.error('Image error:', error);
+    return '';
+  }
+};
+
+// ================= FETCH =================
+const fetchSender = async (id: string): Promise<void> => {
+  loading.value = true;
+
+  try {
+    const response = await api.get(`/sender/paginate/${Number(id)}`, {
+      params: {
+        page: pagination.value.page,
+        limit: pagination.value.rowsPerPage,
+        fullname: fullname.value || undefined,
+        position: position.value || undefined,
+        department: department.value || undefined,
+        month: selectedMonth.value || undefined,
+        year: selectedYear.value || undefined,
+      },
+    });
+
+    const res = response.data;
+
+    const list: SenderItem[] = res.sender?.data ?? [];
+
+    rows.value = await Promise.all(
+      list.map(async (item) => {
+        let url = '';
+
+        if (item.card?.imageCard) {
+          url = await getImageUrl(item.card.imageCard);
+        }
+
+        return {
+          sId: item.sId,
+          fullname: item.fullname || '-',
+          position: item.position || '-',
+          department: item.department || '-',
+          url,
+          wishWord: item.wish?.wishWord || '',
+        };
+      }),
+    );
+
+    pagination.value.rowsNumber = res.sender?.total ?? 0;
+  } catch (error) {
+    console.error('FETCH ERROR:', error);
+    rows.value = [];
+  } finally {
+    loading.value = false;
+  }
+};
+
+// ================= DETAIL =================
+const showDialog = ref(false);
+const selectedSender = ref<TableRow | null>(null);
+
+const fetchSenderById = async (id: number | string) => {
+  try {
+    loading.value = true;
+
+    const res = await api.get(`/sender/${id}`);
+    const data = res.data.sender;
+
+    let url = '';
+    if (data.card?.imageCard) {
+      url = await getImageUrl(data.card.imageCard);
+    }
+
+    selectedSender.value = {
+      sId: data.sId,
+      fullname: data.fullname,
+      position: data.position,
+      department: data.department,
+      url,
+      wishWord: data.wish?.wishWord || '',
+    };
+
+    showDialog.value = true;
+  } catch (err) {
+    console.error(err);
+  } finally {
+    loading.value = false;
+  }
+};
+
+// ================= EVENTS =================
+const onRequest: QTableProps['onRequest'] = (propsTable) => {
+  pagination.value = {
+    ...pagination.value,
+    ...propsTable.pagination,
+  };
+
+  void fetchSender(props.id);
+};
+
+const onSearch = () => {
+  pagination.value.page = 1;
+  void fetchSender(props.id);
+};
+
+// const clearFilter = () => {
+//   fullname.value = null;
+//   position.value = null;
+//   department.value = null;
+//   selectedMonth.value = null;
+//   selectedYear.value = null;
+
+//   pagination.value.page = 1;
+
+//   void fetchSender(props.id);
+// };
+
+// ================= INIT =================
+onMounted(() => {
+  generateThaiYearOptions();
+  void fetchSender(props.id);
+});
+
+// ================= WATCH (สำคัญมาก) =================
+watch(
+  () => props.id,
+  (newId) => {
+    if (newId) {
+      pagination.value.page = 1;
+      void fetchSender(newId);
+    }
+  },
+);
 </script>

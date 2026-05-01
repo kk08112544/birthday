@@ -43,11 +43,11 @@ export class SenderService {
     };
   }
 
-  async findMany(dto: PaginationSenderDto) {
+  async findMany(id: number, dto: PaginationSenderDto) {
     const { page, limit, search, fullname, position, department, month, year } =
       dto;
 
-    const result = await this.senderRepositories.findManyPaginated({
+    const result = await this.senderRepositories.findManyPaginated(id, {
       page,
       limit,
       search,

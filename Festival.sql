@@ -12,7 +12,7 @@
  Target Server Version : 17001000 (17.00.1000)
  File Encoding         : 65001
 
- Date: 24/04/2026 16:28:17
+ Date: 01/05/2026 16:48:38
 */
 
 
@@ -46,6 +46,9 @@ GO
 INSERT INTO [dbo].[Festival] ([fId], [festivalName], [image], [createdAt], [updatedAt], [deletedAt]) VALUES (N'1', N'เนื่องในวันครบรอบสถาปนากรมพัฒนาที่ดิน 63ปี', N'Fileupload-1776915026094.png', N'2026-04-21 14:18:29.0000000', N'2026-04-21 14:18:32.0000000', NULL)
 GO
 
+INSERT INTO [dbo].[Festival] ([fId], [festivalName], [image], [createdAt], [updatedAt], [deletedAt]) VALUES (N'5', N'สพด ภูเก็ต', N'Fileupload-1777623808456.jpeg', N'2026-05-01 16:29:58.4333333', N'2026-05-01 16:29:58.4333333', NULL)
+GO
+
 SET IDENTITY_INSERT [dbo].[Festival] OFF
 GO
 
@@ -53,7 +56,7 @@ GO
 -- ----------------------------
 -- Auto increment value for Festival
 -- ----------------------------
-DBCC CHECKIDENT ('[dbo].[Festival]', RESEED, 1)
+DBCC CHECKIDENT ('[dbo].[Festival]', RESEED, 5)
 GO
 
 

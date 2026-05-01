@@ -43,9 +43,9 @@ export const MESSAGE = {
     DELETE_SUCCESS: 'ลบรูปภาพอวยพรสำเร็จ',
     NOT_FOUND: 'ไม่พบรูปภาพอวยพร',
   },
-  VALIDATE:{
-    FILE_EMPTY:'ไม่พบไฟล์ที่ส่ง',
-    FILE_DOUBLE_NAME:'นามสกุลไฟล์ซ้อน',
+  VALIDATE: {
+    FILE_EMPTY: 'ไม่พบไฟล์ที่ส่ง',
+    FILE_DOUBLE_NAME: 'นามสกุลไฟล์ซ้อน',
     // FILE_S
-  }
+  },
 };
