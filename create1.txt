@@ -1,0 +1,516 @@
+<template>
+  <q-page class="bg-grey-2 q-pa-sm q-pa-md-md">
+    <q-form @submit.prevent="submitAdd" class="column q-gutter-y-md">
+      <div class="max-width-container q-mx-auto full-width">
+
+        <!-- ===== CARD: FESTIVAL ===== -->
+        <q-card flat bordered class="rounded-borders q-pa-sm q-pa-md-md shadow-2">
+          <div class="text-h5 text-weight-bold text-indigo-10 text-center q-mb-md">
+            เพิ่มเทศกาลใหม่
+          </div>
+
+          <div class="text-weight-bold text-grey-8 text-center q-mb-sm">
+            รูปหน้าปกเทศกาล
+          </div>
+
+          <div class="column items-center q-mb-lg">
+            <q-img
+              :src="imageFile ? getFilePreview(imageFile) : 'https://placehold.co/600x400'"
+              class="main-image-preview"
+              :style="{ border: imageError ? '2px solid red' : '2px dashed #ccc' }"
+              @click="$refs.fileInput.pickFiles()"
+            />
+            <q-file
+              v-model="imageFile"
+              ref="fileInput"
+              accept="image/*"
+              class="hidden"
+            />
+            <div class="text-caption text-grey-6 q-mt-sm">คลิกที่รูปเพื่ออัปโหลด</div>
+          </div>
+
+          <q-input
+            v-model="festivalName"
+            outlined
+            label="ชื่อเทศกาล"
+            :rules="[val => !!val || 'กรุณากรอกชื่อ']"
+          />
+        </q-card>
+
+        <!-- ===== CARD: WISH ===== -->
+        <q-card flat bordered class="rounded-borders q-pa-sm q-pa-md-md shadow-2">
+          <div class="row items-center justify-between q-mb-md">
+            <div class="text-h6">เพิ่มคำอวยพร</div>
+            <q-btn
+              color="primary"
+              icon="add"
+              label="เพิ่ม"
+              :size="$q.screen.lt.sm ? 'sm' : 'md'"
+              @click="onAddWish"
+            />
+          </div>
+
+          <!-- <q-list bordered separator v-if="wishWordList.length > 0">
+            <q-item
+              v-for="(wish, i) in wishWordList"
+              :key="i"
+              class="items-center q-px-sm q-px-md-md"
+            >
+              <q-item-section class="col ellipsis">
+                <span class="ellipsis">{{ wish }}</span>
+              </q-item-section>
+
+              <q-item-section side>
+                <div class="row no-wrap items-center">
+                  <q-btn
+                    flat
+                    :icon="$q.screen.lt.sm ? 'edit' : 'edit'"
+                    color="orange"
+                    :size="$q.screen.lt.sm ? 'sm' : 'md'"
+                    @click="editWish(i)"
+                  />
+                  <q-btn
+                    flat
+                    icon="delete"
+                    color="red"
+                    :size="$q.screen.lt.sm ? 'sm' : 'md'"
+                    @click="deleteWish(i)"
+                  />
+                </div>
+              </q-item-section>
+            </q-item>
+          </q-list> -->
+<div v-if="wishWordList.length > 0" class="q-gutter-sm">
+
+  <q-card
+    v-for="(wish, i) in wishWordList"
+    :key="i"
+    flat
+    bordered
+    class="wish-card"
+  >
+    <q-card-section class="row items-center q-pa-sm q-pa-md-md">
+
+      <!-- text -->
+      <div class="col ellipsis">
+        <span class="text-body1">{{ wish }}</span>
+      </div>
+
+      <!-- actions -->
+      <!-- <div class="row no-wrap items-center q-gutter-xs">
+        <q-btn
+          flat
+          icon="edit"
+          color="orange"
+          :size="$q.screen.lt.sm ? 'sm' : 'md'"
+          @click="editWish(i)"
+        />
+
+        <q-btn
+          flat
+          icon="delete"
+          color="red"
+          :size="$q.screen.lt.sm ? 'sm' : 'md'"
+          @click="deleteWish(i)"
+        />
+      </div> -->
+      <div class="row no-wrap items-center justify-end q-gutter-xs">
+  <q-btn
+    flat
+    icon="edit"
+    color="orange"
+    :size="$q.screen.lt.sm ? 'sm' : 'md'"
+    @click="editWish(i)"
+  />
+
+  <q-btn
+    flat
+    icon="delete"
+    color="red"
+    :size="$q.screen.lt.sm ? 'sm' : 'md'"
+    @click="deleteWish(i)"
+  />
+</div>
+
+    </q-card-section>
+  </q-card>
+
+</div>
+          <div v-else class="text-grey-5 text-center q-py-md">
+            ยังไม่มีคำอวยพร
+          </div>
+        </q-card>
+
+        <!-- ===== CARD: CARD IMAGE ===== -->
+        <q-card flat bordered class="rounded-borders q-pa-sm q-pa-md-md shadow-2">
+          <div class="row items-center justify-between q-mb-md">
+            <div class="text-h6">เพิ่มการ์ด</div>
+            <q-btn
+              color="primary"
+              icon="add"
+              label="เพิ่ม"
+              :size="$q.screen.lt.sm ? 'sm' : 'md'"
+              @click="onAddCard"
+            />
+          </div>
+
+          <div class="row q-col-gutter-xs q-col-gutter-sm-sm" v-if="cardFileList.length > 0">
+            <div
+              v-for="(file, i) in cardFileList"
+              :key="i"
+              class="col-4 col-sm-3 col-md-3"
+            >
+              <div class="card-thumb-wrapper">
+                <q-img
+                  :src="getFilePreview(file)"
+                  ratio="1"
+                  class="rounded-borders"
+                />
+                <q-btn
+                  round
+                  dense
+                  icon="close"
+                  color="negative"
+                  size="xs"
+                  class="card-remove-btn"
+                  @click="removeCard(i)"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div v-else class="text-grey-5 text-center q-py-md">
+            ยังไม่มีการ์ด
+          </div>
+        </q-card>
+
+        <!-- ===== SUBMIT ===== -->
+         <!-- <q-btn
+          label="ล้างข้อมูล"
+          type="reset"
+          color="red"
+          :loading="loading"
+          class="full-width"
+          size="lg"
+        />
+        <q-btn
+          label="บันทึก"
+          type="submit"
+          color="indigo-10"
+          :loading="loading"
+          class="full-width"
+          size="lg"
+        /> -->
+<div class="row q-gutter-sm">
+
+  <q-btn
+    label="ล้างข้อมูล"
+    type="reset"
+    color="red"
+    :loading="loading"
+    size="lg"
+    class="col"
+  />
+
+  <q-btn
+    label="บันทึก"
+    type="submit"
+    color="indigo-10"
+    :loading="loading"
+    size="lg"
+    class="col"
+  />
+
+</div>
+      </div>
+    </q-form>
+
+    <!-- ===== DIALOG: ADD WISH ===== -->
+    <q-dialog v-model="AddWishDialog" :maximized="$q.screen.lt.sm">
+      <q-card :style="$q.screen.lt.sm ? '' : 'min-width: 340px'">
+        <q-card-section class="row items-center q-pb-none">
+          <div class="text-h6">เพิ่มคำอวยพร</div>
+          <q-space />
+          <q-btn icon="close" flat round dense v-close-popup />
+        </q-card-section>
+
+        <q-form @submit.prevent="addWishToList">
+          <q-card-section>
+            <q-input
+              v-model="tempWish"
+              label="คำอวยพร"
+              outlined
+              autofocus
+              :rules="[val => !!val.trim() || 'กรุณากรอกคำอวยพร']"
+            />
+          </q-card-section>
+
+          <q-card-actions align="right" class="q-px-md q-pb-md">
+            <q-btn flat label="ยกเลิก" v-close-popup />
+            <q-btn color="primary" label="บันทึก" type="submit" />
+          </q-card-actions>
+        </q-form>
+      </q-card>
+    </q-dialog>
+
+    <!-- ===== DIALOG: EDIT WISH ===== -->
+    <q-dialog v-model="EditWishDialog" :maximized="$q.screen.lt.sm">
+      <q-card :style="$q.screen.lt.sm ? '' : 'min-width: 340px'">
+        <q-card-section class="row items-center q-pb-none">
+          <div class="text-h6">แก้ไขคำอวยพร</div>
+          <q-space />
+          <q-btn icon="close" flat round dense v-close-popup />
+        </q-card-section>
+
+        <q-form @submit.prevent="updateWish">
+          <q-card-section>
+            <q-input
+              v-model="tempWish"
+              label="คำอวยพร"
+              outlined
+              autofocus
+              :rules="[val => !!val.trim() || 'กรุณากรอกคำอวยพร']"
+            />
+          </q-card-section>
+
+          <q-card-actions align="right" class="q-px-md q-pb-md">
+            <q-btn flat label="ยกเลิก" v-close-popup />
+            <q-btn color="primary" label="อัปเดต" type="submit" />
+          </q-card-actions>
+        </q-form>
+      </q-card>
+    </q-dialog>
+
+    <!-- ===== DIALOG: DELETE CONFIRM ===== -->
+    <q-dialog v-model="deleteDialog" persistent>
+      <q-card style="min-width: 280px; max-width: 90vw">
+        <q-card-section class="row items-center">
+          <q-avatar icon="delete" color="negative" text-color="white" />
+          <span class="q-ml-sm text-h6">ยืนยันการลบข้อมูล</span>
+        </q-card-section>
+
+        <q-card-section>
+          คุณต้องการลบคำอวยพร
+          <b class="text-negative">"{{ itemToDelete }}"</b> ใช่หรือไม่?
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn flat label="ยกเลิก" v-close-popup />
+          <q-btn label="ยืนยันการลบ" color="negative" @click="confirmDelete" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
+    <!-- ===== DIALOG: ADD CARD ===== -->
+    <q-dialog v-model="showCardDialog" :maximized="$q.screen.lt.sm">
+      <q-card :style="$q.screen.lt.sm ? '' : 'min-width: 340px'">
+        <q-card-section class="row items-center q-pb-none">
+          <div class="text-h6">เพิ่มรูปการ์ด</div>
+          <q-space />
+          <q-btn icon="close" flat round dense v-close-popup />
+        </q-card-section>
+
+        <q-card-section>
+          <q-file
+            v-model="tempCardFile"
+            label="เลือกรูปภาพ"
+            outlined
+            accept="image/*"
+            @update:model-value="addCardToList"
+          >
+            <template v-slot:prepend>
+              <q-icon name="image" />
+            </template>
+          </q-file>
+        </q-card-section>
+      </q-card>
+    </q-dialog>
+
+  </q-page>
+</template>
+
+<script setup lang="ts">
+import { ref } from 'vue'
+import { useQuasar } from 'quasar'
+import { api } from 'src/boot/axios'
+import { useRouter } from 'vue-router'
+
+const $q = useQuasar()
+const router = useRouter()
+
+const festivalName = ref('')
+const imageFile = ref<File | null>(null)
+const loading = ref(false)
+const imageError = ref(false)
+
+const AddWishDialog = ref(false)
+const EditWishDialog = ref(false)
+const editingIndex = ref<number | null>(null)
+const showCardDialog = ref(false)
+const deleteDialog = ref(false)
+const deleteIndex = ref<number | null>(null)
+const itemToDelete = ref<string | null>(null)
+
+const tempWish = ref('')
+const wishWordList = ref<string[]>([])
+
+const tempCardFile = ref<File | null>(null)
+const cardFileList = ref<File[]>([])
+
+/* ===== WISH ===== */
+const onAddWish = () => {
+  tempWish.value = ''
+  AddWishDialog.value = true
+}
+
+const addWishToList = () => {
+  if (!tempWish.value.trim()) return
+  wishWordList.value.push(tempWish.value.trim())
+  tempWish.value = ''
+  AddWishDialog.value = false
+}
+
+const editWish = (index: number) => {
+  const wish = wishWordList.value[index]
+  if (!wish) return
+  tempWish.value = wish
+  editingIndex.value = index
+  EditWishDialog.value = true
+}
+
+const updateWish = () => {
+  if (editingIndex.value === null) return
+  if (!tempWish.value.trim()) return
+  wishWordList.value[editingIndex.value] = tempWish.value.trim()
+  tempWish.value = ''
+  editingIndex.value = null
+  EditWishDialog.value = false
+}
+
+const deleteWish = (i: number) => {
+  const item = wishWordList.value[i]
+  if (!item) return
+  deleteIndex.value = i
+  itemToDelete.value = item
+  deleteDialog.value = true
+}
+
+const confirmDelete = () => {
+  if (deleteIndex.value === null) return
+  wishWordList.value.splice(deleteIndex.value, 1)
+  deleteIndex.value = null
+  itemToDelete.value = null
+  deleteDialog.value = false
+}
+
+/* ===== CARD ===== */
+const onAddCard = () => {
+  showCardDialog.value = true
+}
+
+const addCardToList = () => {
+  if (!tempCardFile.value) return
+  cardFileList.value.push(tempCardFile.value)
+  tempCardFile.value = null
+  showCardDialog.value = false
+}
+
+const removeCard = (i: number) => {
+  cardFileList.value.splice(i, 1)
+}
+
+/* ===== UTIL ===== */
+const getFilePreview = (file: File) => URL.createObjectURL(file)
+
+/* ===== API ===== */
+const submitAdd = async () => {
+  const accessToken = localStorage.getItem('accessToken')
+  loading.value = true
+  try {
+    let festivalImageName = ''
+
+    if (imageFile.value) {
+      const fd = new FormData()
+      fd.append('singleFile', imageFile.value)
+      const res = await api.post('/upload', fd)
+      festivalImageName = res.data.image
+    }
+
+    let cardImageNames: string[] = []
+    if (cardFileList.value.length > 0) {
+      const uploadPromises = cardFileList.value.map(async (file) => {
+        const formData = new FormData()
+        formData.append('singleFile', file)
+        const res = await api.post('/upload', formData)
+        return res.data.image as string
+      })
+      cardImageNames = await Promise.all(uploadPromises)
+    }
+
+    const payload = {
+      festivalName: festivalName.value,
+      image: festivalImageName,
+      wisher: wishWordList.value.map(word => ({ wishWord: word })),
+      card: cardImageNames.map(imgName => ({ imageCard: imgName }))
+    }
+
+    const response = await api.post('/admin/festival', payload, {
+      headers: { Authorization: `Bearer ${accessToken}` }
+    })
+
+    $q.notify({ color: 'positive', message: response.data.message })
+    router.push('/admin/festival')
+
+  } catch (err) {
+    $q.notify({ color: 'negative', message: 'เกิดข้อผิดพลาด กรุณาลองใหม่', icon: 'warning' })
+  } finally {
+    loading.value = false
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+.max-width-container {
+  max-width: 640px;
+
+  @media (max-width: 599px) {
+    max-width: 100%;
+  }
+}
+
+.main-image-preview {
+  width: 100%;
+  max-width: 320px;
+  cursor: pointer;
+  border-radius: 8px;
+
+  @media (max-width: 599px) {
+    max-width: 100%;
+  }
+}
+
+.card-thumb-wrapper {
+  position: relative;
+  width: 100%;
+
+  .card-remove-btn {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    z-index: 1;
+    background: rgba(0, 0, 0, 0.6) !important;
+    color: white !important;
+  }
+}
+
+.ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 200px;
+
+  @media (max-width: 599px) {
+    max-width: 140px;
+  }
+}
+</style>

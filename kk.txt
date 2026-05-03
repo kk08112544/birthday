@@ -1,29 +1,7 @@
+
 <template>
   <q-page class="q-pa-md bg-grey-1">
     <!-- ส่วนบน: Banner Festival -->
-    <div class="row q-col-gutter-md justify-center q-mb-xl">
-       <!-- <div class="row justify-end q-mb-md">
-          <q-btn color="primary" icon="add" label="เพิ่่มเทศกาล" @click="onAddFestival" />
-        </div> -->
-      <div class="col-12 col-md-10 col-lg-8">
-        
-        <q-card class="my-card shadow-2 overflow-hidden">
-          
-          
-          <q-img :src="image" class="responsive-banner">
-            <template v-slot:error>
-              <div class="absolute-full flex flex-center bg-grey-3 text-grey-7">
-                ไม่มีรูปภาพประกอบ
-              </div>
-            </template>
-
-            <div class="absolute-bottom text-h6 text-white text-center shadow-text">
-              {{ festivalName || 'กำลังโหลดข้อมูล...' }}
-            </div>
-          </q-img>
-        </q-card>
-      </div>
-    </div>
 
     <!-- ส่วนล่าง: ตารางจัดการคำ -->
     <div class="row justify-center">
@@ -32,7 +10,7 @@
           <div
             class="col-12 col-sm-6 text-h5 text-weight-bold text-center text-sm-left q-mb-sm-none q-mb-md"
           >
-            รายการคำอวยพร
+            รายการคำไม่พึงประสงค์
           </div>
         </div>
         <!-- <div class="col-12 col-sm-6 text-right">
@@ -44,15 +22,15 @@
             />
           </div> -->
         <div class="row justify-end q-mb-md">
-          <q-btn color="primary" icon="add" label="เพิ่มคำใหม่" @click="onAdd" />
+          <q-btn color="primary" icon="add" label="เพิ่มคำไม่พึงประสงค์" @click="onAdd" />
         </div>
-  
+
         <q-table
           flat
           bordered
           ref="tableRef"
-          title="รายการคำอวยพร"
-          :rows="wishes"
+          title="รายการคำไม่พึงประสงค์"
+          :rows="rows"
           :columns="columns"
           row-key="id"
           v-model:pagination="pagination"
@@ -109,7 +87,7 @@
         <q-dialog v-model="addDialog" persistent>
           <q-card style="min-width: 350px">
             <q-card-section class="row items-center">
-              <div class="text-h6">เพิ่มคำอวยพร</div>
+              <div class="text-h6">เพิ่มคำไม่พึงประสงค์</div>
               <q-space />
               <q-btn icon="close" flat round dense v-close-popup />
             </q-card-section>
@@ -117,8 +95,8 @@
             <q-form @submit="submitAdd">
               <q-card-section class="q-pt-none">
                 <q-input
-                  v-model="addForm.wishWord"
-                  label="คำอวยพร"
+                  v-model="addForm.word"
+                  label="คำไม่พึงประสงค์"
                   outlined
                   dense
                   autofocus
@@ -136,7 +114,7 @@
         <q-dialog v-model="editDialog" persistent>
           <q-card style="min-width: 350px">
             <q-card-section class="row items-center">
-              <div class="text-h6">แก้ไขคำอวยพร</div>
+              <div class="text-h6">แก้ไขคำไม่พึงประสงค์</div>
               <q-space />
               <q-btn icon="close" flat round dense v-close-popup />
             </q-card-section>
@@ -144,8 +122,8 @@
             <q-form @submit="submitEdit">
               <q-card-section class="q-pt-none">
                 <q-input
-                  v-model="editForm.wishWord"
-                  label="คำอวยพร"
+                  v-model="editForm.word"
+                  label="คำไม่พึงประสงค์"
                   outlined
                   dense
                   autofocus
@@ -169,7 +147,7 @@
 
             <q-card-section class="q-pt-none">
               คุณต้องการลบคำว่า
-              <b class="text-negative">"{{ itemToDelete?.wishWord }}"</b> ใช่หรือไม่?
+              <b class="text-negative">"{{ itemToDelete?.word }}"</b> ใช่หรือไม่?
               การดำเนินการนี้ไม่สามารถย้อนกลับได้
             </q-card-section>
 

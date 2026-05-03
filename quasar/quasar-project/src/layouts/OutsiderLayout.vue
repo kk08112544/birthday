@@ -1,114 +1,182 @@
 <template>
-  <q-layout view="lhh LpR lดf">
-    <q-header elevated>
-      <q-toolbar>
-        <q-toolbar-title>{{ festivalName }}</q-toolbar-title>
+  <q-layout view="lhh LpR lf">
+    <!-- ===== HEADER ===== -->
+    <q-header class="festival-header">
+      <q-toolbar class="festival-toolbar">
+        <!-- Festival icon -->
+        <div class="header-emblem">
+          <q-icon name="celebration" size="20px" color="white" />
+        </div>
+
+        <q-toolbar-title class="festival-title">
+          <span class="festival-title-text">{{ festivalName || 'เทศกาลอวยพร' }}</span>
+        </q-toolbar-title>
+
+        <!-- Decorative dots -->
+        <div class="header-dots gt-xs">
+          <span class="dot dot-1" />
+          <span class="dot dot-2" />
+          <span class="dot dot-3" />
+        </div>
       </q-toolbar>
     </q-header>
+    <br />
+    <br />
+    <br />
+    <!-- ===== BANNER ===== -->
+    <div class="banner-section">
+      <!-- Decorative top wave -->
+      <div class="banner-top-deco" />
 
-    <div class="row flex-center q-pt-md">
-      <q-img
-        :src="image"
-        :class="[$q.screen.gt.sm ? 'banner-desktop' : 'banner-mobile', 'shadow-2 rounded-borders']"
-        fit="cover"
-      >
-        <template v-slot:loading>
-          <q-spinner-gears color="primary" size="3rem" />
-        </template>
-        <template v-slot:error>
-          <div class="absolute-full flex flex-center bg-negative text-white">
-            ไม่สามารถโหลดรูปภาพได้
+      <div class="banner-wrap">
+        <q-img
+          :src="image"
+          class="banner-img"
+          fit="contain"
+          :ratio="$q.screen.xs ? 4 / 3 : $q.screen.sm ? 16 / 9 : 21 / 9"
+        >
+          <template v-slot:loading>
+            <div class="banner-loading">
+              <div class="banner-loading-inner">
+                <q-spinner-dots color="white" size="2rem" />
+                <span>กำลังโหลด...</span>
+              </div>
+            </div>
+          </template>
+          <template v-slot:error>
+            <div class="banner-error">
+              <q-icon name="image_not_supported" size="3rem" color="white" class="q-mb-sm" />
+              <span>ไม่สามารถโหลดรูปภาพได้</span>
+            </div>
+          </template>
+
+          <!-- Overlay gradient -->
+          <div class="banner-overlay" />
+
+          <!-- Festival name on image -->
+          <div class="banner-caption" v-if="festivalName">
+            <div class="banner-caption-tag">🎊 เทศกาล</div>
+            <div class="banner-caption-name">{{ festivalName }}</div>
           </div>
-        </template>
-      </q-img>
+        </q-img>
+
+        <!-- Shimmer bar under banner -->
+        <div class="banner-shimmer-bar" />
+      </div>
     </div>
 
-    <q-toolbar class="wish-toolbar text-black q-mt-md shadow-1">
-      <div class="row flex-center full-width q-gutter-x-md q-gutter-y-xs">
-        <q-toolbar-title class="wish-title text-weight-bold">
-          <q-item
-            clickable
-            :to="`/${currentId}`"
-            class="flex flex-center text-center wish-link"
-            :class="{ 'wish-active': isHomeActive }"
-          >
-            ร่วมส่งคำอวยพร
-          </q-item>
-        </q-toolbar-title>
+    <!-- ===== NAV BAR ===== -->
+    <div class="nav-wrap">
+      <div class="nav-inner">
+        <!-- ร่วมส่งคำอวยพร -->
+        <router-link
+          :to="`/${currentId}`"
+          class="nav-tab"
+          :class="{ 'nav-tab--active': isHomeActive }"
+        >
+          <div class="nav-tab-icon">
+            <q-icon name="favorite" size="18px" />
+          </div>
+          <span class="nav-tab-label">ร่วมส่งคำอวยพร</span>
+          <div class="nav-tab-pill" />
+        </router-link>
 
-        <q-separator vertical dark class="gt-sm" />
+        <div class="nav-separator" />
 
-        <q-toolbar-title class="wish-title text-weight-bold">
-          <q-item
-            clickable
-            :to="`/${currentId}/list`"
-            class="flex flex-center text-center wish-link"
-            :class="{ 'wish-active': isListActive }"
-          >
-            รายชื่อผู้ร่วมอวยพร
-          </q-item>
-        </q-toolbar-title>
+        <!-- รายชื่อผู้ร่วมอวยพร -->
+        <router-link
+          :to="`/${currentId}/list`"
+          class="nav-tab"
+          :class="{ 'nav-tab--active': isListActive }"
+        >
+          <div class="nav-tab-icon">
+            <q-icon name="people" size="18px" />
+          </div>
+          <span class="nav-tab-label">รายชื่อผู้ร่วมอวยพร</span>
+          <div class="nav-tab-pill" />
+        </router-link>
       </div>
-    </q-toolbar>
+    </div>
 
-    <q-page-container>
-      <!-- ส่ง currentId เป็น props ไปยังหน้าลูก (ถ้าหน้าลูกต้องการ) -->
+    <!-- ===== PAGE CONTENT ===== -->
+    <q-page-container class="page-bg">
       <router-view :id="currentId" />
     </q-page-container>
 
-    <q-footer class="footer-bg text-white q-pt-xl q-pb-md">
-      <div class="container q-px-md" style="max-width: 1200px; margin: 0 auto">
-        <div class="row q-col-gutter-lg">
-          <div class="col-12 col-md-5">
-            <div class="flex items-center q-mb-md">
-              <q-icon name="festival" size="sm" class="q-mr-sm" />
-              <div class="text-h6 text-weight-bold">Festival Greeting LDD</div>
+    <!-- ===== FOOTER ===== -->
+    <q-footer class="site-footer">
+      <!-- Top decorative wave -->
+      <div class="footer-wave">
+        <svg viewBox="0 0 1440 60" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M0,30 C360,60 1080,0 1440,30 L1440,60 L0,60 Z" fill="rgba(255,255,255,0.04)" />
+        </svg>
+      </div>
+
+      <div class="footer-inner">
+        <div class="footer-grid">
+          <!-- Brand -->
+          <div class="footer-col footer-col--brand">
+            <div class="footer-logo">
+              <div class="footer-logo-icon">
+                <q-icon name="celebration" size="18px" color="white" />
+              </div>
+              <span class="footer-logo-name">Festival Greeting LDD</span>
             </div>
-            <p class="text-body2 opacity-80" style="line-height: 1.6">
+            <p class="footer-desc">
               ร่วมเฉลิมฉลองเนื่องในโอกาสต่างๆ ด้วยคำอวยพร ความสุข และพลังใจดีๆ ให้แก่ผู้บริหาร
               บุคลากร และเครือข่าย ของกรมพัฒนาที่ดิน
             </p>
           </div>
 
-          <div class="col-12 col-sm-6 col-md-3">
-            <div class="text-subtitle1 text-weight-bold q-mb-md">เมนูทางลัด</div>
-            <div class="column q-gutter-y-sm">
-              <router-link :to="`/${currentId}`" class="footer-link">ร่วมส่งคำอวยพร</router-link>
-              <router-link :to="`/${currentId}/list`" class="footer-link"
-                >รายชื่อผู้ร่วมอวยพร</router-link
-              >
-              <router-link to="/login" class="footer-link">แอดมิน</router-link>
-            </div>
+          <!-- Quick Links -->
+          <div class="footer-col">
+            <div class="footer-heading">เมนูทางลัด</div>
+            <nav class="footer-links">
+              <router-link :to="`/${currentId}`" class="footer-link">
+                <q-icon name="favorite_border" size="13px" class="q-mr-xs" />
+                ร่วมส่งคำอวยพร
+              </router-link>
+              <router-link :to="`/${currentId}/list`" class="footer-link">
+                <q-icon name="people_outline" size="13px" class="q-mr-xs" />
+                รายชื่อผู้ร่วมอวยพร
+              </router-link>
+              <router-link to="/login" class="footer-link">
+                <q-icon name="manage_accounts" size="13px" class="q-mr-xs" />
+                สำหรับแอดมิน
+              </router-link>
+            </nav>
           </div>
 
-          <div class="col-12 col-sm-6 col-md-4">
-            <div class="text-subtitle1 text-weight-bold q-mb-md">ติดต่อสอบถาม</div>
-            <div class="column q-gutter-y-sm">
-              <div class="flex items-start no-wrap">
-                <q-icon name="apartment" size="xs" class="q-mr-sm q-mt-xs" />
-                <a
-                  href="https://webapp.ldd.go.th/ICTWeb/index.php"
-                  target="_blank"
-                  class="text-body2 footer-link flex items-start no-wrap"
-                >
-                  <span class="text-body2">ศูนย์เทคโนโลยีสารสนเทศและการสื่อสาร กรมพัฒนาที่ดิน</span>
-                </a>
+          <!-- Contact -->
+          <div class="footer-col">
+            <div class="footer-heading">ติดต่อสอบถาม</div>
+            <div class="footer-contacts">
+              <a
+                href="https://webapp.ldd.go.th/ICTWeb/index.php"
+                target="_blank"
+                class="footer-contact footer-link"
+              >
+                <q-icon name="apartment" size="14px" class="footer-contact-icon" />
+                <span>ศูนย์เทคโนโลยีสารสนเทศฯ กรมพัฒนาที่ดิน</span>
+              </a>
+              <div class="footer-contact">
+                <q-icon name="account_circle" size="14px" class="footer-contact-icon" />
+                <span>กลุ่มฐานข้อมูลสารสนเทศ</span>
               </div>
-              <div class="flex items-center no-wrap">
-                <q-icon name="account_circle" size="xs" class="q-mr-sm" />
-                <span class="text-body2">กลุ่มฐานข้อมูลสารสนเทศ</span>
-              </div>
-              <div class="flex items-center no-wrap">
-                <q-icon name="call" size="xs" class="q-mr-sm" />
-                <span class="text-body2">02-562-5100 ต่อ 1328</span>
+              <div class="footer-contact">
+                <q-icon name="call" size="14px" class="footer-contact-icon" />
+                <span>02-562-5100 ต่อ 1328</span>
               </div>
             </div>
           </div>
         </div>
 
-        <q-separator dark class="q-my-lg opacity-20" />
-        <div class="text-center opacity-70 text-body2">
-          กรมพัฒนาที่ดิน ถนนพหลโยธิน แขวงลาดยาว เขตจตุจักร กรุงเทพฯ 10900 โทร. 1760 ต่อ 1275
+        <div class="footer-divider" />
+
+        <div class="footer-bottom">
+          <span>กรมพัฒนาที่ดิน ถนนพหลโยธิน แขวงลาดยาว เขตจตุจักร กรุงเทพฯ 10900</span>
+          <span class="footer-sep gt-xs">·</span>
+          <span>โทร. 1760 ต่อ 1275</span>
         </div>
       </div>
     </q-footer>
@@ -127,51 +195,38 @@ const $q = useQuasar();
 const image = ref('');
 const festivalName = ref('');
 
-// 1. ดึง ID จาก URL และให้ Default เป็น 1
-// const currentId = computed(() => (route.params.id as string) || '1');
-const currentId = computed(() => {
-  return (route.params.id as string) 
-    || localStorage.getItem('festivalId') 
-    || '1';
-});
+// ดึง ID จาก URL หรือ localStorage fallback
+const currentId = computed(
+  () => (route.params.id as string) || localStorage.getItem('festivalId') || '1',
+);
 
-// 2. Logic การเช็ค Active เมนู
-// const isListActive = computed(() => route.path.startsWith('/list'));
-// const isListActive = computed(() => route.path.startsWith(`${currentId}/list`));
-// const isHomeActive = computed(() => !isListActive.value && !route.path.startsWith('/login'));
+// Active nav
 const isListActive = computed(() => route.path.startsWith(`/${currentId.value}/list`));
-
 const isHomeActive = computed(() => route.path === `/${currentId.value}`);
 
+// ============================================================
+// Helpers
+// ============================================================
 const getImageUrl = async (imagePath: string): Promise<string> => {
   try {
     const response = await api(`/upload/${imagePath}`, { responseType: 'blob' });
     return URL.createObjectURL(response.data);
-  } catch (error) {
-    console.error('Error fetching image:', error);
+  } catch {
     return '';
   }
 };
 
-// 3. ฟังก์ชันดึงข้อมูลโดยใช้ ID
 const fetchFestival = async (id: string) => {
   $q.loading.show();
   try {
-    // console.log("ID" ,id);
-    // ดึงข้อมูล festival ตาม id ที่ระบุ
     const response = await api.get(`/festival/${Number(id)}`);
-
     if (response.data) {
       const data = response.data.festival;
       festivalName.value = data.festivalName;
-      console.log('FestivalName ', festivalName.value);
       image.value = data.image ? await getImageUrl(data.image) : '';
-
-      // เก็บค่า ID ไว้ใช้ในส่วนอื่นๆ ของแอป
       localStorage.setItem('festivalId', id);
     }
-  } catch (error) {
-    console.error('Error fetching festival data:', error);
+  } catch {
     $q.notify({
       color: 'negative',
       message: 'ไม่สามารถโหลดข้อมูลเทศกาลได้',
@@ -182,101 +237,569 @@ const fetchFestival = async (id: string) => {
   }
 };
 
-// 4. Watch การเปลี่ยนแปลงของ currentId (เผื่อผู้ใช้เปลี่ยนเลข ID ใน URL)
-// watch(
-//   currentId,
-//   (newId) => {
-//     if (newId) {
-//       void fetchFestival(newId);
-//     }
-//   },
-//   { immediate: true },
-// ); // immediate: true จะรันครั้งแรกทันทีเมื่อ component ถูกสร้าง (แทน onMounted)
+// ============================================================
+// Watch route id
+// ============================================================
 watch(
   () => route.params.id,
   (newId) => {
     const storedId = localStorage.getItem('festivalId');
-
-    // ✅ ถ้า URL มี id และไม่ตรงกับที่เก็บ → อัปเดตใหม่
     if (newId && newId !== storedId) {
-      localStorage.setItem('festivalId', newId);
+      localStorage.setItem('festivalId', newId as string);
     }
-
-    // ✅ ถ้าไม่มี id → ใช้ตัวที่เก็บไว้
     const finalId = (newId as string) || storedId || '1';
-
-    if (finalId) {
-      void fetchFestival(finalId);
-    }
+    if (finalId) void fetchFestival(finalId);
   },
-  { immediate: true }
+  { immediate: true },
 );
 </script>
 
 <style lang="scss" scoped>
-/* CSS เหมือนเดิมของคุณ */
-.banner-desktop,
-.banner-mobile {
-  width: 100%;
-  max-width: 1650px;
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&family=Sarabun:wght@400;500;600;700&family=Prompt:wght@500;600;700&display=swap');
+
+// ============================================================
+// TOKENS
+// ============================================================
+$rose: #be123c;
+$rose-mid: #e11d48;
+$rose-light: #fb7185;
+$gold: #ca8a04;
+$gold-light: #fbbf24;
+$amber: #f59e0b;
+$surface: #ffffff;
+$text-main: #4a0010;
+$text-muted: #9ca3af;
+$nav-h: 52px;
+
+// ============================================================
+// HEADER
+// ============================================================
+.festival-header {
+  background: linear-gradient(135deg, #7f1d1d 0%, $rose-mid 50%, #db2777 100%) !important;
+  box-shadow: 0 2px 24px rgba(190, 18, 60, 0.35) !important;
+}
+
+.festival-toolbar {
+  min-height: 58px;
+  height: auto;
+  padding: 8px 16px;
+  gap: 12px;
+}
+
+.header-emblem {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  animation: pulse-emblem 3s ease-in-out infinite;
+}
+
+@keyframes pulse-emblem {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(255, 255, 255, 0);
+  }
+}
+
+.festival-title {
+  overflow: hidden;
+}
+
+.festival-title-text {
+  font-family: 'Sarabun', 'Noto Sans Thai', sans-serif;
+  font-size: clamp(13px, 3.5vw, 20px);
+  font-weight: 700;
+  color: white;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+  letter-spacing: 0.01em;
+}
+
+.header-dots {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.dot {
+  border-radius: 50%;
+  display: block;
+  opacity: 0.6;
+  animation: dot-pulse 1.5s ease-in-out infinite;
+}
+
+.dot-1 {
+  width: 6px;
+  height: 6px;
+  background: $gold-light;
+  animation-delay: 0s;
+}
+.dot-2 {
+  width: 8px;
+  height: 8px;
+  background: white;
+  animation-delay: 0.2s;
+}
+.dot-3 {
+  width: 6px;
+  height: 6px;
+  background: $rose-light;
+  animation-delay: 0.4s;
+}
+
+@keyframes dot-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.3);
+    opacity: 1;
+  }
+}
+
+// ============================================================
+// BANNER
+// ============================================================
+.banner-section {
+  background: linear-gradient(180deg, #fff1f2 0%, #fce7f3 100%);
+  padding: 32px 48px 0;
+  position: relative;
+
+  @media (max-width: 768px) {
+    padding: 18px 18px 0;
+  }
+  @media (max-width: 480px) {
+    padding: 8px 0 0;
+  }
+}
+
+.banner-top-deco {
+  display: none; // optional accent bar if desired
+}
+
+.banner-wrap {
+  max-width: 1200px;
   margin: 0 auto;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow:
+    0 8px 40px rgba(190, 18, 60, 0.18),
+    0 2px 6px rgba(0, 0, 0, 0.06),
+    0 0 0 1px rgba(190, 18, 60, 0.08);
+
+  @media (max-width: 768px) {
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(190, 18, 60, 0.12);
+  }
+
+  @media (max-width: 480px) {
+    border-radius: 0;
+    box-shadow: none;
+  }
+}
+
+.banner-img {
+  width: 100%;
   display: block;
 }
-.banner-desktop {
-  height: 400px;
-}
-.banner-mobile {
-  height: 250px;
-  border-radius: 0;
-}
+
 :deep(.q-img__image) {
   object-position: center center;
 }
 
-.wish-toolbar {
-  background-color: #fff;
-  border-top: 2px solid $primary;
-  padding: 10px 0;
-}
-
-.wish-title {
-  font-size: clamp(1.1rem, 4vw, 1.5rem);
-  text-align: center;
-}
-
-.footer-bg {
-  background: linear-gradient(135deg, #1976d2 0%, #1976d2 100%);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.footer-link {
+.banner-loading,
+.banner-error {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, $rose-mid, #db2777);
   color: white;
-  text-decoration: none;
+  font-family: 'Noto Sans Thai', sans-serif;
   font-size: 0.9rem;
-  opacity: 0.85;
-  transition: all 0.3s ease;
-  &:hover {
-    opacity: 1;
-    text-decoration: underline;
-    padding-left: 5px;
+}
+
+.banner-loading-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.banner-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(127, 29, 29, 0.05) 0%,
+    transparent 35%,
+    rgba(127, 29, 29, 0.55) 100%
+  );
+  pointer-events: none;
+}
+
+.banner-caption {
+  position: absolute;
+  bottom: 1.5rem;
+  left: 2rem;
+  animation: slideUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) both 0.2s;
+
+  @media (max-width: 480px) {
+    bottom: 1rem;
+    left: 1rem;
   }
 }
 
-.wish-link {
-  color: black;
+.banner-caption-tag {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 20px;
+  padding: 3px 12px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.92);
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+}
+
+.banner-caption-name {
+  font-family: 'Prompt', sans-serif;
+  font-size: clamp(1.1rem, 5vw, 2.2rem);
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.3);
+  line-height: 1.2;
+  max-width: 600px;
+}
+
+.banner-shimmer-bar {
+  height: 4px;
+  background: linear-gradient(90deg, $rose-mid, $gold-light, $rose-light, $rose-mid);
+  background-size: 200% 100%;
+  animation: shimmer 2.5s linear infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% center;
+  }
+  100% {
+    background-position: -200% center;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ============================================================
+// NAV BAR
+// ============================================================
+.nav-wrap {
+  background: $surface;
+  border-bottom: 1px solid rgba(190, 18, 60, 0.1);
+  box-shadow: 0 3px 16px rgba(190, 18, 60, 0.07);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.nav-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: stretch;
+  padding: 0 1rem;
+
+  @media (max-width: 480px) {
+    padding: 0;
+  }
+}
+
+.nav-tab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 1rem;
+  height: $nav-h;
+  font-family: 'Sarabun', 'Noto Sans Thai', sans-serif;
+  font-size: clamp(0.85rem, 3vw, 1rem);
+  font-weight: 600;
+  color: $text-muted;
   text-decoration: none;
+  position: relative;
+  transition:
+    color 0.2s,
+    background 0.2s;
+
+  @media (max-width: 480px) {
+    gap: 5px;
+    font-size: 0.82rem;
+    padding: 0 0.5rem;
+  }
+
+  .nav-tab-icon {
+    display: flex;
+    align-items: center;
+    opacity: 0.55;
+    transition:
+      opacity 0.2s,
+      transform 0.2s;
+  }
+
+  .nav-tab-pill {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%) scaleX(0);
+    width: 55%;
+    height: 3px;
+    border-radius: 3px 3px 0 0;
+    background: linear-gradient(90deg, $rose-mid, $rose-light);
+    transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  &:hover {
+    color: $rose-mid;
+    background: rgba(190, 18, 60, 0.03);
+
+    .nav-tab-icon {
+      opacity: 1;
+      transform: scale(1.12);
+    }
+  }
+
+  &--active {
+    color: $rose-mid;
+
+    .nav-tab-icon {
+      opacity: 1;
+    }
+    .nav-tab-pill {
+      transform: translateX(-50%) scaleX(1);
+    }
+  }
 }
-.wish-active {
-  color: #1976d2 !important;
-  font-weight: bold;
+
+.nav-separator {
+  width: 1px;
+  background: rgba(190, 18, 60, 0.1);
+  margin: 10px 0;
+  flex-shrink: 0;
 }
-.opacity-80 {
-  opacity: 0.8;
+
+// ============================================================
+// PAGE BG
+// ============================================================
+.page-bg {
+  background: linear-gradient(155deg, #fff1f2 0%, #fdf4ff 50%, #fff7ed 100%);
+  min-height: 60vh;
 }
-.opacity-70 {
-  opacity: 0.7;
+
+// ============================================================
+// FOOTER
+// ============================================================
+.site-footer {
+  background: linear-gradient(135deg, #7f1d1d 0%, #9f1239 50%, #881337 100%) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
 }
-.opacity-20 {
-  opacity: 0.2;
+
+.footer-wave {
+  width: 100%;
+  overflow: hidden;
+  line-height: 0;
+  margin-bottom: -2px;
+
+  svg {
+    width: 100%;
+    height: 40px;
+    display: block;
+  }
+}
+
+.footer-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 1.5rem;
+
+  @media (max-width: 600px) {
+    padding: 2rem 1rem 1.25rem;
+  }
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1.5fr;
+  gap: 2.5rem;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    text-align: center;
+  }
+}
+
+.footer-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 0.85rem;
+
+  @media (max-width: 480px) {
+    justify-content: center;
+  }
+}
+
+.footer-logo-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.footer-logo-name {
+  font-family: 'Prompt', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.footer-desc {
+  font-size: 0.83rem;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.8;
+  margin: 0;
+}
+
+.footer-heading {
+  font-family: 'Prompt', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.45);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+}
+
+.footer-links {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+
+  @media (max-width: 480px) {
+    align-items: center;
+  }
+}
+
+.footer-link {
+  display: inline-flex;
+  align-items: center;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.85rem;
+  text-decoration: none;
+  transition:
+    color 0.2s,
+    padding-left 0.2s;
+
+  &:hover {
+    color: $gold-light;
+    padding-left: 4px;
+  }
+}
+
+.footer-contacts {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+
+  @media (max-width: 480px) {
+    align-items: center;
+  }
+}
+
+.footer-contact {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 0.83rem;
+  line-height: 1.5;
+
+  @media (max-width: 480px) {
+    justify-content: center;
+  }
+}
+
+.footer-contact-icon {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: $gold-light;
+  opacity: 0.85;
+}
+
+.footer-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+  margin: 1.75rem 0 1.25rem;
+}
+
+.footer-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 0.77rem;
+  color: rgba(255, 255, 255, 0.38);
+  text-align: center;
+  line-height: 1.7;
+}
+
+.footer-sep {
+  opacity: 0.4;
+}
+
+@media (max-width: 480px) {
+  .footer-bottom {
+    flex-direction: column;
+    gap: 3px;
+  }
 }
 </style>

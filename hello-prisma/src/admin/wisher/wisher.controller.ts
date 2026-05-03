@@ -34,9 +34,12 @@ export class AdminWisherController {
     return this.adminwisherService.findById(id);
   }
 
-  @Get()
-  findMany(@Query() paginationDto: PaginationWisherDto) {
-    return this.adminwisherService.findMany(paginationDto);
+  @Get('/paginate/:festivalId')
+  findMany(
+    @Param('festivalId') festivalId: number,
+    @Query() paginationDto: PaginationWisherDto,
+  ) {
+    return this.adminwisherService.findMany(festivalId, paginationDto);
   }
 
   @Patch(':id')

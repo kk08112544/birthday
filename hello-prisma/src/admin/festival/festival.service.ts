@@ -13,10 +13,10 @@ export class AdminFestivalService {
     private exceptionService: ExceptionsService,
   ) {}
   async create(createFestivalDto: CreateFestivalDto) {
-    const check = await this.adminFestivalRepositories.findAll();
-    if (check) {
-      this.exceptionService.throwFestivalConflict();
-    }
+    // const check = await this.adminFestivalRepositories.findAll();
+    // if (check) {
+    //   this.exceptionService.throwFestivalConflict();
+    // }
     // return 'This action adds a new festival';
     const data = await this.adminFestivalRepositories.create(createFestivalDto);
     return {
@@ -64,17 +64,20 @@ export class AdminFestivalService {
 
   async update(id: number, updateFestivalDto: UpdateFestivalDto) {
     const check = await this.adminFestivalRepositories.findById(id);
+
     if (!check) {
       this.exceptionService.throwInvalidFestival();
     }
+
     const data = await this.adminFestivalRepositories.update(
       id,
       updateFestivalDto,
     );
+
     return {
       festival: data,
       action: STATUS.SUCCESS,
-      message: MESSAGE.FESTIVAL.GET_SUCCESS, // ใช้ตัวแปร MESSAGE
+      message: MESSAGE.FESTIVAL.UPDATE_SUCCESS,
     };
   }
 

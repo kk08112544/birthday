@@ -50,11 +50,14 @@ export class AdminWisherRepositories {
   }
 
   async findManyPaginated(
+    festivalId: number,
     options: PaginationWisherDto,
   ): Promise<PaginatedResult<ResponseWisherDto>> {
     const whereCondition: Prisma.WisherWhereInput = {
+      festivalId: Number(festivalId),
       deletedAt: null,
       festival: {
+        fId: Number(festivalId),
         deletedAt: null,
       },
     };

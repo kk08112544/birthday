@@ -64,6 +64,8 @@ const routes: RouteRecordRaw[] = [
     children: [
       { path: 'festival', component: () => import('pages/admin/FestivalPage.vue') },
       { path: 'unpolite', component: () => import('pages/admin/UnpolitePage.vue') },
+      { path: 'create', component: () => import('pages/admin/create/CreatePage.vue') },
+      { path: 'edit/:id', component: () => import('pages/admin/edit/EditPage.vue'), props: true },
     ],
   },
   // Always leave this as last one,

@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   Query,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { AdminFestivalService } from './festival.service';
 import { CreateFestivalDto } from './dto/create-festival.dto';
@@ -42,14 +43,14 @@ export class AdminFestivalController {
 
   @Patch(':id')
   update(
-    @Param('id') id: number,
+    @Param('id', ParseIntPipe) id: number,
     @Body() updateFestivalDto: UpdateFestivalDto,
   ) {
     return this.adminfestivalService.update(id, updateFestivalDto);
   }
 
   @Delete(':id')
-  async delete(@Param('id') id: number) {
+  delete(@Param('id') id: number) {
     return this.adminfestivalService.delete(id);
   }
 }

@@ -52,14 +52,17 @@ export class AdminWisherService {
     };
   }
 
-  async findMany(dto: PaginationWisherDto) {
+  async findMany(festivalId: number, dto: PaginationWisherDto) {
     const { page, limit, search } = dto;
 
-    const result = await this.adminWishRepositories.findManyPaginated({
-      page,
-      limit,
-      search,
-    });
+    const result = await this.adminWishRepositories.findManyPaginated(
+      festivalId,
+      {
+        page,
+        limit,
+        search,
+      },
+    );
     return {
       wisher: result,
       action: STATUS.SUCCESS,

@@ -1,6 +1,6 @@
 import {
   Injectable,
-  ConflictException,
+  // ConflictException,
   UnauthorizedException,
   BadRequestException,
   NotFoundException,
@@ -39,9 +39,9 @@ export class ExceptionsService {
   throwWisherNotFound(): never {
     throw new NotFoundException(MESSAGE.WISH.NOT_FOUND);
   }
-  throwFestivalConflict(): never {
-    throw new ConflictException(MESSAGE.FESTIVAL.FESTIVAL_CONFLICT);
-  }
+  // throwFestivalConflict(): never {
+  //   throw new ConflictException(MESSAGE.FESTIVAL.FESTIVAL_CONFLICT);
+  // }
   throwCardNotFound(): never {
     throw new NotFoundException(MESSAGE.CARD.NOT_FOUND);
   }

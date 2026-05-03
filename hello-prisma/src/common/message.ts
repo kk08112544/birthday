@@ -6,7 +6,7 @@ export const MESSAGE = {
     UPDATE_SUCCESS: 'แก้ไขขื่อเทศกาลสำเร็จ',
     INVALID_FESTIVALID: 'ไม่มีเทศกาลนี้ในระบบ',
     DELETE_SUCCESS: 'ลบข้อมูลเทศกาลสำเร็จ',
-    FESTIVAL_CONFLICT: 'มีข้อมูลเทศกาลแล้ว',
+    // FESTIVAL_CONFLICT: 'มีข้อมูลเทศกาลแล้ว',
   },
   SENDER: {
     CREATE_SUCCESS: 'สร้างผู้ส่งคำอวยพรสำเร็จ',

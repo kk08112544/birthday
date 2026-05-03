@@ -1,0 +1,431 @@
+<template>
+  <q-page class="bg-grey-2 q-pa-md">
+    <q-form @submit.prevent="addFestival" class="column q-gutter-y-md">
+      <div class="max-width-container q-mx-auto full-width">
+        <!-- Header Section -->
+        <!-- <div class="text-caption text-grey-7">เทศกาล</div> -->
+
+        <div class="max-width-container q-mx-auto">
+          <q-card flat bordered class="rounded-borders q-pa-md shadow-2">
+            <div class="text-h5 text-weight-bold text-indigo-10 q-mb-md" style="text-align: center">
+              เพิ่มเทศกาลใหม่
+            </div>
+            <!-- Image Section: จัดกึ่งกลางแน่นอนด้วย column items-center -->
+            <div class="text-weight-bold text-grey-8 q-mb-sm text-center">รูปหน้าปกเทศกาล</div>
+
+            <div class="column items-center q-mb-lg justify-center">
+              <q-img
+                :src="
+                  imageFile
+                    ? getFilePreview(imageFile)
+                    : 'https://placehold.co/600x400?text=Upload+Image'
+                "
+                class="rounded-borders shadow-1 main-image-preview"
+                :style="{
+                  maxWidth: '300px',
+                  width: '100%',
+                  border: imageError ? '2px solid red' : '2px solid transparent',
+                }"
+                @click="$refs.fileInput.pickFiles()"
+              >
+                <div class="absolute-bottom text-center text-caption q-pa-xs bg-black-3">
+                  แตะเพื่อเลือกรูปภาพ
+                </div>
+              </q-img>
+
+              <q-file
+                v-model="imageFile"
+                ref="fileInput"
+                accept="image/*"
+                class="hidden"
+                :rules="[(val) => !!val || 'กรุณาเลือกรูปภาพ']"
+              />
+            </div>
+
+            <!-- Input Section -->
+            <div class="text-weight-bold text-grey-8 q-mb-xs">ชื่อเทศกาล</div>
+            <q-input
+              v-model="festivalName"
+              outlined
+              dense
+              placeholder="กรอกชื่อเทศกาล"
+              class="bg-white q-mb-lg"
+              :rules="[(val) => !!val || 'กรุณากรอกชื่อเทศกาล']"
+            />
+
+            <!-- Buttons Section: ใช้ row justify-center เพื่อให้ปุ่มอยู่กลาง -->
+            <!-- <div class="row q-col-gutter-sm justify-center">
+      <div class="col-6" style="max-width: 150px;">
+        <q-btn 
+          outline 
+          color="indigo-10" 
+          class="full-width" 
+          icon="chat" 
+          label="คำอวยพร" 
+          @click="showWishDialog = true"
+        >
+          <q-badge color="red" floating v-if="wishWordList.length">{{ wishWordList.length }}</q-badge>
+        </q-btn>
+      </div>
+      <div class="col-6" style="max-width: 150px;">
+        <q-btn 
+          outline 
+          color="indigo-10" 
+          class="full-width" 
+          icon="image" 
+          label="รูปการ์ด" 
+          @click="showCardDialog = true"
+        >
+          <q-badge color="red" floating v-if="cardFileList.length">{{ cardFileList.length }}</q-badge>
+        </q-btn>
+      </div>
+    </div> -->
+          </q-card>
+          <q-card flat bordered class="rounded-borders q-pa-md shadow-2">
+            <div class="text-h5 text-weight-bold text-indigo-10 q-mb-md" style="text-align: center">
+              เพิ่มคำอวยพร
+            </div>
+            <div class="row justify-end q-mb-md">
+              <q-btn color="primary" icon="add" label="เพิ่มคำอวยพร" @click="onAddWish" />
+            </div>
+            <!-- Image Section: จัดกึ่งกลางแน่นอนด้วย column items-center -->
+          </q-card>
+           <q-card flat bordered class="rounded-borders q-pa-md shadow-2">
+            <div class="text-h5 text-weight-bold text-indigo-10 q-mb-md" style="text-align: center">
+              เพิ่มการ์ดอวยพร
+            </div>
+            <div class="row justify-end q-mb-md">
+              <q-btn color="primary" icon="add" label="เพิ่มการ์ดอวยพร" @click="onAddCard" />
+            </div>
+            <!-- Image Section: จัดกึ่งกลางแน่นอนด้วย column items-center -->
+          </q-card>
+        </div>
+        <!-- Submit Button -->
+        <q-btn
+          label="บันทึกเทศกาล"
+          color="indigo-10"
+          class="full-width q-mt-lg q-py-sm text-weight-bold"
+          type="submit"
+          :loading="loading"
+          rounded
+        />
+      </div>
+    </q-form>
+ <q-dialog v-model="AddWishDialog" persistent>
+          <q-card style="min-width: 350px">
+            <q-card-section class="row items-center">
+              <div class="text-h6">เพิ่มคำอวยพร</div>
+              <q-space />
+              <q-btn icon="close" flat round dense v-close-popup />
+            </q-card-section>
+
+            <q-form @submit="submitAdd">
+              <q-card-section class="q-pt-none">
+                <q-input
+                  v-model="addForm.word"
+                  label="คำไม่พึงประสงค์"
+                  outlined
+                  dense
+                  autofocus
+                  :rules="[(val) => !!val || 'กรุณากรอกข้อมูล']"
+                />
+              </q-card-section>
+
+              <q-card-actions align="right" class="text-primary">
+                <q-btn flat label="ยกเลิก" v-close-popup />
+                <q-btn color="primary" label="บันทึก" type="submit" :loading="isSubmitting" />
+              </q-card-actions>
+            </q-form>
+          </q-card>
+        </q-dialog>
+    <!-- Dialog สำหรับเพิ่มคำอวยพร (Mobile Friendly) -->
+    <!-- <q-dialog v-model="showWishDialog" position="bottom">
+      <q-card style="width: 100%; border-radius: 16px 16px 0 0">
+        <q-card-section class="row items-center">
+          <div class="text-h6">จัดการคำอวยพร</div>
+          <q-spacer />
+          <q-btn icon="close" flat round dense v-close-popup />
+        </q-card-section>
+
+        <q-card-section>
+          <q-input v-model="tempWish" outlined dense placeholder="เพิ่มคำอวยพรใหม่">
+            <template v-slot:append>
+              <q-btn round dense flat icon="add" @click="addWishToList" />
+            </template>
+          </q-input>
+
+          <q-list bordered separator class="q-mt-md rounded-borders">
+            <q-item v-for="(wish, index) in wishWordList" :key="index">
+              <q-item-section>{{ wish }}</q-item-section>
+              <q-item-section side>
+                <q-btn flat round color="red" icon="delete" size="sm" @click="removeWish(index)" />
+              </q-item-section>
+            </q-item>
+          </q-list>
+        </q-card-section>
+      </q-card>
+    </q-dialog> -->
+
+    <!-- Dialog สำหรับเพิ่มรูปการ์ด -->
+    <!-- <q-dialog v-model="showCardDialog" position="bottom">
+       <q-card style="width: 100%; border-radius: 16px 16px 0 0">
+         <q-card-section class="text-h6">จัดการรูปการ์ด</q-card-section>
+         <q-card-section>
+            <q-file v-model="tempCardFile" outlined dense label="เลือกรูปการ์ด" @update:model-value="addCardToList" />
+            
+            <div class="row q-col-gutter-xs q-mt-md">
+              <div v-for="(file, index) in cardFileList" :key="index" class="col-4 relative-position">
+                <q-img :src="getFilePreview(file)" ratio="1" class="rounded-borders" />
+                <q-btn 
+                  fab-mini color="red" icon="close" size="xs" 
+                  class="absolute-top-right" @click="removeCard(index)" 
+                />
+              </div>
+            </div>
+         </q-card-section>
+       </q-card>
+    </q-dialog> -->
+  </q-page>
+</template>
+<style scoped>
+.max-width-container {
+  max-width: 500px; /* คุมขนาดไม่ให้กว้างเกินไปเมื่อดูบนแท็บเล็ต */
+}
+
+.main-image-preview {
+  border: 2px dashed #ccc;
+  background-color: #fafafa;
+}
+
+.bg-black-3 {
+  background: rgba(0, 0, 0, 0.4);
+}
+</style>
+<!-- <style lang="scss" scoped>
+.max-width-container {
+  max-width: 600px; /* ลดลงเพื่อให้ดูดีใน Mobile และ Tablet */
+}
+
+.main-image-preview {
+  width: 100%;
+  max-width: 100%;
+  aspect-ratio: 1 / 1; /* ทรงจัตุรัสจะประหยัดพื้นที่บนมือถือ หรือเปลี่ยนเป็น 16/9 */
+  object-fit: cover;
+  cursor: pointer;
+  background: #fff;
+  border: 2px dashed #ccc;
+}
+
+.rounded-borders {
+  border-radius: 12px;
+}
+
+.bg-black-3 {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+/* ปรับระยะห่างสำหรับมือถือหน้าจอเล็กมาก */
+@media (max-width: 400px) {
+  .q-pa-md {
+    padding: 12px !important;
+  }
+}
+</style> -->
+<script setup lang="ts">
+import { ref } from 'vue';
+import { useQuasar } from 'quasar';
+import { api } from 'src/boot/axios';
+import { useRouter } from 'vue-router';
+
+const $q = useQuasar();
+const router = useRouter();
+
+// สร้างตัวแปรมารับค่าจากฟอร์ม
+const festivalName = ref('');
+// const wishWord = ref('');
+const imageFile = ref<File | null>(null);
+// const imageCardFile = ref<File | null>(null);
+const loading = ref(false);
+
+// const showWishDialog = ref(false);
+const showCardDialog = ref(false);
+
+const AddWishDialog = ref(false);
+
+// เพิ่มตัวแปรเหล่านี้ใน <script setup>
+const tempCardFile = ref<File | null>(null);
+const cardFileList = ref<File[]>([]);
+
+// ฟังก์ชันเพิ่มการ์ดเข้า List
+const addCardToList = () => {
+  if (tempCardFile.value) {
+    cardFileList.value.push(tempCardFile.value);
+    tempCardFile.value = null; // ล้างค่า
+    showCardDialog.value = false; // ปิด Dialog
+  }
+};
+
+// ฟังก์ชันลบการ์ด
+const removeCard = (index: number) => {
+  cardFileList.value.splice(index, 1);
+};
+
+// ฟังก์ชันสำหรับ Preview รูป (ถ้าต้องการโชว์รูปเล็กๆ)
+const getFilePreview = (file: File) => {
+  return URL.createObjectURL(file);
+};
+// เก็บค่าที่กำลังกรอกใน Dialog
+const tempWish = ref('');
+// const tempCardImage = ref<File | null>(null);
+// เก็บรายการคำอวยพรทั้งหมด (เพื่อส่งไป Backend)
+const wishWordList = ref<string[]>([]);
+
+// ฟังก์ชันเมื่อกด "เพิ่มคำอวยพร" ใน Dialog
+// const addWishToList = () => {
+//   if (tempWish.value.trim() !== '') {
+//     wishWordList.value.push(tempWish.value);
+//     tempWish.value = ''; // ล้างค่าที่กรอก
+//     showWishDialog.value = false; // ปิด Dialog
+//   }
+// };
+const addWishToList = () => {
+  if (tempWish.value.trim() !== '') {
+    wishWordList.value.push(tempWish.value);
+    tempWish.value = ''; // ล้างค่าที่กรอก
+    AddWishDialog.value = false; // ปิด Dialog
+  }
+};
+
+// ฟังก์ชันลบคำอวยพร (ถ้ากดผิด)
+const removeWish = (index: number) => {
+  wishWordList.value.splice(index, 1);
+};
+
+const addFestival = async () => {
+  loading.value = true;
+  const accessToken = localStorage.getItem('accessToken');
+
+  try {
+    // 1. อัปโหลดรูปภาพหน้าปก (Main Image)
+    let festivalImageName = '';
+    if (imageFile.value) {
+      const formData = new FormData();
+      formData.append('singleFile', imageFile.value);
+      const res = await api.post('/upload', formData);
+      festivalImageName = res.data.image;
+    }
+
+    // 2. อัปโหลดรูปการ์ด (Multiple Cards)
+    // ใช้ Promise.all เพื่อให้อัปโหลดพร้อมกัน (Parallel) จะเร็วกว่า loop await ทีละตัว
+    let cardImageNames = [];
+    if (cardFileList.value && cardFileList.value.length > 0) {
+      const uploadPromises = cardFileList.value.map(async (file) => {
+        const formData = new FormData();
+        formData.append('singleFile', file);
+        const res = await api.post('/upload', formData);
+        return res.data.image; // คืนค่าชื่อไฟล์กลับไปใน Array
+      });
+
+      // รอให้อัปโหลดเสร็จทุกไฟล์
+      cardImageNames = await Promise.all(uploadPromises);
+    }
+
+    // 3. เตรียม Payload
+    const payload = {
+      festivalName: festivalName.value,
+      image: festivalImageName,
+      // แปลงเป็น Array of Objects ตามที่คุณต้องการ
+      wisher: wishWordList.value.map((word) => ({ wishWord: word })),
+      card: cardImageNames.map((imgName) => ({ imageCard: imgName })),
+    };
+
+    // 4. บันทึกข้อมูลลงฐานข้อมูล
+    const response = await api.post('/admin/festival', payload, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+
+    $q.notify({ color: 'positive', message: response.data.message, icon: 'check' });
+    await router.push('/admin/festival');
+  } catch (error) {
+    console.error('เกิดข้อผิดพลาด:', error);
+    $q.notify({
+      color: 'negative',
+      message: 'บันทึกไม่สำเร็จ: ',
+      icon: 'report_problem',
+    });
+  } finally {
+    loading.value = false;
+  }
+};
+</script>
+
+<!-- <style lang="scss" scoped>
+.max-width-container {
+  max-width: 1000px; // คุมไม่ให้หน้าแผ่กว้างเกินไปในจอใหญ่
+  width: 100%;
+}
+
+.rounded-borders {
+  border-radius: 12px;
+}
+
+.main-image {
+  width: 100%;
+  max-width: 500px; // จำกัดขนาดสูงสุดในคอมพิวเตอร์
+  aspect-ratio: 16 / 9; // คุมสัดส่วนรูปหน้าปก
+  object-fit: cover;
+}
+
+.min-height-box {
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+}
+
+.display-inline-block {
+  display: inline-block;
+  width: 100%;
+}
+
+// ปรับ Padding ในมือถือให้เล็กลง
+@media (max-width: $breakpoint-xs-max) {
+  .q-pa-xl {
+    padding: 16px !important;
+  }
+  .main-image {
+    max-width: 100%;
+  }
+}
+
+// Custom Colors เพื่อให้เหมือนรูปตัวอย่าง
+.text-indigo-10 { color: #1a237e; }
+.bg-blue-1 { background-color: #f0f4ff !important; }
+.bg-indigo-10 { background-color: #1a237e !important; }
+</style> -->
+<!-- <style lang="scss" scoped>
+.responsive-banner {
+  height: 500px;
+
+  // บนหน้าจอมือถือ ให้รูปเตี้ยลงเพื่อไม่ให้กินพื้นที่มากเกินไป
+  @media (max-width: $breakpoint-xs-max) {
+    height: 250px;
+  }
+}
+
+.shadow-text {
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(2px);
+}
+
+// ปรับให้ปุ่มและช่องค้นหาเต็มความกว้างเมื่ออยู่บนมือถือเล็กๆ
+@media (max-width: $breakpoint-xs-max) {
+  .full-width-xs {
+    width: 100%;
+  }
+}
+
+.my-sticky-header-table {
+  /* ปรับแต่งความสูงตารางได้ตามต้องการ */
+  background-color: white;
+}
+</style> -->
