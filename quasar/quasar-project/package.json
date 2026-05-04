@@ -1,9 +1,7 @@
-
 {
   "name": "quasar-project",
   "version": "0.0.1",
   "description": "A Quasar Project",
-
   "author": "suwarakk-LDD",
   "type": "module",
   "private": true,

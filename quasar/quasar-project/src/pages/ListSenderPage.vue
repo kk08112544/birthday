@@ -333,7 +333,80 @@
         </div>
       </div>
     </q-dialog>
+    <!-- ===== LOADING DIALOG ===== -->
+    <!-- ===== LOADING DIALOG ===== -->
+    <q-dialog v-model="showLoading" persistent no-backdrop-dismiss>
+      <div class="loading-dialog">
+        <!-- Orb spinner -->
+        <div class="ld-orb-wrap">
+          <div class="ld-orb-bg" />
+          <div class="ld-orb-ring1" />
+          <div class="ld-orb-ring2" />
+          <div class="ld-orb-inner">🎴</div>
+        </div>
 
+        <!-- Title -->
+        <div class="ld-title">กำลังโหลดข้อมูล</div>
+
+        <!-- Big % number -->
+        <div class="ld-pct-row">
+          <span class="ld-pct-num">{{ loadingPercent }}</span>
+          <span class="ld-pct-sym">%</span>
+        </div>
+
+        <!-- Step label -->
+        <div class="ld-sub">{{ loadingSteps[loadingStep]?.label ?? 'กำลังเริ่มต้น...' }}</div>
+
+        <!-- Step checklist -->
+        <div class="ld-steps">
+          <div
+            v-for="(s, i) in loadingSteps"
+            :key="i"
+            class="ld-step-row"
+            :class="{
+              'ld-step-row--done': i < loadingStep,
+              'ld-step-row--active': i === loadingStep,
+              'ld-step-row--pending': i > loadingStep,
+            }"
+          >
+            <div
+              class="ld-step-ic"
+              :class="{
+                'ld-step-ic--done': i < loadingStep,
+                'ld-step-ic--active': i === loadingStep,
+                'ld-step-ic--pending': i > loadingStep,
+              }"
+            >
+              <span v-if="i < loadingStep">✓</span>
+              <span v-else-if="i === loadingStep" class="ld-step-spinner" />
+              <span v-else>·</span>
+            </div>
+            <div class="ld-step-label">{{ s.label }}</div>
+            <div
+              class="ld-step-pct"
+              :class="{
+                'ld-step-pct--done': i < loadingStep,
+                'ld-step-pct--active': i === loadingStep,
+              }"
+            >
+              {{ i < loadingStep ? '✓' : i === loadingStep ? s.pct + '%' : '' }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Progress bar -->
+        <div class="ld-bar-track">
+          <div class="ld-bar-fill" :style="{ width: loadingPercent + '%' }" />
+        </div>
+
+        <!-- Dot loader -->
+        <div class="ld-dots">
+          <span class="ld-dot" />
+          <span class="ld-dot" />
+          <span class="ld-dot" />
+        </div>
+      </div>
+    </q-dialog>
     <!-- ===== CLICK PARTICLES ===== -->
     <teleport to="body">
       <div class="click-particles-root">
@@ -424,6 +497,49 @@ const rows = ref<TableRow[]>([]);
 const loading = ref(false);
 const pagination = ref({ page: 1, rowsPerPage: 10, rowsNumber: 0, sortBy: '', descending: false });
 
+// ===== LOADING DIALOG =====
+// ================= LOADING =================
+const showLoading = ref(false);
+const loadingStep = ref(0);
+const loadingPercent = ref(0);
+
+const loadingSteps = [
+  { label: 'โหลดข้อมูลผู้ส่งอวยพร', pct: 80 },
+  { label: 'แสดงรายการผู้ส่งอวยพร', pct: 100 },
+];
+
+let pctAnimTimer: ReturnType<typeof setInterval> | null = null;
+
+const animatePct = (target: number) => {
+  if (pctAnimTimer) clearInterval(pctAnimTimer);
+  const start = loadingPercent.value;
+  const dur = 800;
+  const t0 = Date.now();
+  pctAnimTimer = setInterval(() => {
+    const p = Math.min(1, (Date.now() - t0) / dur);
+    loadingPercent.value = Math.round(start + (target - start) * p);
+    if (p >= 1) {
+      clearInterval(pctAnimTimer!);
+      pctAnimTimer = null;
+    }
+  }, 16);
+};
+
+const startLoading = () => {
+  showLoading.value = true;
+  loadingStep.value = 0;
+  loadingPercent.value = 0;
+  animatePct(5);
+};
+
+const stopLoading = () => {
+  loadingStep.value = loadingSteps.length;
+  animatePct(100);
+  setTimeout(() => {
+    showLoading.value = false;
+  }, 1000);
+};
+
 // ================= IMAGE =================
 const getImageUrl = async (imagePath: string): Promise<string> => {
   try {
@@ -435,22 +551,36 @@ const getImageUrl = async (imagePath: string): Promise<string> => {
 };
 
 // ================= FETCH LIST =================
+// ================= FETCH LIST =================
 const fetchSender = async (id: string): Promise<void> => {
-  loading.value = true;
+  startLoading();
+
   try {
-    const response = await api.get(`/sender/paginate/${Number(id)}`, {
-      params: {
-        page: pagination.value.page,
-        limit: pagination.value.rowsPerPage,
-        fullname: fullname.value || undefined,
-        position: position.value || undefined,
-        department: department.value || undefined,
-        month: selectedMonth.value || undefined,
-        year: selectedYear.value || undefined,
-      },
-    });
+    // 👉 step 1
+    loadingStep.value = 0;
+   animatePct(loadingSteps[loadingStep.value]?.pct ?? 100);
+
+    const data = {
+      page: pagination.value.page,
+      limit: pagination.value.rowsPerPage,
+      fullname: fullname.value || undefined,
+      position: position.value || undefined,
+      department: department.value || undefined,
+      month: selectedMonth.value || undefined,
+      year: selectedYear.value || undefined,
+    };
+
+    const response = await api.get(`/sender/paginate/${Number(id)}`, { params: data });
+
     const res = response.data;
     const list: SenderItem[] = res.sender?.data ?? [];
+
+    pagination.value.rowsNumber = res.sender?.total ?? 0;
+
+    // 👉 step 2
+    loadingStep.value = 1;
+    animatePct(loadingSteps[loadingStep.value]?.pct ?? 100);
+
     rows.value = await Promise.all(
       list.map(async (item) => ({
         sId: item.sId,
@@ -459,16 +589,75 @@ const fetchSender = async (id: string): Promise<void> => {
         department: item.department || '-',
         url: item.card?.imageCard ? await getImageUrl(item.card.imageCard) : '',
         wishWord: item.wish?.wishWord || '',
-      })),
+      }))
     );
-    pagination.value.rowsNumber = res.sender?.total ?? 0;
+
   } catch (error) {
     console.error('FETCH ERROR:', error);
     rows.value = [];
   } finally {
-    loading.value = false;
+    stopLoading();
   }
 };
+// const fetchSender = async (id: string): Promise<void> => {
+//   startLoading();
+
+//   try {
+//     // Step 1 — ดึงข้อมูลเดือนและปี
+//     // loadingStep.value = 0;
+//     // animatePct(loadingSteps[0]!.pct);
+//     // await new Promise((r) => setTimeout(r, 4000));  // 8 วิ
+//     // Step 2 — เตรียมแบบฟอร์มค้นหา
+//     // loadingStep.value = 1;
+//     // animatePct(loadingSteps[1]!.pct);
+//     await new Promise((r) => setTimeout(r, 12000)); // 12 วิ
+//     const data = {
+//       page: pagination.value.page,
+//       limit: pagination.value.rowsPerPage,
+//       fullname: fullname.value || undefined,
+//       position: position.value || undefined,
+//       department: department.value || undefined,
+//       month: selectedMonth.value || undefined,
+//       year: selectedYear.value || undefined,
+//     };
+
+//     const response = await api.get(`/sender/paginate/${Number(id)}`, { params: data });
+
+//     // Step 2 — เตรียมแบบฟอร์มค้นหา
+//     // loadingStep.value = 1;
+//     // animatePct(loadingSteps[1]!.pct);
+//     const res = response.data;
+//     const list: SenderItem[] = res.sender?.data ?? [];
+//     pagination.value.rowsNumber = res.sender?.total ?? 0;
+
+// //     // Step 2 — แสดงรายการผู้ส่งอวยพร
+// //     loadingStep.value = 2;
+// // // ลบ: const value = response.data?.someObject?.pct  ← เอาออกทั้งบรรทัด
+// // if (loadingSteps[2]) animatePct(loadingSteps[2].pct);  // ✅ เช็คก่อนเรียก
+// // await new Promise((r) => setTimeout(r, 4000));
+// //     await new Promise((r) => setTimeout(r, 4000)); // 8 วิ
+//     rows.value = await Promise.all(
+//       list.map(async (item) => ({
+//         sId: item.sId,
+//         fullname: item.fullname || '-',
+//         position: item.position || '-',
+//         department: item.department || '-',
+//         url: item.card?.imageCard ? await getImageUrl(item.card.imageCard) : '',
+//         wishWord: item.wish?.wishWord || '',
+//       })),
+//     );
+
+//     // Step 4 — แสดงรายการผู้ส่งอวยพร
+//     loadingStep.value = 3;
+//     animatePct(loadingSteps[3]!.pct);
+//     await new Promise((r) => setTimeout(r, 350));
+//   } catch (error) {
+//     console.error('FETCH ERROR:', error);
+//     rows.value = [];
+//   } finally {
+//     stopLoading();
+//   }
+// };
 
 // ================= FETCH DETAIL =================
 const showDialog = ref(false);
@@ -691,6 +880,266 @@ $surface: #ffffff;
 $text-main: #1e1b4b;
 $text-muted: #6b7280;
 $radius-card: 16px;
+
+$indigo-deep: #1a1460;
+$indigo-mid: #2d2d8a;
+
+.loading-dialog {
+  background: #fff;
+  border-radius: 24px;
+  padding: 2rem 1.75rem 1.75rem;
+  width: min(340px, 92vw);
+  text-align: center;
+  box-shadow: 0 24px 64px rgba(26, 20, 96, 0.22);
+  font-family: 'Noto Sans Thai', 'Prompt', sans-serif;
+  outline: none;
+}
+
+/* ── Orb ── */
+.ld-orb-wrap {
+  position: relative;
+  width: 90px;
+  height: 90px;
+  margin: 0 auto 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ld-orb-bg {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1a1460, #6b5ce7, #a78bfa);
+  animation: ldOrbPulse 2s ease-in-out infinite;
+}
+.ld-orb-ring1 {
+  position: absolute;
+  inset: -7px;
+  border-radius: 50%;
+  border: 2.5px solid transparent;
+  border-top-color: #a78bfa;
+  border-right-color: #6b5ce7;
+  animation: ldSpin 1.1s linear infinite;
+}
+.ld-orb-ring2 {
+  position: absolute;
+  inset: -14px;
+  border-radius: 50%;
+  border: 1.5px solid transparent;
+  border-bottom-color: rgba(167, 139, 250, 0.28);
+  animation: ldSpin 2.2s linear infinite reverse;
+}
+.ld-orb-inner {
+  position: relative;
+  z-index: 2;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+}
+@keyframes ldSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes ldOrbPulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(107, 92, 231, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 0 12px rgba(107, 92, 231, 0);
+  }
+}
+
+/* ── Text ── */
+.ld-title {
+  font-family: 'Prompt', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: $indigo-deep;
+  margin-bottom: 0.1rem;
+}
+.ld-pct-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 3px;
+  margin-bottom: 0.2rem;
+}
+.ld-pct-num {
+  font-family: 'Prompt', sans-serif;
+  font-size: 2.8rem;
+  font-weight: 800;
+  color: $indigo-mid;
+  line-height: 1;
+  transition: all 0.05s;
+  min-width: 3ch;
+  text-align: right;
+}
+.ld-pct-sym {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #6b5ce7;
+}
+.ld-sub {
+  font-size: 0.76rem;
+  color: #8b87b0;
+  min-height: 1rem;
+  margin-bottom: 1rem;
+  transition: opacity 0.3s;
+}
+
+/* ── Step list ── */
+.ld-steps {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(45, 45, 138, 0.07);
+  border-radius: 14px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+  text-align: left;
+}
+.ld-step-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 13px;
+  border-bottom: 1px solid rgba(45, 45, 138, 0.06);
+  transition: background 0.35s;
+  &:last-child {
+    border-bottom: none;
+  }
+  &--done {
+    background: rgba(34, 197, 94, 0.05);
+  }
+  &--active {
+    background: rgba(99, 102, 241, 0.07);
+  }
+  &--pending {
+    background: transparent;
+  }
+}
+.ld-step-ic {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  &--done {
+    background: #dcfce7;
+    color: #16a34a;
+  }
+  &--active {
+    background: $indigo-soft;
+    animation: ldIcPulse 1s ease-in-out infinite;
+  }
+  &--pending {
+    background: #f3f4f6;
+    color: #d1d5db;
+  }
+}
+@keyframes ldIcPulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 0 5px rgba(99, 102, 241, 0);
+  }
+}
+.ld-step-spinner {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 2px solid #6366f1;
+  border-top-color: transparent;
+  animation: ldSpin 0.7s linear infinite;
+}
+.ld-step-label {
+  flex: 1;
+  font-size: 0.79rem;
+  line-height: 1.35;
+  .ld-step-row--done & {
+    color: #374151;
+  }
+  .ld-step-row--active & {
+    color: $indigo-deep;
+    font-weight: 700;
+  }
+  .ld-step-row--pending & {
+    color: #9ca3af;
+  }
+}
+.ld-step-pct {
+  font-size: 0.7rem;
+  font-weight: 700;
+  min-width: 28px;
+  text-align: right;
+  &--done {
+    color: #16a34a;
+  }
+  &--active {
+    color: #6366f1;
+  }
+}
+
+/* ── Progress bar ── */
+.ld-bar-track {
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(45, 45, 138, 0.08);
+  overflow: hidden;
+  margin-bottom: 0.85rem;
+}
+.ld-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, $indigo-mid, #a78bfa);
+  transition: width 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── Dot loader ── */
+.ld-dots {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+}
+.ld-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: $indigo-mid;
+  display: inline-block;
+  animation: ldDotB 1.2s ease-in-out infinite;
+  &:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+  &:nth-child(3) {
+    animation-delay: 0.4s;
+  }
+}
+@keyframes ldDotB {
+  0%,
+  80%,
+  100% {
+    transform: scale(0.7);
+    opacity: 0.35;
+  }
+  40% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+}
 
 // ============================================================
 // PAGE
@@ -1407,6 +1856,132 @@ $radius-card: 16px;
     flex-direction: column;
   }
 }
+
+// ============================================================
+// LOADING DIALOG
+// ============================================================
+// ============================================================
+// LOADING DIALOG
+// ============================================================
+// .ld-card {
+//   position: relative;
+//   background: #fff;
+//   border-radius: 24px;
+//   padding: 2rem 2.5rem 1.75rem;
+//   width: 280px;
+//   display: flex;
+//   flex-direction: column;
+//   align-items: center;
+//   gap: 0.9rem;
+//   overflow: hidden;
+//   box-shadow: 0 20px 60px rgba(67, 56, 202, 0.22);
+// }
+
+// .ld-shimmer-bar {
+//   position: absolute;
+//   top: 0; left: 0; right: 0;
+//   height: 4px;
+//   background: linear-gradient(90deg, #6366f1, #818cf8, #6366f1);
+//   background-size: 200% 100%;
+//   animation: ldShimmer 1.4s linear infinite;
+// }
+
+// @keyframes ldShimmer {
+//   0%   { background-position: 200% 0; }
+//   100% { background-position: -200% 0; }
+// }
+
+// .ld-icon-wrap {
+//   width: 72px;
+//   height: 72px;
+//   border-radius: 50%;
+//   background: linear-gradient(135deg, #eef2ff, #e0e7ff);
+//   border: 2px solid rgba(99, 102, 241, 0.15);
+//   display: flex;
+//   align-items: center;
+//   justify-content: center;
+// }
+
+// .ld-icon {
+//   animation: ldPulse 1.1s ease-in-out infinite;
+// }
+
+// @keyframes ldPulse {
+//   0%, 100% { transform: scale(1);    opacity: 1;   }
+//   50%       { transform: scale(1.18); opacity: 0.7; }
+// }
+
+// .ld-label {
+//   font-family: 'Noto Sans Thai', sans-serif;
+//   font-size: 0.95rem;
+//   font-weight: 600;
+//   color: #4338ca;
+//   text-align: center;
+// }
+
+// // fade transition
+// .ld-fade-enter-active,
+// .ld-fade-leave-active { transition: all 0.2s ease; }
+// .ld-fade-enter-from   { opacity: 0; transform: translateY(6px); }
+// .ld-fade-leave-to     { opacity: 0; transform: translateY(-6px); }
+
+// // dots
+// .ld-dots {
+//   display: flex;
+//   gap: 8px;
+//   align-items: center;
+// }
+
+// .ld-dot {
+//   width: 20px;
+//   height: 20px;
+//   border-radius: 50%;
+//   border: 2px solid rgba(99, 102, 241, 0.25);
+//   background: #f5f3ff;
+//   display: flex;
+//   align-items: center;
+//   justify-content: center;
+//   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+
+//   &--done {
+//     background: #6366f1;
+//     border-color: #6366f1;
+//     transform: scale(1.05);
+//   }
+
+//   &--active {
+//     border-color: #6366f1;
+//     background: #eef2ff;
+//     box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+//     animation: ldDotPop 0.9s ease-in-out infinite;
+//   }
+// }
+
+// @keyframes ldDotPop {
+//   0%, 100% { box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15); }
+//   50%       { box-shadow: 0 0 0 7px rgba(99, 102, 241, 0.08); }
+// }
+
+// // step numbers
+// .ld-step-row {
+//   display: flex;
+//   align-items: center;
+//   gap: 4px;
+//   font-size: 0.72rem;
+//   color: #9ca3af;
+// }
+
+// .ld-step-text {
+//   transition: color 0.2s, font-weight 0.2s;
+//   &--active {
+//     color: #4338ca;
+//     font-weight: 700;
+//   }
+// }
+
+// .ld-step-of {
+//   margin-left: 2px;
+// }
 
 // ============================================================
 // CLICK PARTICLES

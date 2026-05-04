@@ -204,6 +204,18 @@ const currentId = computed(
 const isListActive = computed(() => route.path.startsWith(`/${currentId.value}/list`));
 const isHomeActive = computed(() => route.path === `/${currentId.value}`);
 
+const webName = ref('ระบบบริหารจัดการอวยพรเนื่องในโอกาสต่างๆ ของกรมฯ');
+
+// onMounted(async () => {
+//   try {
+//     const res = await api.get(`/festival/${currentId.value}`);
+//     webName.value = res.data?.festival?.webName ?? 'ระบบบริหารจัดการอวยพรเนื่องในโอกาสต่างๆ ของกรมฯ';
+//     document.title = webName.value;
+//   } catch (err) {
+//     console.error('โหลดชื่อไม่สำเร็จ');
+//   }
+// });
+
 // ============================================================
 // Helpers
 // ============================================================
@@ -240,6 +252,22 @@ const fetchFestival = async (id: string) => {
 // ============================================================
 // Watch route id
 // ============================================================
+watch(
+  currentId,
+  async (id) => {
+    try {
+      const res = await api.get(`/festival/${id}`);
+      webName.value =
+        res.data?.festival?.webName ?? 'ระบบบริหารจัดการอวยพรเนื่องในโอกาสต่างๆ ของกรมฯ';
+
+      document.title = webName.value;
+    } catch {
+      console.error('โหลดชื่อไม่สำเร็จ');
+    }
+  },
+  { immediate: true },
+);
+
 watch(
   () => route.params.id,
   (newId) => {

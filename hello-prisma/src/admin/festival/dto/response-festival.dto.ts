@@ -3,6 +3,8 @@ export class ResponseFestivalDto {
   fId!: number;
   festivalName!: string;
   image!: string;
+  webName!: string | null;;
+  logo!: string | null;;
   createdAt!: Date;
   updatedAt!: Date;
   deletedAt!: Date | null;

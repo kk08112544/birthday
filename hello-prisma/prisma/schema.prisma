@@ -1,3 +1,4 @@
+
 generator client {
   provider        = "prisma-client-js"
   output          = "../node_modules/.prisma/client"
@@ -6,22 +7,22 @@ generator client {
 
 datasource db {
   provider = "sqlserver"
-
 }
 
 model Sender {
   sId        Int      @id @default(autoincrement())
-  fullname   String
   position   String
   department String
-  festivalId Int
   cardId     Int
   wishId     Int
-  createdAt  DateTime @default(now())
-  festival   Festival @relation(fields: [festivalId], references: [fId])
+  festivalId Int
+   
+  fullname   String
+  createdAt  DateTime @default(now(), map: "DF__Sender__createdA__6EF57B66")
+
   card       Card     @relation(fields: [cardId], references: [cId], onUpdate: NoAction)
-  wish       Wisher   @relation(fields: [wishId], references: [wId], onUpdate: NoAction)
- 
+  wish       Wisher     @relation(fields: [wishId], references: [wId], onUpdate: NoAction)
+  festival   Festival @relation(fields: [festivalId], references: [fId], onUpdate: NoAction)
 }
 
 model Wisher {
@@ -29,10 +30,10 @@ model Wisher {
   wishWord   String
   festivalId Int
   createdAt  DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
   deletedAt  DateTime?
-  sender     Sender[]
+  updatedAt  DateTime  @updatedAt
   festival   Festival  @relation(fields: [festivalId], references: [fId])
+  sender     Sender[]
 }
 
 model Card {
@@ -40,7 +41,7 @@ model Card {
   imageCard  String
   festivalId Int
   createdAt  DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  updatedAt  DateTime  @updatedAt
   deletedAt  DateTime?
   festival   Festival  @relation(fields: [festivalId], references: [fId])
   sender     Sender[]
@@ -50,12 +51,14 @@ model Festival {
   fId          Int       @id @default(autoincrement())
   festivalName String
   image        String
+  logo         String?
+  webName      String?
   createdAt    DateTime  @default(now())
-   updatedAt DateTime  @updatedAt
+  updatedAt    DateTime  @updatedAt
   deletedAt    DateTime?
   card         Card[]
   wisher       Wisher[]
-  sender       Sender[]
+  Sender       Sender[]
 }
 
 model Unpolite {

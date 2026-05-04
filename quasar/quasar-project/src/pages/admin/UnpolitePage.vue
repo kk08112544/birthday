@@ -466,7 +466,6 @@ const onAdd = () => {
   addDialog.value = true;
 };
 
-
 const submitAdd = async () => {
   isSubmitting.value = true;
   try {
@@ -524,8 +523,6 @@ const confirmDelete = async () => {
     itemToDelete.value = null;
   }
 };
-
-
 
 // ================= TABLE EVENTS =================
 const onRequest: QTableProps['onRequest'] = (reqProps) => {

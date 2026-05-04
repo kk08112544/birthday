@@ -12,7 +12,7 @@
       </div>
     </div>
 
-    <!-- ===== FORM (div แทน q-form เพื่อป้องกัน submit bubble) ===== -->
+    <!-- ===== FORM ===== -->
     <div class="form-body">
       <div class="form-container">
         <!-- ===== CARD: COVER IMAGE & NAME ===== -->
@@ -22,43 +22,122 @@
             ข้อมูลเทศกาล
           </div>
 
-          <div class="cover-upload-zone" @click="fileInput?.pickFiles()">
-            <q-img
-              v-if="imageFile"
-              :src="getFilePreview(imageFile)"
-              class="cover-img"
-              :ratio="16 / 9"
+          <!-- COVER IMAGE -->
+          <div ref="coverRef" class="field-group">
+            <div
+              class="cover-upload-zone"
+              :class="{ 'upload-zone--error': imageError }"
+              @click="fileInput?.pickFiles()"
             >
-              <div class="cover-overlay">
-                <q-icon name="photo_camera" size="28px" color="white" />
-                <span>เปลี่ยนรูป</span>
+              <q-img
+                v-if="imageFile"
+                :src="getFilePreview(imageFile)"
+                class="cover-img"
+                :ratio="16 / 9"
+              >
+                <div class="cover-overlay">
+                  <q-icon name="photo_camera" size="28px" color="white" />
+                  <span>เปลี่ยนรูป</span>
+                </div>
+              </q-img>
+              <div v-else class="cover-placeholder">
+                <div class="cover-placeholder-icon">🖼️</div>
+                <div class="cover-placeholder-text">คลิกเพื่ออัปโหลดรูปหน้าปก</div>
+                <div class="cover-placeholder-sub">PNG, JPG ขนาดไม่เกิน 5MB</div>
               </div>
-            </q-img>
-            <div v-else class="cover-placeholder">
-              <div class="cover-placeholder-icon">🖼️</div>
-              <div class="cover-placeholder-text">คลิกเพื่ออัปโหลดรูปหน้าปก</div>
-              <div class="cover-placeholder-sub">PNG, JPG ขนาดไม่เกิน 5MB</div>
             </div>
+            <transition name="err-fade">
+              <div v-if="imageError" class="error-msg">
+                <q-icon name="error_outline" size="14px" />
+                กรุณาอัปโหลดรูปหน้าปก
+              </div>
+            </transition>
           </div>
 
-          <q-file v-model="imageFile" ref="fileInput" accept="image/*" class="hidden" />
+          <q-file
+            v-model="imageFile"
+            ref="fileInput"
+            accept="image/*"
+            class="hidden"
+            @update:model-value="imageError = false"
+          />
 
-          <div class="q-mt-md">
+          <!-- FESTIVAL NAME -->
+          <div ref="nameRef" class="q-mt-md field-group">
             <q-input
+              outlined
               v-model="festivalName"
               label="ชื่อเทศกาล"
               placeholder="เช่น วันสงกรานต์ 2568"
-              outlined
               dense
               autofocus
-              lazy-rules
-              :rules="[
-                (val) => (typeof val === 'string' && val.trim().length > 0) || 'กรุณากรอกข้อมูล',
-              ]"
+              :error="nameError"
+              :error-message="nameError ? 'ชื่อเทศกาลจำเป็นต้องกรอก' : ''"
               class="custom-input"
+              @update:model-value="nameError = false"
             >
               <template v-slot:prepend>
                 <q-icon name="festival" color="deep-orange-5" />
+              </template>
+            </q-input>
+          </div>
+
+          <!-- LOGO UPLOAD -->
+          <div ref="logoRef" class="q-mt-md field-group">
+            <div
+              class="logo-upload-zone"
+              :class="{ 'upload-zone--error': logoError }"
+              @click="logoInput?.pickFiles()"
+            >
+              <q-img
+                v-if="logoFile"
+                :src="getFilePreview(logoFile)"
+                class="logo-preview"
+                :ratio="1"
+                fit="contain"
+              >
+                <div class="cover-overlay">
+                  <q-icon name="photo_camera" size="20px" color="white" />
+                  <span>เปลี่ยน Logo</span>
+                </div>
+              </q-img>
+              <div v-else class="logo-placeholder">
+                <div class="logo-placeholder-icon">🏷️</div>
+                <div class="cover-placeholder-text">คลิกเพื่ออัปโหลด Logo</div>
+                <div class="cover-placeholder-sub">PNG, JPG — แนะนำสี่เหลี่ยมจัตุรัส</div>
+              </div>
+            </div>
+            <transition name="err-fade">
+              <div v-if="logoError" class="error-msg">
+                <q-icon name="error_outline" size="14px" />
+                กรุณาอัปโหลด Logo
+              </div>
+            </transition>
+          </div>
+
+          <q-file
+            v-model="logoFile"
+            ref="logoInput"
+            accept="image/*"
+            class="hidden"
+            @update:model-value="logoError = false"
+          />
+
+          <!-- WEB NAME -->
+          <div ref="webNameRef" class="q-mt-md field-group">
+            <q-input
+              v-model="webName"
+              label="ชื่อเว็บไซต์ (URL slug)"
+              placeholder="เช่น songkran-2568"
+              outlined
+              dense
+              :error="webNameError"
+              :error-message="webNameError ? 'ชื่อเว็บไซต์จำเป็นต้องกรอก' : ''"
+              class="custom-input"
+              @update:model-value="webNameError = false"
+            >
+              <template v-slot:prepend>
+                <q-icon name="language" color="deep-orange-5" />
               </template>
             </q-input>
           </div>
@@ -320,7 +399,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, nextTick, onMounted, onUnmounted } from 'vue';
 import { useQuasar } from 'quasar';
 import { api } from 'src/boot/axios';
 import { useRouter } from 'vue-router';
@@ -332,7 +411,22 @@ const router = useRouter();
 
 const festivalName = ref('');
 const imageFile = ref<File | null>(null);
+const logoFile = ref<File | null>(null);
+const logoInput = ref<InstanceType<typeof QFile> | null>(null);
+const webName = ref('');
 const loading = ref(false);
+
+// ===== Error states =====
+const imageError = ref(false);
+const nameError = ref(false);
+const logoError = ref(false);
+const webNameError = ref(false);
+
+// ===== Field refs for scroll =====
+const coverRef = ref<HTMLElement | null>(null);
+const nameRef = ref<HTMLElement | null>(null);
+const logoRef = ref<HTMLElement | null>(null);
+const webNameRef = ref<HTMLElement | null>(null);
 
 const AddWishDialog = ref(false);
 const EditWishDialog = ref(false);
@@ -426,14 +520,51 @@ const removeCard = (i: number) => {
 /* ===== UTIL ===== */
 const getFilePreview = (file: File) => URL.createObjectURL(file);
 
-/* ===== API ===== */
-const submitAdd = async () => {
-  // const accessToken  = localStorage.getItem('accessToken');
+/* ===== VALIDATE & SCROLL ===== */
+const validateAndScroll = async (): Promise<boolean> => {
+  // Reset all errors
+  imageError.value = false;
+  nameError.value = false;
+  logoError.value = false;
+  webNameError.value = false;
+
+  const isImageValid = !!imageFile.value;
   const isNameValid =
     typeof festivalName.value === 'string' && festivalName.value.trim().length > 0;
-  const isImageValid = !!imageFile.value;
+  const isLogoValid = !!logoFile.value;
+  const isWebNameValid = typeof webName.value === 'string' && webName.value.trim().length > 0;
 
-  if (!isNameValid || !isImageValid) return;
+  if (!isImageValid) imageError.value = true;
+  if (!isNameValid) nameError.value = true;
+  if (!isLogoValid) logoError.value = true;
+  if (!isWebNameValid) webNameError.value = true;
+
+  const hasError = !isImageValid || !isNameValid || !isLogoValid || !isWebNameValid;
+
+  if (hasError) {
+    await nextTick();
+
+    // Scroll to the first field with an error (in DOM order)
+    const targets: Array<{ valid: boolean; el: HTMLElement | null }> = [
+      { valid: isImageValid, el: coverRef.value },
+      { valid: isNameValid, el: nameRef.value },
+      { valid: isLogoValid, el: logoRef.value },
+      { valid: isWebNameValid, el: webNameRef.value },
+    ];
+
+    const firstErrorEl = targets.find((t) => !t.valid)?.el;
+    if (firstErrorEl) {
+      firstErrorEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }
+
+  return !hasError;
+};
+
+/* ===== API ===== */
+const submitAdd = async () => {
+  const isValid = await validateAndScroll();
+  if (!isValid) return;
 
   loading.value = true;
   try {
@@ -443,6 +574,14 @@ const submitAdd = async () => {
       fd.append('singleFile', imageFile.value);
       const res = await api.post('/upload', fd);
       festivalImageName = res.data.image;
+    }
+
+    let festivalLogoName = '';
+    if (logoFile.value) {
+      const fd = new FormData();
+      fd.append('singleFile', logoFile.value);
+      const res = await api.post('/upload', fd);
+      festivalLogoName = res.data.image;
     }
 
     let cardImageNames: string[] = [];
@@ -459,12 +598,13 @@ const submitAdd = async () => {
     const payload = {
       festivalName: festivalName.value,
       image: festivalImageName,
+      logo: festivalLogoName,
+      webName: webName.value,
       wisher: wishWordList.value.map((word) => ({ wishWord: word })),
       card: cardImageNames.map((imgName) => ({ imageCard: imgName })),
     };
 
     const response = await api.post('/admin/festival', payload);
-
     openSuccessDialog(response.data.message || 'บันทึกเทศกาลสำเร็จ');
   } catch {
     $q.notify({
@@ -651,6 +791,7 @@ $text-main: #1a1460;
 $text-muted: #8b87b0;
 $radius-card: 20px;
 $radius-btn: 12px;
+$error-red: #e53935;
 
 /* ===== PAGE ===== */
 .festival-page {
@@ -802,6 +943,65 @@ $radius-btn: 12px;
   }
 }
 
+/* ===== FIELD GROUP ===== */
+.field-group {
+  scroll-margin-top: 80px;
+}
+
+/* ===== ERROR STATES ===== */
+.upload-zone--error {
+  border-color: $error-red !important;
+  border-style: solid !important;
+  background: #fff5f5 !important;
+  animation: shake 0.35s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+
+.error-msg {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: $error-red;
+  font-size: 0.78rem;
+  font-weight: 500;
+  margin-top: 6px;
+  padding: 0 2px;
+}
+
+/* Error fade transition */
+.err-fade-enter-active {
+  transition: all 0.25s ease;
+}
+.err-fade-leave-active {
+  transition: all 0.2s ease;
+}
+.err-fade-enter-from {
+  opacity: 0;
+  transform: translateY(-4px);
+}
+.err-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-4px);
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-5px);
+  }
+  40% {
+    transform: translateX(5px);
+  }
+  60% {
+    transform: translateX(-4px);
+  }
+  80% {
+    transform: translateX(4px);
+  }
+}
+
 /* ===== COVER UPLOAD ===== */
 .cover-upload-zone {
   border-radius: 14px;
@@ -810,6 +1010,7 @@ $radius-btn: 12px;
   border: 2px dashed rgba(45, 45, 138, 0.25);
   transition:
     border-color 0.2s,
+    background 0.2s,
     transform 0.2s;
   background: $surface-2;
 
@@ -862,6 +1063,42 @@ $radius-btn: 12px;
 .cover-placeholder-sub {
   font-size: 0.78rem;
   color: $text-muted;
+}
+
+/* ===== LOGO UPLOAD ===== */
+.logo-upload-zone {
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  border: 2px dashed rgba(45, 45, 138, 0.25);
+  transition:
+    border-color 0.2s,
+    background 0.2s,
+    transform 0.2s;
+  background: $surface-2;
+  max-width: 140px;
+
+  &:hover {
+    border-color: $indigo-mid;
+    transform: translateY(-2px);
+  }
+}
+
+.logo-preview {
+  border-radius: 10px;
+}
+
+.logo-placeholder {
+  padding: 1.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+}
+
+.logo-placeholder-icon {
+  font-size: 2rem;
 }
 
 /* ===== INPUT ===== */

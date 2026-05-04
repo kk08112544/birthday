@@ -17,9 +17,7 @@ export class AdminFestivalRepositories {
   ): Promise<ResponseFestivalDto> {
     const result = await this.prisma.festival.create({
       data: {
-        festivalName: createFestivalDto.festivalName,
-        image: createFestivalDto.image || '',
-
+        ...createFestivalDto, // ใช้ spread operator เพื่อใส่ข้อมูลจาก DTO ลงไปใน data
         // การใช้ .map แบบนี้รองรับทั้ง 1 รายการ และมากกว่า 1 รายการ
         wisher: {
           create:
@@ -290,7 +288,7 @@ async update(
   id: number,
   updateFestivalDto: UpdateFestivalDto,
 ): Promise<ResponseFestivalDto> {
-  const { festivalName, image, wisher, card } = updateFestivalDto;
+  const { festivalName, image, wisher, card, logo, webName } = updateFestivalDto;
 
   return await this.prisma.$transaction(async (tx) => {
     // 1. ตรวจสอบว่า Festival มีอยู่จริง
@@ -375,6 +373,8 @@ async update(
       data: {
         festivalName,
         image,
+        logo,
+        webName,
       },
       include: {
         wisher: { where: { deletedAt: null } },
@@ -383,72 +383,7 @@ async update(
     });
   });
 }
-  // async update(
-  //   id: number,
-  //   updateFestivalDto: UpdateFestivalDto,
-  // ): Promise<ResponseFestivalDto> {
-  //   const { festivalName, image, wisher, card } = updateFestivalDto;
 
-  //   return await this.prisma.$transaction(async (tx) => {
-  //     const existing = await tx.festival.findFirst({
-  //       where: { fId: Number(id), deletedAt: null },
-  //     });
-
-  //     if (!existing) {
-  //       throw new Error('Festival not found');
-  //     }
-
-  //     await tx.festival.update({
-  //       where: { fId: Number(id) },
-  //       data: {
-  //         festivalName,
-  //         image,
-  //       },
-  //     });
-
-  //     await tx.wisher.updateMany({
-  //       where: { festivalId: Number(id), deletedAt: null },
-  //       data: { deletedAt: new Date() },
-  //     });
-
-  //     if (wisher?.length) {
-  //       await tx.wisher.createMany({
-  //         data: wisher.map((w) => ({
-  //           wishWord: w.wishWord,
-  //           festivalId: Number(id),
-  //         })),
-  //       });
-  //     }
-
-  //     await tx.card.updateMany({
-  //       where: { festivalId: Number(id), deletedAt: null },
-  //       data: { deletedAt: new Date() },
-  //     });
-
-  //     if (card?.length) {
-  //       await tx.card.createMany({
-  //         data: card.map((c) => ({
-  //           imageCard: c.imageCard,
-  //           festivalId: Number(id),
-  //         })),
-  //       });
-  //     }
-
-  //     const result = await tx.festival.findUnique({
-  //       where: { fId: Number(id) },
-  //       include: {
-  //         wisher: { where: { deletedAt: null } },
-  //         card: { where: { deletedAt: null } },
-  //       },
-  //     });
-
-  //     if (!result) {
-  //       throw new Error('Festival not found after update');
-  //     }
-
-  //     return result;
-  //   });
-  // }
 
   async delete(id: number): Promise<ResponseFestivalDto> {
     const data = await this.prisma.festival.update({

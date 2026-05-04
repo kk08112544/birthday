@@ -448,14 +448,45 @@ const activeParticles = ref<Particle[]>([]);
 let particleId = 0;
 
 const PARTICLE_COLORS = [
-  '#e11d48', '#fbbf24', '#6366f1', '#22c55e', '#fb7185',
-  '#f59e0b', '#a78bfa', '#34d399', '#f472b6', '#38bdf8',
-  '#4ade80', '#facc15', '#ff6b6b', '#ffd93d', '#6bcb77', '#4d96ff',
+  '#e11d48',
+  '#fbbf24',
+  '#6366f1',
+  '#22c55e',
+  '#fb7185',
+  '#f59e0b',
+  '#a78bfa',
+  '#34d399',
+  '#f472b6',
+  '#38bdf8',
+  '#4ade80',
+  '#facc15',
+  '#ff6b6b',
+  '#ffd93d',
+  '#6bcb77',
+  '#4d96ff',
 ];
 
 const PARTICLE_EMOJIS = [
-  '🎉', '✨', '🎊', '⭐', '💫', '🌟', '🎈', '🌸', '🌺', '🌼',
-  '🎀', '💥', '🎆', '🎇', '🦋', '🍀', '❄️', '🎵', '💎', '🏵️',
+  '🎉',
+  '✨',
+  '🎊',
+  '⭐',
+  '💫',
+  '🌟',
+  '🎈',
+  '🌸',
+  '🌺',
+  '🌼',
+  '🎀',
+  '💥',
+  '🎆',
+  '🎇',
+  '🦋',
+  '🍀',
+  '❄️',
+  '🎵',
+  '💎',
+  '🏵️',
 ];
 
 const SHAPES: ShapeType[] = ['circle', 'square', 'star', 'triangle', 'emoji'];
@@ -488,15 +519,41 @@ const spawnParticles = (x: number, y: number) => {
     const zone = i % 8;
     let targetX: number, targetY: number;
     switch (zone) {
-      case 0: targetX = Math.random() * W * 0.35; targetY = Math.random() * H * 0.35; break;
-      case 1: targetX = W * 0.25 + Math.random() * W * 0.5; targetY = Math.random() * H * 0.25; break;
-      case 2: targetX = W * 0.65 + Math.random() * W * 0.35; targetY = Math.random() * H * 0.35; break;
-      case 3: targetX = W * 0.65 + Math.random() * W * 0.35; targetY = H * 0.25 + Math.random() * H * 0.5; break;
-      case 4: targetX = W * 0.65 + Math.random() * W * 0.35; targetY = H * 0.65 + Math.random() * H * 0.35; break;
-      case 5: targetX = W * 0.25 + Math.random() * W * 0.5; targetY = H * 0.75 + Math.random() * H * 0.25; break;
-      case 6: targetX = Math.random() * W * 0.35; targetY = H * 0.65 + Math.random() * H * 0.35; break;
-      case 7: targetX = Math.random() * W * 0.25; targetY = H * 0.25 + Math.random() * H * 0.5; break;
-      default: targetX = Math.random() * W; targetY = Math.random() * H;
+      case 0:
+        targetX = Math.random() * W * 0.35;
+        targetY = Math.random() * H * 0.35;
+        break;
+      case 1:
+        targetX = W * 0.25 + Math.random() * W * 0.5;
+        targetY = Math.random() * H * 0.25;
+        break;
+      case 2:
+        targetX = W * 0.65 + Math.random() * W * 0.35;
+        targetY = Math.random() * H * 0.35;
+        break;
+      case 3:
+        targetX = W * 0.65 + Math.random() * W * 0.35;
+        targetY = H * 0.25 + Math.random() * H * 0.5;
+        break;
+      case 4:
+        targetX = W * 0.65 + Math.random() * W * 0.35;
+        targetY = H * 0.65 + Math.random() * H * 0.35;
+        break;
+      case 5:
+        targetX = W * 0.25 + Math.random() * W * 0.5;
+        targetY = H * 0.75 + Math.random() * H * 0.25;
+        break;
+      case 6:
+        targetX = Math.random() * W * 0.35;
+        targetY = H * 0.65 + Math.random() * H * 0.35;
+        break;
+      case 7:
+        targetX = Math.random() * W * 0.25;
+        targetY = H * 0.25 + Math.random() * H * 0.5;
+        break;
+      default:
+        targetX = Math.random() * W;
+        targetY = Math.random() * H;
     }
 
     const style: Record<string, string> = {
@@ -513,9 +570,12 @@ const spawnParticles = (x: number, y: number) => {
     };
 
     activeParticles.value.push({ id, style });
-    setTimeout(() => {
-      activeParticles.value = activeParticles.value.filter((p) => p.id !== id);
-    }, dur * 1000 + 200);
+    setTimeout(
+      () => {
+        activeParticles.value = activeParticles.value.filter((p) => p.id !== id);
+      },
+      dur * 1000 + 200,
+    );
   }
 };
 
@@ -606,8 +666,13 @@ $radius: 18px;
 }
 
 @keyframes drift {
-  0%, 100% { transform: translateY(0) scale(1); }
-  50% { transform: translateY(-16px) scale(1.06); }
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-16px) scale(1.06);
+  }
 }
 
 .hero-inner {
@@ -665,7 +730,9 @@ $radius: 18px;
   font-family: 'Noto Sans Thai', sans-serif !important;
   font-weight: 600 !important;
   letter-spacing: 0 !important;
-  transition: background 0.2s, transform 0.15s !important;
+  transition:
+    background 0.2s,
+    transform 0.15s !important;
 
   &:hover {
     background: rgba(255, 255, 255, 0.26) !important;
@@ -765,7 +832,9 @@ $radius: 18px;
     0 3px 20px rgba(234, 88, 12, 0.08),
     0 1px 4px rgba(0, 0, 0, 0.04);
   border: 1px solid rgba(249, 115, 22, 0.1);
-  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s;
+  transition:
+    transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.22s;
   display: flex;
   flex-direction: column;
 
@@ -776,7 +845,9 @@ $radius: 18px;
       0 2px 8px rgba(0, 0, 0, 0.06);
   }
 
-  &--skeleton { pointer-events: none; }
+  &--skeleton {
+    pointer-events: none;
+  }
 }
 
 // ============================================================
@@ -787,7 +858,9 @@ $radius: 18px;
   background: linear-gradient(135deg, #fff7ed, #fef3c7);
 }
 
-.card-cover-img { display: block; }
+.card-cover-img {
+  display: block;
+}
 
 .card-cover-overlay {
   position: absolute;
@@ -803,7 +876,9 @@ $radius: 18px;
   justify-content: center;
   background: linear-gradient(135deg, #fff7ed, #fef3c7);
 
-  @media (max-width: 480px) { height: 110px; }
+  @media (max-width: 480px) {
+    height: 110px;
+  }
 }
 
 .card-index-badge {
@@ -846,7 +921,9 @@ $radius: 18px;
   margin-bottom: 4px;
   transition: color 0.15s;
 
-  &:hover { color: $orange; }
+  &:hover {
+    color: $orange;
+  }
 }
 
 .card-meta {
@@ -877,29 +954,46 @@ $radius: 18px;
   border: none;
   cursor: pointer;
   text-decoration: none;
-  transition: background 0.15s, color 0.15s;
+  transition:
+    background 0.15s,
+    color 0.15s;
 
   &--edit {
     background: transparent;
     color: $gold;
     border-right: 1px solid rgba(249, 115, 22, 0.08);
-    &:hover { background: #fffbeb; color: $orange; }
+    &:hover {
+      background: #fffbeb;
+      color: $orange;
+    }
   }
 
   &--delete {
     background: transparent;
     color: $red;
-    &:hover { background: $red-soft; }
+    &:hover {
+      background: $red-soft;
+    }
   }
 }
 
 // ============================================================
 // CARD TRANSITION
 // ============================================================
-.card-list-enter-active { transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
-.card-list-leave-active { transition: all 0.25s ease; }
-.card-list-enter-from { opacity: 0; transform: translateY(20px) scale(0.96); }
-.card-list-leave-to { opacity: 0; transform: scale(0.94); }
+.card-list-enter-active {
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.card-list-leave-active {
+  transition: all 0.25s ease;
+}
+.card-list-enter-from {
+  opacity: 0;
+  transform: translateY(20px) scale(0.96);
+}
+.card-list-leave-to {
+  opacity: 0;
+  transform: scale(0.94);
+}
 
 // ============================================================
 // PAGINATION
@@ -961,9 +1055,17 @@ $radius: 18px;
 }
 
 @keyframes pop {
-  0% { transform: scale(0.5); opacity: 0; }
-  80% { transform: scale(1.12); }
-  100% { transform: scale(1); opacity: 1; }
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  80% {
+    transform: scale(1.12);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 // ============================================================
@@ -989,7 +1091,9 @@ $radius: 18px;
   color: $text-main;
   border-bottom: 1px solid rgba(249, 115, 22, 0.08);
 
-  &--danger { background: linear-gradient(135deg, #fee2e2, #fff1f2); }
+  &--danger {
+    background: linear-gradient(135deg, #fee2e2, #fff1f2);
+  }
 }
 
 .dialog-header-icon {
@@ -1016,10 +1120,14 @@ $radius: 18px;
   justify-content: center;
   transition: background 0.15s;
 
-  &:hover { background: rgba(234, 88, 12, 0.14); }
+  &:hover {
+    background: rgba(234, 88, 12, 0.14);
+  }
 }
 
-.dialog-body { padding: 1.25rem; }
+.dialog-body {
+  padding: 1.25rem;
+}
 
 .delete-preview {
   border-radius: 14px;
@@ -1028,8 +1136,12 @@ $radius: 18px;
   border: 1px solid rgba(249, 115, 22, 0.1);
 }
 
-.delete-preview-img { overflow: hidden; }
-.delete-img { display: block; }
+.delete-preview-img {
+  overflow: hidden;
+}
+.delete-img {
+  display: block;
+}
 
 .delete-img-placeholder {
   height: 120px;
@@ -1077,22 +1189,34 @@ $radius: 18px;
   font-size: 0.88rem;
   font-weight: 600;
   cursor: pointer;
-  transition: transform 0.1s, box-shadow 0.15s, opacity 0.15s;
+  transition:
+    transform 0.1s,
+    box-shadow 0.15s,
+    opacity 0.15s;
 
-  &:active { transform: scale(0.96); }
-  &:disabled { opacity: 0.65; cursor: not-allowed; }
+  &:active {
+    transform: scale(0.96);
+  }
+  &:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+  }
 
   &--cancel {
     background: rgba(234, 88, 12, 0.07);
     color: $text-muted;
-    &:hover { background: rgba(234, 88, 12, 0.13); }
+    &:hover {
+      background: rgba(234, 88, 12, 0.13);
+    }
   }
 
   &--danger {
     background: linear-gradient(135deg, #ef4444, $red);
     color: white;
     box-shadow: 0 3px 12px rgba(220, 38, 38, 0.3);
-    &:hover { box-shadow: 0 5px 18px rgba(220, 38, 38, 0.4); }
+    &:hover {
+      box-shadow: 0 5px 18px rgba(220, 38, 38, 0.4);
+    }
   }
 }
 
@@ -1100,26 +1224,53 @@ $radius: 18px;
 // RESPONSIVE
 // ============================================================
 @media (max-width: 600px) {
-  .page-hero { padding: 1.5rem 1rem 3.5rem; }
-  .content-wrap { padding: 0 0.75rem 3rem; gap: 1rem; }
-  .hero-left { gap: 10px; }
-  .hero-icon-wrap { width: 46px; height: 46px; }
-  .top-bar { flex-direction: column; align-items: stretch; }
-  .pagination-wrap { flex-direction: column; }
+  .page-hero {
+    padding: 1.5rem 1rem 3.5rem;
+  }
+  .content-wrap {
+    padding: 0 0.75rem 3rem;
+    gap: 1rem;
+  }
+  .hero-left {
+    gap: 10px;
+  }
+  .hero-icon-wrap {
+    width: 46px;
+    height: 46px;
+  }
+  .top-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .pagination-wrap {
+    flex-direction: column;
+  }
 }
 
 // ============================================================
 // SHARED DIALOG ANIMATIONS
 // ============================================================
 @keyframes successPop {
-  0% { transform: scale(0.5); opacity: 0; }
-  80% { transform: scale(1.15); }
-  100% { transform: scale(1); opacity: 1; }
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  80% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 @keyframes progressShrink {
-  from { transform: scaleX(1); }
-  to { transform: scaleX(0); }
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
 }
 
 // ============================================================
@@ -1296,12 +1447,22 @@ $radius: 18px;
   animation: clickFall var(--dur) cubic-bezier(0.2, 0.9, 0.4, 1) forwards;
   border-radius: 50%;
 
-  &[style*='--shape: square'] { border-radius: 3px; }
+  &[style*='--shape: square'] {
+    border-radius: 3px;
+  }
   &[style*='--shape: star'] {
     border-radius: 0;
     clip-path: polygon(
-      50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%,
-      50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%
+      50% 0%,
+      61% 35%,
+      98% 35%,
+      68% 57%,
+      79% 91%,
+      50% 70%,
+      21% 91%,
+      32% 57%,
+      2% 35%,
+      39% 35%
     );
   }
   &[style*='--shape: triangle'] {

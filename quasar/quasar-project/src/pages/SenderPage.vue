@@ -238,75 +238,79 @@
       </div>
     </q-form>
     <!-- ===== LOADING DIALOG ===== -->
-<!-- ===== LOADING DIALOG ===== -->
-<q-dialog v-model="showLoading" persistent no-backdrop-dismiss>
-  <div class="loading-dialog">
-
-    <!-- Orb spinner -->
-    <div class="ld-orb-wrap">
-      <div class="ld-orb-bg" />
-      <div class="ld-orb-ring1" />
-      <div class="ld-orb-ring2" />
-      <div class="ld-orb-inner">🎴</div>
-    </div>
-
-    <!-- Title -->
-    <div class="ld-title">กำลังโหลดข้อมูล</div>
-
-    <!-- Big % number -->
-    <div class="ld-pct-row">
-      <span class="ld-pct-num">{{ loadingPercent }}</span>
-      <span class="ld-pct-sym">%</span>
-    </div>
-
-    <!-- Step label -->
-    <div class="ld-sub">{{ loadingSteps[loadingStep]?.label ?? 'กำลังเริ่มต้น...' }}</div>
-
-    <!-- Step checklist -->
-    <div class="ld-steps">
-      <div
-        v-for="(s, i) in loadingSteps" :key="i"
-        class="ld-step-row"
-        :class="{
-          'ld-step-row--done':    i < loadingStep,
-          'ld-step-row--active':  i === loadingStep,
-          'ld-step-row--pending': i > loadingStep,
-        }"
-      >
-        <div class="ld-step-ic"
-          :class="{
-            'ld-step-ic--done':    i < loadingStep,
-            'ld-step-ic--active':  i === loadingStep,
-            'ld-step-ic--pending': i > loadingStep,
-          }"
-        >
-          <span v-if="i < loadingStep">✓</span>
-          <span v-else-if="i === loadingStep" class="ld-step-spinner" />
-          <span v-else>·</span>
+    <!-- ===== LOADING DIALOG ===== -->
+    <q-dialog v-model="showLoading" persistent no-backdrop-dismiss>
+      <div class="loading-dialog">
+        <!-- Orb spinner -->
+        <div class="ld-orb-wrap">
+          <div class="ld-orb-bg" />
+          <div class="ld-orb-ring1" />
+          <div class="ld-orb-ring2" />
+          <div class="ld-orb-inner">🎴</div>
         </div>
-        <div class="ld-step-label">{{ s.label }}</div>
-        <div class="ld-step-pct"
-          :class="{ 'ld-step-pct--done': i < loadingStep, 'ld-step-pct--active': i === loadingStep }"
-        >
-          {{ i < loadingStep ? '✓' : i === loadingStep ? s.pct + '%' : '' }}
+
+        <!-- Title -->
+        <div class="ld-title">กำลังโหลดข้อมูล</div>
+
+        <!-- Big % number -->
+        <div class="ld-pct-row">
+          <span class="ld-pct-num">{{ loadingPercent }}</span>
+          <span class="ld-pct-sym">%</span>
+        </div>
+
+        <!-- Step label -->
+        <div class="ld-sub">{{ loadingSteps[loadingStep]?.label ?? 'กำลังเริ่มต้น...' }}</div>
+
+        <!-- Step checklist -->
+        <div class="ld-steps">
+          <div
+            v-for="(s, i) in loadingSteps"
+            :key="i"
+            class="ld-step-row"
+            :class="{
+              'ld-step-row--done': i < loadingStep,
+              'ld-step-row--active': i === loadingStep,
+              'ld-step-row--pending': i > loadingStep,
+            }"
+          >
+            <div
+              class="ld-step-ic"
+              :class="{
+                'ld-step-ic--done': i < loadingStep,
+                'ld-step-ic--active': i === loadingStep,
+                'ld-step-ic--pending': i > loadingStep,
+              }"
+            >
+              <span v-if="i < loadingStep">✓</span>
+              <span v-else-if="i === loadingStep" class="ld-step-spinner" />
+              <span v-else>·</span>
+            </div>
+            <div class="ld-step-label">{{ s.label }}</div>
+            <div
+              class="ld-step-pct"
+              :class="{
+                'ld-step-pct--done': i < loadingStep,
+                'ld-step-pct--active': i === loadingStep,
+              }"
+            >
+              {{ i < loadingStep ? '✓' : i === loadingStep ? s.pct + '%' : '' }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Progress bar -->
+        <div class="ld-bar-track">
+          <div class="ld-bar-fill" :style="{ width: loadingPercent + '%' }" />
+        </div>
+
+        <!-- Dot loader -->
+        <div class="ld-dots">
+          <span class="ld-dot" />
+          <span class="ld-dot" />
+          <span class="ld-dot" />
         </div>
       </div>
-    </div>
-
-    <!-- Progress bar -->
-    <div class="ld-bar-track">
-      <div class="ld-bar-fill" :style="{ width: loadingPercent + '%' }" />
-    </div>
-
-    <!-- Dot loader -->
-    <div class="ld-dots">
-      <span class="ld-dot" />
-      <span class="ld-dot" />
-      <span class="ld-dot" />
-    </div>
-
-  </div>
-</q-dialog>
+    </q-dialog>
     <!-- ===== UNPOLITE DIALOG ===== -->
     <q-dialog v-model="showErrorDialog">
       <div class="unpolite-dialog">
@@ -399,7 +403,7 @@
         </div>
       </div>
     </transition>
-<!-- ===== ERROR DIALOG ===== -->
+    <!-- ===== ERROR DIALOG ===== -->
 
     <!-- ===== CLICK PARTICLES ===== -->
     <teleport to="body">
@@ -413,7 +417,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { api } from 'src/boot/axios';
-import { useQuasar } from 'quasar';
+// import { useQuasar } from 'quasar';
 import type { QTable } from 'quasar';
 import type { AxiosError } from 'axios';
 import { useFestivalStore } from 'src/stores/festival';
@@ -425,12 +429,12 @@ const festivalStore = useFestivalStore();
 onMounted(async () => {
   if (props.id) {
     // เปลี่ยนจาก fetchFestivalData เป็น fetchFestivalName
-    await festivalStore.fetchFestivalName(Number(props.id)); 
+    await festivalStore.fetchFestivalName(Number(props.id));
   }
 });
 // const props = defineProps({ id: { type: String, required: true } });
 
-const $q = useQuasar();
+// const $q = useQuasar();
 const myTable = ref<InstanceType<typeof QTable> | null>(null);
 
 const wisherData = ref<{ label: string; value: number }[]>([]);
@@ -459,8 +463,6 @@ const successName = ref<string | null>(null);
 const successDept = ref<string | null>(null);
 const successWishText = ref<string | null>(null);
 
-
-
 // เพิ่มตรงกลุ่ม Error Dialog state
 const showErrorDialog = ref(false);
 const errorMessage = ref('');
@@ -482,6 +484,51 @@ const filterFn = (val: string, update: (cb: () => void) => void) => {
   });
 };
 
+// ===== Loading state =====
+// ===== Loading state =====
+const showLoading = ref(false);
+const loadingStep = ref(0);
+const loadingPercent = ref(0);
+
+const loadingSteps = [
+  { label: 'โหลดข้อมูลเทศกาล', pct: 20 },
+  { label: 'ดึงรายการคำอวยพร', pct: 45 },
+  { label: 'โหลดรูปการ์ดทั้งหมด', pct: 80 },
+  { label: 'เตรียมแบบฟอร์ม', pct: 100 },
+];
+
+let pctAnimTimer: ReturnType<typeof setInterval> | null = null;
+
+const animatePct = (target: number) => {
+  if (pctAnimTimer) clearInterval(pctAnimTimer);
+  const start = loadingPercent.value;
+  const dur = 800;
+  const t0 = Date.now();
+  pctAnimTimer = setInterval(() => {
+    const p = Math.min(1, (Date.now() - t0) / dur);
+    loadingPercent.value = Math.round(start + (target - start) * p);
+    if (p >= 1) {
+      clearInterval(pctAnimTimer!);
+      pctAnimTimer = null;
+    }
+  }, 16);
+};
+
+const startLoading = () => {
+  showLoading.value = true;
+  loadingStep.value = 0;
+  loadingPercent.value = 0;
+  animatePct(5);
+};
+
+const stopLoading = () => {
+  loadingStep.value = loadingSteps.length; // ทุก step = done
+  animatePct(100);
+  setTimeout(() => {
+    showLoading.value = false;
+  }, 1000);
+};
+
 const getImageUrl = async (imagePath: string): Promise<string> => {
   try {
     const response = await api(`/upload/${imagePath}`, { responseType: 'blob' });
@@ -491,130 +538,52 @@ const getImageUrl = async (imagePath: string): Promise<string> => {
   }
 };
 
-
-// ===== Loading state =====
-// ===== Loading state =====
-const showLoading = ref(false)
-const loadingStep = ref(0)
-const loadingPercent = ref(0)
-
-const loadingSteps = [
-  { label: 'โหลดข้อมูลเทศกาล',    pct: 20  },
-  { label: 'ดึงรายการคำอวยพร',     pct: 45  },
-  { label: 'โหลดรูปการ์ดทั้งหมด', pct: 80  },
-  { label: 'เตรียมแบบฟอร์ม',       pct: 100 },
-]
-
-let pctAnimTimer: ReturnType<typeof setInterval> | null = null
-
-const animatePct = (target: number) => {
-  if (pctAnimTimer) clearInterval(pctAnimTimer)
-  const start = loadingPercent.value
-  const dur = 500
-  const t0 = Date.now()
-  pctAnimTimer = setInterval(() => {
-    const p = Math.min(1, (Date.now() - t0) / dur)
-    loadingPercent.value = Math.round(start + (target - start) * p)
-    if (p >= 1) { clearInterval(pctAnimTimer!); pctAnimTimer = null }
-  }, 16)
-}
-
-const startLoading = () => {
-  showLoading.value = true
-  loadingStep.value = 0
-  loadingPercent.value = 0
-  animatePct(5)
-}
-
-const stopLoading = () => {
-  loadingStep.value = loadingSteps.length  // ทุก step = done
-  animatePct(100)
-  setTimeout(() => { showLoading.value = false }, 600)
-}
-
-
 const fetchBirthCard = async (targetId: string) => {
-  startLoading()
+  startLoading();
   try {
     // Step 0 → 20%
-    const response = await api.get<{ festival: FestivalResponse }>(`/festival/${Number(targetId)}`)
-    const fest = response.data?.festival
+    const response = await api.get<{ festival: FestivalResponse }>(`/festival/${Number(targetId)}`);
+    const fest = response.data?.festival;
 
     if (fest?.fId) {
       // Step 1 → 45%
-      loadingStep.value = 1
-      animatePct(loadingSteps[1]!.pct)
-      wisherData.value = (fest.wisher || []).map((i) => ({ label: i.wishWord, value: i.wId }))
-      options.value = wisherData.value
+      loadingStep.value = 1;
+      animatePct(loadingSteps[1]!.pct);
+      await new Promise((r) => setTimeout(r, 4000)); // 8 วิ
+      wisherData.value = (fest.wisher || []).map((i) => ({ label: i.wishWord, value: i.wId }));
+      options.value = wisherData.value;
 
       // Step 2 → 80% (อัปเดตตามรูปที่โหลดได้)
-      loadingStep.value = 2
-      const total = (fest.card || []).filter(c => c.imageCard).length
-      let loaded = 0
+      loadingStep.value = 2;
+      const total = (fest.card || []).filter((c) => c.imageCard).length;
+      let loaded = 0;
       const validCards = await Promise.all(
         (fest.card || []).map(async (c) => {
-          if (!c.imageCard) return null
-          const url = await getImageUrl(c.imageCard)
-          loaded++
-          animatePct(Math.round(45 + (loaded / Math.max(total, 1)) * 35))
-          return { cId: c.cId, url }
+          if (!c.imageCard) return null;
+          const url = await getImageUrl(c.imageCard);
+          loaded++;
+          animatePct(Math.round(45 + (loaded / Math.max(total, 1)) * 35));
+          return { cId: c.cId, url };
         }),
-      )
+      );
 
       // Step 3 → 100%
-      loadingStep.value = 3
-      animatePct(loadingSteps[3]!.pct)
-      rows.value = validCards.filter((c): c is CardRow => c !== null)
-      const first = rows.value?.[0]
+      loadingStep.value = 3;
+      animatePct(loadingSteps[3]!.pct);
+      rows.value = validCards.filter((c): c is CardRow => c !== null);
+      const first = rows.value?.[0];
       if (first) {
-        selectedCardId.value = first.cId
-        selectedImage.value = first.url
+        selectedCardId.value = first.cId;
+        selectedImage.value = first.url;
       }
     }
   } catch {
-    errorMessage.value = 'ไม่สามารถโหลดข้อมูลเทศกาลได้ กรุณาตรวจสอบการเชื่อมต่อและลองใหม่อีกครั้ง'
-    showErrorDialog.value = true
+    errorMessage.value = 'ไม่สามารถโหลดข้อมูลเทศกาลได้ กรุณาตรวจสอบการเชื่อมต่อและลองใหม่อีกครั้ง';
+    showErrorDialog.value = true;
   } finally {
-    stopLoading()
+    stopLoading();
   }
-}
-
-
-// const postSender = async () => {
-//   submitting.value = true;
-//   try {
-//     const response = await api.post('/sender', {
-//       fullname: name.value,
-//       position: position.value,
-//       department: department.value,
-//       wishId: selectedWisher.value,
-//       cardId: selectedCardId.value,
-//       festivalId: Number(props.id),
-//     });
-
-//     if (response.status === 201) {
-//       successImage.value = selectedImage.value;
-//       successName.value = name.value;
-//       successDept.value = department.value;
-//       const wishObj = wisherData.value.find((w) => w.value === selectedWisher.value);
-//       successWishText.value = wishObj?.label ?? null;
-//       showSuccess.value = true;
-//     }
-//   } catch (err: unknown) {
-//     const error = err as AxiosError<{ message: string }>;
-//     const msg = error.response?.data?.message || 'เกิดข้อผิดพลาด';
-
-//     // ถ้า backend ส่ง message เกี่ยวกับคำไม่สุภาพ → เปิด dialog
-//     if (error.response?.status === 400 && msg) {
-//       errorMessage.value = msg;
-//       showErrorDialog.value = true;
-//     } else {
-//       $q.notify({ color: 'negative', message: msg, position: 'top' });
-//     }
-//   } finally {
-//     submitting.value = false;
-//   }
-// };
+};
 
 const postSender = async () => {
   submitting.value = true;
@@ -688,7 +657,7 @@ watch(showSuccess, (val) => {
     // 2. สั่งปิด Dialog ตัวเองหลังจากผ่านไป 4 วินาที (เพื่อให้คนดูพลุทัน)
     setTimeout(() => {
       showSuccess.value = false;
-    }, 4000); 
+    }, 4000);
   }
 });
 
@@ -930,10 +899,8 @@ $white: #ffffff;
 $surface: #f5f4ff;
 $muted: #8b87b0;
 
-
-
 $indigo-deep: #1a1460;
-$indigo-mid:  #2d2d8a;
+$indigo-mid: #2d2d8a;
 
 .loading-dialog {
   background: #fff;
@@ -941,144 +908,255 @@ $indigo-mid:  #2d2d8a;
   padding: 2rem 1.75rem 1.75rem;
   width: min(340px, 92vw);
   text-align: center;
-  box-shadow: 0 24px 64px rgba(26,20,96,.22);
-  font-family: 'Noto Sans Thai','Prompt',sans-serif;
+  box-shadow: 0 24px 64px rgba(26, 20, 96, 0.22);
+  font-family: 'Noto Sans Thai', 'Prompt', sans-serif;
   outline: none;
 }
 
 /* ── Orb ── */
 .ld-orb-wrap {
-  position: relative; width: 90px; height: 90px;
+  position: relative;
+  width: 90px;
+  height: 90px;
   margin: 0 auto 1.25rem;
-  display: flex; align-items: center; justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .ld-orb-bg {
-  position: absolute; inset: 0; border-radius: 50%;
-  background: linear-gradient(135deg,#1a1460,#6b5ce7,#a78bfa);
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1a1460, #6b5ce7, #a78bfa);
   animation: ldOrbPulse 2s ease-in-out infinite;
 }
 .ld-orb-ring1 {
-  position: absolute; inset: -7px; border-radius: 50%;
+  position: absolute;
+  inset: -7px;
+  border-radius: 50%;
   border: 2.5px solid transparent;
-  border-top-color: #a78bfa; border-right-color: #6b5ce7;
+  border-top-color: #a78bfa;
+  border-right-color: #6b5ce7;
   animation: ldSpin 1.1s linear infinite;
 }
 .ld-orb-ring2 {
-  position: absolute; inset: -14px; border-radius: 50%;
+  position: absolute;
+  inset: -14px;
+  border-radius: 50%;
   border: 1.5px solid transparent;
-  border-bottom-color: rgba(167,139,250,.28);
+  border-bottom-color: rgba(167, 139, 250, 0.28);
   animation: ldSpin 2.2s linear infinite reverse;
 }
 .ld-orb-inner {
-  position: relative; z-index: 2;
-  width: 58px; height: 58px; border-radius: 50%; background: #fff;
-  display: flex; align-items: center; justify-content: center;
+  position: relative;
+  z-index: 2;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 22px;
 }
-@keyframes ldSpin     { to { transform: rotate(360deg); } }
+@keyframes ldSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
 @keyframes ldOrbPulse {
-  0%,100% { box-shadow: 0 0 0 0   rgba(107,92,231,.3); }
-  50%     { box-shadow: 0 0 0 12px rgba(107,92,231,0);  }
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(107, 92, 231, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 0 12px rgba(107, 92, 231, 0);
+  }
 }
 
 /* ── Text ── */
 .ld-title {
-  font-family: 'Prompt',sans-serif;
-  font-size: 1.05rem; font-weight: 700;
-  color: $indigo-deep; margin-bottom: .1rem;
+  font-family: 'Prompt', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: $indigo-deep;
+  margin-bottom: 0.1rem;
 }
 .ld-pct-row {
-  display: flex; align-items: baseline;
-  justify-content: center; gap: 3px; margin-bottom: .2rem;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 3px;
+  margin-bottom: 0.2rem;
 }
 .ld-pct-num {
-  font-family: 'Prompt',sans-serif;
-  font-size: 2.8rem; font-weight: 800;
-  color: $indigo-mid; line-height: 1;
-  transition: all .05s;
-  min-width: 3ch; text-align: right;
+  font-family: 'Prompt', sans-serif;
+  font-size: 2.8rem;
+  font-weight: 800;
+  color: $indigo-mid;
+  line-height: 1;
+  transition: all 0.05s;
+  min-width: 3ch;
+  text-align: right;
 }
 .ld-pct-sym {
-  font-size: 1.1rem; font-weight: 700; color: #6b5ce7;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #6b5ce7;
 }
 .ld-sub {
-  font-size: .76rem; color: #8b87b0;
-  min-height: 1rem; margin-bottom: 1rem;
-  transition: opacity .3s;
+  font-size: 0.76rem;
+  color: #8b87b0;
+  min-height: 1rem;
+  margin-bottom: 1rem;
+  transition: opacity 0.3s;
 }
 
 /* ── Step list ── */
 .ld-steps {
-  display: flex; flex-direction: column;
-  border: 1px solid rgba(45,45,138,.07);
-  border-radius: 14px; overflow: hidden;
-  margin-bottom: 1rem; text-align: left;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(45, 45, 138, 0.07);
+  border-radius: 14px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+  text-align: left;
 }
 .ld-step-row {
-  display: flex; align-items: center; gap: 9px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
   padding: 9px 13px;
-  border-bottom: 1px solid rgba(45,45,138,.06);
-  transition: background .35s;
-  &:last-child { border-bottom: none; }
-  &--done    { background: rgba(34,197,94,.05); }
-  &--active  { background: rgba(99,102,241,.07); }
-  &--pending { background: transparent; }
+  border-bottom: 1px solid rgba(45, 45, 138, 0.06);
+  transition: background 0.35s;
+  &:last-child {
+    border-bottom: none;
+  }
+  &--done {
+    background: rgba(34, 197, 94, 0.05);
+  }
+  &--active {
+    background: rgba(99, 102, 241, 0.07);
+  }
+  &--pending {
+    background: transparent;
+  }
 }
 .ld-step-ic {
-  width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 11px; font-weight: 700;
-  &--done    { background: #dcfce7; color: #16a34a; }
-  &--active  { background: $indigo-soft; animation: ldIcPulse 1s ease-in-out infinite; }
-  &--pending { background: #f3f4f6; color: #d1d5db; }
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  &--done {
+    background: #dcfce7;
+    color: #16a34a;
+  }
+  &--active {
+    background: $indigo-soft;
+    animation: ldIcPulse 1s ease-in-out infinite;
+  }
+  &--pending {
+    background: #f3f4f6;
+    color: #d1d5db;
+  }
 }
 @keyframes ldIcPulse {
-  0%,100% { box-shadow: 0 0 0 0   rgba(99,102,241,.3); }
-  50%     { box-shadow: 0 0 0 5px rgba(99,102,241,0);   }
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 0 5px rgba(99, 102, 241, 0);
+  }
 }
 .ld-step-spinner {
-  display: inline-block; width: 9px; height: 9px;
-  border-radius: 50%; border: 2px solid #6366f1;
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 2px solid #6366f1;
   border-top-color: transparent;
-  animation: ldSpin .7s linear infinite;
+  animation: ldSpin 0.7s linear infinite;
 }
 .ld-step-label {
-  flex: 1; font-size: .79rem; line-height: 1.35;
-  .ld-step-row--done    & { color: #374151; }
-  .ld-step-row--active  & { color: $indigo-deep; font-weight: 700; }
-  .ld-step-row--pending & { color: #9ca3af; }
+  flex: 1;
+  font-size: 0.79rem;
+  line-height: 1.35;
+  .ld-step-row--done & {
+    color: #374151;
+  }
+  .ld-step-row--active & {
+    color: $indigo-deep;
+    font-weight: 700;
+  }
+  .ld-step-row--pending & {
+    color: #9ca3af;
+  }
 }
 .ld-step-pct {
-  font-size: .7rem; font-weight: 700;
-  min-width: 28px; text-align: right;
-  &--done   { color: #16a34a; }
-  &--active { color: #6366f1; }
+  font-size: 0.7rem;
+  font-weight: 700;
+  min-width: 28px;
+  text-align: right;
+  &--done {
+    color: #16a34a;
+  }
+  &--active {
+    color: #6366f1;
+  }
 }
 
 /* ── Progress bar ── */
 .ld-bar-track {
-  height: 6px; border-radius: 3px;
-  background: rgba(45,45,138,.08);
-  overflow: hidden; margin-bottom: .85rem;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(45, 45, 138, 0.08);
+  overflow: hidden;
+  margin-bottom: 0.85rem;
 }
 .ld-bar-fill {
-  height: 100%; border-radius: 3px;
-  background: linear-gradient(90deg,$indigo-mid,#a78bfa);
-  transition: width .55s cubic-bezier(.4,0,.2,1);
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, $indigo-mid, #a78bfa);
+  transition: width 0.55s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* ── Dot loader ── */
-.ld-dots { display: flex; gap: 6px; justify-content: center; }
+.ld-dots {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+}
 .ld-dot {
-  width: 7px; height: 7px; border-radius: 50%;
-  background: $indigo-mid; display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: $indigo-mid;
+  display: inline-block;
   animation: ldDotB 1.2s ease-in-out infinite;
-  &:nth-child(2) { animation-delay: .2s; }
-  &:nth-child(3) { animation-delay: .4s; }
+  &:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+  &:nth-child(3) {
+    animation-delay: 0.4s;
+  }
 }
 @keyframes ldDotB {
-  0%,80%,100% { transform: scale(.7); opacity: .35; }
-  40%         { transform: scale(1.1); opacity: 1;   }
+  0%,
+  80%,
+  100% {
+    transform: scale(0.7);
+    opacity: 0.35;
+  }
+  40% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
 }
 
 // ============================================================

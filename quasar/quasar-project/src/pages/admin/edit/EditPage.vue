@@ -15,7 +15,6 @@
     <!-- ===== FORM ===== -->
     <div class="form-body">
       <div class="form-container">
-
         <!-- ===== CARD: COVER IMAGE & NAME ===== -->
         <div class="fest-card animate-in" style="animation-delay: 0.05s">
           <div class="card-label">
@@ -23,11 +22,12 @@
             ข้อมูลเทศกาล
           </div>
 
-          <div class="cover-upload-zone" @click="fileInput?.pickFiles()">
+          <div class="cover-upload-zone" ref="coverRef" @click="fileInput?.pickFiles()">
             <q-img
               v-if="imageFile || existingImageUrl"
               :src="imageFile ? getFilePreview(imageFile) : existingImageUrl"
               class="cover-img"
+              fit="contain"
               :ratio="16 / 9"
             >
               <div class="cover-overlay">
@@ -44,22 +44,64 @@
 
           <q-file v-model="imageFile" ref="fileInput" accept="image/*" class="hidden" />
 
-          <div class="q-mt-md">
+          <div ref="nameRef" class="q-mt-md field-group">
             <q-input
+              outlined
               v-model="festivalName"
               label="ชื่อเทศกาล"
               placeholder="เช่น วันสงกรานต์ 2568"
-              outlined
               dense
               autofocus
+              :error="nameError"
+              :error-message="nameError ? 'ชื่อเทศกาลจำเป็นต้องกรอก' : ''"
+              class="custom-input"
+               @update:model-value="nameError = false"
+            >
+              <template v-slot:prepend>
+                <q-icon name="festival" color="deep-orange-5" />
+              </template>
+            </q-input>
+          </div>
+          <!-- LOGO UPLOAD -->
+          <div class="q-mt-md">
+            <div class="logo-upload-zone"  ref="logoRef" @click="logoInput?.pickFiles()">
+              <q-img
+                v-if="logoFile"
+                :src="getFilePreview(logoFile)"
+                class="logo-preview"
+                fit="contain"
+                :ratio="16 / 9"
+              >
+                <div class="cover-overlay">
+                  <q-icon name="photo_camera" size="20px" color="white" />
+                  <span>เปลี่ยน Logo</span>
+                </div>
+              </q-img>
+              <div v-else class="logo-placeholder">
+                <div class="logo-placeholder-icon">🏷️</div>
+                <div class="cover-placeholder-text">คลิกเพื่ออัปโหลด Logo</div>
+                <div class="cover-placeholder-sub">PNG, JPG — แนะนำสี่เหลี่ยมจัตุรัส</div>
+              </div>
+            </div>
+            <q-file v-model="logoFile" ref="logoInput" accept="image/*" class="hidden" />
+          </div>
+          <div ref="webNameRef" class="q-mt-md field-group">
+            <q-input
+              v-model="webName"
+              label="ชื่อเว็บไซต์ (URL slug)"
+              placeholder="เช่น songkran-2568"
+              outlined
+              dense
               lazy-rules
               :rules="[
-                (val) => (typeof val === 'string' && val.trim().length > 0) || 'กรุณากรอกข้อมูล',
+                (val) =>
+                  (typeof val === 'string' && val.trim().length > 0) ||
+                  'ชื่อเว็บไซต์จำเป็นต้องกรอก',
               ]"
               class="custom-input"
             >
               <template v-slot:prepend>
-                <q-icon name="festival" color="deep-orange-5" />
+                <q-icon name="language" color="deep-orange-5" />
               </template>
             </q-input>
           </div>
@@ -88,7 +130,11 @@
           </div>
 
           <transition-group name="wish-list" tag="div" class="wish-list-wrapper">
-            <div v-for="(wish, i) in wishWordList" :key="(wish.wId ?? 'new') + '-' + i" class="wish-item">
+            <div
+              v-for="(wish, i) in wishWordList"
+              :key="(wish.wId ?? 'new') + '-' + i"
+              class="wish-item"
+            >
               <div class="wish-number">{{ i + 1 }}</div>
               <div class="wish-text">{{ wish.wishWord }}</div>
               <div class="wish-actions">
@@ -118,7 +164,9 @@
 
           <div class="card-header-row">
             <div class="card-header-info">
-              <span class="card-header-count">{{ existingCards.length + cardFileList.length }}</span>
+              <span class="card-header-count">{{
+                existingCards.length + cardFileList.length
+              }}</span>
               <span class="card-header-unit">รูป</span>
             </div>
             <q-btn
@@ -132,7 +180,11 @@
           </div>
 
           <div v-if="existingCards.length > 0 || cardFileList.length > 0" class="card-grid">
-            <div v-for="(card, i) in existingCards" :key="'existing-' + card.cId" class="card-thumb">
+            <div
+              v-for="(card, i) in existingCards"
+              :key="'existing-' + card.cId"
+              class="card-thumb"
+            >
               <q-img :src="card.previewUrl" ratio="1" fit="contain" class="card-thumb-img" />
               <button class="card-thumb-remove" type="button" @click="removeExistingCard(i)">
                 <q-icon name="close" size="14px" />
@@ -197,7 +249,11 @@
             />
           </div>
           <div class="custom-dialog-footer">
-            <button type="button" class="dialog-btn dialog-btn--cancel" @click="AddWishDialog = false">
+            <button
+              type="button"
+              class="dialog-btn dialog-btn--cancel"
+              @click="AddWishDialog = false"
+            >
               ยกเลิก
             </button>
             <button type="submit" class="dialog-btn dialog-btn--confirm">บันทึก</button>
@@ -227,7 +283,11 @@
             />
           </div>
           <div class="custom-dialog-footer">
-            <button type="button" class="dialog-btn dialog-btn--cancel" @click="EditWishDialog = false">
+            <button
+              type="button"
+              class="dialog-btn dialog-btn--cancel"
+              @click="EditWishDialog = false"
+            >
               ยกเลิก
             </button>
             <button type="submit" class="dialog-btn dialog-btn--confirm">อัปเดต</button>
@@ -305,7 +365,10 @@
           <div class="result-dialog-emoji">🎊</div>
           <p class="result-dialog-msg result-dialog-msg--success">{{ successMessage }}</p>
         </div>
-        <div :key="'s-' + successMessage" class="result-dialog-progress result-dialog-progress--success" />
+        <div
+          :key="'s-' + successMessage"
+          class="result-dialog-progress result-dialog-progress--success"
+        />
       </div>
     </q-dialog>
 
@@ -325,7 +388,10 @@
           <div class="result-dialog-emoji">⚠️</div>
           <p class="result-dialog-msg result-dialog-msg--error">{{ errorMessage }}</p>
         </div>
-        <div :key="'e-' + errorMessage" class="result-dialog-progress result-dialog-progress--error" />
+        <div
+          :key="'e-' + errorMessage"
+          class="result-dialog-progress result-dialog-progress--error"
+        />
       </div>
     </q-dialog>
 
@@ -346,7 +412,11 @@
           <p class="result-dialog-msg result-dialog-msg--warning">{{ validationMessage }}</p>
         </div>
         <div class="result-dialog-footer">
-          <button type="button" class="dialog-btn dialog-btn--confirm" @click="showValidationDialog = false">
+          <button
+            type="button"
+            class="dialog-btn dialog-btn--confirm"
+            @click="showValidationDialog = false"
+          >
             รับทราบ
           </button>
         </div>
@@ -367,10 +437,16 @@
         </div>
         <div class="result-dialog-body">
           <div class="result-dialog-emoji">🌐</div>
-          <p class="result-dialog-msg result-dialog-msg--error">ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้</p>
+          <p class="result-dialog-msg result-dialog-msg--error">
+            ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้
+          </p>
         </div>
         <div class="result-dialog-footer">
-          <button type="button" class="dialog-btn dialog-btn--confirm" @click="showFetchErrorDialog = false">
+          <button
+            type="button"
+            class="dialog-btn dialog-btn--confirm"
+            @click="showFetchErrorDialog = false"
+          >
             รับทราบ
           </button>
         </div>
@@ -387,7 +463,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, nextTick } from 'vue';
 import { useQuasar } from 'quasar';
 import { api } from 'src/boot/axios';
 import { useRouter, useRoute } from 'vue-router';
@@ -423,16 +499,34 @@ interface CardApi {
 interface FestivalData {
   festivalName: string;
   image: string;
+  logo: string;
+  webName: string;
   wisher?: WisherApi[];
   card?: CardApi[];
 }
 
 /* ===== STATE ===== */
+const festivalId = ref<string | null>(null);
 const festivalName = ref('');
 const imageFile = ref<File | null>(null);
+const logoFile = ref<File | null>(null);
+const logoInput = ref<InstanceType<typeof QFile> | null>(null);
+const webName = ref('');
 const existingImageUrl = ref<string>('');
 const existingImageName = ref<string>('');
 const loading = ref(false);
+
+// เพิ่ม template refs ที่ขาดหายไป
+const coverRef = ref<HTMLElement | null>(null);
+const nameRef = ref<HTMLElement | null>(null);
+const logoRef = ref<HTMLElement | null>(null);
+const webNameRef = ref<HTMLElement | null>(null);
+
+// ===== Error states =====
+const imageError = ref(false);
+const nameError = ref(false);
+const logoError = ref(false);
+const webNameError = ref(false);
 
 // Dialog: บันทึกสำเร็จ
 const showSuccessDialog = ref(false);
@@ -458,13 +552,15 @@ const openSuccessDialog = (msg: string) => {
 const openErrorDialog = (msg: string) => {
   errorMessage.value = msg;
   showErrorDialog.value = true;
-  setTimeout(() => { showErrorDialog.value = false; }, 2500);
+  setTimeout(() => {
+    showErrorDialog.value = false;
+  }, 2500);
 };
 
-const openValidationDialog = (msg: string) => {
-  validationMessage.value = msg;
-  showValidationDialog.value = true;
-};
+// const openValidationDialog = (msg: string) => {
+//   validationMessage.value = msg;
+//   showValidationDialog.value = true;
+// };
 
 /* ===== WISH DIALOG STATE ===== */
 const AddWishDialog = ref(false);
@@ -496,22 +592,34 @@ const getImageUrl = async (imagePath: string): Promise<string> => {
 /* ===== API: ดึงข้อมูล festival ===== */
 const fetchFestivalId = async (id: string) => {
   $q.loading.show();
+   festivalId.value = id; // ← เพิ่มบรรทัดนี้
   try {
     const response = await api.get(`/festival/${Number(id)}`);
     const data: FestivalData = response.data.festival;
 
     festivalName.value = data.festivalName;
+    webName.value = data.webName;
+    // logoFile.value = data.logo ? await getImageUrl(data.logo) : null;
 
     if (data.image) {
       existingImageName.value = data.image;
       existingImageUrl.value = await getImageUrl(data.image);
     }
 
+    if (data.logo) {
+      const logoUrl = await getImageUrl(data.logo);
+      logoFile.value = await fetch(logoUrl)
+        .then((res) => res.blob())
+        .then((blob) => new File([blob], data.logo, { type: blob.type }));
+    }
+
     wishWordList.value =
-      data.wisher?.map((w: WisherApi): WishItem => ({
-        wId: w.wId,
-        wishWord: w.wishWord,
-      })) ?? [];
+      data.wisher?.map(
+        (w: WisherApi): WishItem => ({
+          wId: w.wId,
+          wishWord: w.wishWord,
+        }),
+      ) ?? [];
 
     if (data.card && data.card.length > 0) {
       const cardPromises = data.card.map(async (c: CardApi) => {
@@ -560,9 +668,9 @@ const updateWish = () => {
   //   wishWord: tempWish.value.trim(),
   // };
   wishWordList.value[editingIndex.value] = {
-  ...(existing?.wId !== undefined ? { wId: existing.wId } : {}),
-  wishWord: tempWish.value.trim(),
-};
+    ...(existing?.wId !== undefined ? { wId: existing.wId } : {}),
+    wishWord: tempWish.value.trim(),
+  };
   tempWish.value = '';
   editingIndex.value = null;
   EditWishDialog.value = false;
@@ -585,7 +693,9 @@ const confirmDelete = () => {
 };
 
 /* ===== CARD ===== */
-const onAddCard = () => { showCardDialog.value = true; };
+const onAddCard = () => {
+  showCardDialog.value = true;
+};
 
 const addCardToList = () => {
   if (!tempCardFile.value) return;
@@ -594,8 +704,12 @@ const addCardToList = () => {
   showCardDialog.value = false;
 };
 
-const removeCard = (i: number) => { cardFileList.value.splice(i, 1); };
-const removeExistingCard = (i: number) => { existingCards.value.splice(i, 1); };
+const removeCard = (i: number) => {
+  cardFileList.value.splice(i, 1);
+};
+const removeExistingCard = (i: number) => {
+  existingCards.value.splice(i, 1);
+};
 
 /* ===== UTIL ===== */
 const objectUrlCache = new WeakMap<File, string>();
@@ -606,18 +720,51 @@ const getFilePreview = (file: File): string => {
   return url;
 };
 
+const validateAndScroll = async (): Promise<boolean> => {
+  // Reset all errors
+  imageError.value = false;
+  nameError.value = false;
+  logoError.value = false;
+  webNameError.value = false;
+
+  const isImageValid = !!imageFile.value || !!existingImageUrl.value;;
+  const isNameValid =
+    typeof festivalName.value === 'string' && festivalName.value.trim().length > 0;
+  const isLogoValid = !!logoFile.value;
+  const isWebNameValid = typeof webName.value === 'string' && webName.value.trim().length > 0;
+
+  if (!isImageValid) imageError.value = true;
+  if (!isNameValid) nameError.value = true;
+  if (!isLogoValid) logoError.value = true;
+  if (!isWebNameValid) webNameError.value = true;
+
+  const hasError = !isImageValid || !isNameValid || !isLogoValid || !isWebNameValid;
+
+  if (hasError) {
+    await nextTick();
+
+    // Scroll to the first field with an error (in DOM order)
+    const targets: Array<{ valid: boolean; el: HTMLElement | null }> = [
+      { valid: isImageValid, el: coverRef.value },
+      { valid: isNameValid, el: nameRef.value },
+      { valid: isLogoValid, el: logoRef.value },
+      { valid: isWebNameValid, el: webNameRef.value },
+    ];
+
+    const firstErrorEl = targets.find((t) => !t.valid)?.el;
+    if (firstErrorEl) {
+      firstErrorEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }
+
+  return !hasError;
+};
+
+
 /* ===== SUBMIT ===== */
 const submitEdit = async () => {
-  const accessToken = localStorage.getItem('accessToken');
-  const festivalId = localStorage.getItem('festivalId');
-
-  const isNameValid = typeof festivalName.value === 'string' && festivalName.value.trim().length > 0;
-  const isImageValid = !!imageFile.value || !!existingImageName.value;
-
-  if (!isNameValid || !isImageValid) {
-    openValidationDialog('กรุณากรอกชื่อเทศกาลและอัปโหลดรูปหน้าปก'); // เปลี่ยนจาก $q.notify
-    return;
-  }
+ const isValid = await validateAndScroll();
+  if (!isValid) return;
 
   loading.value = true;
   try {
@@ -628,6 +775,14 @@ const submitEdit = async () => {
       fd.append('singleFile', imageFile.value);
       const res = await api.post('/upload', fd);
       festivalImageName = res.data.image;
+    }
+
+    let festivalLogoName = '';
+    if (logoFile.value) {
+      const fd = new FormData();
+      fd.append('singleFile', logoFile.value);
+      const res = await api.post('/upload', fd);
+      festivalLogoName = res.data.image;
     }
 
     let newCardImageNames: string[] = [];
@@ -649,6 +804,8 @@ const submitEdit = async () => {
     const payload = {
       festivalName: festivalName.value,
       image: festivalImageName,
+      logo: festivalLogoName,
+      webName: webName.value,
       wisher: wishWordList.value.map((w) => ({
         ...(w.wId !== undefined ? { wId: w.wId } : {}),
         wishWord: w.wishWord,
@@ -657,21 +814,21 @@ const submitEdit = async () => {
     };
 
     let response;
-    if (festivalId) {
-      response = await api.patch(`/admin/festival/${festivalId}`, payload, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
+    if (festivalId.value) {
+      response = await api.patch(`/admin/festival/${festivalId.value}`, payload);
     } else {
-      response = await api.post('/admin/festival', payload, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
+      response = await api.post('/admin/festival', payload);
     }
 
     // เปลี่ยนจาก $q.notify → success dialog แล้ว redirect หลัง 2 วิ
     openSuccessDialog(response.data.message || 'บันทึกเทศกาลสำเร็จแล้ว');
-    setTimeout(async () => {
+    // setTimeout(async () => {
+    //   showSuccessDialog.value = false;
+    //   await router.push('/admin/festival');
+    // }, 2000);
+    setTimeout(() => {
       showSuccessDialog.value = false;
-      await router.push('/admin/festival');
+      void router.push('/admin/festival');
     }, 2000);
   } catch {
     openErrorDialog('เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง'); // เปลี่ยนจาก $q.notify
@@ -693,14 +850,45 @@ const activeParticles = ref<Particle[]>([]);
 let particleId = 0;
 
 const PARTICLE_COLORS = [
-  '#e11d48', '#fbbf24', '#6366f1', '#22c55e', '#fb7185',
-  '#f59e0b', '#a78bfa', '#34d399', '#f472b6', '#38bdf8',
-  '#4ade80', '#facc15', '#ff6b6b', '#ffd93d', '#6bcb77', '#4d96ff',
+  '#e11d48',
+  '#fbbf24',
+  '#6366f1',
+  '#22c55e',
+  '#fb7185',
+  '#f59e0b',
+  '#a78bfa',
+  '#34d399',
+  '#f472b6',
+  '#38bdf8',
+  '#4ade80',
+  '#facc15',
+  '#ff6b6b',
+  '#ffd93d',
+  '#6bcb77',
+  '#4d96ff',
 ];
 
 const PARTICLE_EMOJIS = [
-  '🎉', '✨', '🎊', '⭐', '💫', '🌟', '🎈', '🌸', '🌺', '🌼',
-  '🎀', '💥', '🎆', '🎇', '🦋', '🍀', '❄️', '🎵', '💎', '🏵️',
+  '🎉',
+  '✨',
+  '🎊',
+  '⭐',
+  '💫',
+  '🌟',
+  '🎈',
+  '🌸',
+  '🌺',
+  '🌼',
+  '🎀',
+  '💥',
+  '🎆',
+  '🎇',
+  '🦋',
+  '🍀',
+  '❄️',
+  '🎵',
+  '💎',
+  '🏵️',
 ];
 
 const SHAPES: ShapeType[] = ['circle', 'square', 'star', 'triangle', 'emoji'];
@@ -733,15 +921,41 @@ const spawnParticles = (x: number, y: number) => {
     const zone = i % 8;
     let targetX: number, targetY: number;
     switch (zone) {
-      case 0: targetX = Math.random() * W * 0.35; targetY = Math.random() * H * 0.35; break;
-      case 1: targetX = W * 0.25 + Math.random() * W * 0.5; targetY = Math.random() * H * 0.25; break;
-      case 2: targetX = W * 0.65 + Math.random() * W * 0.35; targetY = Math.random() * H * 0.35; break;
-      case 3: targetX = W * 0.65 + Math.random() * W * 0.35; targetY = H * 0.25 + Math.random() * H * 0.5; break;
-      case 4: targetX = W * 0.65 + Math.random() * W * 0.35; targetY = H * 0.65 + Math.random() * H * 0.35; break;
-      case 5: targetX = W * 0.25 + Math.random() * W * 0.5; targetY = H * 0.75 + Math.random() * H * 0.25; break;
-      case 6: targetX = Math.random() * W * 0.35; targetY = H * 0.65 + Math.random() * H * 0.35; break;
-      case 7: targetX = Math.random() * W * 0.25; targetY = H * 0.25 + Math.random() * H * 0.5; break;
-      default: targetX = Math.random() * W; targetY = Math.random() * H;
+      case 0:
+        targetX = Math.random() * W * 0.35;
+        targetY = Math.random() * H * 0.35;
+        break;
+      case 1:
+        targetX = W * 0.25 + Math.random() * W * 0.5;
+        targetY = Math.random() * H * 0.25;
+        break;
+      case 2:
+        targetX = W * 0.65 + Math.random() * W * 0.35;
+        targetY = Math.random() * H * 0.35;
+        break;
+      case 3:
+        targetX = W * 0.65 + Math.random() * W * 0.35;
+        targetY = H * 0.25 + Math.random() * H * 0.5;
+        break;
+      case 4:
+        targetX = W * 0.65 + Math.random() * W * 0.35;
+        targetY = H * 0.65 + Math.random() * H * 0.35;
+        break;
+      case 5:
+        targetX = W * 0.25 + Math.random() * W * 0.5;
+        targetY = H * 0.75 + Math.random() * H * 0.25;
+        break;
+      case 6:
+        targetX = Math.random() * W * 0.35;
+        targetY = H * 0.65 + Math.random() * H * 0.35;
+        break;
+      case 7:
+        targetX = Math.random() * W * 0.25;
+        targetY = H * 0.25 + Math.random() * H * 0.5;
+        break;
+      default:
+        targetX = Math.random() * W;
+        targetY = Math.random() * H;
     }
 
     const style: Record<string, string> = {
@@ -758,9 +972,12 @@ const spawnParticles = (x: number, y: number) => {
     };
 
     activeParticles.value.push({ id, style });
-    setTimeout(() => {
-      activeParticles.value = activeParticles.value.filter((p) => p.id !== id);
-    }, dur * 1000 + 200);
+    setTimeout(
+      () => {
+        activeParticles.value = activeParticles.value.filter((p) => p.id !== id);
+      },
+      dur * 1000 + 200,
+    );
   }
 };
 
@@ -815,103 +1032,526 @@ $radius-btn: 12px;
   text-align: center;
 }
 
-.hero-orb { position: absolute; border-radius: 50%; opacity: 0.15; }
-.hero-orb-1 { width: 280px; height: 280px; background: $gold; top: -80px; right: -60px; animation: float 6s ease-in-out infinite; }
-.hero-orb-2 { width: 180px; height: 180px; background: $teal; bottom: -40px; left: -40px; animation: float 8s ease-in-out infinite reverse; }
-.hero-orb-3 { width: 120px; height: 120px; background: $gold-light; top: 20px; left: 30%; animation: float 5s ease-in-out infinite 1s; }
+.hero-orb {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.15;
+}
+.hero-orb-1 {
+  width: 280px;
+  height: 280px;
+  background: $gold;
+  top: -80px;
+  right: -60px;
+  animation: float 6s ease-in-out infinite;
+}
+.hero-orb-2 {
+  width: 180px;
+  height: 180px;
+  background: $teal;
+  bottom: -40px;
+  left: -40px;
+  animation: float 8s ease-in-out infinite reverse;
+}
+.hero-orb-3 {
+  width: 120px;
+  height: 120px;
+  background: $gold-light;
+  top: 20px;
+  left: 30%;
+  animation: float 5s ease-in-out infinite 1s;
+}
 
 @keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-16px); }
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-16px);
+  }
 }
 
-.hero-content { position: relative; z-index: 2; }
+.hero-content {
+  position: relative;
+  z-index: 2;
+}
 
-.hero-icon { font-size: 3.5rem; line-height: 1; margin-bottom: 0.75rem; animation: pop 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both; }
+.hero-icon {
+  font-size: 3.5rem;
+  line-height: 1;
+  margin-bottom: 0.75rem;
+  animation: pop 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
 
 @keyframes pop {
-  0% { transform: scale(0.5); opacity: 0; }
-  80% { transform: scale(1.1); }
-  100% { transform: scale(1); opacity: 1; }
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  80% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
-.hero-title { font-family: 'Prompt', sans-serif; font-size: clamp(1.6rem, 5vw, 2.4rem); font-weight: 700; color: #fff; margin: 0 0 0.4rem; letter-spacing: -0.02em; }
-.hero-sub { font-size: clamp(0.85rem, 3vw, 1rem); color: rgba(255, 255, 255, 0.7); margin: 0; }
+.hero-title {
+  font-family: 'Prompt', sans-serif;
+  font-size: clamp(1.6rem, 5vw, 2.4rem);
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 0.4rem;
+  letter-spacing: -0.02em;
+}
+.hero-sub {
+  font-size: clamp(0.85rem, 3vw, 1rem);
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+}
 
 /* ===== FORM BODY ===== */
-.form-body { margin-top: -2rem; }
-.form-container { max-width: 620px; margin: 0 auto; padding: 0 1rem 1rem; display: flex; flex-direction: column; gap: 1.25rem; }
+.form-body {
+  margin-top: -2rem;
+}
+.form-container {
+  max-width: 620px;
+  margin: 0 auto;
+  padding: 0 1rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
 
 /* ===== CARDS ===== */
 .fest-card {
   background: $surface;
   border-radius: $radius-card;
   padding: 1.5rem;
-  box-shadow: 0 4px 24px rgba(26, 20, 96, 0.08), 0 1px 4px rgba(26, 20, 96, 0.05);
+  box-shadow:
+    0 4px 24px rgba(26, 20, 96, 0.08),
+    0 1px 4px rgba(26, 20, 96, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.8);
 }
 
-.card-label { display: flex; align-items: center; gap: 8px; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.08em; color: $text-muted; text-transform: uppercase; margin-bottom: 1.25rem; }
-.label-dot { width: 8px; height: 8px; border-radius: 50%; background: $indigo-mid; flex-shrink: 0; &--amber { background: $gold; } &--teal { background: $teal; } }
+.card-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: $text-muted;
+  text-transform: uppercase;
+  margin-bottom: 1.25rem;
+}
+.label-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: $indigo-mid;
+  flex-shrink: 0;
+  &--amber {
+    background: $gold;
+  }
+  &--teal {
+    background: $teal;
+  }
+}
 
 /* ===== COVER UPLOAD ===== */
-.cover-upload-zone { border-radius: 14px; overflow: hidden; cursor: pointer; border: 2px dashed rgba(45, 45, 138, 0.25); transition: border-color 0.2s, transform 0.2s; background: $surface-2; &:hover { border-color: $indigo-mid; transform: translateY(-2px); } }
-.cover-img { border-radius: 12px; }
-.cover-overlay { position: absolute; inset: 0; background: rgba(26, 20, 96, 0.5); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; opacity: 0; transition: opacity 0.2s; color: white; font-size: 0.85rem; font-weight: 500; .cover-upload-zone:hover & { opacity: 1; } }
-.cover-placeholder { padding: 2.5rem 1rem; display: flex; flex-direction: column; align-items: center; gap: 6px; }
-.cover-placeholder-icon { font-size: 2.5rem; }
-.cover-placeholder-text { font-size: 0.95rem; font-weight: 600; color: $text-main; }
-.cover-placeholder-sub { font-size: 0.78rem; color: $text-muted; }
+.cover-upload-zone {
+  border-radius: 14px;
+  overflow: hidden;
+  cursor: pointer;
+  border: 2px dashed rgba(45, 45, 138, 0.25);
+  transition:
+    border-color 0.2s,
+    transform 0.2s;
+  background: $surface-2;
+  &:hover {
+    border-color: $indigo-mid;
+    transform: translateY(-2px);
+  }
+}
+.cover-img {
+  border-radius: 12px;
+}
+.cover-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(26, 20, 96, 0.5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  opacity: 0;
+  transition: opacity 0.2s;
+  color: white;
+  font-size: 0.85rem;
+  font-weight: 500;
+  .cover-upload-zone:hover & {
+    opacity: 1;
+  }
+}
+.cover-placeholder {
+  padding: 2.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.cover-placeholder-icon {
+  font-size: 2.5rem;
+}
+.cover-placeholder-text {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: $text-main;
+}
+.cover-placeholder-sub {
+  font-size: 0.78rem;
+  color: $text-muted;
+}
 
 /* ===== INPUT ===== */
-.custom-input :deep(.q-field__control) { border-radius: 12px !important; }
+.custom-input :deep(.q-field__control) {
+  border-radius: 12px !important;
+}
 
 /* ===== CARD HEADER ROW ===== */
-.card-header-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
-.card-header-info { display: flex; align-items: baseline; gap: 5px; }
-.card-header-count { font-family: 'Prompt', sans-serif; font-size: 2rem; font-weight: 700; color: $indigo-mid; line-height: 1; }
-.card-header-unit { font-size: 0.85rem; color: $text-muted; }
-.add-btn { border-radius: $radius-btn !important; font-weight: 600 !important; font-family: 'Noto Sans Thai', sans-serif !important; letter-spacing: 0 !important; }
+.card-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+.card-header-info {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+}
+.card-header-count {
+  font-family: 'Prompt', sans-serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: $indigo-mid;
+  line-height: 1;
+}
+.card-header-unit {
+  font-size: 0.85rem;
+  color: $text-muted;
+}
+.add-btn {
+  border-radius: $radius-btn !important;
+  font-weight: 600 !important;
+  font-family: 'Noto Sans Thai', sans-serif !important;
+  letter-spacing: 0 !important;
+}
 
 /* ===== WISH LIST ===== */
-.wish-list-wrapper { display: flex; flex-direction: column; gap: 8px; }
-.wish-item { display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: $surface-2; border-radius: 12px; border: 1px solid rgba(45, 45, 138, 0.08); transition: box-shadow 0.2s, transform 0.2s; &:hover { box-shadow: 0 4px 16px rgba(45, 45, 138, 0.1); transform: translateX(2px); } }
-.wish-number { width: 26px; height: 26px; border-radius: 50%; background: linear-gradient(135deg, $indigo-mid, #6b5ce7); color: white; font-size: 0.72rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.wish-text { flex: 1; font-size: 0.92rem; color: $text-main; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.wish-actions { display: flex; gap: 6px; flex-shrink: 0; }
-.wish-btn { width: 32px; height: 32px; border-radius: 8px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.15s, transform 0.1s; &:active { transform: scale(0.92); } &--edit { background: rgba(245, 166, 35, 0.1); color: #c47a00; &:hover { background: rgba(245, 166, 35, 0.2); } } &--delete { background: rgba(255, 107, 107, 0.1); color: $coral; &:hover { background: rgba(255, 107, 107, 0.2); } } }
+.wish-list-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.wish-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: $surface-2;
+  border-radius: 12px;
+  border: 1px solid rgba(45, 45, 138, 0.08);
+  transition:
+    box-shadow 0.2s,
+    transform 0.2s;
+  &:hover {
+    box-shadow: 0 4px 16px rgba(45, 45, 138, 0.1);
+    transform: translateX(2px);
+  }
+}
+.wish-number {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, $indigo-mid, #6b5ce7);
+  color: white;
+  font-size: 0.72rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.wish-text {
+  flex: 1;
+  font-size: 0.92rem;
+  color: $text-main;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.wish-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.wish-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background 0.15s,
+    transform 0.1s;
+  &:active {
+    transform: scale(0.92);
+  }
+  &--edit {
+    background: rgba(245, 166, 35, 0.1);
+    color: #c47a00;
+    &:hover {
+      background: rgba(245, 166, 35, 0.2);
+    }
+  }
+  &--delete {
+    background: rgba(255, 107, 107, 0.1);
+    color: $coral;
+    &:hover {
+      background: rgba(255, 107, 107, 0.2);
+    }
+  }
+}
 
-.wish-list-enter-active, .wish-list-leave-active { transition: all 0.3s cubic-bezier(0.36, 0.07, 0.19, 0.97); }
-.wish-list-enter-from { opacity: 0; transform: translateX(-16px); }
-.wish-list-leave-to { opacity: 0; transform: translateX(16px) scale(0.95); }
+.wish-list-enter-active,
+.wish-list-leave-active {
+  transition: all 0.3s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+.wish-list-enter-from {
+  opacity: 0;
+  transform: translateX(-16px);
+}
+.wish-list-leave-to {
+  opacity: 0;
+  transform: translateX(16px) scale(0.95);
+}
 
 /* ===== CARD GRID ===== */
-.card-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; @media (min-width: 480px) { grid-template-columns: repeat(4, 1fr); } }
-.card-thumb { position: relative; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); transition: transform 0.2s; &:hover { transform: scale(1.03); } }
-.card-thumb-img { display: block; border-radius: 12px; }
-.card-thumb-remove { position: absolute; top: 5px; right: 5px; width: 22px; height: 22px; border-radius: 50%; border: none; background: rgba(26, 20, 96, 0.75); color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.15s; &:hover { background: $coral; } }
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  @media (min-width: 480px) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+.card-thumb {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
+  &:hover {
+    transform: scale(1.03);
+  }
+}
+.card-thumb-img {
+  display: block;
+  border-radius: 12px;
+}
+.card-thumb-remove {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(26, 20, 96, 0.75);
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+  &:hover {
+    background: $coral;
+  }
+}
 
 /* ===== EMPTY STATE ===== */
-.empty-state { text-align: center; padding: 1.5rem 1rem; }
-.empty-state-icon { font-size: 2rem; margin-bottom: 6px; }
-.empty-state-text { font-size: 0.92rem; font-weight: 600; color: $text-main; margin-bottom: 4px; }
-.empty-state-sub { font-size: 0.78rem; color: $text-muted; }
+.empty-state {
+  text-align: center;
+  padding: 1.5rem 1rem;
+}
+.empty-state-icon {
+  font-size: 2rem;
+  margin-bottom: 6px;
+}
+.empty-state-text {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: $text-main;
+  margin-bottom: 4px;
+}
+.empty-state-sub {
+  font-size: 0.78rem;
+  color: $text-muted;
+}
 
 /* ===== SUBMIT BUTTON ===== */
-.submit-btn { width: 100%; padding: 1rem; border-radius: 16px; border: none; background: linear-gradient(135deg, $indigo-deep 0%, $indigo-mid 50%, #5a3ea0 100%); color: white; font-family: 'Noto Sans Thai', 'Prompt', sans-serif; font-size: 1.05rem; font-weight: 700; cursor: pointer; box-shadow: 0 6px 24px rgba(45, 45, 138, 0.35); transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s; letter-spacing: 0.01em; &:hover:not(.loading):not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 32px rgba(45, 45, 138, 0.4); } &:active:not(.loading) { transform: translateY(0); } &.loading, &:disabled { opacity: 0.75; cursor: not-allowed; } }
-.submit-btn-inner { display: flex; align-items: center; justify-content: center; gap: 8px; }
+.submit-btn {
+  width: 100%;
+  padding: 1rem;
+  border-radius: 16px;
+  border: none;
+  background: linear-gradient(135deg, $indigo-deep 0%, $indigo-mid 50%, #5a3ea0 100%);
+  color: white;
+  font-family: 'Noto Sans Thai', 'Prompt', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 6px 24px rgba(45, 45, 138, 0.35);
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s,
+    opacity 0.2s;
+  letter-spacing: 0.01em;
+  &:hover:not(.loading):not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 32px rgba(45, 45, 138, 0.4);
+  }
+  &:active:not(.loading) {
+    transform: translateY(0);
+  }
+  &.loading,
+  &:disabled {
+    opacity: 0.75;
+    cursor: not-allowed;
+  }
+}
+.submit-btn-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
 
 /* ===== WISH DIALOGS ===== */
-.custom-dialog { background: $surface; border-radius: 20px; overflow: hidden; min-width: 320px; max-width: 420px; width: 100%; box-shadow: 0 20px 60px rgba(26, 20, 96, 0.2); &--mobile { border-radius: 20px 20px 0 0; max-width: 100%; position: fixed; bottom: 0; left: 0; right: 0; } }
-.custom-dialog-header { display: flex; align-items: center; justify-content: space-between; padding: 1.1rem 1.25rem 0.9rem; font-family: 'Prompt', sans-serif; font-size: 1rem; font-weight: 600; color: $text-main; border-bottom: 1px solid rgba(45, 45, 138, 0.07); background: $surface-2; &--danger { background: #fff1f1; } }
-.dialog-close { width: 30px; height: 30px; border-radius: 8px; border: none; background: rgba(45, 45, 138, 0.07); color: $text-muted; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.15s; &:hover { background: rgba(45, 45, 138, 0.14); } }
-.custom-dialog-body { padding: 1.25rem; }
-.custom-dialog-footer { display: flex; justify-content: flex-end; gap: 10px; padding: 0.75rem 1.25rem 1.25rem; }
+.custom-dialog {
+  background: $surface;
+  border-radius: 20px;
+  overflow: hidden;
+  min-width: 320px;
+  max-width: 420px;
+  width: 100%;
+  box-shadow: 0 20px 60px rgba(26, 20, 96, 0.2);
+  &--mobile {
+    border-radius: 20px 20px 0 0;
+    max-width: 100%;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+  }
+}
+.custom-dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.1rem 1.25rem 0.9rem;
+  font-family: 'Prompt', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: $text-main;
+  border-bottom: 1px solid rgba(45, 45, 138, 0.07);
+  background: $surface-2;
+  &--danger {
+    background: #fff1f1;
+  }
+}
+.dialog-close {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: none;
+  background: rgba(45, 45, 138, 0.07);
+  color: $text-muted;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+  &:hover {
+    background: rgba(45, 45, 138, 0.14);
+  }
+}
+.custom-dialog-body {
+  padding: 1.25rem;
+}
+.custom-dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 0.75rem 1.25rem 1.25rem;
+}
 
-.dialog-btn { padding: 9px 22px; border-radius: 10px; border: none; font-family: 'Noto Sans Thai', sans-serif; font-size: 0.88rem; font-weight: 600; cursor: pointer; transition: transform 0.1s, background 0.15s; &:active { transform: scale(0.96); } &--cancel { background: rgba(45, 45, 138, 0.07); color: $text-muted; &:hover { background: rgba(45, 45, 138, 0.12); } } &--confirm { background: linear-gradient(135deg, $indigo-mid, #6b5ce7); color: white; box-shadow: 0 3px 12px rgba(45, 45, 138, 0.3); &:hover { box-shadow: 0 5px 16px rgba(45, 45, 138, 0.4); } } &--danger { background: linear-gradient(135deg, #e53935, #c62828); color: white; box-shadow: 0 3px 12px rgba(229, 57, 53, 0.3); } }
+.dialog-btn {
+  padding: 9px 22px;
+  border-radius: 10px;
+  border: none;
+  font-family: 'Noto Sans Thai', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    transform 0.1s,
+    background 0.15s;
+  &:active {
+    transform: scale(0.96);
+  }
+  &--cancel {
+    background: rgba(45, 45, 138, 0.07);
+    color: $text-muted;
+    &:hover {
+      background: rgba(45, 45, 138, 0.12);
+    }
+  }
+  &--confirm {
+    background: linear-gradient(135deg, $indigo-mid, #6b5ce7);
+    color: white;
+    box-shadow: 0 3px 12px rgba(45, 45, 138, 0.3);
+    &:hover {
+      box-shadow: 0 5px 16px rgba(45, 45, 138, 0.4);
+    }
+  }
+  &--danger {
+    background: linear-gradient(135deg, #e53935, #c62828);
+    color: white;
+    box-shadow: 0 3px 12px rgba(229, 57, 53, 0.3);
+  }
+}
 
-.delete-confirm-text { text-align: center; font-size: 0.92rem; color: $text-main; line-height: 1.8; margin: 0; }
-.delete-target { color: $coral; font-weight: 700; }
+.delete-confirm-text {
+  text-align: center;
+  font-size: 0.92rem;
+  color: $text-main;
+  line-height: 1.8;
+  margin: 0;
+}
+.delete-target {
+  color: $coral;
+  font-weight: 700;
+}
 
 /* ===== RESULT DIALOGS ===== */
 .result-dialog {
@@ -928,13 +1568,20 @@ $radius-btn: 12px;
   align-items: center;
   gap: 12px;
   padding: 1.25rem 1.5rem;
-  &--success { background: linear-gradient(135deg, $green-dark, $green); }
-  &--error { background: linear-gradient(135deg, #7f1d1d, #dc2626); }
-  &--warning { background: linear-gradient(135deg, $amber-dark, $amber); }
+  &--success {
+    background: linear-gradient(135deg, $green-dark, $green);
+  }
+  &--error {
+    background: linear-gradient(135deg, #7f1d1d, #dc2626);
+  }
+  &--warning {
+    background: linear-gradient(135deg, $amber-dark, $amber);
+  }
 }
 
 .result-dialog-icon {
-  width: 44px; height: 44px;
+  width: 44px;
+  height: 44px;
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.18);
   border: 1px solid rgba(255, 255, 255, 0.25);
@@ -944,69 +1591,203 @@ $radius-btn: 12px;
   flex-shrink: 0;
 }
 
-.result-dialog-title { font-family: 'Prompt', sans-serif; font-size: 1rem; font-weight: 700; color: #fff; line-height: 1.2; }
-.result-dialog-sub { font-size: 0.75rem; color: rgba(255, 255, 255, 0.72); margin-top: 2px; }
-
-.result-dialog-body { padding: 1.5rem 1.5rem 0.75rem; text-align: center; }
-
-.result-dialog-emoji { font-size: 3rem; margin-bottom: 0.75rem; display: block; animation: resultPop 0.45s cubic-bezier(0.36, 0.07, 0.19, 0.97) both; }
-
-@keyframes resultPop {
-  0% { transform: scale(0.5); opacity: 0; }
-  80% { transform: scale(1.15); }
-  100% { transform: scale(1); opacity: 1; }
+.result-dialog-title {
+  font-family: 'Prompt', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.2;
+}
+.result-dialog-sub {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.72);
+  margin-top: 2px;
 }
 
-.result-dialog-msg { font-size: 0.92rem; font-weight: 600; color: #374151; border-radius: 10px; padding: 10px 14px; margin: 0; line-height: 1.6; &--success { background: $green-soft; } &--error { background: #fef2f2; } &--warning { background: $amber-soft; } }
+.result-dialog-body {
+  padding: 1.5rem 1.5rem 0.75rem;
+  text-align: center;
+}
 
-.result-dialog-footer { display: flex; justify-content: flex-end; padding: 0.75rem 1.5rem 1.25rem; }
+.result-dialog-emoji {
+  font-size: 3rem;
+  margin-bottom: 0.75rem;
+  display: block;
+  animation: resultPop 0.45s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
 
-.result-dialog-progress { height: 4px; width: 100%; transform-origin: left; animation: progressShrink 2s linear forwards; &--success { background: linear-gradient(90deg, $green-dark, $green); } &--error { background: linear-gradient(90deg, #7f1d1d, #dc2626); animation-duration: 2.5s; } }
+@keyframes resultPop {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  80% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.result-dialog-msg {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #374151;
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin: 0;
+  line-height: 1.6;
+  &--success {
+    background: $green-soft;
+  }
+  &--error {
+    background: #fef2f2;
+  }
+  &--warning {
+    background: $amber-soft;
+  }
+}
+
+.result-dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0.75rem 1.5rem 1.25rem;
+}
+
+.result-dialog-progress {
+  height: 4px;
+  width: 100%;
+  transform-origin: left;
+  animation: progressShrink 2s linear forwards;
+  &--success {
+    background: linear-gradient(90deg, $green-dark, $green);
+  }
+  &--error {
+    background: linear-gradient(90deg, #7f1d1d, #dc2626);
+    animation-duration: 2.5s;
+  }
+}
 
 @keyframes progressShrink {
-  from { transform: scaleX(1); }
-  to { transform: scaleX(0); }
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
 }
 
 /* ===== ANIMATIONS ===== */
-.animate-in { animation: slideUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.animate-in {
+  animation: slideUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
 
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(24px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ===== RESPONSIVE ===== */
 @media (max-width: 599px) {
-  .fest-card { padding: 1.1rem; }
-  .hero-header { padding: 2.25rem 1rem 3.5rem; }
-  .form-container { padding: 0 0.75rem 1rem; gap: 1rem; }
-  .card-header-count { font-size: 1.6rem; }
-  .wish-text { max-width: 160px; }
+  .fest-card {
+    padding: 1.1rem;
+  }
+  .hero-header {
+    padding: 2.25rem 1rem 3.5rem;
+  }
+  .form-container {
+    padding: 0 0.75rem 1rem;
+    gap: 1rem;
+  }
+  .card-header-count {
+    font-size: 1.6rem;
+  }
+  .wish-text {
+    max-width: 160px;
+  }
 }
 
 /* ===== CLICK PARTICLES ===== */
-.click-particles-root { position: fixed; inset: 0; pointer-events: none; z-index: 99999; }
+.click-particles-root {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 99999;
+}
 
 .click-particle {
   position: fixed;
-  left: var(--x); top: var(--y);
-  width: var(--size); height: var(--size);
+  left: var(--x);
+  top: var(--y);
+  width: var(--size);
+  height: var(--size);
   background: var(--color);
   pointer-events: none;
   will-change: transform, opacity;
   animation: clickFall var(--dur) cubic-bezier(0.2, 0.9, 0.4, 1) forwards;
   border-radius: 50%;
 
-  &[style*='--shape: square'] { border-radius: 3px; }
-  &[style*='--shape: star'] { border-radius: 0; clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%); }
-  &[style*='--shape: triangle'] { background: transparent !important; border-left: calc(var(--size) * 0.5) solid transparent; border-right: calc(var(--size) * 0.5) solid transparent; border-bottom: var(--size) solid var(--color); border-radius: 0; width: 0 !important; height: 0 !important; }
-  &[style*='--shape: emoji'] { background: transparent; border-radius: 0; display: flex; align-items: center; justify-content: center; &::after { content: var(--emoji-content); font-size: var(--size); line-height: 1; } }
+  &[style*='--shape: square'] {
+    border-radius: 3px;
+  }
+  &[style*='--shape: star'] {
+    border-radius: 0;
+    clip-path: polygon(
+      50% 0%,
+      61% 35%,
+      98% 35%,
+      68% 57%,
+      79% 91%,
+      50% 70%,
+      21% 91%,
+      32% 57%,
+      2% 35%,
+      39% 35%
+    );
+  }
+  &[style*='--shape: triangle'] {
+    background: transparent !important;
+    border-left: calc(var(--size) * 0.5) solid transparent;
+    border-right: calc(var(--size) * 0.5) solid transparent;
+    border-bottom: var(--size) solid var(--color);
+    border-radius: 0;
+    width: 0 !important;
+    height: 0 !important;
+  }
+  &[style*='--shape: emoji'] {
+    background: transparent;
+    border-radius: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    &::after {
+      content: var(--emoji-content);
+      font-size: var(--size);
+      line-height: 1;
+    }
+  }
 }
 
 @keyframes clickFall {
-  0% { opacity: 1; transform: translate(-50%, -50%) translate(0px, 0px) rotate(0deg) scale(1); }
-  12% { opacity: 1; transform: translate(-50%, -50%) translate(calc(var(--dx) * 0.15), calc(var(--dy) * 0.15)) rotate(calc(var(--rot) * 0.1)) scale(1.2); }
-  100% { opacity: 0; transform: translate(-50%, -50%) translate(var(--dx), var(--dy)) rotate(var(--rot)) scale(0.1); }
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) translate(0px, 0px) rotate(0deg) scale(1);
+  }
+  12% {
+    opacity: 1;
+    transform: translate(-50%, -50%) translate(calc(var(--dx) * 0.15), calc(var(--dy) * 0.15))
+      rotate(calc(var(--rot) * 0.1)) scale(1.2);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) translate(var(--dx), var(--dy)) rotate(var(--rot)) scale(0.1);
+  }
 }
 </style>

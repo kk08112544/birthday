@@ -16,6 +16,14 @@ export class CreateFestivalDto {
   @IsString()
   image!: string;
 
+  @IsNotEmpty()
+  @IsString()
+  logo!: string;
+  
+  @IsNotEmpty()
+  @IsString()
+  webName!: string;
+
   @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })

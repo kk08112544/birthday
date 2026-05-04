@@ -11,7 +11,7 @@
         <!-- <q-toolbar-title class="festival-title">
           <span class="festival-title-text">{{ festivalName || 'เทศกาลอวยพร' }}</span>
         </q-toolbar-title> -->
-        <q-toolbar-title class="festival-title">
+        <q-toolbar-title class="login-title">
           ระบบบริหารจัดการอวยพรเนื่องในโอกาสต่างๆ ของกรมฯ
         </q-toolbar-title>
 
@@ -32,8 +32,14 @@
       <div class="banner-top-deco" />
 
       <div class="banner-wrap">
-        <q-img
+        <!-- <q-img
           :src="image"
+          class="banner-img"
+          fit="contain"
+          :ratio="$q.screen.xs ? 4 / 3 : $q.screen.sm ? 16 / 9 : 21 / 9"
+        > -->
+          <q-img
+          src="/ldd_banner.jpg"
           class="banner-img"
           fit="contain"
           :ratio="$q.screen.xs ? 4 / 3 : $q.screen.sm ? 16 / 9 : 21 / 9"
@@ -57,10 +63,12 @@
           <div class="banner-overlay" />
 
           <!-- Festival name on image -->
-          <div class="banner-caption" v-if="festivalName">
-            <div class="banner-caption-tag">🎊 เทศกาล</div>
-            <div class="banner-caption-name">{{ festivalName }}</div>
-          </div>
+          <!-- <div class="banner-caption" v-if="festivalName">
+            <div class="banner-caption-tag">🎊 กรมพัฒนาที่ดิน</div>
+             <div class="banner-caption-name">“เป็นองค์การอัจฉริยะทางดิน เพื่อขับเคลื่อนการใช้ที่ดินอย่างเหมาะสม”</div>
+          
+          </div> -->
+            <!-- <div class="banner-caption-name">{{ festivalName }}</div> -->
         </q-img>
 
         <!-- Shimmer bar under banner -->
@@ -187,7 +195,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { useQuasar } from 'quasar';
 import { api } from 'src/boot/axios';
 import { useRoute } from 'vue-router';
@@ -255,6 +263,9 @@ watch(
   },
   { immediate: true },
 );
+onMounted(() => {
+  document.title = 'ระบบบริหารจัดการอวยพรเนื่องในโอกาสต่างๆ ของกรมฯ';
+});
 </script>
 
 <style lang="scss" scoped>
@@ -316,7 +327,7 @@ $nav-h: 52px;
 // .festival-title {
 //   overflow: hidden;
 // }
-.festival-title {
+.login-title {
   font-family: 'Sarabun', 'Noto Sans Thai', sans-serif;
   font-size: clamp(12px, 3vw, 17px);
   font-weight: 600;
@@ -466,42 +477,65 @@ $nav-h: 52px;
   pointer-events: none;
 }
 
-.banner-caption {
-  position: absolute;
-  bottom: 1.5rem;
-  left: 2rem;
-  animation: slideUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) both 0.2s;
+// .banner-caption {
+//   position: absolute;
+//   bottom: 1.5rem;
+//   right: 2rem;
+//   left:auto;
 
-  @media (max-width: 480px) {
-    bottom: 1rem;
-    left: 1rem;
-  }
-}
+//     max-width: 480px;     // 👈 จำกัดความกว้าง ไม่ให้ยาวกินซ้าย
+//   width: auto;
 
-.banner-caption-tag {
-  display: inline-flex;
-  align-items: center;
-  background: rgba(255, 255, 255, 0.18);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  border-radius: 20px;
-  padding: 3px 12px;
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.92);
-  letter-spacing: 0.05em;
-  margin-bottom: 6px;
-}
+//   text-align: right;    // 👈 ข้อความชิดขวา
 
-.banner-caption-name {
-  font-family: 'Prompt', sans-serif;
-  font-size: clamp(1.1rem, 5vw, 2.2rem);
-  font-weight: 700;
-  color: #fff;
-  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.3);
-  line-height: 1.2;
-  max-width: 600px;
-}
+//   display: flex;
+//   flex-direction: column;
+//   align-items: flex-end; // 👈 ดันทุก element ไปขวา
+//   animation: slideUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) both 0.2s;
+
+//   @media (max-width: 480px) {
+//     // bottom: 1rem;
+//     // left: 1rem;
+//      right: 1rem;
+//     bottom: 1rem;
+//     max-width: 90%;
+//   }
+// }
+
+// .banner-caption-tag {
+//   display: inline-flex;
+//   align-items: center;
+//   background: rgba(255, 255, 255, 0.18);
+//   backdrop-filter: blur(8px);
+//   border: 1px solid rgba(255, 255, 255, 0.25);
+//   border-radius: 20px;
+//   padding: 3px 12px;
+//   font-size: 0.72rem;
+//   font-weight: 600;
+//   color: rgba(255, 255, 255, 0.92);
+//   letter-spacing: 0.05em;
+//   margin-bottom: 6px;
+// }
+
+// .banner-caption-name {
+//   font-family: 'Prompt', sans-serif;
+//   font-size: clamp(1.1rem, 5vw, 2.2rem);
+//   font-weight: 700;
+//   color: #fff;
+//   text-shadow: 0 2px 16px rgba(0, 0, 0, 0.3);
+//   line-height: 1.2;
+//   max-width: 600px;
+//   text-align: right;
+//   margin-left: auto;  
+// }
+// // .banner-caption-name {
+// //   text-align: right;
+// //   margin-left: auto;   // 👈 กันล้นซ้าย
+// // }
+
+// .banner-caption {
+//   width: fit-content;   // 👈 ให้ขนาดพอดีข้อความ
+// }
 
 .banner-shimmer-bar {
   height: 4px;

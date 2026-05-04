@@ -3,6 +3,8 @@ import { UpdateWisherDto } from "./update-wisher.dto";
 export class UpdateFestivalDto {
   festivalName?: string;
   image?: string;
+  logo?: string;
+  webName?: string;
   wisher?: UpdateWisherDto[];
   card?: UpdateCardDto[];
 }
