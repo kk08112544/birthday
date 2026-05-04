@@ -1,8 +1,8 @@
-import { CreateCardDto } from '../../card/dto/create-card.dto';
-import { CreateWisherDto } from '../../wisher/dto/create-wisher.dto';
+import { UpdateCardDto } from "./update-card.dto";
+import { UpdateWisherDto } from "./update-wisher.dto";
 export class UpdateFestivalDto {
   festivalName?: string;
   image?: string;
-  wisher?: CreateWisherDto[];
-  card?: CreateCardDto[];
+  wisher?: UpdateWisherDto[];
+  card?: UpdateCardDto[];
 }

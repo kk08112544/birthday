@@ -38,13 +38,13 @@ export class AdminFestivalService {
   async findMany(dto: PaginationFestivalDto) {
     const { page, limit, search } = dto;
 
-    const result = await this.adminFestivalRepositories.findManyPaginated({
+    const data = await this.adminFestivalRepositories.findManyPaginated({
       page,
       limit,
       search,
     });
     return {
-      festival: result,
+      festival: data,
       action: STATUS.SUCCESS,
       message: MESSAGE.FESTIVAL.GET_SUCCESS, // ใช้ตัวแปร MESSAGE
     };

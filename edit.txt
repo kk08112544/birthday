@@ -23,6 +23,7 @@
             ข้อมูลเทศกาล
           </div>
 
+          <!-- 🔧 FIX 1: แสดง existingImageUrl เมื่อยังไม่ได้เลือกรูปใหม่ -->
           <div class="cover-upload-zone" @click="fileInput?.pickFiles()">
             <q-img
               v-if="imageFile || existingImageUrl"
@@ -118,6 +119,7 @@
 
           <div class="card-header-row">
             <div class="card-header-info">
+              <!-- 🔧 FIX 2: นับรวมการ์ดเดิม + การ์ดใหม่ -->
               <span class="card-header-count">{{ existingCards.length + cardFileList.length }}</span>
               <span class="card-header-unit">รูป</span>
             </div>
@@ -131,14 +133,25 @@
             />
           </div>
 
+          <!-- 🔧 FIX 3: แสดงทั้งการ์ดเดิมและการ์ดใหม่ -->
           <div v-if="existingCards.length > 0 || cardFileList.length > 0" class="card-grid">
-            <div v-for="(card, i) in existingCards" :key="'existing-' + card.cId" class="card-thumb">
+            <!-- การ์ดเดิมจาก API -->
+            <div
+              v-for="(card, i) in existingCards"
+              :key="'existing-' + card.cId"
+              class="card-thumb"
+            >
               <q-img :src="card.previewUrl" ratio="1" fit="contain" class="card-thumb-img" />
               <button class="card-thumb-remove" type="button" @click="removeExistingCard(i)">
                 <q-icon name="close" size="14px" />
               </button>
             </div>
-            <div v-for="(file, i) in cardFileList" :key="'new-' + i" class="card-thumb">
+            <!-- การ์ดใหม่ที่ user เพิ่ม -->
+            <div
+              v-for="(file, i) in cardFileList"
+              :key="'new-' + i"
+              class="card-thumb"
+            >
               <q-img :src="getFilePreview(file)" ratio="1" fit="contain" class="card-thumb-img" />
               <button class="card-thumb-remove" type="button" @click="removeCard(i)">
                 <q-icon name="close" size="14px" />
@@ -236,7 +249,7 @@
       </div>
     </q-dialog>
 
-    <!-- ===== DIALOG: DELETE WISH ===== -->
+    <!-- ===== DIALOG: DELETE ===== -->
     <q-dialog v-model="deleteDialog" persistent>
       <div class="custom-dialog">
         <div class="custom-dialog-header custom-dialog-header--danger">
@@ -289,91 +302,23 @@
       </div>
     </q-dialog>
 
-    <!-- ===== SUCCESS DIALOG (บันทึกสำเร็จ) ===== -->
+    <!-- ===== SUCCESS DIALOG ===== -->
     <q-dialog v-model="showSuccessDialog">
-      <div class="result-dialog">
-        <div class="result-dialog-header result-dialog-header--success">
-          <div class="result-dialog-icon">
+      <div class="success-dialog">
+        <div class="success-dialog-header">
+          <div class="success-dialog-header-icon">
             <q-icon name="check_circle" size="1.6rem" color="white" />
           </div>
           <div>
-            <div class="result-dialog-title">บันทึกสำเร็จ!</div>
-            <div class="result-dialog-sub">กำลังนำท่านไปหน้ารายการ...</div>
+            <div class="success-dialog-title">บันทึกสำเร็จ!</div>
+            <div class="success-dialog-sub">กำลังนำท่านไปหน้ารายการ...</div>
           </div>
         </div>
-        <div class="result-dialog-body">
-          <div class="result-dialog-emoji">🎊</div>
-          <p class="result-dialog-msg result-dialog-msg--success">{{ successMessage }}</p>
+        <div class="success-dialog-body">
+          <div class="success-dialog-emoji">🎊</div>
+          <p class="success-dialog-msg">{{ successMessage }}</p>
         </div>
-        <div :key="'s-' + successMessage" class="result-dialog-progress result-dialog-progress--success" />
-      </div>
-    </q-dialog>
-
-    <!-- ===== ERROR DIALOG (เกิดข้อผิดพลาด) ===== -->
-    <q-dialog v-model="showErrorDialog">
-      <div class="result-dialog">
-        <div class="result-dialog-header result-dialog-header--error">
-          <div class="result-dialog-icon">
-            <q-icon name="error_outline" size="1.6rem" color="white" />
-          </div>
-          <div>
-            <div class="result-dialog-title">เกิดข้อผิดพลาด</div>
-            <div class="result-dialog-sub">กรุณาลองใหม่อีกครั้ง</div>
-          </div>
-        </div>
-        <div class="result-dialog-body">
-          <div class="result-dialog-emoji">⚠️</div>
-          <p class="result-dialog-msg result-dialog-msg--error">{{ errorMessage }}</p>
-        </div>
-        <div :key="'e-' + errorMessage" class="result-dialog-progress result-dialog-progress--error" />
-      </div>
-    </q-dialog>
-
-    <!-- ===== VALIDATION DIALOG (ข้อมูลไม่ครบ) ===== -->
-    <q-dialog v-model="showValidationDialog">
-      <div class="result-dialog">
-        <div class="result-dialog-header result-dialog-header--warning">
-          <div class="result-dialog-icon">
-            <q-icon name="warning_amber" size="1.6rem" color="white" />
-          </div>
-          <div>
-            <div class="result-dialog-title">ข้อมูลไม่ครบถ้วน</div>
-            <div class="result-dialog-sub">กรุณาตรวจสอบข้อมูลอีกครั้ง</div>
-          </div>
-        </div>
-        <div class="result-dialog-body">
-          <div class="result-dialog-emoji">📋</div>
-          <p class="result-dialog-msg result-dialog-msg--warning">{{ validationMessage }}</p>
-        </div>
-        <div class="result-dialog-footer">
-          <button type="button" class="dialog-btn dialog-btn--confirm" @click="showValidationDialog = false">
-            รับทราบ
-          </button>
-        </div>
-      </div>
-    </q-dialog>
-
-    <!-- ===== FETCH ERROR DIALOG (โหลดข้อมูลไม่สำเร็จ) ===== -->
-    <q-dialog v-model="showFetchErrorDialog">
-      <div class="result-dialog">
-        <div class="result-dialog-header result-dialog-header--error">
-          <div class="result-dialog-icon">
-            <q-icon name="cloud_off" size="1.6rem" color="white" />
-          </div>
-          <div>
-            <div class="result-dialog-title">โหลดข้อมูลไม่สำเร็จ</div>
-            <div class="result-dialog-sub">กรุณาลองใหม่อีกครั้ง</div>
-          </div>
-        </div>
-        <div class="result-dialog-body">
-          <div class="result-dialog-emoji">🌐</div>
-          <p class="result-dialog-msg result-dialog-msg--error">ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้</p>
-        </div>
-        <div class="result-dialog-footer">
-          <button type="button" class="dialog-btn dialog-btn--confirm" @click="showFetchErrorDialog = false">
-            รับทราบ
-          </button>
-        </div>
+        <div :key="successMessage" class="success-dialog-progress" />
       </div>
     </q-dialog>
 
@@ -399,6 +344,7 @@ const router = useRouter();
 const route = useRoute();
 
 /* ===== TYPES ===== */
+// 🔧 FIX 4: เพิ่ม WishItem interface ให้ถูกต้อง
 interface WishItem {
   wId?: number;
   wishWord: string;
@@ -433,40 +379,9 @@ const imageFile = ref<File | null>(null);
 const existingImageUrl = ref<string>('');
 const existingImageName = ref<string>('');
 const loading = ref(false);
-
-// Dialog: บันทึกสำเร็จ
 const showSuccessDialog = ref(false);
 const successMessage = ref('');
 
-// Dialog: เกิดข้อผิดพลาด (submit)
-const showErrorDialog = ref(false);
-const errorMessage = ref('');
-
-// Dialog: ข้อมูลไม่ครบ (validation)
-const showValidationDialog = ref(false);
-const validationMessage = ref('');
-
-// Dialog: โหลดข้อมูลไม่สำเร็จ (fetch)
-const showFetchErrorDialog = ref(false);
-
-/* ===== DIALOG HELPERS ===== */
-const openSuccessDialog = (msg: string) => {
-  successMessage.value = msg;
-  showSuccessDialog.value = true;
-};
-
-const openErrorDialog = (msg: string) => {
-  errorMessage.value = msg;
-  showErrorDialog.value = true;
-  setTimeout(() => { showErrorDialog.value = false; }, 2500);
-};
-
-const openValidationDialog = (msg: string) => {
-  validationMessage.value = msg;
-  showValidationDialog.value = true;
-};
-
-/* ===== WISH DIALOG STATE ===== */
 const AddWishDialog = ref(false);
 const EditWishDialog = ref(false);
 const editingIndex = ref<number | null>(null);
@@ -476,6 +391,7 @@ const deleteIndex = ref<number | null>(null);
 const itemToDelete = ref<string | null>(null);
 
 const tempWish = ref('');
+// 🔧 FIX 5: type ถูกต้องเป็น WishItem[] ไม่ใช่ string[]
 const wishWordList = ref<WishItem[]>([]);
 
 const tempCardFile = ref<File | null>(null);
@@ -500,19 +416,23 @@ const fetchFestivalId = async (id: string) => {
     const response = await api.get(`/festival/${Number(id)}`);
     const data: FestivalData = response.data.festival;
 
+    // ชื่อเทศกาล
     festivalName.value = data.festivalName;
 
+    // รูปปก
     if (data.image) {
       existingImageName.value = data.image;
       existingImageUrl.value = await getImageUrl(data.image);
     }
 
+    // 🔧 FIX 6: map wisher ให้ถูก type เป็น WishItem[]
     wishWordList.value =
       data.wisher?.map((w: WisherApi): WishItem => ({
         wId: w.wId,
         wishWord: w.wishWord,
       })) ?? [];
 
+    // การ์ดอวยพร
     if (data.card && data.card.length > 0) {
       const cardPromises = data.card.map(async (c: CardApi) => {
         const previewUrl = await getImageUrl(c.imageCard);
@@ -524,7 +444,11 @@ const fetchFestivalId = async (id: string) => {
     localStorage.setItem('festivalId', id);
   } catch (error) {
     console.error(error);
-    showFetchErrorDialog.value = true; // เปลี่ยนจาก $q.notify
+    $q.notify({
+      color: 'negative',
+      message: 'โหลดข้อมูลไม่สำเร็จ',
+      icon: 'report_problem',
+    });
   } finally {
     $q.loading.hide();
   }
@@ -555,14 +479,10 @@ const updateWish = () => {
   if (editingIndex.value === null) return;
   if (!tempWish.value.trim()) return;
   const existing = wishWordList.value[editingIndex.value];
-  // wishWordList.value[editingIndex.value] = {
-  //   wId: existing?.wId,
-  //   wishWord: tempWish.value.trim(),
-  // };
   wishWordList.value[editingIndex.value] = {
-  ...(existing?.wId !== undefined ? { wId: existing.wId } : {}),
-  wishWord: tempWish.value.trim(),
-};
+    wId: existing?.wId,
+    wishWord: tempWish.value.trim(),
+  };
   tempWish.value = '';
   editingIndex.value = null;
   EditWishDialog.value = false;
@@ -585,7 +505,9 @@ const confirmDelete = () => {
 };
 
 /* ===== CARD ===== */
-const onAddCard = () => { showCardDialog.value = true; };
+const onAddCard = () => {
+  showCardDialog.value = true;
+};
 
 const addCardToList = () => {
   if (!tempCardFile.value) return;
@@ -594,10 +516,16 @@ const addCardToList = () => {
   showCardDialog.value = false;
 };
 
-const removeCard = (i: number) => { cardFileList.value.splice(i, 1); };
-const removeExistingCard = (i: number) => { existingCards.value.splice(i, 1); };
+const removeCard = (i: number) => {
+  cardFileList.value.splice(i, 1);
+};
+
+const removeExistingCard = (i: number) => {
+  existingCards.value.splice(i, 1);
+};
 
 /* ===== UTIL ===== */
+// 🔧 FIX 7: สร้าง cache เพื่อไม่ให้ createObjectURL ซ้ำทุก render
 const objectUrlCache = new WeakMap<File, string>();
 const getFilePreview = (file: File): string => {
   if (objectUrlCache.has(file)) return objectUrlCache.get(file)!;
@@ -611,11 +539,17 @@ const submitEdit = async () => {
   const accessToken = localStorage.getItem('accessToken');
   const festivalId = localStorage.getItem('festivalId');
 
-  const isNameValid = typeof festivalName.value === 'string' && festivalName.value.trim().length > 0;
+  const isNameValid =
+    typeof festivalName.value === 'string' && festivalName.value.trim().length > 0;
+
   const isImageValid = !!imageFile.value || !!existingImageName.value;
 
   if (!isNameValid || !isImageValid) {
-    openValidationDialog('กรุณากรอกชื่อเทศกาลและอัปโหลดรูปหน้าปก'); // เปลี่ยนจาก $q.notify
+    $q.notify({
+      color: 'negative',
+      message: 'กรุณากรอกชื่อเทศกาลและอัปโหลดรูป',
+      icon: 'warning',
+    });
     return;
   }
 
@@ -623,6 +557,7 @@ const submitEdit = async () => {
   try {
     let festivalImageName = existingImageName.value;
 
+    // ถ้า user เลือกรูปใหม่ → อัปโหลดก่อน
     if (imageFile.value) {
       const fd = new FormData();
       fd.append('singleFile', imageFile.value);
@@ -630,6 +565,7 @@ const submitEdit = async () => {
       festivalImageName = res.data.image;
     }
 
+    // อัปโหลดการ์ดใหม่ที่ user เพิ่ม
     let newCardImageNames: string[] = [];
     if (cardFileList.value.length > 0) {
       const uploadPromises = cardFileList.value.map(async (file) => {
@@ -641,6 +577,7 @@ const submitEdit = async () => {
       newCardImageNames = await Promise.all(uploadPromises);
     }
 
+    // Build payload
     const allCards = [
       ...existingCards.value.map((c) => ({ cId: c.cId, imageCard: c.imageName })),
       ...newCardImageNames.map((imgName) => ({ imageCard: imgName })),
@@ -667,14 +604,21 @@ const submitEdit = async () => {
       });
     }
 
-    // เปลี่ยนจาก $q.notify → success dialog แล้ว redirect หลัง 2 วิ
-    openSuccessDialog(response.data.message || 'บันทึกเทศกาลสำเร็จแล้ว');
-    setTimeout(async () => {
-      showSuccessDialog.value = false;
-      await router.push('/admin/festival');
-    }, 2000);
+    $q.notify({
+      color: 'positive',
+      message: response.data.message || 'บันทึกสำเร็จ',
+      icon: 'celebration',
+      position: 'top',
+      timeout: 2500,
+    });
+    await router.push('/admin/festival');
   } catch {
-    openErrorDialog('เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง'); // เปลี่ยนจาก $q.notify
+    $q.notify({
+      color: 'negative',
+      message: 'เกิดข้อผิดพลาด กรุณาลองใหม่',
+      icon: 'warning',
+      position: 'top',
+    });
   } finally {
     loading.value = false;
   }
@@ -770,7 +714,9 @@ const handleGlobalClick = (e: MouseEvent) => {
 
 onMounted(async () => {
   const id = (route.params.id as string) || (route.query.id as string);
-  if (id) await fetchFestivalId(id);
+  if (id) {
+    await fetchFestivalId(id);
+  }
   window.addEventListener('click', handleGlobalClick);
 });
 </script>
@@ -785,12 +731,6 @@ $gold: #f5a623;
 $gold-light: #ffd166;
 $coral: #ff6b6b;
 $teal: #0d9488;
-$green: #16a34a;
-$green-dark: #14532d;
-$green-soft: #f0fdf4;
-$amber: #d97706;
-$amber-dark: #92400e;
-$amber-soft: #fffbeb;
 $surface: #ffffff;
 $surface-2: #f7f5ff;
 $text-main: #1a1460;
@@ -815,19 +755,52 @@ $radius-btn: 12px;
   text-align: center;
 }
 
-.hero-orb { position: absolute; border-radius: 50%; opacity: 0.15; }
-.hero-orb-1 { width: 280px; height: 280px; background: $gold; top: -80px; right: -60px; animation: float 6s ease-in-out infinite; }
-.hero-orb-2 { width: 180px; height: 180px; background: $teal; bottom: -40px; left: -40px; animation: float 8s ease-in-out infinite reverse; }
-.hero-orb-3 { width: 120px; height: 120px; background: $gold-light; top: 20px; left: 30%; animation: float 5s ease-in-out infinite 1s; }
+.hero-orb {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.15;
+}
+.hero-orb-1 {
+  width: 280px;
+  height: 280px;
+  background: $gold;
+  top: -80px;
+  right: -60px;
+  animation: float 6s ease-in-out infinite;
+}
+.hero-orb-2 {
+  width: 180px;
+  height: 180px;
+  background: $teal;
+  bottom: -40px;
+  left: -40px;
+  animation: float 8s ease-in-out infinite reverse;
+}
+.hero-orb-3 {
+  width: 120px;
+  height: 120px;
+  background: $gold-light;
+  top: 20px;
+  left: 30%;
+  animation: float 5s ease-in-out infinite 1s;
+}
 
 @keyframes float {
   0%, 100% { transform: translateY(0px); }
   50% { transform: translateY(-16px); }
 }
 
-.hero-content { position: relative; z-index: 2; }
+.hero-content {
+  position: relative;
+  z-index: 2;
+}
 
-.hero-icon { font-size: 3.5rem; line-height: 1; margin-bottom: 0.75rem; animation: pop 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both; }
+.hero-icon {
+  font-size: 3.5rem;
+  line-height: 1;
+  margin-bottom: 0.75rem;
+  animation: pop 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
 
 @keyframes pop {
   0% { transform: scale(0.5); opacity: 0; }
@@ -835,86 +808,459 @@ $radius-btn: 12px;
   100% { transform: scale(1); opacity: 1; }
 }
 
-.hero-title { font-family: 'Prompt', sans-serif; font-size: clamp(1.6rem, 5vw, 2.4rem); font-weight: 700; color: #fff; margin: 0 0 0.4rem; letter-spacing: -0.02em; }
-.hero-sub { font-size: clamp(0.85rem, 3vw, 1rem); color: rgba(255, 255, 255, 0.7); margin: 0; }
+.hero-title {
+  font-family: 'Prompt', sans-serif;
+  font-size: clamp(1.6rem, 5vw, 2.4rem);
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 0.4rem;
+  letter-spacing: -0.02em;
+}
+
+.hero-sub {
+  font-size: clamp(0.85rem, 3vw, 1rem);
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+}
 
 /* ===== FORM BODY ===== */
-.form-body { margin-top: -2rem; }
-.form-container { max-width: 620px; margin: 0 auto; padding: 0 1rem 1rem; display: flex; flex-direction: column; gap: 1.25rem; }
+.form-body {
+  margin-top: -2rem;
+}
+
+.form-container {
+  max-width: 620px;
+  margin: 0 auto;
+  padding: 0 1rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
 
 /* ===== CARDS ===== */
 .fest-card {
   background: $surface;
   border-radius: $radius-card;
   padding: 1.5rem;
-  box-shadow: 0 4px 24px rgba(26, 20, 96, 0.08), 0 1px 4px rgba(26, 20, 96, 0.05);
+  box-shadow:
+    0 4px 24px rgba(26, 20, 96, 0.08),
+    0 1px 4px rgba(26, 20, 96, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.8);
 }
 
-.card-label { display: flex; align-items: center; gap: 8px; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.08em; color: $text-muted; text-transform: uppercase; margin-bottom: 1.25rem; }
-.label-dot { width: 8px; height: 8px; border-radius: 50%; background: $indigo-mid; flex-shrink: 0; &--amber { background: $gold; } &--teal { background: $teal; } }
+.card-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: $text-muted;
+  text-transform: uppercase;
+  margin-bottom: 1.25rem;
+}
+
+.label-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: $indigo-mid;
+  flex-shrink: 0;
+
+  &--amber { background: $gold; }
+  &--teal { background: $teal; }
+}
 
 /* ===== COVER UPLOAD ===== */
-.cover-upload-zone { border-radius: 14px; overflow: hidden; cursor: pointer; border: 2px dashed rgba(45, 45, 138, 0.25); transition: border-color 0.2s, transform 0.2s; background: $surface-2; &:hover { border-color: $indigo-mid; transform: translateY(-2px); } }
-.cover-img { border-radius: 12px; }
-.cover-overlay { position: absolute; inset: 0; background: rgba(26, 20, 96, 0.5); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; opacity: 0; transition: opacity 0.2s; color: white; font-size: 0.85rem; font-weight: 500; .cover-upload-zone:hover & { opacity: 1; } }
-.cover-placeholder { padding: 2.5rem 1rem; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.cover-upload-zone {
+  border-radius: 14px;
+  overflow: hidden;
+  cursor: pointer;
+  border: 2px dashed rgba(45, 45, 138, 0.25);
+  transition: border-color 0.2s, transform 0.2s;
+  background: $surface-2;
+
+  &:hover {
+    border-color: $indigo-mid;
+    transform: translateY(-2px);
+  }
+}
+
+.cover-img {
+  border-radius: 12px;
+}
+
+.cover-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(26, 20, 96, 0.5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  opacity: 0;
+  transition: opacity 0.2s;
+  color: white;
+  font-size: 0.85rem;
+  font-weight: 500;
+
+  .cover-upload-zone:hover & { opacity: 1; }
+}
+
+.cover-placeholder {
+  padding: 2.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
 .cover-placeholder-icon { font-size: 2.5rem; }
-.cover-placeholder-text { font-size: 0.95rem; font-weight: 600; color: $text-main; }
-.cover-placeholder-sub { font-size: 0.78rem; color: $text-muted; }
+.cover-placeholder-text {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: $text-main;
+}
+.cover-placeholder-sub {
+  font-size: 0.78rem;
+  color: $text-muted;
+}
 
 /* ===== INPUT ===== */
-.custom-input :deep(.q-field__control) { border-radius: 12px !important; }
+.custom-input :deep(.q-field__control) {
+  border-radius: 12px !important;
+}
 
 /* ===== CARD HEADER ROW ===== */
-.card-header-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
-.card-header-info { display: flex; align-items: baseline; gap: 5px; }
-.card-header-count { font-family: 'Prompt', sans-serif; font-size: 2rem; font-weight: 700; color: $indigo-mid; line-height: 1; }
-.card-header-unit { font-size: 0.85rem; color: $text-muted; }
-.add-btn { border-radius: $radius-btn !important; font-weight: 600 !important; font-family: 'Noto Sans Thai', sans-serif !important; letter-spacing: 0 !important; }
+.card-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.card-header-info {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+}
+
+.card-header-count {
+  font-family: 'Prompt', sans-serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: $indigo-mid;
+  line-height: 1;
+}
+
+.card-header-unit {
+  font-size: 0.85rem;
+  color: $text-muted;
+}
+
+.add-btn {
+  border-radius: $radius-btn !important;
+  font-weight: 600 !important;
+  font-family: 'Noto Sans Thai', sans-serif !important;
+  letter-spacing: 0 !important;
+}
 
 /* ===== WISH LIST ===== */
-.wish-list-wrapper { display: flex; flex-direction: column; gap: 8px; }
-.wish-item { display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: $surface-2; border-radius: 12px; border: 1px solid rgba(45, 45, 138, 0.08); transition: box-shadow 0.2s, transform 0.2s; &:hover { box-shadow: 0 4px 16px rgba(45, 45, 138, 0.1); transform: translateX(2px); } }
-.wish-number { width: 26px; height: 26px; border-radius: 50%; background: linear-gradient(135deg, $indigo-mid, #6b5ce7); color: white; font-size: 0.72rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.wish-text { flex: 1; font-size: 0.92rem; color: $text-main; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.wish-actions { display: flex; gap: 6px; flex-shrink: 0; }
-.wish-btn { width: 32px; height: 32px; border-radius: 8px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.15s, transform 0.1s; &:active { transform: scale(0.92); } &--edit { background: rgba(245, 166, 35, 0.1); color: #c47a00; &:hover { background: rgba(245, 166, 35, 0.2); } } &--delete { background: rgba(255, 107, 107, 0.1); color: $coral; &:hover { background: rgba(255, 107, 107, 0.2); } } }
+.wish-list-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
 
-.wish-list-enter-active, .wish-list-leave-active { transition: all 0.3s cubic-bezier(0.36, 0.07, 0.19, 0.97); }
-.wish-list-enter-from { opacity: 0; transform: translateX(-16px); }
-.wish-list-leave-to { opacity: 0; transform: translateX(16px) scale(0.95); }
+.wish-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: $surface-2;
+  border-radius: 12px;
+  border: 1px solid rgba(45, 45, 138, 0.08);
+  transition: box-shadow 0.2s, transform 0.2s;
+
+  &:hover {
+    box-shadow: 0 4px 16px rgba(45, 45, 138, 0.1);
+    transform: translateX(2px);
+  }
+}
+
+.wish-number {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, $indigo-mid, #6b5ce7);
+  color: white;
+  font-size: 0.72rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.wish-text {
+  flex: 1;
+  font-size: 0.92rem;
+  color: $text-main;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wish-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.wish-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, transform 0.1s;
+
+  &:active { transform: scale(0.92); }
+
+  &--edit {
+    background: rgba(245, 166, 35, 0.1);
+    color: #c47a00;
+    &:hover { background: rgba(245, 166, 35, 0.2); }
+  }
+  &--delete {
+    background: rgba(255, 107, 107, 0.1);
+    color: $coral;
+    &:hover { background: rgba(255, 107, 107, 0.2); }
+  }
+}
+
+/* ===== WISH LIST TRANSITION ===== */
+.wish-list-enter-active,
+.wish-list-leave-active {
+  transition: all 0.3s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+.wish-list-enter-from {
+  opacity: 0;
+  transform: translateX(-16px);
+}
+.wish-list-leave-to {
+  opacity: 0;
+  transform: translateX(16px) scale(0.95);
+}
 
 /* ===== CARD GRID ===== */
-.card-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; @media (min-width: 480px) { grid-template-columns: repeat(4, 1fr); } }
-.card-thumb { position: relative; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); transition: transform 0.2s; &:hover { transform: scale(1.03); } }
-.card-thumb-img { display: block; border-radius: 12px; }
-.card-thumb-remove { position: absolute; top: 5px; right: 5px; width: 22px; height: 22px; border-radius: 50%; border: none; background: rgba(26, 20, 96, 0.75); color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.15s; &:hover { background: $coral; } }
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+
+  @media (min-width: 480px) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.card-thumb {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
+
+  &:hover { transform: scale(1.03); }
+}
+
+.card-thumb-img {
+  display: block;
+  border-radius: 12px;
+}
+
+.card-thumb-remove {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(26, 20, 96, 0.75);
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+
+  &:hover { background: $coral; }
+}
 
 /* ===== EMPTY STATE ===== */
-.empty-state { text-align: center; padding: 1.5rem 1rem; }
-.empty-state-icon { font-size: 2rem; margin-bottom: 6px; }
-.empty-state-text { font-size: 0.92rem; font-weight: 600; color: $text-main; margin-bottom: 4px; }
-.empty-state-sub { font-size: 0.78rem; color: $text-muted; }
+.empty-state {
+  text-align: center;
+  padding: 1.5rem 1rem;
+}
+.empty-state-icon {
+  font-size: 2rem;
+  margin-bottom: 6px;
+}
+.empty-state-text {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: $text-main;
+  margin-bottom: 4px;
+}
+.empty-state-sub {
+  font-size: 0.78rem;
+  color: $text-muted;
+}
 
 /* ===== SUBMIT BUTTON ===== */
-.submit-btn { width: 100%; padding: 1rem; border-radius: 16px; border: none; background: linear-gradient(135deg, $indigo-deep 0%, $indigo-mid 50%, #5a3ea0 100%); color: white; font-family: 'Noto Sans Thai', 'Prompt', sans-serif; font-size: 1.05rem; font-weight: 700; cursor: pointer; box-shadow: 0 6px 24px rgba(45, 45, 138, 0.35); transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s; letter-spacing: 0.01em; &:hover:not(.loading):not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 32px rgba(45, 45, 138, 0.4); } &:active:not(.loading) { transform: translateY(0); } &.loading, &:disabled { opacity: 0.75; cursor: not-allowed; } }
-.submit-btn-inner { display: flex; align-items: center; justify-content: center; gap: 8px; }
+.submit-btn {
+  width: 100%;
+  padding: 1rem;
+  border-radius: 16px;
+  border: none;
+  background: linear-gradient(135deg, $indigo-deep 0%, $indigo-mid 50%, #5a3ea0 100%);
+  color: white;
+  font-family: 'Noto Sans Thai', 'Prompt', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 6px 24px rgba(45, 45, 138, 0.35);
+  transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+  letter-spacing: 0.01em;
 
-/* ===== WISH DIALOGS ===== */
-.custom-dialog { background: $surface; border-radius: 20px; overflow: hidden; min-width: 320px; max-width: 420px; width: 100%; box-shadow: 0 20px 60px rgba(26, 20, 96, 0.2); &--mobile { border-radius: 20px 20px 0 0; max-width: 100%; position: fixed; bottom: 0; left: 0; right: 0; } }
-.custom-dialog-header { display: flex; align-items: center; justify-content: space-between; padding: 1.1rem 1.25rem 0.9rem; font-family: 'Prompt', sans-serif; font-size: 1rem; font-weight: 600; color: $text-main; border-bottom: 1px solid rgba(45, 45, 138, 0.07); background: $surface-2; &--danger { background: #fff1f1; } }
-.dialog-close { width: 30px; height: 30px; border-radius: 8px; border: none; background: rgba(45, 45, 138, 0.07); color: $text-muted; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.15s; &:hover { background: rgba(45, 45, 138, 0.14); } }
+  &:hover:not(.loading):not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 32px rgba(45, 45, 138, 0.4);
+  }
+  &:active:not(.loading) { transform: translateY(0); }
+  &.loading, &:disabled {
+    opacity: 0.75;
+    cursor: not-allowed;
+  }
+}
+
+.submit-btn-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+/* ===== DIALOG ===== */
+.custom-dialog {
+  background: $surface;
+  border-radius: 20px;
+  overflow: hidden;
+  min-width: 320px;
+  max-width: 420px;
+  width: 100%;
+  box-shadow: 0 20px 60px rgba(26, 20, 96, 0.2);
+
+  &--mobile {
+    border-radius: 20px 20px 0 0;
+    max-width: 100%;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+  }
+}
+
+.custom-dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.1rem 1.25rem 0.9rem;
+  font-family: 'Prompt', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: $text-main;
+  border-bottom: 1px solid rgba(45, 45, 138, 0.07);
+  background: $surface-2;
+
+  &--danger { background: #fff1f1; }
+}
+
+.dialog-close {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: none;
+  background: rgba(45, 45, 138, 0.07);
+  color: $text-muted;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+
+  &:hover { background: rgba(45, 45, 138, 0.14); }
+}
+
 .custom-dialog-body { padding: 1.25rem; }
-.custom-dialog-footer { display: flex; justify-content: flex-end; gap: 10px; padding: 0.75rem 1.25rem 1.25rem; }
 
-.dialog-btn { padding: 9px 22px; border-radius: 10px; border: none; font-family: 'Noto Sans Thai', sans-serif; font-size: 0.88rem; font-weight: 600; cursor: pointer; transition: transform 0.1s, background 0.15s; &:active { transform: scale(0.96); } &--cancel { background: rgba(45, 45, 138, 0.07); color: $text-muted; &:hover { background: rgba(45, 45, 138, 0.12); } } &--confirm { background: linear-gradient(135deg, $indigo-mid, #6b5ce7); color: white; box-shadow: 0 3px 12px rgba(45, 45, 138, 0.3); &:hover { box-shadow: 0 5px 16px rgba(45, 45, 138, 0.4); } } &--danger { background: linear-gradient(135deg, #e53935, #c62828); color: white; box-shadow: 0 3px 12px rgba(229, 57, 53, 0.3); } }
+.custom-dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 0.75rem 1.25rem 1.25rem;
+}
 
-.delete-confirm-text { text-align: center; font-size: 0.92rem; color: $text-main; line-height: 1.8; margin: 0; }
-.delete-target { color: $coral; font-weight: 700; }
+.dialog-btn {
+  padding: 9px 22px;
+  border-radius: 10px;
+  border: none;
+  font-family: 'Noto Sans Thai', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.1s, background 0.15s;
 
-/* ===== RESULT DIALOGS ===== */
-.result-dialog {
+  &:active { transform: scale(0.96); }
+
+  &--cancel {
+    background: rgba(45, 45, 138, 0.07);
+    color: $text-muted;
+    &:hover { background: rgba(45, 45, 138, 0.12); }
+  }
+  &--confirm {
+    background: linear-gradient(135deg, $indigo-mid, #6b5ce7);
+    color: white;
+    box-shadow: 0 3px 12px rgba(45, 45, 138, 0.3);
+    &:hover { box-shadow: 0 5px 16px rgba(45, 45, 138, 0.4); }
+  }
+  &--danger {
+    background: linear-gradient(135deg, #e53935, #c62828);
+    color: white;
+    box-shadow: 0 3px 12px rgba(229, 57, 53, 0.3);
+  }
+}
+
+.delete-confirm-text {
+  text-align: center;
+  font-size: 0.92rem;
+  color: $text-main;
+  line-height: 1.8;
+  margin: 0;
+}
+.delete-target {
+  color: $coral;
+  font-weight: 700;
+}
+
+/* ===== SUCCESS DIALOG ===== */
+.success-dialog {
   background: #fff;
   border-radius: 24px;
   overflow: hidden;
@@ -923,18 +1269,17 @@ $radius-btn: 12px;
   box-shadow: 0 24px 64px rgba(26, 20, 96, 0.18);
 }
 
-.result-dialog-header {
+.success-dialog-header {
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 1.25rem 1.5rem;
-  &--success { background: linear-gradient(135deg, $green-dark, $green); }
-  &--error { background: linear-gradient(135deg, #7f1d1d, #dc2626); }
-  &--warning { background: linear-gradient(135deg, $amber-dark, $amber); }
+  background: linear-gradient(135deg, #14532d, #16a34a);
 }
 
-.result-dialog-icon {
-  width: 44px; height: 44px;
+.success-dialog-header-icon {
+  width: 44px;
+  height: 44px;
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.18);
   border: 1px solid rgba(255, 255, 255, 0.25);
@@ -944,24 +1289,55 @@ $radius-btn: 12px;
   flex-shrink: 0;
 }
 
-.result-dialog-title { font-family: 'Prompt', sans-serif; font-size: 1rem; font-weight: 700; color: #fff; line-height: 1.2; }
-.result-dialog-sub { font-size: 0.75rem; color: rgba(255, 255, 255, 0.72); margin-top: 2px; }
+.success-dialog-title {
+  font-family: 'Prompt', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.2;
+}
+.success-dialog-sub {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.72);
+  margin-top: 2px;
+}
 
-.result-dialog-body { padding: 1.5rem 1.5rem 0.75rem; text-align: center; }
+.success-dialog-body {
+  padding: 1.5rem 1.5rem 0.75rem;
+  text-align: center;
+}
 
-.result-dialog-emoji { font-size: 3rem; margin-bottom: 0.75rem; display: block; animation: resultPop 0.45s cubic-bezier(0.36, 0.07, 0.19, 0.97) both; }
+.success-dialog-emoji {
+  font-size: 3rem;
+  margin-bottom: 0.75rem;
+  display: block;
+  animation: successPop 0.45s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
 
-@keyframes resultPop {
+@keyframes successPop {
   0% { transform: scale(0.5); opacity: 0; }
   80% { transform: scale(1.15); }
   100% { transform: scale(1); opacity: 1; }
 }
 
-.result-dialog-msg { font-size: 0.92rem; font-weight: 600; color: #374151; border-radius: 10px; padding: 10px 14px; margin: 0; line-height: 1.6; &--success { background: $green-soft; } &--error { background: #fef2f2; } &--warning { background: $amber-soft; } }
+.success-dialog-msg {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #374151;
+  background: #f0fdf4;
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin: 0;
+  line-height: 1.6;
+}
 
-.result-dialog-footer { display: flex; justify-content: flex-end; padding: 0.75rem 1.5rem 1.25rem; }
-
-.result-dialog-progress { height: 4px; width: 100%; transform-origin: left; animation: progressShrink 2s linear forwards; &--success { background: linear-gradient(90deg, $green-dark, $green); } &--error { background: linear-gradient(90deg, #7f1d1d, #dc2626); animation-duration: 2.5s; } }
+.success-dialog-progress {
+  height: 4px;
+  width: 100%;
+  background: linear-gradient(90deg, #14532d, #16a34a);
+  animation: progressShrink 2s linear forwards;
+  transform-origin: left;
+}
 
 @keyframes progressShrink {
   from { transform: scaleX(1); }
@@ -969,7 +1345,9 @@ $radius-btn: 12px;
 }
 
 /* ===== ANIMATIONS ===== */
-.animate-in { animation: slideUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.animate-in {
+  animation: slideUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
 
 @keyframes slideUp {
   from { opacity: 0; transform: translateY(24px); }
@@ -980,18 +1358,28 @@ $radius-btn: 12px;
 @media (max-width: 599px) {
   .fest-card { padding: 1.1rem; }
   .hero-header { padding: 2.25rem 1rem 3.5rem; }
-  .form-container { padding: 0 0.75rem 1rem; gap: 1rem; }
+  .form-container {
+    padding: 0 0.75rem 1rem;
+    gap: 1rem;
+  }
   .card-header-count { font-size: 1.6rem; }
   .wish-text { max-width: 160px; }
 }
 
 /* ===== CLICK PARTICLES ===== */
-.click-particles-root { position: fixed; inset: 0; pointer-events: none; z-index: 99999; }
+.click-particles-root {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 99999;
+}
 
 .click-particle {
   position: fixed;
-  left: var(--x); top: var(--y);
-  width: var(--size); height: var(--size);
+  left: var(--x);
+  top: var(--y);
+  width: var(--size);
+  height: var(--size);
   background: var(--color);
   pointer-events: none;
   will-change: transform, opacity;
@@ -999,14 +1387,49 @@ $radius-btn: 12px;
   border-radius: 50%;
 
   &[style*='--shape: square'] { border-radius: 3px; }
-  &[style*='--shape: star'] { border-radius: 0; clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%); }
-  &[style*='--shape: triangle'] { background: transparent !important; border-left: calc(var(--size) * 0.5) solid transparent; border-right: calc(var(--size) * 0.5) solid transparent; border-bottom: var(--size) solid var(--color); border-radius: 0; width: 0 !important; height: 0 !important; }
-  &[style*='--shape: emoji'] { background: transparent; border-radius: 0; display: flex; align-items: center; justify-content: center; &::after { content: var(--emoji-content); font-size: var(--size); line-height: 1; } }
+  &[style*='--shape: star'] {
+    border-radius: 0;
+    clip-path: polygon(
+      50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%,
+      50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%
+    );
+  }
+  &[style*='--shape: triangle'] {
+    background: transparent !important;
+    border-left: calc(var(--size) * 0.5) solid transparent;
+    border-right: calc(var(--size) * 0.5) solid transparent;
+    border-bottom: var(--size) solid var(--color);
+    border-radius: 0;
+    width: 0 !important;
+    height: 0 !important;
+  }
+  &[style*='--shape: emoji'] {
+    background: transparent;
+    border-radius: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    &::after {
+      content: var(--emoji-content);
+      font-size: var(--size);
+      line-height: 1;
+    }
+  }
 }
 
 @keyframes clickFall {
-  0% { opacity: 1; transform: translate(-50%, -50%) translate(0px, 0px) rotate(0deg) scale(1); }
-  12% { opacity: 1; transform: translate(-50%, -50%) translate(calc(var(--dx) * 0.15), calc(var(--dy) * 0.15)) rotate(calc(var(--rot) * 0.1)) scale(1.2); }
-  100% { opacity: 0; transform: translate(-50%, -50%) translate(var(--dx), var(--dy)) rotate(var(--rot)) scale(0.1); }
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) translate(0px, 0px) rotate(0deg) scale(1);
+  }
+  12% {
+    opacity: 1;
+    transform: translate(-50%, -50%) translate(calc(var(--dx) * 0.15), calc(var(--dy) * 0.15))
+      rotate(calc(var(--rot) * 0.1)) scale(1.2);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) translate(var(--dx), var(--dy)) rotate(var(--rot)) scale(0.1);
+  }
 }
 </style>

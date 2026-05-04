@@ -466,29 +466,7 @@ const onAdd = () => {
   addDialog.value = true;
 };
 
-// const submitAdd = async () => {
-//   isSubmitting.value = true;
-//   // const accessToken = localStorage.getItem('accessToken');
-//   try {
-//     const response = await api.post(
-//       '/admin/unpolite',
-//       { word: addForm.value.word },
-//       // { headers: { Authorization: `Bearer ${accessToken}` } },
-//     );
-//     $q.notify({
-//       color: 'positive',
-//       message: response.data.message,
-//       icon: 'check',
-//       position: 'top',
-//     });
-//     addDialog.value = false;
-//     void fetchUnpolite();
-//   } catch {
-//     $q.notify({ color: 'negative', message: 'เกิดข้อผิดพลาด', icon: 'error', position: 'top' });
-//   } finally {
-//     isSubmitting.value = false;
-//   }
-// };
+
 const submitAdd = async () => {
   isSubmitting.value = true;
   try {
@@ -508,35 +486,6 @@ const onEdit = (row: TableRow) => {
   editDialog.value = true;
 };
 
-// const submitEdit = async () => {
-//   isSubmitting.value = true;
-//   // const accessToken = localStorage.getItem('accessToken');
-//   try {
-//     const response = await api.patch(
-//       `/admin/unpolite/${editForm.value.upId}`,
-//       { word: editForm.value.word },
-//       // { headers: { Authorization: `Bearer ${accessToken}` } },
-//     );
-//     $q.notify({
-//       color: 'positive',
-//       message: response.data.message,
-//       icon: 'check',
-//       position: 'top',
-//     });
-//     editDialog.value = false;
-//     void fetchUnpolite();
-//   } catch (err: unknown) {
-//     const error = err as AxiosError<{ message: string }>;
-//     $q.notify({
-//       color: 'negative',
-//       message: error.response?.data?.message || 'เกิดข้อผิดพลาด',
-//       icon: 'error',
-//       position: 'top',
-//     });
-//   } finally {
-//     isSubmitting.value = false;
-//   }
-// };
 const submitEdit = async () => {
   isSubmitting.value = true;
   try {
@@ -576,36 +525,7 @@ const confirmDelete = async () => {
   }
 };
 
-// const confirmDelete = async () => {
-//   if (!itemToDelete.value) return;
-//   isSubmitting.value = true;
-//   const accessToken = localStorage.getItem('accessToken');
-//   try {
-//     // const response = await api.delete(`/admin/unpolite/${itemToDelete.value.upId}`, {
-//     //   headers: { Authorization: `Bearer ${accessToken}` },
-//     // });
-//      const response = await api.delete(`/admin/unpolite/${itemToDelete.value.upId}`);
-//     $q.notify({
-//       color: 'positive',
-//       message: response.data.message,
-//       icon: 'delete',
-//       position: 'top',
-//     });
-//     deleteDialog.value = false;
-//     void fetchUnpolite();
-//   } catch (err: unknown) {
-//     const error = err as AxiosError<{ message: string }>;
-//     $q.notify({
-//       color: 'negative',
-//       message: error.response?.data?.message || 'เกิดข้อผิดพลาด',
-//       icon: 'error',
-//       position: 'top',
-//     });
-//   } finally {
-//     isSubmitting.value = false;
-//     itemToDelete.value = null;
-//   }
-// };
+
 
 // ================= TABLE EVENTS =================
 const onRequest: QTableProps['onRequest'] = (reqProps) => {
