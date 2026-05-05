@@ -416,9 +416,9 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
-import { api } from 'src/boot/axios';
 // import { useQuasar } from 'quasar';
 import type { QTable } from 'quasar';
+import { api } from 'src/boot/axios';
 import type { AxiosError } from 'axios';
 import { useFestivalStore } from 'src/stores/festival';
 
@@ -549,7 +549,7 @@ const fetchBirthCard = async (targetId: string) => {
       // Step 1 → 45%
       loadingStep.value = 1;
       animatePct(loadingSteps[1]!.pct);
-      await new Promise((r) => setTimeout(r, 4000)); // 8 วิ
+      // await new Promise((r) => setTimeout(r, 4000)); // 8 วิ
       wisherData.value = (fest.wisher || []).map((i) => ({ label: i.wishWord, value: i.wId }));
       options.value = wisherData.value;
 
@@ -569,7 +569,7 @@ const fetchBirthCard = async (targetId: string) => {
 
       // Step 3 → 100%
       loadingStep.value = 3;
-      animatePct(loadingSteps[3]!.pct);
+      // animatePct(loadingSteps[3]!.pct);
       rows.value = validCards.filter((c): c is CardRow => c !== null);
       const first = rows.value?.[0];
       if (first) {
@@ -645,19 +645,15 @@ const triggerFirework = () => {
   }, 900);
 };
 
-// Auto-trigger once when dialog opens
-// watch(showSuccess, (val) => {
-//   if (val) setTimeout(triggerFirework, 350);
-// });
 watch(showSuccess, (val) => {
   if (val) {
     // 1. จุดพลุหลังจากเปิด Dialog 0.35 วินาที
     setTimeout(triggerFirework, 350);
 
-    // 2. สั่งปิด Dialog ตัวเองหลังจากผ่านไป 4 วินาที (เพื่อให้คนดูพลุทัน)
+    // 2. สั่งปิด Dialog ตัวเองหลังจากผ่านไป 1 วินาที (เพื่อให้คนดูพลุทัน)
     setTimeout(() => {
       showSuccess.value = false;
-    }, 4000);
+    }, 1000);
   }
 });
 
@@ -666,7 +662,7 @@ watch(showErrorDialog, (val) => {
   if (val) {
     setTimeout(() => {
       showErrorDialog.value = false;
-    }, 3000); // ปิดเองหลังจาก 3 วินาที
+    }, 2000); // ปิดเองหลังจาก 2 วินาที
   }
 });
 const sparkleStyle = (n: number) => {
@@ -721,6 +717,11 @@ interface Particle {
 const activeParticles = ref<Particle[]>([]);
 let particleId = 0;
 
+// const PARTICLE_COLORS = [
+//   '#e11d48', '#fbbf24', '#6366f1', '#22c55e',
+//   '#fb7185', '#f59e0b', '#a78bfa', '#34d399',
+// ];
+
 const PARTICLE_COLORS = [
   '#e11d48',
   '#fbbf24',
@@ -739,6 +740,8 @@ const PARTICLE_COLORS = [
   '#6bcb77',
   '#4d96ff',
 ];
+
+// const PARTICLE_EMOJIS = ['🎉', '✨', '🎊', '⭐', '💫', '🌟', '🎈', '🌸'];
 
 const PARTICLE_EMOJIS = [
   '🎉',
@@ -763,82 +766,28 @@ const PARTICLE_EMOJIS = [
   '🏵️',
 ];
 
-// shape types: circle, square, star, triangle
-type ShapeType = 'circle' | 'square' | 'star' | 'triangle' | 'emoji';
+
+type ShapeType = 'circle' | 'square' | 'star' | 'emoji';
 
 const spawnParticles = (x: number, y: number) => {
-  const count = 36 + Math.floor(Math.random() * 12); // 36–48 particles
-  const W = window.innerWidth;
-  const H = window.innerHeight;
+  const count = 12 + Math.floor(Math.random() * 6); // 12–18 particles (ลดจาก 36–48)
 
   for (let i = 0; i < count; i++) {
     const id = ++particleId;
-    const size = 7 + Math.random() * 11;
+    const size = 6 + Math.random() * 7;
     const color = PARTICLE_COLORS[Math.floor(Math.random() * PARTICLE_COLORS.length)] ?? '#fbbf24';
-    const dur = 1.2 + Math.random() * 1.2;
+    const dur = 0.7 + Math.random() * 0.5; // สั้นลง 0.7–1.2s (จาก 1.2–2.4s)
     const emoji = PARTICLE_EMOJIS[Math.floor(Math.random() * PARTICLE_EMOJIS.length)] ?? '🎉';
 
-    const shapes: ShapeType[] = ['circle', 'square', 'star', 'triangle', 'emoji'];
-    const weights = [0.25, 0.2, 0.2, 0.15, 0.2];
-    const rand = Math.random();
-    let cumulative = 0;
-    let shape: ShapeType = 'circle';
-    for (let s = 0; s < shapes.length; s++) {
-      cumulative += weights[s] ?? 0;
-      if (rand < cumulative) {
-        shape = shapes[s] ?? 'circle';
-        break;
-      }
-    }
-
+    const shapes: ShapeType[] = ['circle', 'circle', 'square', 'star', 'emoji'];
+    const shape = shapes[Math.floor(Math.random() * shapes.length)] ?? 'circle';
     const isEmoji = shape === 'emoji';
 
-    // สุ่ม target position ที่ใดก็ได้บนหน้าจอ
-    // แบ่ง zone 4 มุม + 4 ขอบ ให้กระจายทั่ว
-    const zone = i % 8;
-    let targetX: number, targetY: number;
-
-    switch (zone) {
-      case 0: // ซ้ายบน
-        targetX = Math.random() * W * 0.35;
-        targetY = Math.random() * H * 0.35;
-        break;
-      case 1: // กลางบน
-        targetX = W * 0.25 + Math.random() * W * 0.5;
-        targetY = Math.random() * H * 0.25;
-        break;
-      case 2: // ขวาบน
-        targetX = W * 0.65 + Math.random() * W * 0.35;
-        targetY = Math.random() * H * 0.35;
-        break;
-      case 3: // ขวากลาง
-        targetX = W * 0.65 + Math.random() * W * 0.35;
-        targetY = H * 0.25 + Math.random() * H * 0.5;
-        break;
-      case 4: // ขวาล่าง
-        targetX = W * 0.65 + Math.random() * W * 0.35;
-        targetY = H * 0.65 + Math.random() * H * 0.35;
-        break;
-      case 5: // กลางล่าง
-        targetX = W * 0.25 + Math.random() * W * 0.5;
-        targetY = H * 0.75 + Math.random() * H * 0.25;
-        break;
-      case 6: // ซ้ายล่าง
-        targetX = Math.random() * W * 0.35;
-        targetY = H * 0.65 + Math.random() * H * 0.35;
-        break;
-      case 7: // ซ้ายกลาง
-        targetX = Math.random() * W * 0.25;
-        targetY = H * 0.25 + Math.random() * H * 0.5;
-        break;
-      default:
-        targetX = Math.random() * W;
-        targetY = Math.random() * H;
-    }
-
-    // dx/dy คือระยะจากจุดคลิกไปยัง target
-    const dx = targetX - x;
-    const dy = targetY - y;
+    // กระจายรอบจุดคลิกในรัศมี 80–160px แทนการกระเด็นทั่วจอ
+    const angle = (i / count) * Math.PI * 2 + (Math.random() - 0.5) * 0.8;
+    const dist = 80 + Math.random() * 80;
+    const dx = Math.cos(angle) * dist;
+    const dy = Math.sin(angle) * dist;
 
     const style: Record<string, string> = {
       '--x': `${x}px`,
@@ -847,21 +796,160 @@ const spawnParticles = (x: number, y: number) => {
       '--dy': `${dy}px`,
       '--dur': `${dur}s`,
       '--color': isEmoji ? 'transparent' : color,
-      '--size': isEmoji ? '22px' : `${size}px`,
+      '--size': isEmoji ? '18px' : `${size}px`,
       '--shape': shape,
       '--emoji-content': isEmoji ? `"${emoji}"` : '""',
-      '--rot': `${Math.random() * 720 - 360}deg`,
+      '--rot': `${Math.random() * 360 - 180}deg`, // หมุนน้อยลง (จาก ±360 → ±180)
     };
 
     activeParticles.value.push({ id, style });
-    setTimeout(
-      () => {
-        activeParticles.value = activeParticles.value.filter((p) => p.id !== id);
-      },
-      dur * 1000 + 200,
-    );
+    setTimeout(() => {
+      activeParticles.value = activeParticles.value.filter((p) => p.id !== id);
+    }, dur * 1000 + 100);
   }
 };
+
+// const PARTICLE_COLORS = [
+//   '#e11d48',
+//   '#fbbf24',
+//   '#6366f1',
+//   '#22c55e',
+//   '#fb7185',
+//   '#f59e0b',
+//   '#a78bfa',
+//   '#34d399',
+//   '#f472b6',
+//   '#38bdf8',
+//   '#4ade80',
+//   '#facc15',
+//   '#ff6b6b',
+//   '#ffd93d',
+//   '#6bcb77',
+//   '#4d96ff',
+// ];
+
+// const PARTICLE_EMOJIS = [
+//   '🎉',
+//   '✨',
+//   '🎊',
+//   '⭐',
+//   '💫',
+//   '🌟',
+//   '🎈',
+//   '🌸',
+//   '🌺',
+//   '🌼',
+//   '🎀',
+//   '💥',
+//   '🎆',
+//   '🎇',
+//   '🦋',
+//   '🍀',
+//   '❄️',
+//   '🎵',
+//   '💎',
+//   '🏵️',
+// ];
+
+// // shape types: circle, square, star, triangle
+// type ShapeType = 'circle' | 'square' | 'star' | 'triangle' | 'emoji';
+
+// const spawnParticles = (x: number, y: number) => {
+//   const count = 36 + Math.floor(Math.random() * 12); // 36–48 particles
+//   const W = window.innerWidth;
+//   const H = window.innerHeight;
+
+//   for (let i = 0; i < count; i++) {
+//     const id = ++particleId;
+//     const size = 7 + Math.random() * 11;
+//     const color = PARTICLE_COLORS[Math.floor(Math.random() * PARTICLE_COLORS.length)] ?? '#fbbf24';
+//     const dur = 1.2 + Math.random() * 1.2;
+//     const emoji = PARTICLE_EMOJIS[Math.floor(Math.random() * PARTICLE_EMOJIS.length)] ?? '🎉';
+
+//     const shapes: ShapeType[] = ['circle', 'square', 'star', 'triangle', 'emoji'];
+//     const weights = [0.25, 0.2, 0.2, 0.15, 0.2];
+//     const rand = Math.random();
+//     let cumulative = 0;
+//     let shape: ShapeType = 'circle';
+//     for (let s = 0; s < shapes.length; s++) {
+//       cumulative += weights[s] ?? 0;
+//       if (rand < cumulative) {
+//         shape = shapes[s] ?? 'circle';
+//         break;
+//       }
+//     }
+
+//     const isEmoji = shape === 'emoji';
+
+//     // สุ่ม target position ที่ใดก็ได้บนหน้าจอ
+//     // แบ่ง zone 4 มุม + 4 ขอบ ให้กระจายทั่ว
+//     const zone = i % 8;
+//     let targetX: number, targetY: number;
+
+//     switch (zone) {
+//       case 0: // ซ้ายบน
+//         targetX = Math.random() * W * 0.35;
+//         targetY = Math.random() * H * 0.35;
+//         break;
+//       case 1: // กลางบน
+//         targetX = W * 0.25 + Math.random() * W * 0.5;
+//         targetY = Math.random() * H * 0.25;
+//         break;
+//       case 2: // ขวาบน
+//         targetX = W * 0.65 + Math.random() * W * 0.35;
+//         targetY = Math.random() * H * 0.35;
+//         break;
+//       case 3: // ขวากลาง
+//         targetX = W * 0.65 + Math.random() * W * 0.35;
+//         targetY = H * 0.25 + Math.random() * H * 0.5;
+//         break;
+//       case 4: // ขวาล่าง
+//         targetX = W * 0.65 + Math.random() * W * 0.35;
+//         targetY = H * 0.65 + Math.random() * H * 0.35;
+//         break;
+//       case 5: // กลางล่าง
+//         targetX = W * 0.25 + Math.random() * W * 0.5;
+//         targetY = H * 0.75 + Math.random() * H * 0.25;
+//         break;
+//       case 6: // ซ้ายล่าง
+//         targetX = Math.random() * W * 0.35;
+//         targetY = H * 0.65 + Math.random() * H * 0.35;
+//         break;
+//       case 7: // ซ้ายกลาง
+//         targetX = Math.random() * W * 0.25;
+//         targetY = H * 0.25 + Math.random() * H * 0.5;
+//         break;
+//       default:
+//         targetX = Math.random() * W;
+//         targetY = Math.random() * H;
+//     }
+
+//     // dx/dy คือระยะจากจุดคลิกไปยัง target
+//     const dx = targetX - x;
+//     const dy = targetY - y;
+
+//     const style: Record<string, string> = {
+//       '--x': `${x}px`,
+//       '--y': `${y}px`,
+//       '--dx': `${dx}px`,
+//       '--dy': `${dy}px`,
+//       '--dur': `${dur}s`,
+//       '--color': isEmoji ? 'transparent' : color,
+//       '--size': isEmoji ? '22px' : `${size}px`,
+//       '--shape': shape,
+//       '--emoji-content': isEmoji ? `"${emoji}"` : '""',
+//       '--rot': `${Math.random() * 720 - 360}deg`,
+//     };
+
+//     activeParticles.value.push({ id, style });
+//     setTimeout(
+//       () => {
+//         activeParticles.value = activeParticles.value.filter((p) => p.id !== id);
+//       },
+//       dur * 1000 + 200,
+//     );
+//   }
+// };
 
 const handleGlobalClick = (e: MouseEvent) => {
   const target = e.target as HTMLElement;
@@ -888,6 +976,8 @@ watch(
 </script>
 
 <style lang="scss" scoped>
+
+// import and color 
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&family=Prompt:wght@400;500;600;700&display=swap');
 
 $indigo-deep: #1a1460;
@@ -901,6 +991,411 @@ $muted: #8b87b0;
 
 $indigo-deep: #1a1460;
 $indigo-mid: #2d2d8a;
+
+
+// ใช้้แค่อันเดียว
+
+// ============================================================
+// PAGE
+// ============================================================
+.sender-page {
+  font-family: 'Noto Sans Thai', 'Prompt', sans-serif;
+  background: linear-gradient(155deg, #f0edff 0%, #fff9ee 55%, #e8f8f6 100%);
+  min-height: 100vh;
+  padding-bottom: 3rem;
+}
+
+// ============================================================
+// HERO
+// ============================================================
+.hero-header {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, $indigo-deep 0%, $indigo-mid 55%, #3b1f80 100%);
+  padding: clamp(2rem, 5vw, 3.5rem) 1.5rem clamp(3rem, 7vw, 5rem);
+  text-align: center;
+}
+
+.hero-orb {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.14;
+}
+.orb-1 {
+  width: 300px;
+  height: 300px;
+  background: $gold;
+  top: -90px;
+  right: -70px;
+  animation: floatY 7s ease-in-out infinite;
+}
+.orb-2 {
+  width: 200px;
+  height: 200px;
+  background: $teal;
+  bottom: -50px;
+  left: -50px;
+  animation: floatY 9s ease-in-out infinite reverse;
+}
+.orb-3 {
+  width: 130px;
+  height: 130px;
+  background: #ffd166;
+  top: 10px;
+  left: 28%;
+  animation: floatY 5.5s ease-in-out infinite 1.2s;
+}
+
+@keyframes floatY {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-18px);
+  }
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+}
+
+.hero-emoji {
+  font-size: clamp(2.8rem, 8vw, 4rem);
+  line-height: 1;
+  margin-bottom: 0.6rem;
+  animation: popIn 0.55s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+@keyframes popIn {
+  0% {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+  80% {
+    transform: scale(1.12);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.hero-title {
+  font-family: 'Prompt', sans-serif;
+  font-size: clamp(1.7rem, 5vw, 2.5rem);
+  font-weight: 700;
+  color: $white;
+  margin: 0 0 0.35rem;
+  letter-spacing: -0.02em;
+}
+
+.hero-sub {
+  font-size: clamp(0.82rem, 2.5vw, 1rem);
+  color: rgba(255, 255, 255, 0.68);
+  margin: 0;
+}
+
+// ============================================================
+// FORM
+// ============================================================
+.form-body {
+  margin-top: -2rem;
+}
+
+.body-container {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+
+
+.selected-preview {
+  margin-bottom: 1rem;
+  border-radius: 14px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 4px 20px rgba(26, 20, 96, 0.12);
+}
+
+.selected-preview-img {
+  border-radius: 14px;
+}
+
+.selected-preview-badge {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  background: rgba(26, 20, 96, 0.75);
+  backdrop-filter: blur(4px);
+  color: $white;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.grid-wrapper {
+  width: 100%;
+}
+
+.grid-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  @media (min-width: 480px) {
+    gap: 10px;
+  }
+}
+
+.grid-area {
+  flex: 1;
+  min-width: 0;
+}
+
+.img-card {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  border: 2.5px solid transparent;
+  transition:
+    border-color 0.22s,
+    transform 0.2s,
+    box-shadow 0.2s;
+  background: $surface;
+
+  &:hover {
+    border-color: rgba(45, 45, 138, 0.35);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(45, 45, 138, 0.15);
+  }
+  &--active {
+    border-color: $indigo-mid;
+    box-shadow: 0 6px 24px rgba(45, 45, 138, 0.28);
+    transform: translateY(-2px);
+  }
+}
+
+.img-card-img {
+  display: block;
+}
+
+.img-card-check {
+  position: absolute;
+  inset: 0;
+  background: rgba(45, 45, 138, 0.38);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.page-dots {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  margin-top: 0.75rem;
+}
+
+.page-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(45, 45, 138, 0.2);
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    transform 0.2s;
+
+  &--active {
+    background: $indigo-mid;
+    transform: scale(1.35);
+  }
+}
+
+.fields-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+
+// ===== WISH SELECT =====
+.wish-select {
+  :deep(.q-field__control) {
+    border-radius: 14px !important;
+    background: linear-gradient(135deg, #f8f7ff, #fff) !important;
+    border: 1.5px solid rgba(99, 102, 241, 0.2) !important;
+    transition:
+      border-color 0.2s,
+      box-shadow 0.2s !important;
+  }
+
+  :deep(.q-field--focused .q-field__control) {
+    border-color: rgba(99, 102, 241, 0.5) !important;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1) !important;
+  }
+
+  :deep(.q-field__label) {
+    color: #8b87b0 !important;
+    font-size: 0.88rem !important;
+  }
+}
+
+.wish-selected-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 0;
+}
+
+.wish-selected-dot {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.wish-selected-text {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #1a1460;
+  line-height: 1.4;
+  white-space: normal;
+  word-break: break-word;
+}
+
+// Popup dropdown
+:global(.wish-select-popup) {
+  border-radius: 14px !important;
+  box-shadow: 0 8px 32px rgba(99, 102, 241, 0.15) !important;
+  border: 1px solid rgba(99, 102, 241, 0.1) !important;
+  overflow: hidden;
+}
+
+.wish-option-item {
+  padding: 10px 14px !important;
+  transition: background 0.15s !important;
+  border-bottom: 1px solid rgba(99, 102, 241, 0.05) !important;
+
+  &:last-child {
+    border-bottom: none !important;
+  }
+
+  &:hover {
+    background: rgba(99, 102, 241, 0.05) !important;
+  }
+
+  // active item
+  :deep(&.q-item--active) {
+    background: rgba(99, 102, 241, 0.08) !important;
+  }
+}
+
+.wish-option-icon {
+  font-size: 1.1rem;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(99, 102, 241, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wish-option-label {
+  font-size: 0.88rem !important;
+  font-weight: 500 !important;
+  color: #1a1460 !important;
+  white-space: normal !important;
+  line-height: 1.5 !important;
+}
+
+.wish-no-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 1.5rem;
+  color: #9ca3af;
+  font-size: 0.85rem;
+
+  span:first-child {
+    font-size: 2rem;
+  }
+}
+
+.actions-row {
+  display: flex;
+  gap: 12px;
+
+  @media (max-width: 480px) {
+    flex-direction: column;
+  }
+}
+
+.submit-btn,
+.reset-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0.9rem 1.4rem;
+  border-radius: 14px;
+  border: none;
+  font-family: 'Noto Sans Thai', 'Prompt', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    transform 0.18s,
+    box-shadow 0.18s,
+    opacity 0.18s;
+
+  &:active {
+    transform: scale(0.97);
+  }
+}
+
+.submit-btn {
+  flex: 1;
+  background: linear-gradient(135deg, $indigo-deep, $indigo-mid 55%, #5a3ea0);
+  color: $white;
+  box-shadow: 0 6px 24px rgba(45, 45, 138, 0.32);
+
+  &:hover:not(:disabled) {
+    box-shadow: 0 10px 32px rgba(45, 45, 138, 0.42);
+    transform: translateY(-2px);
+  }
+  &--loading,
+  &:disabled {
+    opacity: 0.72;
+    cursor: not-allowed;
+  }
+}
+
+.btn-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+
+
+
+
+
+
+
 
 .loading-dialog {
   background: #fff;
@@ -1074,6 +1569,8 @@ $indigo-mid: #2d2d8a;
     box-shadow: 0 0 0 5px rgba(99, 102, 241, 0);
   }
 }
+
+
 .ld-step-spinner {
   display: inline-block;
   width: 9px;
@@ -1083,6 +1580,7 @@ $indigo-mid: #2d2d8a;
   border-top-color: transparent;
   animation: ldSpin 0.7s linear infinite;
 }
+
 .ld-step-label {
   flex: 1;
   font-size: 0.79rem;
@@ -1098,6 +1596,7 @@ $indigo-mid: #2d2d8a;
     color: #9ca3af;
   }
 }
+
 .ld-step-pct {
   font-size: 0.7rem;
   font-weight: 700;
@@ -1160,509 +1659,136 @@ $indigo-mid: #2d2d8a;
 }
 
 // ============================================================
-// PAGE
+// UNPOLITE DIALOG
 // ============================================================
-.sender-page {
-  font-family: 'Noto Sans Thai', 'Prompt', sans-serif;
-  background: linear-gradient(155deg, #f0edff 0%, #fff9ee 55%, #e8f8f6 100%);
-  min-height: 100vh;
-  padding-bottom: 3rem;
+.unpolite-dialog {
+  background: #fff;
+  border-radius: 24px;
+  overflow: hidden;
+  width: 360px;
+  max-width: 92vw;
+  box-shadow: 0 24px 64px rgba(220, 38, 38, 0.18);
 }
 
-// ============================================================
-// HERO
-// ============================================================
-.hero-header {
-  position: relative;
-  overflow: hidden;
-  background: linear-gradient(135deg, $indigo-deep 0%, $indigo-mid 55%, #3b1f80 100%);
-  padding: clamp(2rem, 5vw, 3.5rem) 1.5rem clamp(3rem, 7vw, 5rem);
+.unpolite-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 1.25rem 1.5rem;
+  background: linear-gradient(135deg, #7f1d1d, #dc2626);
+}
+
+.unpolite-header-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.unpolite-title {
+  font-family: 'Prompt', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.2;
+}
+
+.unpolite-sub {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.72);
+  margin-top: 2px;
+}
+
+.unpolite-body {
+  padding: 1.5rem 1.5rem 0.75rem;
   text-align: center;
 }
 
-.hero-orb {
-  position: absolute;
-  border-radius: 50%;
-  opacity: 0.14;
-}
-.orb-1 {
-  width: 300px;
-  height: 300px;
-  background: $gold;
-  top: -90px;
-  right: -70px;
-  animation: floatY 7s ease-in-out infinite;
-}
-.orb-2 {
-  width: 200px;
-  height: 200px;
-  background: $teal;
-  bottom: -50px;
-  left: -50px;
-  animation: floatY 9s ease-in-out infinite reverse;
-}
-.orb-3 {
-  width: 130px;
-  height: 130px;
-  background: #ffd166;
-  top: 10px;
-  left: 28%;
-  animation: floatY 5.5s ease-in-out infinite 1.2s;
+.unpolite-icon-wrap {
+  margin-bottom: 0.75rem;
 }
 
-@keyframes floatY {
+.unpolite-emoji {
+  font-size: 3rem;
+  display: inline-block;
+  animation: unpoliteShake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+@keyframes unpoliteShake {
   0%,
   100% {
-    transform: translateY(0);
+    transform: rotate(0deg);
   }
-  50% {
-    transform: translateY(-18px);
+  20% {
+    transform: rotate(-12deg) scale(1.1);
   }
-}
-
-.hero-content {
-  position: relative;
-  z-index: 2;
-}
-
-.hero-emoji {
-  font-size: clamp(2.8rem, 8vw, 4rem);
-  line-height: 1;
-  margin-bottom: 0.6rem;
-  animation: popIn 0.55s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
-}
-
-@keyframes popIn {
-  0% {
-    transform: scale(0.4);
-    opacity: 0;
+  40% {
+    transform: rotate(10deg) scale(1.1);
+  }
+  60% {
+    transform: rotate(-8deg);
   }
   80% {
-    transform: scale(1.12);
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
+    transform: rotate(6deg);
   }
 }
 
-.hero-title {
-  font-family: 'Prompt', sans-serif;
-  font-size: clamp(1.7rem, 5vw, 2.5rem);
-  font-weight: 700;
-  color: $white;
-  margin: 0 0 0.35rem;
-  letter-spacing: -0.02em;
+.unpolite-msg {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #dc2626;
+  background: #fee2e2;
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin: 0 0 10px;
+  line-height: 1.6;
 }
 
-.hero-sub {
-  font-size: clamp(0.82rem, 2.5vw, 1rem);
-  color: rgba(255, 255, 255, 0.68);
+.unpolite-hint {
+  font-size: 0.78rem;
+  color: #9ca3af;
+  line-height: 1.6;
   margin: 0;
 }
 
-// ============================================================
-// FORM
-// ============================================================
-.form-body {
-  margin-top: -2rem;
-}
-
-.body-container {
-  max-width: 680px;
-  margin: 0 auto;
-  padding: 0 1rem;
+.unpolite-footer {
+  padding: 0.75rem 1.5rem 1.25rem;
   display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-}
-
-.section-card {
-  background: $white;
-  border-radius: 20px;
-  padding: 1.5rem;
-  box-shadow:
-    0 4px 28px rgba(26, 20, 96, 0.08),
-    0 1px 4px rgba(26, 20, 96, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.85);
-
-  @media (max-width: 480px) {
-    padding: 1.1rem;
-  }
-}
-
-.section-label {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  color: $muted;
-  text-transform: uppercase;
-  margin-bottom: 1.1rem;
-}
-
-.step-badge {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, $indigo-mid, #6b5ce7);
-  color: $white;
-  font-size: 0.72rem;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-
-  &--amber {
-    background: linear-gradient(135deg, $gold, #e8820a);
-  }
-}
-
-.selected-preview {
-  margin-bottom: 1rem;
-  border-radius: 14px;
-  overflow: hidden;
-  position: relative;
-  box-shadow: 0 4px 20px rgba(26, 20, 96, 0.12);
-}
-
-.selected-preview-img {
-  border-radius: 14px;
-}
-
-.selected-preview-badge {
-  position: absolute;
-  bottom: 10px;
-  left: 10px;
-  background: rgba(26, 20, 96, 0.75);
-  backdrop-filter: blur(4px);
-  color: $white;
-  font-size: 0.75rem;
-  font-weight: 600;
-  padding: 4px 10px;
-  border-radius: 20px;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-// ===== WISH SELECT =====
-.wish-select {
-  :deep(.q-field__control) {
-    border-radius: 14px !important;
-    background: linear-gradient(135deg, #f8f7ff, #fff) !important;
-    border: 1.5px solid rgba(99, 102, 241, 0.2) !important;
-    transition:
-      border-color 0.2s,
-      box-shadow 0.2s !important;
-  }
-
-  :deep(.q-field--focused .q-field__control) {
-    border-color: rgba(99, 102, 241, 0.5) !important;
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1) !important;
-  }
-
-  :deep(.q-field__label) {
-    color: #8b87b0 !important;
-    font-size: 0.88rem !important;
-  }
-}
-
-.wish-selected-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 2px 0;
-}
-
-.wish-selected-dot {
-  font-size: 1rem;
-  flex-shrink: 0;
-}
-
-.wish-selected-text {
-  font-size: 0.92rem;
-  font-weight: 600;
-  color: #1a1460;
-  line-height: 1.4;
-  white-space: normal;
-  word-break: break-word;
-}
-
-// Popup dropdown
-:global(.wish-select-popup) {
-  border-radius: 14px !important;
-  box-shadow: 0 8px 32px rgba(99, 102, 241, 0.15) !important;
-  border: 1px solid rgba(99, 102, 241, 0.1) !important;
-  overflow: hidden;
-}
-
-.wish-option-item {
-  padding: 10px 14px !important;
-  transition: background 0.15s !important;
-  border-bottom: 1px solid rgba(99, 102, 241, 0.05) !important;
-
-  &:last-child {
-    border-bottom: none !important;
-  }
-
-  &:hover {
-    background: rgba(99, 102, 241, 0.05) !important;
-  }
-
-  // active item
-  :deep(&.q-item--active) {
-    background: rgba(99, 102, 241, 0.08) !important;
-  }
-}
-
-.wish-option-icon {
-  font-size: 1.1rem;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: rgba(99, 102, 241, 0.08);
-  display: flex;
-  align-items: center;
   justify-content: center;
 }
 
-.wish-option-label {
-  font-size: 0.88rem !important;
-  font-weight: 500 !important;
-  color: #1a1460 !important;
-  white-space: normal !important;
-  line-height: 1.5 !important;
-}
-
-.wish-no-option {
-  display: flex;
-  flex-direction: column;
+.unpolite-btn {
+  display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 1.5rem;
-  color: #9ca3af;
-  font-size: 0.85rem;
-
-  span:first-child {
-    font-size: 2rem;
-  }
-}
-.grid-wrapper {
-  width: 100%;
-}
-
-.grid-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-
-  @media (min-width: 480px) {
-    gap: 10px;
-  }
-}
-
-.grid-area {
-  flex: 1;
-  min-width: 0;
-}
-
-.nav-btn {
-  flex-shrink: 0;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: 1.5px solid rgba(45, 45, 138, 0.2);
-  background: $white;
-  color: $indigo-mid;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition:
-    background 0.18s,
-    border-color 0.18s,
-    transform 0.12s,
-    box-shadow 0.18s;
-  box-shadow: 0 2px 8px rgba(45, 45, 138, 0.08);
-
-  &:hover:not(:disabled) {
-    background: $indigo-soft;
-    border-color: $indigo-mid;
-    transform: scale(1.08);
-  }
-
-  &:disabled {
-    opacity: 0.3;
-    cursor: not-allowed;
-  }
-
-  @media (min-width: 480px) {
-    width: 44px;
-    height: 44px;
-  }
-}
-
-.img-card {
-  position: relative;
+  padding: 10px 28px;
   border-radius: 12px;
-  overflow: hidden;
-  cursor: pointer;
-  border: 2.5px solid transparent;
-  transition:
-    border-color 0.22s,
-    transform 0.2s,
-    box-shadow 0.2s;
-  background: $surface;
-
-  &:hover {
-    border-color: rgba(45, 45, 138, 0.35);
-    transform: translateY(-3px);
-    box-shadow: 0 8px 20px rgba(45, 45, 138, 0.15);
-  }
-  &--active {
-    border-color: $indigo-mid;
-    box-shadow: 0 6px 24px rgba(45, 45, 138, 0.28);
-    transform: translateY(-2px);
-  }
-}
-
-.img-card-img {
-  display: block;
-}
-
-.img-card-check {
-  position: absolute;
-  inset: 0;
-  background: rgba(45, 45, 138, 0.38);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.page-dots {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 6px;
-  margin-top: 0.75rem;
-}
-
-.page-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: rgba(45, 45, 138, 0.2);
-  cursor: pointer;
-  transition:
-    background 0.2s,
-    transform 0.2s;
-
-  &--active {
-    background: $indigo-mid;
-    transform: scale(1.35);
-  }
-}
-
-.fields-stack {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-.field-group {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.field-label-text {
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: $muted;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  padding-left: 2px;
-}
-
-.custom-field :deep(.q-field__control) {
-  border-radius: 12px !important;
-  background: $surface !important;
-}
-
-.actions-row {
-  display: flex;
-  gap: 12px;
-
-  @media (max-width: 480px) {
-    flex-direction: column;
-  }
-}
-
-.submit-btn,
-.reset-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 0.9rem 1.4rem;
-  border-radius: 14px;
   border: none;
+  background: linear-gradient(135deg, #7f1d1d, #dc2626);
+  color: white;
   font-family: 'Noto Sans Thai', 'Prompt', sans-serif;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 700;
   cursor: pointer;
+  box-shadow: 0 4px 16px rgba(220, 38, 38, 0.35);
   transition:
     transform 0.18s,
-    box-shadow 0.18s,
-    opacity 0.18s;
+    box-shadow 0.18s;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 22px rgba(220, 38, 38, 0.45);
+  }
 
   &:active {
     transform: scale(0.97);
   }
 }
 
-.submit-btn {
-  flex: 1;
-  background: linear-gradient(135deg, $indigo-deep, $indigo-mid 55%, #5a3ea0);
-  color: $white;
-  box-shadow: 0 6px 24px rgba(45, 45, 138, 0.32);
-
-  &:hover:not(:disabled) {
-    box-shadow: 0 10px 32px rgba(45, 45, 138, 0.42);
-    transform: translateY(-2px);
-  }
-  &--loading,
-  &:disabled {
-    opacity: 0.72;
-    cursor: not-allowed;
-  }
-}
-
-.btn-inner {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-
-.reset-btn {
-  background: rgba(45, 45, 138, 0.07);
-  color: $muted;
-  flex: 0 0 auto;
-  padding: 0.9rem 1.2rem;
-
-  &:hover {
-    background: rgba(45, 45, 138, 0.13);
-    color: $indigo-mid;
-  }
-
-  @media (max-width: 480px) {
-    flex: 1;
-  }
-}
 
 // ============================================================
 // SUCCESS OVERLAY
@@ -1948,176 +2074,7 @@ $indigo-mid: #2d2d8a;
   }
 }
 
-// ============================================================
-// TRANSITIONS
-// ============================================================
-.success-fade-enter-active,
-.success-fade-leave-active {
-  transition: opacity 0.3s ease;
-}
-.success-fade-enter-from,
-.success-fade-leave-to {
-  opacity: 0;
-}
 
-.fade-slide-enter-active,
-.fade-slide-leave-active {
-  transition: all 0.32s cubic-bezier(0.36, 0.07, 0.19, 0.97);
-}
-.fade-slide-enter-from {
-  opacity: 0;
-  transform: translateY(-10px) scale(0.97);
-}
-.fade-slide-leave-to {
-  opacity: 0;
-  transform: translateY(8px) scale(0.97);
-}
-
-.animate-in {
-  animation: slideUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(22px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-// ============================================================
-// UNPOLITE DIALOG
-// ============================================================
-.unpolite-dialog {
-  background: #fff;
-  border-radius: 24px;
-  overflow: hidden;
-  width: 360px;
-  max-width: 92vw;
-  box-shadow: 0 24px 64px rgba(220, 38, 38, 0.18);
-}
-
-.unpolite-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 1.25rem 1.5rem;
-  background: linear-gradient(135deg, #7f1d1d, #dc2626);
-}
-
-.unpolite-header-icon {
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.18);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.unpolite-title {
-  font-family: 'Prompt', sans-serif;
-  font-size: 1rem;
-  font-weight: 700;
-  color: #fff;
-  line-height: 1.2;
-}
-
-.unpolite-sub {
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.72);
-  margin-top: 2px;
-}
-
-.unpolite-body {
-  padding: 1.5rem 1.5rem 0.75rem;
-  text-align: center;
-}
-
-.unpolite-icon-wrap {
-  margin-bottom: 0.75rem;
-}
-
-.unpolite-emoji {
-  font-size: 3rem;
-  display: inline-block;
-  animation: unpoliteShake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
-}
-
-@keyframes unpoliteShake {
-  0%,
-  100% {
-    transform: rotate(0deg);
-  }
-  20% {
-    transform: rotate(-12deg) scale(1.1);
-  }
-  40% {
-    transform: rotate(10deg) scale(1.1);
-  }
-  60% {
-    transform: rotate(-8deg);
-  }
-  80% {
-    transform: rotate(6deg);
-  }
-}
-
-.unpolite-msg {
-  font-size: 0.92rem;
-  font-weight: 600;
-  color: #dc2626;
-  background: #fee2e2;
-  border-radius: 10px;
-  padding: 10px 14px;
-  margin: 0 0 10px;
-  line-height: 1.6;
-}
-
-.unpolite-hint {
-  font-size: 0.78rem;
-  color: #9ca3af;
-  line-height: 1.6;
-  margin: 0;
-}
-
-.unpolite-footer {
-  padding: 0.75rem 1.5rem 1.25rem;
-  display: flex;
-  justify-content: center;
-}
-
-.unpolite-btn {
-  display: inline-flex;
-  align-items: center;
-  padding: 10px 28px;
-  border-radius: 12px;
-  border: none;
-  background: linear-gradient(135deg, #7f1d1d, #dc2626);
-  color: white;
-  font-family: 'Noto Sans Thai', 'Prompt', sans-serif;
-  font-size: 0.9rem;
-  font-weight: 700;
-  cursor: pointer;
-  box-shadow: 0 4px 16px rgba(220, 38, 38, 0.35);
-  transition:
-    transform 0.18s,
-    box-shadow 0.18s;
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 22px rgba(220, 38, 38, 0.45);
-  }
-
-  &:active {
-    transform: scale(0.97);
-  }
-}
 // ============================================================
 // CLICK PARTICLES
 // ============================================================
@@ -2200,5 +2157,123 @@ $indigo-mid: #2d2d8a;
     opacity: 0;
     transform: translate(-50%, -50%) translate(var(--dx), var(--dy)) rotate(var(--rot)) scale(0.1);
   }
+}
+
+
+
+// more than 1
+
+.section-card {
+  background: $white;
+  border-radius: 20px;
+  padding: 1.5rem;
+  box-shadow:
+    0 4px 28px rgba(26, 20, 96, 0.08),
+    0 1px 4px rgba(26, 20, 96, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+
+  @media (max-width: 480px) {
+    padding: 1.1rem;
+  }
+}
+
+.animate-in {
+  animation: slideUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+.section-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: $muted;
+  text-transform: uppercase;
+  margin-bottom: 1.1rem;
+}
+
+.step-badge {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, $indigo-mid, #6b5ce7);
+  color: $white;
+  font-size: 0.72rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  &--amber {
+    background: linear-gradient(135deg, $gold, #e8820a);
+  }
+}
+.nav-btn {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(45, 45, 138, 0.2);
+  background: $white;
+  color: $indigo-mid;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background 0.18s,
+    border-color 0.18s,
+    transform 0.12s,
+    box-shadow 0.18s;
+  box-shadow: 0 2px 8px rgba(45, 45, 138, 0.08);
+
+  &:hover:not(:disabled) {
+    background: $indigo-soft;
+    border-color: $indigo-mid;
+    transform: scale(1.08);
+  }
+
+  &:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
+  @media (min-width: 480px) {
+    width: 44px;
+    height: 44px;
+  }
+}
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.field-label-text {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: $muted;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding-left: 2px;
+}
+
+.custom-field :deep(.q-field__control) {
+  border-radius: 12px !important;
+  background: $surface !important;
 }
 </style>

@@ -8,28 +8,38 @@
         </div>
 
         <q-toolbar-title class="admin-title">
-          ระบบบริหารจัดการอวยพรเนื่องในโอกาสต่างๆ ของกรมฯ
+          <!-- ระบบบริหารจัดการอวยพรเนื่องในโอกาสต่างๆ ของกรมฯ -->
+            <span class="admin-title-text">ระบบบริหารจัดการอวยพรเนื่องในโอกาสต่างๆ ของกรมฯ</span>
         </q-toolbar-title>
 
         <q-space />
 
-        <div class="admin-badge gt-xs">
-          <q-icon name="admin_panel_settings" size="16px" />
-          <span>{{ firstName }}</span>
-        </div>
 
-        <q-btn
-          flat
-          round
-          dense
-          icon="logout"
-          color="white"
-          size="md"
-          class="logout-btn"
-          @click="handleLogout"
-        >
-          <q-tooltip>ออกจากระบบ</q-tooltip>
-        </q-btn>
+    <div class="admin-badge gt-xs" v-if="firstName">
+  <q-icon name="admin_panel_settings" size="16px" />
+  <span>{{ firstName }}</span>
+</div>
+
+<q-btn
+  v-if="isLoggedIn"
+  flat
+  round
+  dense
+  icon="logout"
+  color="white"
+  size="md"
+  class="logout-btn"
+  @click="handleLogout"
+>
+  <q-tooltip>ออกจากระบบ</q-tooltip>
+</q-btn>
+
+<!-- else -->
+<div v-else class="header-dots gt-xs">
+  <span class="dot dot-1" />
+  <span class="dot dot-2" />
+  <span class="dot dot-3" />
+</div>
       </q-toolbar>
     </q-header>
      <br />
@@ -85,7 +95,7 @@
               route.path.startsWith('/admin/create'),
           }"
         >
-          <div class="nav-item-icon"><q-icon name="celebration" size="20px" /></div>
+          <div class="nav-item-icon"><q-icon name="celebration" size="18px" /></div>
           <span>เทศกาล</span>
           <div class="nav-item-indicator" />
         </router-link>
@@ -97,7 +107,7 @@
           class="nav-item"
           :class="{ 'nav-item--active': route.path === '/admin/unpolite' }"
         >
-          <div class="nav-item-icon"><q-icon name="block" size="20px" /></div>
+          <div class="nav-item-icon"><q-icon name="block" size="18px" /></div>
           <span>รายการคำต้องห้าม</span>
           <div class="nav-item-indicator" />
         </router-link>
@@ -160,18 +170,23 @@
           <div class="footer-col">
             <div class="footer-col-title">เมนูทางลัด</div>
             <div class="footer-links">
-              <router-link :to="`/${currentId}`" class="footer-link">
-                <q-icon name="favorite_border" size="14px" class="q-mr-xs" />
-                ร่วมส่งคำอวยพร
+              <!-- <router-link :to="`/${currentId}`" class="footer-link"> -->
+                <router-link :to="`/admin/festival`" class="footer-link">
+                <!-- <q-icon name="favorite_border" size="14px" class="q-mr-xs" /> -->
+                <q-icon name="celebration" size="14px"  class="q-mr-xs"/>
+                <!-- ร่วมส่งคำอวยพร -->
+                 เทศกาล
               </router-link>
-              <router-link :to="`/${currentId}/list`" class="footer-link">
-                <q-icon name="people_outline" size="14px" class="q-mr-xs" />
-                รายชื่อผู้ร่วมอวยพร
+              <!-- <router-link :to="`/${currentId}/list`" class="footer-link"> -->
+                 <router-link :to="`/admin/unpolite`" class="footer-link">
+                <!-- <q-icon name="people_outline" size="14px" class="q-mr-xs" /> -->
+                 <q-icon name="block" size="14px"  class="q-mr-xs"/>
+                 รายการคำต้องห้าม
               </router-link>
-              <router-link to="/login" class="footer-link">
+              <!-- <router-link to="/login" class="footer-link">
                 <q-icon name="manage_accounts" size="14px" class="q-mr-xs" />
                 แอดมิน
-              </router-link>
+              </router-link> -->
             </div>
           </div>
 
@@ -212,10 +227,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue';
+import { ref, reactive, computed, onMounted,watch } from 'vue';
 import { useQuasar } from 'quasar';
 import { api } from 'src/boot/axios';
 import { useRouter, useRoute } from 'vue-router';
+
+
+
 
 const image = ref('');
 const festivalId = ref();
@@ -225,10 +243,22 @@ const route = useRoute();
 const $q = useQuasar();
 const router = useRouter();
 
-const currentId = computed(
-  () => (route.params.id as string) || localStorage.getItem('festivalId') || '1',
+// const currentId = computed(
+//   () => (route.params.id as string) || localStorage.getItem('festivalId') || '1',
+// );
+// const firstName = localStorage.getItem('firstName');
+
+const firstName = ref(localStorage.getItem('firstName') || '');
+
+const isLoggedIn = computed(() => !!firstName.value);
+
+watch(
+  () => route.path,
+  () => {
+    firstName.value = localStorage.getItem('firstName') || '';
+  },
+  { immediate: true }
 );
-const firstName = localStorage.getItem('firstName');
 
 // ============================================================
 // Alert Dialog State
@@ -307,6 +337,7 @@ const handleLogout = () => {
   localStorage.removeItem('username');
   localStorage.removeItem('userId');
   localStorage.removeItem('firstName');
+  firstName.value = ''; // 🔥 ตัวนี้สำคัญมาก
   router.push('/login').catch(console.error);
 };
 
@@ -320,6 +351,10 @@ onMounted(() => {
 onMounted(() => {
   document.title = 'ระบบบริหารจัดการอวยพรเนื่องในโอกาสต่างๆ ของกรมฯ';
 });
+onMounted(() => {
+  firstName.value = localStorage.getItem('firstName') || '';
+});
+
 </script>
 
 <style lang="scss" scoped>
@@ -348,7 +383,7 @@ $nav-h: 52px;
 }
 
 .admin-toolbar {
-  min-height: 60px;
+  min-height: 58px;
   height: auto;
   padding: 8px 16px;
   gap: 12px;
@@ -365,6 +400,7 @@ $nav-h: 52px;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  animation: pulse-emblem 3s ease-in-out infinite;
 }
 
 .admin-title {
@@ -377,6 +413,19 @@ $nav-h: 52px;
   line-height: 1.45;
   letter-spacing: 0.01em;
 }
+
+.admin-title-text {
+  font-family: 'Sarabun', 'Noto Sans Thai', sans-serif;
+  font-size: clamp(13px, 3.5vw, 20px);
+  font-weight: 700;
+  color: white;
+  // white-space: nowrap;
+   overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+  letter-spacing: 0.01em;
+}
+
 
 .admin-badge {
   display: flex;
@@ -404,6 +453,51 @@ $nav-h: 52px;
   &:hover {
     background: rgba(255, 255, 255, 0.2) !important;
     transform: scale(1.05);
+  }
+}
+
+.header-dots {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.dot {
+  border-radius: 50%;
+  display: block;
+  opacity: 0.6;
+  animation: dot-pulse 1.5s ease-in-out infinite;
+}
+
+.dot-1 {
+  width: 6px;
+  height: 6px;
+  background: $gold-light;
+  animation-delay: 0s;
+}
+.dot-2 {
+  width: 8px;
+  height: 8px;
+  background: white;
+  animation-delay: 0.2s;
+}
+.dot-3 {
+  width: 6px;
+  height: 6px;
+  background: $rose-light;
+  animation-delay: 0.4s;
+}
+
+@keyframes dot-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.3);
+    opacity: 1;
   }
 }
 

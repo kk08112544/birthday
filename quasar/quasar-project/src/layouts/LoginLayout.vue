@@ -79,31 +79,31 @@
     <!-- ===== NAV BAR ===== -->
     <div class="nav-wrap">
       <div class="nav-inner">
-        <!-- ร่วมส่งคำอวยพร -->
+     
         <router-link
-          :to="`/${currentId}`"
+           to="/admin/festival"
           class="nav-tab"
           :class="{ 'nav-tab--active': isHomeActive }"
         >
           <div class="nav-tab-icon">
-            <q-icon name="favorite" size="18px" />
+            <q-icon name="celebration" size="18px" />
           </div>
-          <span class="nav-tab-label">ร่วมส่งคำอวยพร</span>
+          <span class="nav-tab-label">เทศกาล</span>
           <div class="nav-tab-pill" />
         </router-link>
 
         <div class="nav-separator" />
 
-        <!-- รายชื่อผู้ร่วมอวยพร -->
+      
         <router-link
-          :to="`/${currentId}/list`"
+          to="/admin/unpolite"
           class="nav-tab"
           :class="{ 'nav-tab--active': isListActive }"
         >
           <div class="nav-tab-icon">
-            <q-icon name="people" size="18px" />
+           <q-icon name="block" size="18px" />
           </div>
-          <span class="nav-tab-label">รายชื่อผู้ร่วมอวยพร</span>
+          <span class="nav-tab-label">รายการคำต้องห้าม</span>
           <div class="nav-tab-pill" />
         </router-link>
       </div>
@@ -143,7 +143,7 @@
           <div class="footer-col">
             <div class="footer-heading">เมนูทางลัด</div>
             <nav class="footer-links">
-              <router-link :to="`/${currentId}`" class="footer-link">
+              <!-- <router-link :to="`/${currentId}`" class="footer-link">
                 <q-icon name="favorite_border" size="13px" class="q-mr-xs" />
                 ร่วมส่งคำอวยพร
               </router-link>
@@ -154,6 +154,18 @@
               <router-link to="/login" class="footer-link">
                 <q-icon name="manage_accounts" size="13px" class="q-mr-xs" />
                 สำหรับแอดมิน
+              </router-link> -->
+                <router-link :to="`/admin/festival`" class="footer-link">
+                <!-- <q-icon name="favorite_border" size="14px" class="q-mr-xs" /> -->
+                <q-icon name="celebration" size="14px"  class="q-mr-xs"/>
+                <!-- ร่วมส่งคำอวยพร -->
+                 เทศกาล
+              </router-link>
+              <!-- <router-link :to="`/${currentId}/list`" class="footer-link"> -->
+                 <router-link :to="`/admin/unpolite`" class="footer-link">
+                <!-- <q-icon name="people_outline" size="14px" class="q-mr-xs" /> -->
+                 <q-icon name="block" size="14px"  class="q-mr-xs"/>
+                 รายการคำต้องห้าม
               </router-link>
             </nav>
           </div>

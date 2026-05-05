@@ -34,6 +34,7 @@
           class="banner-img"
           fit="contain"
           :ratio="$q.screen.xs ? 4 / 3 : $q.screen.sm ? 16 / 9 : 21 / 9"
+          
         >
           <template v-slot:loading>
             <div class="banner-loading">
@@ -54,10 +55,10 @@
           <div class="banner-overlay" />
 
           <!-- Festival name on image -->
-          <div class="banner-caption" v-if="festivalName">
+          <!-- <div class="banner-caption" v-if="festivalName">
             <div class="banner-caption-tag">🎊 เทศกาล</div>
             <div class="banner-caption-name">{{ festivalName }}</div>
-          </div>
+          </div> -->
         </q-img>
 
         <!-- Shimmer bar under banner -->
@@ -140,10 +141,10 @@
                 <q-icon name="people_outline" size="13px" class="q-mr-xs" />
                 รายชื่อผู้ร่วมอวยพร
               </router-link>
-              <router-link to="/login" class="footer-link">
+              <!-- <router-link to="/login" class="footer-link">
                 <q-icon name="manage_accounts" size="13px" class="q-mr-xs" />
                 สำหรับแอดมิน
-              </router-link>
+              </router-link> -->
             </nav>
           </div>
 
@@ -328,18 +329,26 @@ $nav-h: 52px;
   animation: pulse-emblem 3s ease-in-out infinite;
 }
 
-@keyframes pulse-emblem {
-  0%,
-  100% {
-    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.2);
-  }
-  50% {
-    box-shadow: 0 0 0 6px rgba(255, 255, 255, 0);
-  }
-}
+// @keyframes pulse-emblem {
+//   0%,
+//   100% {
+//     box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.2);
+//   }
+//   50% {
+//     box-shadow: 0 0 0 6px rgba(255, 255, 255, 0);
+//   }
+// }
 
 .festival-title {
-  overflow: hidden;
+  // overflow: hidden;
+  font-family: 'Sarabun', 'Noto Sans Thai', sans-serif;
+  font-size: clamp(12px, 3vw, 17px);
+  font-weight: 600;
+  color: white;
+  white-space: normal;
+  word-break: break-word;
+  line-height: 1.45;
+  letter-spacing: 0.01em;
 }
 
 .festival-title-text {
@@ -347,8 +356,8 @@ $nav-h: 52px;
   font-size: clamp(13px, 3.5vw, 20px);
   font-weight: 700;
   color: white;
-  white-space: nowrap;
-  overflow: hidden;
+  // white-space: nowrap;
+   overflow: hidden;
   text-overflow: ellipsis;
   display: block;
   letter-spacing: 0.01em;
@@ -481,42 +490,42 @@ $nav-h: 52px;
   pointer-events: none;
 }
 
-.banner-caption {
-  position: absolute;
-  bottom: 1.5rem;
-  left: 2rem;
-  animation: slideUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) both 0.2s;
+// .banner-caption {
+//   position: absolute;
+//   bottom: 1.5rem;
+//   left: 2rem;
+//   animation: slideUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) both 0.2s;
 
-  @media (max-width: 480px) {
-    bottom: 1rem;
-    left: 1rem;
-  }
-}
+//   @media (max-width: 480px) {
+//     bottom: 1rem;
+//     left: 1rem;
+//   }
+// }
 
-.banner-caption-tag {
-  display: inline-flex;
-  align-items: center;
-  background: rgba(255, 255, 255, 0.18);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  border-radius: 20px;
-  padding: 3px 12px;
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.92);
-  letter-spacing: 0.05em;
-  margin-bottom: 6px;
-}
+// .banner-caption-tag {
+//   display: inline-flex;
+//   align-items: center;
+//   background: rgba(255, 255, 255, 0.18);
+//   backdrop-filter: blur(8px);
+//   border: 1px solid rgba(255, 255, 255, 0.25);
+//   border-radius: 20px;
+//   padding: 3px 12px;
+//   font-size: 0.72rem;
+//   font-weight: 600;
+//   color: rgba(255, 255, 255, 0.92);
+//   letter-spacing: 0.05em;
+//   margin-bottom: 6px;
+// }
 
-.banner-caption-name {
-  font-family: 'Prompt', sans-serif;
-  font-size: clamp(1.1rem, 5vw, 2.2rem);
-  font-weight: 700;
-  color: #fff;
-  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.3);
-  line-height: 1.2;
-  max-width: 600px;
-}
+// .banner-caption-name {
+//   font-family: 'Prompt', sans-serif;
+//   font-size: clamp(1.1rem, 5vw, 2.2rem);
+//   font-weight: 700;
+//   color: #fff;
+//   text-shadow: 0 2px 16px rgba(0, 0, 0, 0.3);
+//   line-height: 1.2;
+//   max-width: 600px;
+// }
 
 .banner-shimmer-bar {
   height: 4px;

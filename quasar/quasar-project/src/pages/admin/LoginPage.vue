@@ -90,6 +90,8 @@
         </div>
       </div>
     </div>
+     
+   
     <!-- ===== AUTH RESULT DIALOG ===== -->
     <q-dialog v-model="authDialog">
       <div class="auth-dialog">
@@ -173,14 +175,20 @@ const openAuthDialog = (success: boolean, message: string) => {
     success ? 1800 : 2500,
   );
 };
+
+
+
 const onSubmit = async () => {
-  loading.value = true;
+
   try {
-    const response = await api.post('/auth/login', {
+    
+    const data = {
       userName: userName.value,
       password: password.value,
-    });
-
+    }
+      
+    const response = await api.post('/auth/login', data);
+      
     const { accessToken, refreshToken, uId, firstName, userName: uName } = response.data.user.user;
 
     localStorage.setItem('accessToken', accessToken);
@@ -188,8 +196,9 @@ const onSubmit = async () => {
     localStorage.setItem('userId', uId);
     localStorage.setItem('firstName', firstName);
     localStorage.setItem('username', uName);
-
+ 
     if (response.status === 201) {
+     
       openAuthDialog(true, response.data.message || 'เข้าสู่ระบบสำเร็จ');
     }
   } catch (err: unknown) {
@@ -204,9 +213,8 @@ const onSubmit = async () => {
     }
 
     openAuthDialog(false, msg);
-  } finally {
-    loading.value = false;
   }
+  
 };
 
 // ============================================================
@@ -499,7 +507,19 @@ $text-muted: #9ca3af;
 }
 
 .brand-icon-wrap {
-  width: 64px;
+  // width: 64px;
+  // height: 64px;
+  // border-radius: 18px;
+  // background: linear-gradient(135deg, #7f1d1d 0%, $rose-mid 50%, #db2777 100%);
+  // display: flex;
+  // align-items: center;
+  // justify-content: center;
+  // box-shadow:
+  //   0 6px 24px rgba(190, 18, 60, 0.38),
+  //   0 0 0 4px rgba(251, 113, 133, 0.14);
+  // margin-bottom: 4px;
+  // animation: icon-pop 0.55s cubic-bezier(0.36, 0.07, 0.19, 0.97) both 0.1s;
+    width: 64px;
   height: 64px;
   border-radius: 18px;
   background: linear-gradient(135deg, #7f1d1d 0%, $rose-mid 50%, #db2777 100%);
@@ -658,7 +678,274 @@ $text-muted: #9ca3af;
   font-size: 0.72rem;
   color: $text-muted;
 }
+$indigo-deep: #1a1460;
+$indigo-mid: #2d2d8a;
+$indigo-soft: #eeeeff;
+$gold: #f5a623;
+$teal: #0d9488;
+$white: #ffffff;
+$surface: #f5f4ff;
+$muted: #8b87b0;
 
+$indigo-deep: #1a1460;
+$indigo-mid: #2d2d8a;
+
+// .loading-dialog {
+//   background: #fff;
+//   border-radius: 24px;
+//   padding: 2rem 1.75rem 1.75rem;
+//   width: min(340px, 92vw);
+//   text-align: center;
+//   box-shadow: 0 24px 64px rgba(26, 20, 96, 0.22);
+//   font-family: 'Noto Sans Thai', 'Prompt', sans-serif;
+//   outline: none;
+// }
+
+// /* ── Orb ── */
+// .ld-orb-wrap {
+//   position: relative;
+//   width: 90px;
+//   height: 90px;
+//   margin: 0 auto 1.25rem;
+//   display: flex;
+//   align-items: center;
+//   justify-content: center;
+// }
+// .ld-orb-bg {
+//   position: absolute;
+//   inset: 0;
+//   border-radius: 50%;
+//   background: linear-gradient(135deg, #1a1460, #6b5ce7, #a78bfa);
+//   animation: ldOrbPulse 2s ease-in-out infinite;
+// }
+// .ld-orb-ring1 {
+//   position: absolute;
+//   inset: -7px;
+//   border-radius: 50%;
+//   border: 2.5px solid transparent;
+//   border-top-color: #a78bfa;
+//   border-right-color: #6b5ce7;
+//   animation: ldSpin 1.1s linear infinite;
+// }
+// .ld-orb-ring2 {
+//   position: absolute;
+//   inset: -14px;
+//   border-radius: 50%;
+//   border: 1.5px solid transparent;
+//   border-bottom-color: rgba(167, 139, 250, 0.28);
+//   animation: ldSpin 2.2s linear infinite reverse;
+// }
+// .ld-orb-inner {
+//   position: relative;
+//   z-index: 2;
+//   width: 58px;
+//   height: 58px;
+//   border-radius: 50%;
+//   background: #fff;
+//   display: flex;
+//   align-items: center;
+//   justify-content: center;
+//   font-size: 22px;
+// }
+// @keyframes ldSpin {
+//   to {
+//     transform: rotate(360deg);
+//   }
+// }
+// @keyframes ldOrbPulse {
+//   0%,
+//   100% {
+//     box-shadow: 0 0 0 0 rgba(107, 92, 231, 0.3);
+//   }
+//   50% {
+//     box-shadow: 0 0 0 12px rgba(107, 92, 231, 0);
+//   }
+// }
+
+// /* ── Text ── */
+// .ld-title {
+//   font-family: 'Prompt', sans-serif;
+//   font-size: 1.05rem;
+//   font-weight: 700;
+//   color: $indigo-deep;
+//   margin-bottom: 0.1rem;
+// }
+// .ld-pct-row {
+//   display: flex;
+//   align-items: baseline;
+//   justify-content: center;
+//   gap: 3px;
+//   margin-bottom: 0.2rem;
+// }
+// .ld-pct-num {
+//   font-family: 'Prompt', sans-serif;
+//   font-size: 2.8rem;
+//   font-weight: 800;
+//   color: $indigo-mid;
+//   line-height: 1;
+//   transition: all 0.05s;
+//   min-width: 3ch;
+//   text-align: right;
+// }
+// .ld-pct-sym {
+//   font-size: 1.1rem;
+//   font-weight: 700;
+//   color: #6b5ce7;
+// }
+// .ld-sub {
+//   font-size: 0.76rem;
+//   color: #8b87b0;
+//   min-height: 1rem;
+//   margin-bottom: 1rem;
+//   transition: opacity 0.3s;
+// }
+
+// /* ── Step list ── */
+// .ld-steps {
+//   display: flex;
+//   flex-direction: column;
+//   border: 1px solid rgba(45, 45, 138, 0.07);
+//   border-radius: 14px;
+//   overflow: hidden;
+//   margin-bottom: 1rem;
+//   text-align: left;
+// }
+// .ld-step-row {
+//   display: flex;
+//   align-items: center;
+//   gap: 9px;
+//   padding: 9px 13px;
+//   border-bottom: 1px solid rgba(45, 45, 138, 0.06);
+//   transition: background 0.35s;
+//   &:last-child {
+//     border-bottom: none;
+//   }
+//   &--done {
+//     background: rgba(34, 197, 94, 0.05);
+//   }
+//   &--active {
+//     background: rgba(99, 102, 241, 0.07);
+//   }
+//   &--pending {
+//     background: transparent;
+//   }
+// }
+// .ld-step-ic {
+//   width: 20px;
+//   height: 20px;
+//   border-radius: 50%;
+//   flex-shrink: 0;
+//   display: flex;
+//   align-items: center;
+//   justify-content: center;
+//   font-size: 11px;
+//   font-weight: 700;
+//   &--done {
+//     background: #dcfce7;
+//     color: #16a34a;
+//   }
+//   &--active {
+//     background: $indigo-soft;
+//     animation: ldIcPulse 1s ease-in-out infinite;
+//   }
+//   &--pending {
+//     background: #f3f4f6;
+//     color: #d1d5db;
+//   }
+// }
+// @keyframes ldIcPulse {
+//   0%,
+//   100% {
+//     box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.3);
+//   }
+//   50% {
+//     box-shadow: 0 0 0 5px rgba(99, 102, 241, 0);
+//   }
+// }
+// .ld-step-spinner {
+//   display: inline-block;
+//   width: 9px;
+//   height: 9px;
+//   border-radius: 50%;
+//   border: 2px solid #6366f1;
+//   border-top-color: transparent;
+//   animation: ldSpin 0.7s linear infinite;
+// }
+// .ld-step-label {
+//   flex: 1;
+//   font-size: 0.79rem;
+//   line-height: 1.35;
+//   .ld-step-row--done & {
+//     color: #374151;
+//   }
+//   .ld-step-row--active & {
+//     color: $indigo-deep;
+//     font-weight: 700;
+//   }
+//   .ld-step-row--pending & {
+//     color: #9ca3af;
+//   }
+// }
+// .ld-step-pct {
+//   font-size: 0.7rem;
+//   font-weight: 700;
+//   min-width: 28px;
+//   text-align: right;
+//   &--done {
+//     color: #16a34a;
+//   }
+//   &--active {
+//     color: #6366f1;
+//   }
+// }
+
+// /* ── Progress bar ── */
+// .ld-bar-track {
+//   height: 6px;
+//   border-radius: 3px;
+//   background: rgba(45, 45, 138, 0.08);
+//   overflow: hidden;
+//   margin-bottom: 0.85rem;
+// }
+// .ld-bar-fill {
+//   height: 100%;
+//   border-radius: 3px;
+//   background: linear-gradient(90deg, $indigo-mid, #a78bfa);
+//   transition: width 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+// }
+
+// /* ── Dot loader ── */
+// .ld-dots {
+//   display: flex;
+//   gap: 6px;
+//   justify-content: center;
+// }
+// .ld-dot {
+//   width: 7px;
+//   height: 7px;
+//   border-radius: 50%;
+//   background: $indigo-mid;
+//   display: inline-block;
+//   animation: ldDotB 1.2s ease-in-out infinite;
+//   &:nth-child(2) {
+//     animation-delay: 0.2s;
+//   }
+//   &:nth-child(3) {
+//     animation-delay: 0.4s;
+//   }
+// }
+// @keyframes ldDotB {
+//   0%,
+//   80%,
+//   100% {
+//     transform: scale(0.7);
+//     opacity: 0.35;
+//   }
+//   40% {
+//     transform: scale(1.1);
+//     opacity: 1;
+//   }
+// }
 // ============================================================
 // AUTH DIALOG
 // ============================================================
