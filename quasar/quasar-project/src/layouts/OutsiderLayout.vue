@@ -20,20 +20,32 @@
         </div>
       </q-toolbar>
     </q-header>
-    <br />
-    <br />
-    <br />
+   
     <!-- ===== BANNER ===== -->
     <div class="banner-section">
       <!-- Decorative top wave -->
       <div class="banner-top-deco" />
-
+      
       <div class="banner-wrap">
-        <q-img
+        <!-- <q-img
           :src="image"
           class="banner-img"
           fit="contain"
           :ratio="$q.screen.xs ? 4 / 3 : $q.screen.sm ? 16 / 9 : 21 / 9"
+          
+        > -->
+        <!-- <br>
+        <br>
+        <br> -->
+        <br>
+        <br>
+        <br>
+        <br>
+           <q-img
+          :src="image"
+          class="banner-img"
+          fit="cover"
+          :ratio="18/9"
           
         >
           <template v-slot:loading>
@@ -411,43 +423,113 @@ $nav-h: 52px;
 // ============================================================
 // BANNER
 // ============================================================
+// .banner-section {
+//   background: linear-gradient(180deg, #fff1f2 0%, #fce7f3 100%);
+//   padding: 32px 48px 0;
+//   position: relative;
+
+//   @media (max-width: 768px) {
+//     padding: 18px 18px 0;
+//   }
+//   @media (max-width: 480px) {
+//     padding: 8px 0 0;
+//   }
+// }
+// .banner-section {
+//   background: linear-gradient(180deg, #fff1f2 0%, #fce7f3 100%);
+//   padding: 20px 0px 0;
+//   // padding: 32px 0, 0;
+//   position: relative;
+
+//   @media (max-width: 768px) {
+//     // padding: 18px 18px 0;
+//     // padding: 18px 12px 0;
+//     padding: 16px 0px 0;
+//   }
+//   // @media (max-width: 480px) {
+//   //   padding: 8px 0 0;
+//   // }
+// }
 .banner-section {
   background: linear-gradient(180deg, #fff1f2 0%, #fce7f3 100%);
-  padding: 32px 48px 0;
+  padding: 32px 0, 0;   // ← เพิ่มจาก 20px → 48px
   position: relative;
 
   @media (max-width: 768px) {
-    padding: 18px 18px 0;
+    padding: 18px 12px 0;  // ← เพิ่มจาก 16px → 32px
   }
-  @media (max-width: 480px) {
-    padding: 8px 0 0;
-  }
+
+  // @media (max-width: 480px) {
+  //   padding: 8px 0 0 0;
+  // }
 }
 
 .banner-top-deco {
   display: none; // optional accent bar if desired
 }
 
+// .banner-wrap {
+//   max-width: 1200px;
+//   margin: 0 auto;
+//   border-radius: 24px;
+//   overflow: hidden;
+//   box-shadow:
+//     0 8px 40px rgba(190, 18, 60, 0.18),
+//     0 2px 6px rgba(0, 0, 0, 0.06),
+//     0 0 0 1px rgba(190, 18, 60, 0.08);
+
+//   @media (max-width: 768px) {
+//     border-radius: 16px;
+//     box-shadow: 0 4px 24px rgba(190, 18, 60, 0.12);
+//   }
+
+//   @media (max-width: 480px) {
+//     border-radius: 0;
+//     box-shadow: none;
+//   }
+// }
 .banner-wrap {
   max-width: 1200px;
+  // margin: 0 auto;
   margin: 0 auto;
-  border-radius: 24px;
-  overflow: hidden;
-  box-shadow:
-    0 8px 40px rgba(190, 18, 60, 0.18),
-    0 2px 6px rgba(0, 0, 0, 0.06),
-    0 0 0 1px rgba(190, 18, 60, 0.08);
+  // margin:auto;
+  // border-radius: 24px;
+  // overflow: hidden;
+  // box-shadow:
+  //   0 8px 40px rgba(190, 18, 60, 0.18),
+  //   0 2px 6px rgba(0, 0, 0, 0.06),
+  //   0 0 0 1px rgba(190, 18, 60, 0.08);
 
   @media (max-width: 768px) {
     border-radius: 16px;
-    box-shadow: 0 4px 24px rgba(190, 18, 60, 0.12);
+    // box-shadow: 0 4px 24px rgba(190, 18, 60, 0.12);
   }
-
   @media (max-width: 480px) {
     border-radius: 0;
-    box-shadow: none;
+    // box-shadow: none;
   }
 }
+
+// .banner-wrap {
+//   max-width: 1200px;
+//   // margin: 0 auto;
+//   margin:auto;
+//   // border-radius: 24px;
+//   // overflow: hidden;
+//   // box-shadow:
+//   //   0 8px 40px rgba(190, 18, 60, 0.18),
+//   //   0 2px 6px rgba(0, 0, 0, 0.06),
+//   //   0 0 0 1px rgba(190, 18, 60, 0.08);
+
+//   @media (max-width: 768px) {
+//     border-radius: 16px;
+//     // box-shadow: 0 4px 24px rgba(190, 18, 60, 0.12);
+//   }
+//   @media (max-width: 480px) {
+//     border-radius: 0;
+//     // box-shadow: none;
+//   }
+// }
 
 .banner-img {
   width: 100%;

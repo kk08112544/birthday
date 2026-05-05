@@ -38,7 +38,7 @@
           fit="contain"
           :ratio="$q.screen.xs ? 4 / 3 : $q.screen.sm ? 16 / 9 : 21 / 9"
         > -->
-          <q-img
+        <q-img
           src="/ldd_banner.jpg"
           class="banner-img"
           fit="contain"
@@ -68,7 +68,7 @@
              <div class="banner-caption-name">“เป็นองค์การอัจฉริยะทางดิน เพื่อขับเคลื่อนการใช้ที่ดินอย่างเหมาะสม”</div>
           
           </div> -->
-            <!-- <div class="banner-caption-name">{{ festivalName }}</div> -->
+          <!-- <div class="banner-caption-name">{{ festivalName }}</div> -->
         </q-img>
 
         <!-- Shimmer bar under banner -->
@@ -79,9 +79,8 @@
     <!-- ===== NAV BAR ===== -->
     <div class="nav-wrap">
       <div class="nav-inner">
-     
         <router-link
-           to="/admin/festival"
+          to="/admin/festival"
           class="nav-tab"
           :class="{ 'nav-tab--active': isHomeActive }"
         >
@@ -94,14 +93,13 @@
 
         <div class="nav-separator" />
 
-      
         <router-link
           to="/admin/unpolite"
           class="nav-tab"
           :class="{ 'nav-tab--active': isListActive }"
         >
           <div class="nav-tab-icon">
-           <q-icon name="block" size="18px" />
+            <q-icon name="block" size="18px" />
           </div>
           <span class="nav-tab-label">รายการคำต้องห้าม</span>
           <div class="nav-tab-pill" />
@@ -155,17 +153,17 @@
                 <q-icon name="manage_accounts" size="13px" class="q-mr-xs" />
                 สำหรับแอดมิน
               </router-link> -->
-                <router-link :to="`/admin/festival`" class="footer-link">
+              <router-link :to="`/admin/festival`" class="footer-link">
                 <!-- <q-icon name="favorite_border" size="14px" class="q-mr-xs" /> -->
-                <q-icon name="celebration" size="14px"  class="q-mr-xs"/>
+                <q-icon name="celebration" size="14px" class="q-mr-xs" />
                 <!-- ร่วมส่งคำอวยพร -->
-                 เทศกาล
+                เทศกาล
               </router-link>
               <!-- <router-link :to="`/${currentId}/list`" class="footer-link"> -->
-                 <router-link :to="`/admin/unpolite`" class="footer-link">
+              <router-link :to="`/admin/unpolite`" class="footer-link">
                 <!-- <q-icon name="people_outline" size="14px" class="q-mr-xs" /> -->
-                 <q-icon name="block" size="14px"  class="q-mr-xs"/>
-                 รายการคำต้องห้าม
+                <q-icon name="block" size="14px" class="q-mr-xs" />
+                รายการคำต้องห้าม
               </router-link>
             </nav>
           </div>
@@ -538,7 +536,7 @@ $nav-h: 52px;
 //   line-height: 1.2;
 //   max-width: 600px;
 //   text-align: right;
-//   margin-left: auto;  
+//   margin-left: auto;
 // }
 // // .banner-caption-name {
 // //   text-align: right;

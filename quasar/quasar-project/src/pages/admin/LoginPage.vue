@@ -90,8 +90,7 @@
         </div>
       </div>
     </div>
-     
-   
+
     <!-- ===== AUTH RESULT DIALOG ===== -->
     <q-dialog v-model="authDialog">
       <div class="auth-dialog">
@@ -176,19 +175,15 @@ const openAuthDialog = (success: boolean, message: string) => {
   );
 };
 
-
-
 const onSubmit = async () => {
-
   try {
-    
     const data = {
       userName: userName.value,
       password: password.value,
-    }
-      
+    };
+
     const response = await api.post('/auth/login', data);
-      
+
     const { accessToken, refreshToken, uId, firstName, userName: uName } = response.data.user.user;
 
     localStorage.setItem('accessToken', accessToken);
@@ -196,9 +191,8 @@ const onSubmit = async () => {
     localStorage.setItem('userId', uId);
     localStorage.setItem('firstName', firstName);
     localStorage.setItem('username', uName);
- 
+
     if (response.status === 201) {
-     
       openAuthDialog(true, response.data.message || 'เข้าสู่ระบบสำเร็จ');
     }
   } catch (err: unknown) {
@@ -214,7 +208,6 @@ const onSubmit = async () => {
 
     openAuthDialog(false, msg);
   }
-  
 };
 
 // ============================================================
@@ -519,7 +512,7 @@ $text-muted: #9ca3af;
   //   0 0 0 4px rgba(251, 113, 133, 0.14);
   // margin-bottom: 4px;
   // animation: icon-pop 0.55s cubic-bezier(0.36, 0.07, 0.19, 0.97) both 0.1s;
-    width: 64px;
+  width: 64px;
   height: 64px;
   border-radius: 18px;
   background: linear-gradient(135deg, #7f1d1d 0%, $rose-mid 50%, #db2777 100%);

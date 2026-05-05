@@ -558,7 +558,7 @@ const fetchSender = async (id: string): Promise<void> => {
   try {
     // 👉 step 1
     loadingStep.value = 0;
-   animatePct(loadingSteps[loadingStep.value]?.pct ?? 100);
+    animatePct(loadingSteps[loadingStep.value]?.pct ?? 100);
 
     const data = {
       page: pagination.value.page,
@@ -589,9 +589,8 @@ const fetchSender = async (id: string): Promise<void> => {
         department: item.department || '-',
         url: item.card?.imageCard ? await getImageUrl(item.card.imageCard) : '',
         wishWord: item.wish?.wishWord || '',
-      }))
+      })),
     );
-
   } catch (error) {
     console.error('FETCH ERROR:', error);
     rows.value = [];
@@ -705,7 +704,6 @@ type ShapeType = 'circle' | 'square' | 'star' | 'triangle' | 'emoji';
 
 const activeParticles = ref<Particle[]>([]);
 let particleId = 0;
-
 
 // const PARTICLE_COLORS = [
 //   '#e11d48',
@@ -883,7 +881,6 @@ const PARTICLE_EMOJIS = [
   '🏵️',
 ];
 
-
 // type ShapeType = 'circle' | 'square' | 'star' | 'emoji';
 
 const spawnParticles = (x: number, y: number) => {
@@ -920,9 +917,12 @@ const spawnParticles = (x: number, y: number) => {
     };
 
     activeParticles.value.push({ id, style });
-    setTimeout(() => {
-      activeParticles.value = activeParticles.value.filter((p) => p.id !== id);
-    }, dur * 1000 + 100);
+    setTimeout(
+      () => {
+        activeParticles.value = activeParticles.value.filter((p) => p.id !== id);
+      },
+      dur * 1000 + 100,
+    );
   }
 };
 
@@ -970,7 +970,6 @@ $radius-card: 16px;
 
 $indigo-deep: #1a1460;
 $indigo-mid: #2d2d8a;
-
 
 .sender-page {
   font-family: 'Noto Sans Thai', 'Prompt', sans-serif;
@@ -1531,8 +1530,6 @@ $indigo-mid: #2d2d8a;
   color: $text-muted;
 }
 
-
-
 // ============================================================
 // DETAIL DIALOG
 // ============================================================
@@ -1687,7 +1684,6 @@ $indigo-mid: #2d2d8a;
     flex-direction: column;
   }
 }
-
 
 // // ============================================================
 // // CARD TRANSITION
@@ -1962,7 +1958,6 @@ $indigo-mid: #2d2d8a;
     opacity: 1;
   }
 }
-
 
 // ============================================================
 // CLICK PARTICLES

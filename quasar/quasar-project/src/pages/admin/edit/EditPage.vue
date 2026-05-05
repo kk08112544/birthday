@@ -58,23 +58,25 @@
                @update:model-value="nameError = false"
             > -->
             <q-input
-  outlined
-  v-model="festivalName"
-  label="ชื่อเทศกาล"
-  placeholder="เช่น สงกรานต์-IT-2568"
-  hint="รูปแบบ: เทศกาล-หน่วยงาน-ปี"
-  dense
-  autofocus
-  :error="nameError"
-  :error-message="nameError ? 'รูปแบบต้องเป็น เทศกาล-หน่วยงาน-ปี เช่น สงกรานต์-IT-2568' : ''"
-  class="custom-input"
-  @update:model-value="onFestivalNameChange"
->
-  <template v-slot:prepend>
-    <q-icon name="festival" color="deep-orange-5" />
-  </template>
-</q-input>
-                    <!-- <q-input
+              outlined
+              v-model="festivalName"
+              label="ชื่อเทศกาล"
+              placeholder="เช่น สงกรานต์-IT-2568"
+              hint="รูปแบบ: เทศกาล-หน่วยงาน-ปี"
+              dense
+              autofocus
+              :error="nameError"
+              :error-message="
+                nameError ? 'รูปแบบต้องเป็น เทศกาล-หน่วยงาน-ปี เช่น สงกรานต์-IT-2568' : ''
+              "
+              class="custom-input"
+              @update:model-value="onFestivalNameChange"
+            >
+              <template v-slot:prepend>
+                <q-icon name="festival" color="deep-orange-5" />
+              </template>
+            </q-input>
+            <!-- <q-input
               outlined
               v-model="festivalName"
               label="ชื่อเทศกาล"
@@ -93,7 +95,7 @@
           </div>
           <!-- LOGO UPLOAD -->
           <div class="q-mt-md">
-            <div class="logo-upload-zone"  ref="logoRef" @click="logoInput?.pickFiles()">
+            <div class="logo-upload-zone" ref="logoRef" @click="logoInput?.pickFiles()">
               <q-img
                 v-if="logoFile"
                 :src="getFilePreview(logoFile)"
@@ -621,7 +623,7 @@ const getImageUrl = async (imagePath: string): Promise<string> => {
 /* ===== API: ดึงข้อมูล festival ===== */
 const fetchFestivalId = async (id: string) => {
   $q.loading.show();
-   festivalId.value = id; // ← เพิ่มบรรทัดนี้
+  festivalId.value = id; // ← เพิ่มบรรทัดนี้
   try {
     const response = await api.get(`/festival/${Number(id)}`);
     const data: FestivalData = response.data.festival;
@@ -749,19 +751,17 @@ const getFilePreview = (file: File): string => {
   return url;
 };
 
-
 const onFestivalNameChange = (val: string | number | null) => {
   nameError.value = false;
 
   if (typeof val !== 'string') return;
 
- const pattern = /^[^-].*[^-]-[^-]+-\d{4}$/;
+  const pattern = /^[^-].*[^-]-[^-]+-\d{4}$/;
 
   if (val && !pattern.test(val)) {
     nameError.value = true;
   }
 };
-
 
 const validateAndScroll = async (): Promise<boolean> => {
   // Reset all errors
@@ -770,14 +770,13 @@ const validateAndScroll = async (): Promise<boolean> => {
   logoError.value = false;
   webNameError.value = false;
 
-  const isImageValid = !!imageFile.value || !!existingImageUrl.value;;
+  const isImageValid = !!imageFile.value || !!existingImageUrl.value;
   console.log('festivalName:', festivalName.value);
 
-const isNameValid =
-  // typeof festivalName.value === 'string' &&
-  // /^[^-\s]+-[^-\s]+-\d{4}$/.test(festivalName.value);
-  typeof festivalName.value === 'string' &&
-  /^[^-]+-[^-]+-\d{4}$/.test(festivalName.value);
+  const isNameValid =
+    // typeof festivalName.value === 'string' &&
+    // /^[^-\s]+-[^-\s]+-\d{4}$/.test(festivalName.value);
+    typeof festivalName.value === 'string' && /^[^-]+-[^-]+-\d{4}$/.test(festivalName.value);
   console.log('isNameValid:', isNameValid);
   const isLogoValid = !!logoFile.value;
   const isWebNameValid = typeof webName.value === 'string' && webName.value.trim().length > 0;
@@ -809,10 +808,9 @@ const isNameValid =
   return !hasError;
 };
 
-
 /* ===== SUBMIT ===== */
 const submitEdit = async () => {
- const isValid = await validateAndScroll();
+  const isValid = await validateAndScroll();
   if (!isValid) return;
 
   loading.value = true;

@@ -9,55 +9,63 @@
 
         <q-toolbar-title class="admin-title">
           <!-- ระบบบริหารจัดการอวยพรเนื่องในโอกาสต่างๆ ของกรมฯ -->
-            <span class="admin-title-text">ระบบบริหารจัดการอวยพรเนื่องในโอกาสต่างๆ ของกรมฯ</span>
+          <span class="admin-title-text">ระบบบริหารจัดการอวยพรเนื่องในโอกาสต่างๆ ของกรมฯ</span>
         </q-toolbar-title>
 
         <q-space />
 
+        <div class="admin-badge gt-xs" v-if="firstName">
+          <q-icon name="admin_panel_settings" size="16px" />
+          <span>{{ firstName }}</span>
+        </div>
 
-    <div class="admin-badge gt-xs" v-if="firstName">
-  <q-icon name="admin_panel_settings" size="16px" />
-  <span>{{ firstName }}</span>
-</div>
+        <q-btn
+          v-if="isLoggedIn"
+          flat
+          round
+          dense
+          icon="logout"
+          color="white"
+          size="md"
+          class="logout-btn"
+          @click="handleLogout"
+        >
+          <q-tooltip>ออกจากระบบ</q-tooltip>
+        </q-btn>
 
-<q-btn
-  v-if="isLoggedIn"
-  flat
-  round
-  dense
-  icon="logout"
-  color="white"
-  size="md"
-  class="logout-btn"
-  @click="handleLogout"
->
-  <q-tooltip>ออกจากระบบ</q-tooltip>
-</q-btn>
-
-<!-- else -->
-<div v-else class="header-dots gt-xs">
-  <span class="dot dot-1" />
-  <span class="dot dot-2" />
-  <span class="dot dot-3" />
-</div>
+        <!-- else -->
+        <div v-else class="header-dots gt-xs">
+          <span class="dot dot-1" />
+          <span class="dot dot-2" />
+          <span class="dot dot-3" />
+        </div>
       </q-toolbar>
     </q-header>
-     <br />
+    <br />
     <br />
     <br />
 
-     <!-- ===== BANNER ===== -->
+    <!-- ===== BANNER ===== -->
     <div class="banner-section">
       <!-- Decorative top wave -->
       <div class="banner-top-deco" />
-
+     
       <div class="banner-wrap">
-          <q-img
+        <!-- <q-img
           src="/ldd_banner.jpg"
           class="banner-img"
           fit="contain"
           :ratio="$q.screen.xs ? 4 / 3 : $q.screen.sm ? 16 / 9 : 21 / 9"
+        > -->
+        <br>
+        <q-img
+          src="/ldd_banner.jpg"
+          class="banner-img"
+          fit="cover"
+          :ratio="18/9" 
         >
+        <!-- br -->
+        
           <template v-slot:loading>
             <div class="banner-loading">
               <div class="banner-loading-inner">
@@ -171,17 +179,17 @@
             <div class="footer-col-title">เมนูทางลัด</div>
             <div class="footer-links">
               <!-- <router-link :to="`/${currentId}`" class="footer-link"> -->
-                <router-link :to="`/admin/festival`" class="footer-link">
+              <router-link :to="`/admin/festival`" class="footer-link">
                 <!-- <q-icon name="favorite_border" size="14px" class="q-mr-xs" /> -->
-                <q-icon name="celebration" size="14px"  class="q-mr-xs"/>
+                <q-icon name="celebration" size="14px" class="q-mr-xs" />
                 <!-- ร่วมส่งคำอวยพร -->
-                 เทศกาล
+                เทศกาล
               </router-link>
               <!-- <router-link :to="`/${currentId}/list`" class="footer-link"> -->
-                 <router-link :to="`/admin/unpolite`" class="footer-link">
+              <router-link :to="`/admin/unpolite`" class="footer-link">
                 <!-- <q-icon name="people_outline" size="14px" class="q-mr-xs" /> -->
-                 <q-icon name="block" size="14px"  class="q-mr-xs"/>
-                 รายการคำต้องห้าม
+                <q-icon name="block" size="14px" class="q-mr-xs" />
+                รายการคำต้องห้าม
               </router-link>
               <!-- <router-link to="/login" class="footer-link">
                 <q-icon name="manage_accounts" size="14px" class="q-mr-xs" />
@@ -227,13 +235,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted,watch } from 'vue';
+import { ref, reactive, computed, onMounted, watch } from 'vue';
 import { useQuasar } from 'quasar';
 import { api } from 'src/boot/axios';
 import { useRouter, useRoute } from 'vue-router';
-
-
-
 
 const image = ref('');
 const festivalId = ref();
@@ -257,7 +262,7 @@ watch(
   () => {
     firstName.value = localStorage.getItem('firstName') || '';
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 // ============================================================
@@ -281,18 +286,18 @@ const showAlert = (
   btnLabel = 'ตกลง',
 ) => {
   const config: Record<AlertType, { icon: string; title: string }> = {
-    error:   { icon: 'error_outline',   title: 'เกิดข้อผิดพลาด' },
+    error: { icon: 'error_outline', title: 'เกิดข้อผิดพลาด' },
     success: { icon: 'check_circle_outline', title: 'สำเร็จ' },
-    warning: { icon: 'warning_amber',   title: 'คำเตือน' },
-    info:    { icon: 'info_outline',    title: 'แจ้งเตือน' },
+    warning: { icon: 'warning_amber', title: 'คำเตือน' },
+    info: { icon: 'info_outline', title: 'แจ้งเตือน' },
   };
 
-  alertDialog.type     = type;
-  alertDialog.icon     = config[type].icon;
-  alertDialog.title    = title ?? config[type].title;
-  alertDialog.message  = message;
+  alertDialog.type = type;
+  alertDialog.icon = config[type].icon;
+  alertDialog.title = title ?? config[type].title;
+  alertDialog.message = message;
   alertDialog.btnLabel = btnLabel;
-  alertDialog.show     = true;
+  alertDialog.show = true;
 };
 
 // ============================================================
@@ -354,7 +359,6 @@ onMounted(() => {
 onMounted(() => {
   firstName.value = localStorage.getItem('firstName') || '';
 });
-
 </script>
 
 <style lang="scss" scoped>
@@ -420,12 +424,11 @@ $nav-h: 52px;
   font-weight: 700;
   color: white;
   // white-space: nowrap;
-   overflow: hidden;
+  overflow: hidden;
   text-overflow: ellipsis;
   display: block;
   letter-spacing: 0.01em;
 }
-
 
 .admin-badge {
   display: flex;
@@ -447,7 +450,9 @@ $nav-h: 52px;
   background: rgba(255, 255, 255, 0.1) !important;
   border: 1px solid rgba(255, 255, 255, 0.2) !important;
   border-radius: 10px !important;
-  transition: background 0.2s, transform 0.15s !important;
+  transition:
+    background 0.2s,
+    transform 0.15s !important;
   flex-shrink: 0;
 
   &:hover {
@@ -506,38 +511,57 @@ $nav-h: 52px;
 // ============================================================
 .banner-section {
   background: linear-gradient(180deg, #fff1f2 0%, #fce7f3 100%);
-  padding: 32px 48px 0;
+  // padding: 32px 48px 0;
+  padding: 32px 0, 0;
   position: relative;
 
-  @media (max-width: 768px) { padding: 18px 18px 0; }
-  @media (max-width: 480px) { padding: 8px 0 0; }
+  @media (max-width: 768px) {
+    // padding: 18px 18px 0;
+    padding: 18px 12px 0;
+  }
+  // @media (max-width: 480px) {
+  //   padding: 8px 0 0;
+  // }
 }
 
-.banner-top-deco { display: none; }
+.banner-top-deco {
+  display: none;
+}
 
 .banner-wrap {
   max-width: 1200px;
-  margin: 0 auto;
-  border-radius: 24px;
-  overflow: hidden;
-  box-shadow:
-    0 8px 40px rgba(190, 18, 60, 0.18),
-    0 2px 6px rgba(0, 0, 0, 0.06),
-    0 0 0 1px rgba(190, 18, 60, 0.08);
+  // margin: 0 auto;
+  margin:auto;
+  // border-radius: 24px;
+  // overflow: hidden;
+  // box-shadow:
+  //   0 8px 40px rgba(190, 18, 60, 0.18),
+  //   0 2px 6px rgba(0, 0, 0, 0.06),
+  //   0 0 0 1px rgba(190, 18, 60, 0.08);
 
   @media (max-width: 768px) {
     border-radius: 16px;
-    box-shadow: 0 4px 24px rgba(190, 18, 60, 0.12);
+    // box-shadow: 0 4px 24px rgba(190, 18, 60, 0.12);
   }
   @media (max-width: 480px) {
     border-radius: 0;
-    box-shadow: none;
+    // box-shadow: none;
   }
 }
 
-.banner-img { width: 100%; display: block; }
 
-:deep(.q-img__image) { object-position: center center; }
+
+.banner-img {
+  width: 100%;
+  display: block;
+}
+
+:deep(.q-img__image) {
+  object-position: center center;
+}
+// :deep(.q-img__image) {
+//   object-position: center top; // หรือ 50% 30%
+// }
 
 .banner-loading,
 .banner-error {
@@ -579,8 +603,12 @@ $nav-h: 52px;
 }
 
 @keyframes shimmer {
-  0%   { background-position: 200% center; }
-  100% { background-position: -200% center; }
+  0% {
+    background-position: 200% center;
+  }
+  100% {
+    background-position: -200% center;
+  }
 }
 
 // ============================================================
@@ -603,7 +631,9 @@ $nav-h: 52px;
   margin: 0 auto;
   padding: 0 1rem;
 
-  @media (max-width: 480px) { padding: 0; }
+  @media (max-width: 480px) {
+    padding: 0;
+  }
 }
 
 .nav-item {
@@ -620,7 +650,9 @@ $nav-h: 52px;
   color: $text-muted;
   text-decoration: none;
   position: relative;
-  transition: color 0.2s, background 0.2s;
+  transition:
+    color 0.2s,
+    background 0.2s;
   white-space: nowrap;
 
   @media (max-width: 480px) {
@@ -633,7 +665,9 @@ $nav-h: 52px;
     display: flex;
     align-items: center;
     opacity: 0.55;
-    transition: opacity 0.2s, transform 0.2s;
+    transition:
+      opacity 0.2s,
+      transform 0.2s;
   }
 
   .nav-item-indicator {
@@ -651,14 +685,21 @@ $nav-h: 52px;
   &:hover {
     color: $rose-mid;
     background: rgba(190, 18, 60, 0.04);
-    .nav-item-icon { opacity: 1; transform: scale(1.1); }
+    .nav-item-icon {
+      opacity: 1;
+      transform: scale(1.1);
+    }
   }
 
   &--active {
     color: $rose-mid;
     background: rgba(190, 18, 60, 0.05);
-    .nav-item-icon { opacity: 1; }
-    .nav-item-indicator { transform: translateX(-50%) scaleX(1); }
+    .nav-item-icon {
+      opacity: 1;
+    }
+    .nav-item-indicator {
+      transform: translateX(-50%) scaleX(1);
+    }
   }
 }
 
@@ -695,10 +736,18 @@ $nav-h: 52px;
   justify-content: center;
   padding: 28px 0 20px;
 
-  &--error   { background: linear-gradient(135deg, #7f1d1d, $rose-mid); }
-  &--success { background: linear-gradient(135deg, #14532d, #16a34a); }
-  &--warning { background: linear-gradient(135deg, #78350f, $amber); }
-  &--info    { background: linear-gradient(135deg, #1e3a5f, #2563eb); }
+  &--error {
+    background: linear-gradient(135deg, #7f1d1d, $rose-mid);
+  }
+  &--success {
+    background: linear-gradient(135deg, #14532d, #16a34a);
+  }
+  &--warning {
+    background: linear-gradient(135deg, #78350f, $amber);
+  }
+  &--info {
+    background: linear-gradient(135deg, #1e3a5f, #2563eb);
+  }
 }
 
 .alert-icon-ring {
@@ -745,10 +794,22 @@ $nav-h: 52px;
   padding: 8px 28px !important;
   letter-spacing: 0.01em;
 
-  &--error   { background: linear-gradient(135deg, $rose-mid, #db2777) !important; color: #fff !important; }
-  &--success { background: linear-gradient(135deg, #16a34a, #15803d) !important; color: #fff !important; }
-  &--warning { background: linear-gradient(135deg, $amber, #d97706) !important; color: #fff !important; }
-  &--info    { background: linear-gradient(135deg, #2563eb, #1d4ed8) !important; color: #fff !important; }
+  &--error {
+    background: linear-gradient(135deg, $rose-mid, #db2777) !important;
+    color: #fff !important;
+  }
+  &--success {
+    background: linear-gradient(135deg, #16a34a, #15803d) !important;
+    color: #fff !important;
+  }
+  &--warning {
+    background: linear-gradient(135deg, $amber, #d97706) !important;
+    color: #fff !important;
+  }
+  &--info {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
+    color: #fff !important;
+  }
 }
 
 // ============================================================
@@ -764,7 +825,9 @@ $nav-h: 52px;
   margin: 0 auto;
   padding: 3rem 1.5rem 1.5rem;
 
-  @media (max-width: 600px) { padding: 2rem 1rem 1.25rem; }
+  @media (max-width: 600px) {
+    padding: 2rem 1rem 1.25rem;
+  }
 }
 
 .footer-grid {
@@ -772,8 +835,15 @@ $nav-h: 52px;
   grid-template-columns: 2fr 1fr 1.5fr;
   gap: 2.5rem;
 
-  @media (max-width: 768px) { grid-template-columns: 1fr 1fr; gap: 2rem; }
-  @media (max-width: 480px) { grid-template-columns: 1fr; gap: 1.5rem; text-align: center; }
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    text-align: center;
+  }
 }
 
 .footer-col-title {
@@ -792,7 +862,9 @@ $nav-h: 52px;
   gap: 10px;
   margin-bottom: 0.9rem;
 
-  @media (max-width: 480px) { justify-content: center; }
+  @media (max-width: 480px) {
+    justify-content: center;
+  }
 }
 
 .footer-brand-icon {
@@ -826,7 +898,9 @@ $nav-h: 52px;
   flex-direction: column;
   gap: 10px;
 
-  @media (max-width: 480px) { align-items: center; }
+  @media (max-width: 480px) {
+    align-items: center;
+  }
 }
 
 .footer-link {
@@ -835,9 +909,14 @@ $nav-h: 52px;
   color: rgba(255, 255, 255, 0.7);
   font-size: 0.86rem;
   text-decoration: none;
-  transition: color 0.2s, padding-left 0.2s;
+  transition:
+    color 0.2s,
+    padding-left 0.2s;
 
-  &:hover { color: $gold-light; padding-left: 4px; }
+  &:hover {
+    color: $gold-light;
+    padding-left: 4px;
+  }
 }
 
 .footer-contacts {
@@ -845,7 +924,9 @@ $nav-h: 52px;
   flex-direction: column;
   gap: 10px;
 
-  @media (max-width: 480px) { align-items: center; }
+  @media (max-width: 480px) {
+    align-items: center;
+  }
 }
 
 .footer-contact-item {
@@ -856,7 +937,10 @@ $nav-h: 52px;
   font-size: 0.84rem;
   line-height: 1.5;
 
-  @media (max-width: 480px) { justify-content: center; align-items: center; }
+  @media (max-width: 480px) {
+    justify-content: center;
+    align-items: center;
+  }
 }
 
 .footer-contact-icon {
@@ -884,9 +968,14 @@ $nav-h: 52px;
   line-height: 1.6;
 }
 
-.footer-bottom-sep { opacity: 0.4; }
+.footer-bottom-sep {
+  opacity: 0.4;
+}
 
 @media (max-width: 480px) {
-  .footer-bottom { flex-direction: column; gap: 4px; }
+  .footer-bottom {
+    flex-direction: column;
+    gap: 4px;
+  }
 }
 </style>

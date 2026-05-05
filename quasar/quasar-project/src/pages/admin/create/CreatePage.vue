@@ -91,23 +91,25 @@
                 <q-icon name="festival" color="deep-orange-5" />
               </template>
             </q-input> -->
-                      <q-input
-  outlined
-  v-model="festivalName"
-  label="ชื่อเทศกาล"
-  placeholder="เช่น สงกรานต์-IT-2568"
-  hint="รูปแบบ: เทศกาล-หน่วยงาน-ปี"
-  dense
-  autofocus
-  :error="nameError"
-  :error-message="nameError ? 'รูปแบบต้องเป็น เทศกาล-หน่วยงาน-ปี เช่น สงกรานต์-IT-2568' : ''"
-  class="custom-input"
-  @update:model-value="onFestivalNameChange"
->
-  <template v-slot:prepend>
-    <q-icon name="festival" color="deep-orange-5" />
-  </template>
-</q-input>
+            <q-input
+              outlined
+              v-model="festivalName"
+              label="ชื่อเทศกาล"
+              placeholder="เช่น สงกรานต์-IT-2568"
+              hint="รูปแบบ: เทศกาล-หน่วยงาน-ปี"
+              dense
+              autofocus
+              :error="nameError"
+              :error-message="
+                nameError ? 'รูปแบบต้องเป็น เทศกาล-หน่วยงาน-ปี เช่น สงกรานต์-IT-2568' : ''
+              "
+              class="custom-input"
+              @update:model-value="onFestivalNameChange"
+            >
+              <template v-slot:prepend>
+                <q-icon name="festival" color="deep-orange-5" />
+              </template>
+            </q-input>
           </div>
 
           <!-- LOGO UPLOAD -->
@@ -169,7 +171,6 @@
               </template>
             </q-input>
           </div>
-          
         </div>
 
         <!-- ===== CARD: WISHES ===== -->
@@ -569,7 +570,7 @@ const onFestivalNameChange = (val: string | number | null) => {
   if (typeof val !== 'string') return;
 
   // const pattern = /^[^-]+-[^-]+-\d{4}$/;
-const pattern = /^[^-].*[^-]-[^-]+-\d{4}$/;
+  const pattern = /^[^-].*[^-]-[^-]+-\d{4}$/;
   if (val && !pattern.test(val.trim())) {
     nameError.value = true;
   }
@@ -585,8 +586,7 @@ const validateAndScroll = async (): Promise<boolean> => {
   // const isNameValid =
   //   typeof festivalName.value === 'string' && festivalName.value.trim().length > 0;
   const isNameValid =
-  typeof festivalName.value === 'string' &&
-  /^[^-]+-[^-]+-\d{4}$/.test(festivalName.value.trim());
+    typeof festivalName.value === 'string' && /^[^-]+-[^-]+-\d{4}$/.test(festivalName.value.trim());
   const isLogoValid = !!logoFile.value;
   const isWebNameValid = typeof webName.value === 'string' && webName.value.trim().length > 0;
 
@@ -628,8 +628,6 @@ const validateAndScroll = async (): Promise<boolean> => {
 //   }
 // };
 
-
-
 /* ===== API ===== */
 const submitAdd = async () => {
   const isValid = await validateAndScroll();
@@ -637,7 +635,6 @@ const submitAdd = async () => {
 
   loading.value = true;
   try {
-    
     let festivalImageName = '';
     if (imageFile.value) {
       const fd = new FormData();

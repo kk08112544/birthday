@@ -766,7 +766,6 @@ const PARTICLE_EMOJIS = [
   '🏵️',
 ];
 
-
 type ShapeType = 'circle' | 'square' | 'star' | 'emoji';
 
 const spawnParticles = (x: number, y: number) => {
@@ -803,9 +802,12 @@ const spawnParticles = (x: number, y: number) => {
     };
 
     activeParticles.value.push({ id, style });
-    setTimeout(() => {
-      activeParticles.value = activeParticles.value.filter((p) => p.id !== id);
-    }, dur * 1000 + 100);
+    setTimeout(
+      () => {
+        activeParticles.value = activeParticles.value.filter((p) => p.id !== id);
+      },
+      dur * 1000 + 100,
+    );
   }
 };
 
@@ -976,8 +978,7 @@ watch(
 </script>
 
 <style lang="scss" scoped>
-
-// import and color 
+// import and color
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&family=Prompt:wght@400;500;600;700&display=swap');
 
 $indigo-deep: #1a1460;
@@ -991,7 +992,6 @@ $muted: #8b87b0;
 
 $indigo-deep: #1a1460;
 $indigo-mid: #2d2d8a;
-
 
 // ใช้้แค่อันเดียว
 
@@ -1113,8 +1113,6 @@ $indigo-mid: #2d2d8a;
   gap: 1.25rem;
 }
 
-
-
 .selected-preview {
   margin-bottom: 1rem;
   border-radius: 14px;
@@ -1228,7 +1226,6 @@ $indigo-mid: #2d2d8a;
   flex-direction: column;
   gap: 1rem;
 }
-
 
 // ===== WISH SELECT =====
 .wish-select {
@@ -1388,14 +1385,6 @@ $indigo-mid: #2d2d8a;
   justify-content: center;
   gap: 8px;
 }
-
-
-
-
-
-
-
-
 
 .loading-dialog {
   background: #fff;
@@ -1569,7 +1558,6 @@ $indigo-mid: #2d2d8a;
     box-shadow: 0 0 0 5px rgba(99, 102, 241, 0);
   }
 }
-
 
 .ld-step-spinner {
   display: inline-block;
@@ -1788,7 +1776,6 @@ $indigo-mid: #2d2d8a;
     transform: scale(0.97);
   }
 }
-
 
 // ============================================================
 // SUCCESS OVERLAY
@@ -2074,7 +2061,6 @@ $indigo-mid: #2d2d8a;
   }
 }
 
-
 // ============================================================
 // CLICK PARTICLES
 // ============================================================
@@ -2159,8 +2145,6 @@ $indigo-mid: #2d2d8a;
   }
 }
 
-
-
 // more than 1
 
 .section-card {
@@ -2191,7 +2175,6 @@ $indigo-mid: #2d2d8a;
     transform: translateY(0);
   }
 }
-
 
 .section-label {
   display: flex;
