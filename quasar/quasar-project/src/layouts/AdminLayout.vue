@@ -8,7 +8,6 @@
         </div>
 
         <q-toolbar-title class="admin-title">
-          <!-- ระบบบริหารจัดการอวยพรเนื่องในโอกาสต่างๆ ของกรมฯ -->
           <span class="admin-title-text">ระบบบริหารจัดการอวยพรเนื่องในโอกาสต่างๆ ของกรมฯ</span>
         </q-toolbar-title>
 
@@ -33,7 +32,6 @@
           <q-tooltip>ออกจากระบบ</q-tooltip>
         </q-btn>
 
-        <!-- else -->
         <div v-else class="header-dots gt-xs">
           <span class="dot dot-1" />
           <span class="dot dot-2" />
@@ -41,109 +39,84 @@
         </div>
       </q-toolbar>
     </q-header>
-    <br />
-    <br />
-    <br />
 
-    <!-- ===== BANNER ===== -->
-    <div class="banner-section">
-      <!-- Decorative top wave -->
-      <div class="banner-top-deco" />
-     
-      <div class="banner-wrap">
-        <!-- <q-img
-          src="/ldd_banner.jpg"
-          class="banner-img"
-          fit="contain"
-          :ratio="$q.screen.xs ? 4 / 3 : $q.screen.sm ? 16 / 9 : 21 / 9"
-        > -->
-        <br>
-        <q-img
-          src="/ldd_banner.jpg"
-          class="banner-img"
-          fit="cover"
-          :ratio="18/9" 
-        >
-        <!-- br -->
-        
-          <template v-slot:loading>
-            <div class="banner-loading">
-              <div class="banner-loading-inner">
-                <q-spinner-dots color="white" size="2rem" />
-                <span>กำลังโหลด...</span>
+    <!-- ===== PAGE CONTENT (Quasar จัดการ offset header ให้อัตโนมัติ) ===== -->
+    <q-page-container>
+      <!-- BANNER อยู่ใน page-container เพื่อให้ Quasar offset header ให้เอง -->
+      <div class="banner-section">
+        <div class="banner-wrap">
+          <q-img src="/ldd_banner.jpg" class="banner-img" fit="cover" :ratio="18 / 9">
+            <template v-slot:loading>
+              <div class="banner-loading">
+                <div class="banner-loading-inner">
+                  <q-spinner-dots color="white" size="2rem" />
+                  <span>กำลังโหลด...</span>
+                </div>
               </div>
-            </div>
-          </template>
-          <template v-slot:error>
-            <div class="banner-error">
-              <q-icon name="image_not_supported" size="3rem" color="white" class="q-mb-sm" />
-              <span>ไม่สามารถโหลดรูปภาพได้</span>
-            </div>
-          </template>
-
-          <!-- Overlay gradient -->
-          <div class="banner-overlay" />
-        </q-img>
-
-        <!-- Shimmer bar under banner -->
-        <div class="banner-shimmer-bar" />
+            </template>
+            <template v-slot:error>
+              <div class="banner-error">
+                <q-icon name="image_not_supported" size="3rem" color="white" class="q-mb-sm" />
+                <span>ไม่สามารถโหลดรูปภาพได้</span>
+              </div>
+            </template>
+            <div class="banner-overlay" />
+          </q-img>
+          <div class="banner-shimmer-bar" />
+        </div>
       </div>
-    </div>
 
-    <!-- ===== NAV BAR ===== -->
-    <div class="nav-bar-wrap">
-      <div class="nav-bar">
-        <router-link
-          to="/admin/festival"
-          class="nav-item"
-          :class="{
-            'nav-item--active':
-              route.path.startsWith('/admin/festival') ||
-              route.path.startsWith('/admin/edit') ||
-              route.path.startsWith('/admin/create'),
-          }"
-        >
-          <div class="nav-item-icon"><q-icon name="celebration" size="18px" /></div>
-          <span>เทศกาล</span>
-          <div class="nav-item-indicator" />
-        </router-link>
+      <!-- NAV BAR -->
+      <div class="nav-bar-wrap">
+        <div class="nav-bar">
+          <router-link
+            to="/admin/festival"
+            class="nav-item"
+            :class="{
+              'nav-item--active':
+                route.path.startsWith('/admin/festival') ||
+                route.path.startsWith('/admin/edit') ||
+                route.path.startsWith('/admin/create') ||
+                route.path.startsWith('/admin/view'),
+            }"
+          >
+            <div class="nav-item-icon"><q-icon name="celebration" size="18px" /></div>
+            <span>เทศกาล</span>
+            <div class="nav-item-indicator" />
+          </router-link>
 
-        <div class="nav-divider" />
+          <div class="nav-divider" />
 
-        <router-link
-          to="/admin/unpolite"
-          class="nav-item"
-          :class="{ 'nav-item--active': route.path === '/admin/unpolite' }"
-        >
-          <div class="nav-item-icon"><q-icon name="block" size="18px" /></div>
-          <span>รายการคำต้องห้าม</span>
-          <div class="nav-item-indicator" />
-        </router-link>
+          <router-link
+            to="/admin/unpolite"
+            class="nav-item"
+            :class="{ 'nav-item--active': route.path === '/admin/unpolite' }"
+          >
+            <div class="nav-item-icon"><q-icon name="block" size="18px" /></div>
+            <span>รายการคำต้องห้าม</span>
+            <div class="nav-item-indicator" />
+          </router-link>
+        </div>
       </div>
-    </div>
 
-    <!-- ===== PAGE CONTENT ===== -->
-    <q-page-container class="page-container">
-      <router-view />
+      <!-- PAGE CONTENT -->
+      <div class="page-content">
+        <router-view />
+      </div>
     </q-page-container>
 
     <!-- ===== ALERT DIALOG ===== -->
     <q-dialog v-model="alertDialog.show" persistent>
       <q-card class="alert-card">
-        <!-- Icon header -->
         <div class="alert-icon-wrap" :class="`alert-icon-wrap--${alertDialog.type}`">
           <div class="alert-icon-ring">
             <q-icon :name="alertDialog.icon" size="34px" color="white" />
           </div>
         </div>
-
-        <!-- Body -->
         <q-card-section class="alert-body">
           <div class="alert-title">{{ alertDialog.title }}</div>
           <div class="alert-message">{{ alertDialog.message }}</div>
         </q-card-section>
-
-        <!-- Action -->
         <q-card-actions align="center" class="alert-actions">
           <q-btn
             unelevated
@@ -160,7 +133,6 @@
     <q-footer class="site-footer">
       <div class="footer-inner">
         <div class="footer-grid">
-          <!-- Brand -->
           <div class="footer-col footer-col--brand">
             <div class="footer-brand">
               <div class="footer-brand-icon">
@@ -174,31 +146,18 @@
             </p>
           </div>
 
-          <!-- Quick Links -->
           <div class="footer-col">
             <div class="footer-col-title">เมนูทางลัด</div>
             <div class="footer-links">
-              <!-- <router-link :to="`/${currentId}`" class="footer-link"> -->
-              <router-link :to="`/admin/festival`" class="footer-link">
-                <!-- <q-icon name="favorite_border" size="14px" class="q-mr-xs" /> -->
-                <q-icon name="celebration" size="14px" class="q-mr-xs" />
-                <!-- ร่วมส่งคำอวยพร -->
-                เทศกาล
+              <router-link to="/admin/festival" class="footer-link">
+                <q-icon name="celebration" size="14px" class="q-mr-xs" />เทศกาล
               </router-link>
-              <!-- <router-link :to="`/${currentId}/list`" class="footer-link"> -->
-              <router-link :to="`/admin/unpolite`" class="footer-link">
-                <!-- <q-icon name="people_outline" size="14px" class="q-mr-xs" /> -->
-                <q-icon name="block" size="14px" class="q-mr-xs" />
-                รายการคำต้องห้าม
+              <router-link to="/admin/unpolite" class="footer-link">
+                <q-icon name="block" size="14px" class="q-mr-xs" />รายการคำต้องห้าม
               </router-link>
-              <!-- <router-link to="/login" class="footer-link">
-                <q-icon name="manage_accounts" size="14px" class="q-mr-xs" />
-                แอดมิน
-              </router-link> -->
             </div>
           </div>
 
-          <!-- Contact -->
           <div class="footer-col">
             <div class="footer-col-title">ติดต่อสอบถาม</div>
             <div class="footer-contacts">
@@ -240,21 +199,11 @@ import { useQuasar } from 'quasar';
 import { api } from 'src/boot/axios';
 import { useRouter, useRoute } from 'vue-router';
 
-const image = ref('');
-const festivalId = ref();
-const festivalName = ref('');
-
 const route = useRoute();
 const $q = useQuasar();
 const router = useRouter();
 
-// const currentId = computed(
-//   () => (route.params.id as string) || localStorage.getItem('festivalId') || '1',
-// );
-// const firstName = localStorage.getItem('firstName');
-
 const firstName = ref(localStorage.getItem('firstName') || '');
-
 const isLoggedIn = computed(() => !!firstName.value);
 
 watch(
@@ -265,9 +214,6 @@ watch(
   { immediate: true },
 );
 
-// ============================================================
-// Alert Dialog State
-// ============================================================
 type AlertType = 'error' | 'success' | 'warning' | 'info';
 
 const alertDialog = reactive({
@@ -291,7 +237,6 @@ const showAlert = (
     warning: { icon: 'warning_amber', title: 'คำเตือน' },
     info: { icon: 'info_outline', title: 'แจ้งเตือน' },
   };
-
   alertDialog.type = type;
   alertDialog.icon = config[type].icon;
   alertDialog.title = title ?? config[type].title;
@@ -300,31 +245,13 @@ const showAlert = (
   alertDialog.show = true;
 };
 
-// ============================================================
-// Image helper
-// ============================================================
-const getImageUrl = async (imagePath: string): Promise<string> => {
-  try {
-    const response = await api(`/upload/${imagePath}`, { responseType: 'blob' });
-    return URL.createObjectURL(response.data);
-  } catch {
-    return '';
-  }
-};
-
-// ============================================================
-// Fetch festival
-// ============================================================
 const fetchFestival = async () => {
   $q.loading.show();
   try {
     const response = await api.get('/festival/all');
     if (response.data?.festival?.length > 0) {
       const data = response.data.festival[0];
-      festivalName.value = data.festivalName;
-      festivalId.value = data.fId;
       localStorage.setItem('festivalId', String(data.fId));
-      image.value = data.image ? await getImageUrl(data.image) : '';
     }
   } catch {
     showAlert('ไม่สามารถโหลดข้อมูลได้ กรุณาลองใหม่อีกครั้ง', 'error');
@@ -333,30 +260,19 @@ const fetchFestival = async () => {
   }
 };
 
-// ============================================================
-// Logout
-// ============================================================
 const handleLogout = () => {
   localStorage.removeItem('accessToken');
   localStorage.removeItem('refreshToken');
   localStorage.removeItem('username');
   localStorage.removeItem('userId');
   localStorage.removeItem('firstName');
-  firstName.value = ''; // 🔥 ตัวนี้สำคัญมาก
+  firstName.value = '';
   router.push('/login').catch(console.error);
 };
 
-// ============================================================
-// Init
-// ============================================================
 onMounted(() => {
   void fetchFestival();
-});
-
-onMounted(() => {
   document.title = 'ระบบบริหารจัดการอวยพรเนื่องในโอกาสต่างๆ ของกรมฯ';
-});
-onMounted(() => {
   firstName.value = localStorage.getItem('firstName') || '';
 });
 </script>
@@ -364,9 +280,6 @@ onMounted(() => {
 <style lang="scss" scoped>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&family=Sarabun:wght@400;500;600;700&family=Prompt:wght@500;600;700&display=swap');
 
-// ============================================================
-// TOKENS — Rose / Gold
-// ============================================================
 $rose: #be123c;
 $rose-mid: #e11d48;
 $rose-light: #fb7185;
@@ -404,7 +317,6 @@ $nav-h: 52px;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  animation: pulse-emblem 3s ease-in-out infinite;
 }
 
 .admin-title {
@@ -423,7 +335,6 @@ $nav-h: 52px;
   font-size: clamp(13px, 3.5vw, 20px);
   font-weight: 700;
   color: white;
-  // white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   display: block;
@@ -454,7 +365,6 @@ $nav-h: 52px;
     background 0.2s,
     transform 0.15s !important;
   flex-shrink: 0;
-
   &:hover {
     background: rgba(255, 255, 255, 0.2) !important;
     transform: scale(1.05);
@@ -507,49 +417,30 @@ $nav-h: 52px;
 }
 
 // ============================================================
-// BANNER
+// BANNER — ไม่ต้องมี margin-top เพราะอยู่ใน q-page-container แล้ว
 // ============================================================
 .banner-section {
   background: linear-gradient(180deg, #fff1f2 0%, #fce7f3 100%);
-  // padding: 32px 48px 0;
-  padding: 32px 0, 0;
+  padding: 4px 0 0;
   position: relative;
 
   @media (max-width: 768px) {
-    // padding: 18px 18px 0;
     padding: 18px 12px 0;
   }
-  // @media (max-width: 480px) {
-  //   padding: 8px 0 0;
-  // }
-}
-
-.banner-top-deco {
-  display: none;
 }
 
 .banner-wrap {
   max-width: 1200px;
-  // margin: 0 auto;
-  margin:auto;
-  // border-radius: 24px;
-  // overflow: hidden;
-  // box-shadow:
-  //   0 8px 40px rgba(190, 18, 60, 0.18),
-  //   0 2px 6px rgba(0, 0, 0, 0.06),
-  //   0 0 0 1px rgba(190, 18, 60, 0.08);
+  margin: auto;
 
   @media (max-width: 768px) {
     border-radius: 16px;
-    // box-shadow: 0 4px 24px rgba(190, 18, 60, 0.12);
+    overflow: hidden;
   }
   @media (max-width: 480px) {
     border-radius: 0;
-    // box-shadow: none;
   }
 }
-
-
 
 .banner-img {
   width: 100%;
@@ -559,9 +450,6 @@ $nav-h: 52px;
 :deep(.q-img__image) {
   object-position: center center;
 }
-// :deep(.q-img__image) {
-//   object-position: center top; // หรือ 50% 30%
-// }
 
 .banner-loading,
 .banner-error {
@@ -612,7 +500,7 @@ $nav-h: 52px;
 }
 
 // ============================================================
-// NAV BAR
+// NAV BAR — sticky ใน flow ปกติ ไม่ขัดกับ fixed header
 // ============================================================
 .nav-bar-wrap {
   background: $surface;
@@ -711,11 +599,11 @@ $nav-h: 52px;
 }
 
 // ============================================================
-// PAGE CONTAINER
+// PAGE CONTENT
 // ============================================================
-.page-container {
+.page-content {
   background: linear-gradient(150deg, #fff1f2 0%, #fdf4ff 50%, #fff7ed 100%);
-  min-height: calc(100vh - 60px - 52px - 200px);
+  min-height: 60vh;
 }
 
 // ============================================================
@@ -766,7 +654,6 @@ $nav-h: 52px;
   padding: 20px 24px 8px !important;
   text-align: center;
 }
-
 .alert-title {
   font-family: 'Prompt', 'Noto Sans Thai', sans-serif;
   font-size: 1.05rem;
@@ -774,13 +661,11 @@ $nav-h: 52px;
   color: $text-main;
   margin-bottom: 8px;
 }
-
 .alert-message {
   font-size: 0.92rem;
   color: #64748b;
   line-height: 1.65;
 }
-
 .alert-actions {
   padding: 12px 24px 22px !important;
 }
@@ -824,7 +709,6 @@ $nav-h: 52px;
   max-width: 1100px;
   margin: 0 auto;
   padding: 3rem 1.5rem 1.5rem;
-
   @media (max-width: 600px) {
     padding: 2rem 1rem 1.25rem;
   }
@@ -834,7 +718,6 @@ $nav-h: 52px;
   display: grid;
   grid-template-columns: 2fr 1fr 1.5fr;
   gap: 2.5rem;
-
   @media (max-width: 768px) {
     grid-template-columns: 1fr 1fr;
     gap: 2rem;
@@ -861,7 +744,6 @@ $nav-h: 52px;
   align-items: center;
   gap: 10px;
   margin-bottom: 0.9rem;
-
   @media (max-width: 480px) {
     justify-content: center;
   }
@@ -885,7 +767,6 @@ $nav-h: 52px;
   font-weight: 700;
   color: #fff;
 }
-
 .footer-desc {
   font-size: 0.84rem;
   color: rgba(255, 255, 255, 0.6);
@@ -897,7 +778,6 @@ $nav-h: 52px;
   display: flex;
   flex-direction: column;
   gap: 10px;
-
   @media (max-width: 480px) {
     align-items: center;
   }
@@ -912,7 +792,6 @@ $nav-h: 52px;
   transition:
     color 0.2s,
     padding-left 0.2s;
-
   &:hover {
     color: $gold-light;
     padding-left: 4px;
@@ -923,7 +802,6 @@ $nav-h: 52px;
   display: flex;
   flex-direction: column;
   gap: 10px;
-
   @media (max-width: 480px) {
     align-items: center;
   }
@@ -936,7 +814,6 @@ $nav-h: 52px;
   color: rgba(255, 255, 255, 0.7);
   font-size: 0.84rem;
   line-height: 1.5;
-
   @media (max-width: 480px) {
     justify-content: center;
     align-items: center;

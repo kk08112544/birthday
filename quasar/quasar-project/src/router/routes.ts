@@ -66,6 +66,7 @@ const routes: RouteRecordRaw[] = [
       { path: 'unpolite', component: () => import('pages/admin/UnpolitePage.vue') },
       { path: 'create', component: () => import('pages/admin/create/CreatePage.vue') },
       { path: 'edit/:id', component: () => import('pages/admin/edit/EditPage.vue'), props: true },
+      { path: 'view/:id', component: () => import('pages/admin/view/ViewPage.vue'), props: true },
     ],
   },
   // Always leave this as last one,

@@ -214,7 +214,7 @@
         </div>
 
         <!-- ACTIONS -->
-        <div class="actions-row animate-in" style="animation-delay: 0.2s">
+        <!-- <div class="actions-row animate-in" style="animation-delay: 0.2s">
           <button type="reset" class="reset-btn">
             <q-icon name="refresh" size="18px" />
             ล้างข้อมูล
@@ -228,6 +228,31 @@
             <span v-if="!submitting" class="btn-inner">
               <q-icon name="send" size="18px" />
               ส่งคำอวยพร
+            </span>
+            <span v-else class="btn-inner">
+              <q-circular-progress indeterminate size="18px" color="white" />
+              กำลังส่ง...
+            </span>
+          </button>
+        </div> -->
+        <div class="actions-row animate-in" style="animation-delay: 0.2s">
+          <button type="reset" class="reset-btn">
+            <q-icon name="refresh" size="18px" />
+            ล้างข้อมูล
+          </button>
+          <button
+            type="submit"
+            class="submit-btn"
+            :class="{ 'submit-btn--loading': submitting }"
+            :disabled="submitting || !isWithinFestivalPeriod"
+          >
+            <span v-if="!submitting && isWithinFestivalPeriod" class="btn-inner">
+              <q-icon name="send" size="18px" />
+              ส่งคำอวยพร
+            </span>
+            <span v-else-if="!isWithinFestivalPeriod" class="btn-inner">
+              <q-icon name="event_busy" size="18px" />
+              ไม่อยู่ในช่วงเทศกาล
             </span>
             <span v-else class="btn-inner">
               <q-circular-progress indeterminate size="18px" color="white" />
@@ -399,7 +424,7 @@
           </button>
 
           <!-- Send again -->
-          <button class="success-again-btn" @click="closeSuccess">ส่งอีกครั้ง</button>
+          <!-- <button class="success-again-btn" @click="closeSuccess">ส่งอีกครั้ง</button> -->
         </div>
       </div>
     </transition>
@@ -484,6 +509,32 @@ const filterFn = (val: string, update: (cb: () => void) => void) => {
   });
 };
 
+// เพิ่มหลัง fetchBirthCard
+const festivalStartDate = ref<string | null>(null);
+const festivalEndDate = ref<string | null>(null);
+
+const isWithinFestivalPeriod = computed(() => {
+  // ถ้าไม่มีวันที่กำหนด → ให้ส่งได้ตลอด
+  if (!festivalStartDate.value && !festivalEndDate.value) return true;
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  if (festivalStartDate.value) {
+    const start = new Date(festivalStartDate.value);
+    start.setHours(0, 0, 0, 0);
+    if (today < start) return false;
+  }
+
+  if (festivalEndDate.value) {
+    const end = new Date(festivalEndDate.value);
+    end.setHours(23, 59, 59, 999);
+    if (today > end) return false;
+  }
+
+  return true;
+});
+
 // ===== Loading state =====
 // ===== Loading state =====
 const showLoading = ref(false);
@@ -544,7 +595,13 @@ const fetchBirthCard = async (targetId: string) => {
     // Step 0 → 20%
     const response = await api.get<{ festival: FestivalResponse }>(`/festival/${Number(targetId)}`);
     const fest = response.data?.festival;
+    const startDate = response.data?.festival.startDate;
+    const endDate = response.data?.festival.endDate;
+    console.log('Fest ', fest);
 
+    // เพิ่ม 2 บรรทัดนี้
+    if (startDate) festivalStartDate.value = startDate;
+    if (endDate) festivalEndDate.value = endDate;
     if (fest?.fId) {
       // Step 1 → 45%
       loadingStep.value = 1;
@@ -602,6 +659,7 @@ const postSender = async () => {
       const wishObj = wisherData.value.find((w) => w.value === selectedWisher.value);
       successWishText.value = wishObj?.label ?? null;
       showSuccess.value = true;
+      resetForm();
     }
   } catch (err: unknown) {
     const error = err as AxiosError<{ message: string }>;
@@ -2046,20 +2104,20 @@ $indigo-mid: #2d2d8a;
   }
 }
 
-.success-again-btn {
-  background: none;
-  border: none;
-  color: #9ca3af;
-  font-family: 'Noto Sans Thai', sans-serif;
-  font-size: 0.82rem;
-  cursor: pointer;
-  text-decoration: underline;
-  transition: color 0.15s;
+// .success-again-btn {
+//   background: none;
+//   border: none;
+//   color: #9ca3af;
+//   font-family: 'Noto Sans Thai', sans-serif;
+//   font-size: 0.82rem;
+//   cursor: pointer;
+//   text-decoration: underline;
+//   transition: color 0.15s;
 
-  &:hover {
-    color: $indigo-mid;
-  }
-}
+//   &:hover {
+//     color: $indigo-mid;
+//   }
+// }
 
 // ============================================================
 // CLICK PARTICLES

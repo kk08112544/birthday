@@ -53,6 +53,13 @@ export class FestivalRepositories {
       where: {
         fId: Number(id),
         deletedAt: null,
+        // startDate: {
+        //   lte: new Date(), // startDate <= วันนี้
+        // },
+
+        // endDate: {
+        //   gte: new Date(), // endDate >= วันนี้
+        // },
       },
       include: {
         wisher: {

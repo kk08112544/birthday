@@ -19,6 +19,8 @@ export class AdminFestivalRepositories {
       data: {
         ...createFestivalDto, // ใช้ spread operator เพื่อใส่ข้อมูลจาก DTO ลงไปใน data
         // การใช้ .map แบบนี้รองรับทั้ง 1 รายการ และมากกว่า 1 รายการ
+        startDate: new Date(createFestivalDto.startDate),
+        endDate: new Date(createFestivalDto.endDate),
         wisher: {
           create:
             createFestivalDto.wisher?.map((w) => ({
@@ -187,203 +189,214 @@ export class AdminFestivalRepositories {
   //   });
   //   return data;
   // }4
-//   async update(
-//   id: number,
-//   updateFestivalDto: UpdateFestivalDto,
-// ): Promise<ResponseFestivalDto> {
-//   const { festivalName, image, wisher, card } = updateFestivalDto;
+  //   async update(
+  //   id: number,
+  //   updateFestivalDto: UpdateFestivalDto,
+  // ): Promise<ResponseFestivalDto> {
+  //   const { festivalName, image, wisher, card } = updateFestivalDto;
 
-//   return await this.prisma.$transaction(async (tx) => {
-//     // 1. ตรวจสอบว่ามี Festival อยู่จริงและดึงข้อมูลเดิมพร้อม Relations มาดู
-//     const existing = await tx.festival.findUnique({
-//       where: { fId: Number(id) },
-//       include: {
-//         wisher: { where: { deletedAt: null } },
-//         card: { where: { deletedAt: null } },
-//       },
-//     });
+  //   return await this.prisma.$transaction(async (tx) => {
+  //     // 1. ตรวจสอบว่ามี Festival อยู่จริงและดึงข้อมูลเดิมพร้อม Relations มาดู
+  //     const existing = await tx.festival.findUnique({
+  //       where: { fId: Number(id) },
+  //       include: {
+  //         wisher: { where: { deletedAt: null } },
+  //         card: { where: { deletedAt: null } },
+  //       },
+  //     });
 
-//     if (!existing || existing.deletedAt) {
-//       throw new Error('Festival not found');
-//     }
+  //     if (!existing || existing.deletedAt) {
+  //       throw new Error('Festival not found');
+  //     }
 
-//     // 2. จัดการข้อมูล WISHER (Concept: Keep, Update, or Create)
-//     if (wisher) {
-//       const wisherIdsToKeep = wisher.filter((w) => w.wId).map((w) => w.wId!);
-      
-//       // Soft Delete ตัวที่ไม่อยู่ใน List ใหม่
-//       await tx.wisher.updateMany({
-//         where: {
-//           festivalId: Number(id),
-//           wId: { notIn: wisherIdsToKeep },
-//           deletedAt: null,
-//         },
-//         data: { deletedAt: new Date() },
-//       });
+  //     // 2. จัดการข้อมูล WISHER (Concept: Keep, Update, or Create)
+  //     if (wisher) {
+  //       const wisherIdsToKeep = wisher.filter((w) => w.wId).map((w) => w.wId!);
 
-//       // วนลูปเพื่อ Update หรือ Create
-//       for (const wData of wisher) {
-//         if (wData.wId) {
-//           await tx.wisher.update({
-//             where: { wId: wData.wId },
-//             data: { wishWord: wData.wishWord },
-//           });
-//         } else {
-//           await tx.wisher.create({
-//             data: {
-//               wishWord: wData.wishWord,
-//               festivalId: Number(id),
-//             },
-//           });
-//         }
-//       }
-//     }
+  //       // Soft Delete ตัวที่ไม่อยู่ใน List ใหม่
+  //       await tx.wisher.updateMany({
+  //         where: {
+  //           festivalId: Number(id),
+  //           wId: { notIn: wisherIdsToKeep },
+  //           deletedAt: null,
+  //         },
+  //         data: { deletedAt: new Date() },
+  //       });
 
-//     // 3. จัดการข้อมูล CARD (Concept: Keep, Update, or Create)
-//     if (card) {
-//       const cardIdsToKeep = card.filter((c) => c.cId).map((c) => c.cId!);
+  //       // วนลูปเพื่อ Update หรือ Create
+  //       for (const wData of wisher) {
+  //         if (wData.wId) {
+  //           await tx.wisher.update({
+  //             where: { wId: wData.wId },
+  //             data: { wishWord: wData.wishWord },
+  //           });
+  //         } else {
+  //           await tx.wisher.create({
+  //             data: {
+  //               wishWord: wData.wishWord,
+  //               festivalId: Number(id),
+  //             },
+  //           });
+  //         }
+  //       }
+  //     }
 
-//       // Soft Delete ตัวที่ไม่อยู่ใน List ใหม่
-//       await tx.card.updateMany({
-//         where: {
-//           festivalId: Number(id),
-//           cId: { notIn: cardIdsToKeep },
-//           deletedAt: null,
-//         },
-//         data: { deletedAt: new Date() },
-//       });
+  //     // 3. จัดการข้อมูล CARD (Concept: Keep, Update, or Create)
+  //     if (card) {
+  //       const cardIdsToKeep = card.filter((c) => c.cId).map((c) => c.cId!);
 
-//       for (const cData of card) {
-//         if (cData.cId) {
-//           await tx.card.update({
-//             where: { cId: cData.cId },
-//             data: { imageCard: cData.imageCard },
-//           });
-//         } else {
-//           await tx.card.create({
-//             data: {
-//               imageCard: cData.imageCard,
-//               festivalId: Number(id),
-//             },
-//           });
-//         }
-//       }
-//     }
+  //       // Soft Delete ตัวที่ไม่อยู่ใน List ใหม่
+  //       await tx.card.updateMany({
+  //         where: {
+  //           festivalId: Number(id),
+  //           cId: { notIn: cardIdsToKeep },
+  //           deletedAt: null,
+  //         },
+  //         data: { deletedAt: new Date() },
+  //       });
 
-//     // 4. Update ข้อมูลหลักของ Festival และ Return ผลลัพธ์
-//     return await tx.festival.update({
-//       where: { fId: Number(id) },
-//       data: {
-//         festivalName,
-//         image,
-//       },
-//       include: {
-//         wisher: { where: { deletedAt: null } },
-//         card: { where: { deletedAt: null } },
-//       },
-//     });
-//   });
-// }
-async update(
-  id: number,
-  updateFestivalDto: UpdateFestivalDto,
-): Promise<ResponseFestivalDto> {
-  const { festivalName, image, wisher, card, logo, webName } = updateFestivalDto;
+  //       for (const cData of card) {
+  //         if (cData.cId) {
+  //           await tx.card.update({
+  //             where: { cId: cData.cId },
+  //             data: { imageCard: cData.imageCard },
+  //           });
+  //         } else {
+  //           await tx.card.create({
+  //             data: {
+  //               imageCard: cData.imageCard,
+  //               festivalId: Number(id),
+  //             },
+  //           });
+  //         }
+  //       }
+  //     }
 
-  return await this.prisma.$transaction(async (tx) => {
-    // 1. ตรวจสอบว่า Festival มีอยู่จริง
-    const existing = await tx.festival.findUnique({
-      where: { fId: Number(id) },
-    });
+  //     // 4. Update ข้อมูลหลักของ Festival และ Return ผลลัพธ์
+  //     return await tx.festival.update({
+  //       where: { fId: Number(id) },
+  //       data: {
+  //         festivalName,
+  //         image,
+  //       },
+  //       include: {
+  //         wisher: { where: { deletedAt: null } },
+  //         card: { where: { deletedAt: null } },
+  //       },
+  //     });
+  //   });
+  // }
+  async update(
+    id: number,
+    updateFestivalDto: UpdateFestivalDto,
+  ): Promise<ResponseFestivalDto> {
+    const {
+      festivalName,
+      image,
+      wisher,
+      card,
+      logo,
+      webName,
+      startDate,
+      endDate,
+    } = updateFestivalDto;
 
-    if (!existing || existing.deletedAt) {
-      throw new Error('Festival not found');
-    }
-
-    // 2. จัดการ WISHER (ใช้ wId)
-    if (wisher) {
-      // ดึงรายการ wId ทั้งหมดที่ส่งมา เพื่อเก็บไว้ (ตัวไหนไม่มีในนี้จะโดน Soft Delete)
-      const wisherIdsToKeep = wisher
-        .filter((w) => w.wId)
-        .map((w) => w.wId);
-
-      await tx.wisher.updateMany({
-        where: {
-          festivalId: Number(id),
-          wId: { notIn: wisherIdsToKeep }, // ใช้ wId แทน id
-          deletedAt: null,
-        },
-        data: { deletedAt: new Date() },
+    return await this.prisma.$transaction(async (tx) => {
+      // 1. ตรวจสอบว่า Festival มีอยู่จริง
+      const existing = await tx.festival.findUnique({
+        where: { fId: Number(id) },
       });
 
-      for (const wData of wisher) {
-        if (wData.wId) {
-          // ถ้ามี wId ให้ Update
-          await tx.wisher.update({
-            where: { wId: wData.wId }, // ใช้ wId แทน id
-            data: { wishWord: wData.wishWord },
-          });
-        } else {
-          // ถ้าไม่มี wId ให้ Create ใหม่
-          await tx.wisher.create({
-            data: {
-              wishWord: wData.wishWord,
-              festivalId: Number(id),
-            },
-          });
+      if (!existing || existing.deletedAt) {
+        throw new Error('Festival not found');
+      }
+
+      // 2. จัดการ WISHER (ใช้ wId)
+      if (wisher) {
+        // ดึงรายการ wId ทั้งหมดที่ส่งมา เพื่อเก็บไว้ (ตัวไหนไม่มีในนี้จะโดน Soft Delete)
+        const wisherIdsToKeep = wisher.filter((w) => w.wId).map((w) => w.wId);
+
+        await tx.wisher.updateMany({
+          where: {
+            festivalId: Number(id),
+            wId: { notIn: wisherIdsToKeep }, // ใช้ wId แทน id
+            deletedAt: null,
+          },
+          data: { deletedAt: new Date() },
+        });
+
+        for (const wData of wisher) {
+          if (wData.wId) {
+            // ถ้ามี wId ให้ Update
+            await tx.wisher.update({
+              where: { wId: wData.wId }, // ใช้ wId แทน id
+              data: { wishWord: wData.wishWord },
+            });
+          } else {
+            // ถ้าไม่มี wId ให้ Create ใหม่
+            await tx.wisher.create({
+              data: {
+                wishWord: wData.wishWord,
+                festivalId: Number(id),
+              },
+            });
+          }
         }
       }
-    }
 
-    // 3. จัดการ CARD (ใช้ cId)
-    if (card) {
-      const cardIdsToKeep = card
-        .filter((c) => c.cId)
-        .map((c) => c.cId);
+      // 3. จัดการ CARD (ใช้ cId)
+      if (card) {
+        const cardIdsToKeep = card.filter((c) => c.cId).map((c) => c.cId);
 
-      await tx.card.updateMany({
-        where: {
-          festivalId: Number(id),
-          cId: { notIn: cardIdsToKeep }, // ใช้ cId แทน id
-          deletedAt: null,
+        await tx.card.updateMany({
+          where: {
+            festivalId: Number(id),
+            cId: { notIn: cardIdsToKeep }, // ใช้ cId แทน id
+            deletedAt: null,
+          },
+          data: { deletedAt: new Date() },
+        });
+
+        for (const cData of card) {
+          if (cData.cId) {
+            await tx.card.update({
+              where: { cId: cData.cId }, // ใช้ cId แทน id
+              data: { imageCard: cData.imageCard },
+            });
+          } else {
+            await tx.card.create({
+              data: {
+                imageCard: cData.imageCard,
+                festivalId: Number(id),
+              },
+            });
+          }
+        }
+      }
+
+      // 4. Update ข้อมูลหลักและ Return
+      return await tx.festival.update({
+        where: { fId: Number(id) },
+        data: {
+          festivalName,
+          image,
+          logo,
+          webName,
+          ...(startDate && {
+            startDate: new Date(startDate),
+          }),
+
+          ...(endDate && {
+            endDate: new Date(endDate),
+          }),
         },
-        data: { deletedAt: new Date() },
+        include: {
+          wisher: { where: { deletedAt: null } },
+          card: { where: { deletedAt: null } },
+        },
       });
-
-      for (const cData of card) {
-        if (cData.cId) {
-          await tx.card.update({
-            where: { cId: cData.cId }, // ใช้ cId แทน id
-            data: { imageCard: cData.imageCard },
-          });
-        } else {
-          await tx.card.create({
-            data: {
-              imageCard: cData.imageCard,
-              festivalId: Number(id),
-            },
-          });
-        }
-      }
-    }
-
-    // 4. Update ข้อมูลหลักและ Return
-    return await tx.festival.update({
-      where: { fId: Number(id) },
-      data: {
-        festivalName,
-        image,
-        logo,
-        webName,
-      },
-      include: {
-        wisher: { where: { deletedAt: null } },
-        card: { where: { deletedAt: null } },
-      },
     });
-  });
-}
-
+  }
 
   async delete(id: number): Promise<ResponseFestivalDto> {
     const data = await this.prisma.festival.update({

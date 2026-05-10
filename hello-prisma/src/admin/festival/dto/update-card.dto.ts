@@ -1,9 +1,9 @@
-import {IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsNumber, IsOptional, IsString } from 'class-validator';
 //  IsNumber
 
 export class UpdateCardDto {
-    @IsOptional()
-    @IsNumber()
+  @IsOptional()
+  @IsNumber()
   cId!: number;
 
   @IsOptional()

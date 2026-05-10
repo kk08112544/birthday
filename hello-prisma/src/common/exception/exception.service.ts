@@ -4,7 +4,7 @@ import {
   UnauthorizedException,
   BadRequestException,
   NotFoundException,
-  //   ForbiddenException,
+  ForbiddenException,
 } from '@nestjs/common';
 // import { I18nService } from "nestjs-i18n";
 import { MESSAGE } from 'src/common/message';
@@ -44,5 +44,9 @@ export class ExceptionsService {
   // }
   throwCardNotFound(): never {
     throw new NotFoundException(MESSAGE.CARD.NOT_FOUND);
+  }
+
+  throwDateNotService(): never {
+    throw new ForbiddenException(MESSAGE.SENDER.NOT_SERVICE);
   }
 }

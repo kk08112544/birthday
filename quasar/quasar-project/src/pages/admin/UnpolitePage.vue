@@ -28,7 +28,7 @@
     <!-- ===== CONTENT ===== -->
     <div class="content-wrap">
       <!-- STATS ROW -->
-      <div class="stats-row">
+      <!-- <div class="stats-row">
         <div class="stat-chip">
           <q-icon name="format_list_numbered" size="18px" color="deep-purple-5" />
           <span class="stat-num">{{ pagination.rowsNumber }}</span>
@@ -41,10 +41,54 @@
             >/ {{ Math.ceil(pagination.rowsNumber / pagination.rowsPerPage) || 1 }} หน้า</span
           >
         </div>
-      </div>
+      </div> -->
+      <!-- แทนที่ส่วน STATS ROW และ SEARCH BAR ทั้งหมด -->
+      <div class="top-bar">
+        <div class="stats-row">
+          <div class="stat-chip">
+            <q-icon name="format_list_numbered" size="18px" color="deep-purple-5" />
+            <span class="stat-num">{{ pagination.rowsNumber }}</span>
+            <span class="stat-label">คำทั้งหมด</span>
+          </div>
+          <div class="stat-chip">
+            <q-icon name="description" size="18px" color="teal-6" />
+            <span class="stat-num">{{ pagination.page }}</span>
+            <span class="stat-label"
+              >/ {{ Math.ceil(pagination.rowsNumber / pagination.rowsPerPage) || 1 }} หน้า</span
+            >
+          </div>
+        </div>
 
+        <q-input
+          v-model="search"
+          placeholder="ค้นหาคำไม่พึงประสงค์..."
+          outlined
+          rounded
+          dense
+          debounce="300"
+          class="search-bar"
+          bg-color="white"
+          @update:model-value="onSearch"
+        >
+          <template v-slot:prepend>
+            <q-icon name="search" color="grey-5" />
+          </template>
+          <template v-slot:append>
+            <q-icon
+              v-if="search"
+              name="close"
+              color="grey-5"
+              class="cursor-pointer"
+              @click="
+                search = '';
+                onSearch();
+              "
+            />
+          </template>
+        </q-input>
+      </div>
       <!-- SEARCH BAR -->
-      <div class="search-bar-wrap">
+      <!-- <div class="search-bar-wrap">
         <q-input
           v-model="search"
           placeholder="ค้นหาคำไม่พึงประสงค์..."
@@ -72,7 +116,7 @@
             />
           </template>
         </q-input>
-      </div>
+      </div> -->
 
       <!-- TABLE CARD -->
       <div class="table-card">
@@ -857,10 +901,37 @@ $radius: 16px;
   gap: 1rem;
 }
 
+// .stats-row {
+//   display: flex;
+//   gap: 10px;
+//   flex-wrap: wrap;
+// }
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
 .stats-row {
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
+}
+
+.search-bar {
+  width: 100%;
+  max-width: 320px;
+
+  :deep(.q-field__control) {
+    border-radius: 14px !important;
+    box-shadow: 0 2px 12px rgba(91, 33, 182, 0.08);
+  }
+
+  @media (max-width: 600px) {
+    max-width: 100%;
+  }
 }
 
 .stat-chip {

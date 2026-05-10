@@ -14,6 +14,7 @@ export const MESSAGE = {
     GET_SUCCESS: 'แสดงรายการข้อมูลผู้ส่งคำอวยพรสำเร็จ',
     NOT_FOUND: 'ไม่พบผู้ส่งคำอวยพร',
     BAD_WORD_FOUND: 'ไม่บันทึกคำไม่สุภาพ',
+    NOT_SERVICE: 'ไม่อยู่ในช่วงบริการ',
   },
   UNPOLITE: {
     CREATE_SUCCESS: 'สร้างคำไม่สุภาพสำเร็จ',

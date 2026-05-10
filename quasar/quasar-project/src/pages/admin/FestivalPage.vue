@@ -126,7 +126,15 @@
               class="card-action-btn card-action-btn--edit"
             >
               <q-icon name="edit" size="15px" />
-              <span>แก้ไข</span>
+              <!-- <span>แก้ไข</span> -->
+            </router-link>
+            <router-link
+              v-if="row.actions.view"
+              :to="`/admin/view/${row.fId}`"
+              class="card-action-btn card-action-btn--view"
+            >
+              <q-icon name="visibility" size="15px" />
+              <!-- <span>แก้ไข</span> -->
             </router-link>
             <button
               v-if="row.actions.delete"
@@ -134,8 +142,16 @@
               @click="onDelete(row)"
             >
               <q-icon name="delete_outline" size="15px" />
-              <span>ลบ</span>
+              <!-- <span>ลบ</span> -->
             </button>
+            <!-- <button
+              v-if="row.actions.view"
+              class="card-action-btn card-action-btn--view"
+              :to="`/admin/view/${row.fId}`"
+            >
+              <q-icon name="visibility" size="15px" />
+              
+            </button> -->
           </div>
         </div>
       </transition-group>
@@ -973,6 +989,14 @@ $radius: 18px;
     color: $red;
     &:hover {
       background: $red-soft;
+    }
+  }
+
+  &--view {
+    background: transparent;
+    color: 1px solid rgba(99, 102, 241, 0.1);
+    &:hover {
+      background: 1px solid rgba(99, 102, 241, 0.1);
     }
   }
 }

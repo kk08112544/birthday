@@ -1,216 +1,459 @@
 <template>
-  <q-page class="login-page">
-    <div class="bg-blob bg-blob-1" />
-    <div class="bg-blob bg-blob-2" />
-    <div class="bg-blob bg-blob-3" />
+  <q-page class="create-festival-page">
+    <!-- ===== HERO HEADER ===== -->
+    <div class="hero-header">
+      <div class="hero-orb hero-orb-1" />
+      <div class="hero-orb hero-orb-2" />
+      <div class="hero-orb hero-orb-3" />
+      <div class="hero-content">
+        <div class="hero-icon">🎊</div>
+        <h1 class="hero-title">เพิ่มเทศกาลใหม่</h1>
+        <p class="hero-sub">สร้างเทศกาลสุดพิเศษให้ผู้คนได้อวยพรกัน</p>
+      </div>
+    </div>
 
-    <div class="login-center">
-      <div class="login-card">
-        <!-- Brand -->
-        <div class="brand-section">
-          <div class="brand-icon-wrap">
-            <q-icon name="celebration" size="2rem" color="white" />
+    <!-- ===== FORM ===== -->
+    <div class="form-body">
+      <div class="form-container">
+        <!-- ===== CARD: COVER IMAGE & NAME ===== -->
+        <div class="fest-card animate-in" style="animation-delay: 0.05s">
+          <div class="card-label">
+            <span class="label-dot" />
+            ข้อมูลเทศกาล
           </div>
-          <div class="brand-title">Festival Greeting LDD</div>
-          <div class="brand-sub">ระบบบริหารจัดการอวยพร กรมพัฒนาที่ดิน</div>
-        </div>
 
-        <!-- Divider -->
-        <div class="card-divider">
-          <span class="card-divider-text">เข้าสู่ระบบแอดมิน</span>
-        </div>
+          <!-- COVER IMAGE -->
+          <div ref="coverRef" class="field-group">
+            <div
+              class="cover-upload-zone"
+              :class="{ 'upload-zone--error': imageError }"
+              @click="fileInput?.pickFiles()"
+            >
+              <q-img
+                v-if="imageFile"
+                :src="getFilePreview(imageFile)"
+                class="cover-img"
+                :ratio="16 / 9"
+              >
+                <div class="cover-overlay">
+                  <q-icon name="photo_camera" size="28px" color="white" />
+                  <span>เปลี่ยนรูป</span>
+                </div>
+              </q-img>
+              <div v-else class="cover-placeholder">
+                <div class="cover-placeholder-icon">🖼️</div>
+                <div class="cover-placeholder-text">คลิกเพื่ออัปโหลดรูปหน้าปก</div>
+                <div class="cover-placeholder-sub">
+                  PNG, JPG ขนาดไม่เกิน 2MB ขนาด 1199 x 581 pixel
+                </div>
+                <a
+                  href="https://www.iloveimg.com/resize-image"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="cover-resize-link"
+                  @click.stop
+                >
+                  <q-icon name="open_in_new" size="13px" />
+                  แปลงขนาดรูปภาพที่นี่
+                </a>
+              </div>
+              <transition name="err-fade">
+                <div v-if="imageError" class="error-msg">
+                  <q-icon name="error_outline" size="14px" />
+                  กรุณาอัปโหลดรูปหน้าปกตามคุณสมบัติที่กำหนด
+                </div>
+              </transition>
+            </div>
+            <!-- <transition name="err-fade">
+              <div v-if="imageError" class="error-msg">
+                <q-icon name="error_outline" size="14px" />
+                กรุณาอัปโหลดรูปหน้าปกตามคุณสมบัติที่กำหนด
+              </div>
+            </transition> -->
+          </div>
 
-        <!-- Form -->
-        <q-form @submit.prevent="onSubmit" class="login-form">
-          <div class="field-wrap">
-            <label class="field-label">ชื่อผู้ใช้</label>
-            <q-input
-              v-model="userName"
-              type="text"
+          <!-- <q-file
+            v-model="imageFile"
+            ref="fileInput"
+            accept=".jpg,.jpeg,.png,image/jpeg,image/png"
+            class="hidden"
+            @update:model-value="imageError = false"
+          /> -->
+          <q-file
+            v-model="imageFile"
+            ref="fileInput"
+            accept=".jpg,.jpeg,.png,image/jpeg,image/png"
+            class="hidden"
+            @update:model-value="onImageSelected"
+          />
+
+          <!-- FESTIVAL NAME -->
+          <div ref="nameRef" class="q-mt-md field-group">
+            <!-- <q-input
               outlined
+              v-model="festivalName"
+              label="ชื่อเทศกาล"
+              placeholder="เช่น วันสงกรานต์ 2568"
               dense
-              placeholder="กรอกชื่อผู้ใช้"
-              class="styled-input"
-              :rules="[(val) => !!val || 'กรุณากรอกชื่อผู้ใช้']"
-              lazy-rules
+              autofocus
+              :error="nameError"
+              :error-message="nameError ? 'ชื่อเทศกาลจำเป็นต้องกรอก' : ''"
+              class="custom-input"
+              @update:model-value="nameError = false"
+            > -->
+            <!-- <q-input
+  outlined
+  v-model="festivalName"
+  label="ชื่อเทศกาล"
+  placeholder="เช่น สงกรานต์-IT-2568"
+  dense
+  :error="nameError"
+  :error-message="nameError ? 'รูปแบบต้องเป็น เทศกาล-หน่วยงาน-ปี เช่น สงกรานต์-IT-2568' : ''"
+  class="custom-input"
+  @update:model-value="onFestivalNameChange"
+>
+              <template v-slot:prepend>
+                <q-icon name="festival" color="deep-orange-5" />
+              </template>
+            </q-input> -->
+            <q-input
+              outlined
+              v-model="festivalName"
+              label="ชื่อเทศกาล"
+              placeholder="เช่น สงกรานต์-IT-2568"
+              hint="รูปแบบ: เทศกาล-หน่วยงาน-ปี"
+              dense
+              autofocus
+              :error="nameError"
+              :error-message="
+                nameError ? 'รูปแบบต้องเป็น เทศกาล-หน่วยงาน-ปี เช่น สงกรานต์-IT-2568' : ''
+              "
+              class="custom-input"
+              @update:model-value="onFestivalNameChange"
             >
               <template v-slot:prepend>
-                <q-icon name="person_outline" color="red-8" size="20px" />
+                <q-icon name="festival" color="deep-orange-5" />
               </template>
             </q-input>
           </div>
 
-          <div class="field-wrap">
-            <label class="field-label">รหัสผ่าน</label>
+          <!-- LOGO UPLOAD -->
+          <div ref="logoRef" class="q-mt-md field-group">
+            <div
+              class="logo-upload-zone"
+              :class="{ 'upload-zone--error': logoError }"
+              @click="logoInput?.pickFiles()"
+            >
+              <q-img
+                v-if="logoFile"
+                :src="getFilePreview(logoFile)"
+                class="logo-preview"
+                :ratio="1"
+                fit="contain"
+              >
+                <div class="cover-overlay">
+                  <q-icon name="photo_camera" size="20px" color="white" />
+                  <span>เปลี่ยน Logo</span>
+                </div>
+              </q-img>
+              <div v-else class="logo-placeholder">
+                <div class="logo-placeholder-icon">🏷️</div>
+                <div class="cover-placeholder-text">คลิกเพื่ออัปโหลด Logo</div>
+                <div class="cover-placeholder-sub">PNG, JPG — แนะนำสี่เหลี่ยมจัตุรัส</div>
+              </div>
+            </div>
+            <transition name="err-fade">
+              <div v-if="logoError" class="error-msg">
+                <q-icon name="error_outline" size="14px" />
+                กรุณาอัปโหลด Logo
+              </div>
+            </transition>
+          </div>
+
+          <!-- <q-file
+            v-model="logoFile"
+            ref="logoInput"
+            accept=".jpg,.jpeg,.png,image/jpeg,image/png"
+            class="hidden"
+            @update:model-value="logoError = false"
+          /> -->
+          <q-file
+            v-model="logoFile"
+            ref="logoInput"
+            accept=".jpg,.jpeg,.png,image/jpeg,image/png"
+            class="hidden"
+            @update:model-value="onLogoSelected"
+          />
+
+          <!-- WEB NAME -->
+          <div ref="webNameRef" class="q-mt-md field-group">
             <q-input
-              v-model="password"
-              :type="isPwd ? 'password' : 'text'"
+              v-model="webName"
+              label="ชื่อเว็บไซต์ (URL slug)"
+              placeholder="เช่น songkran-2568"
               outlined
               dense
-              placeholder="กรอกรหัสผ่าน"
-              class="styled-input"
-              :rules="[(val) => !!val || 'กรุณากรอกรหัสผ่าน']"
-              lazy-rules
+              :error="webNameError"
+              :error-message="webNameError ? 'ชื่อเว็บไซต์จำเป็นต้องกรอก' : ''"
+              class="custom-input"
+              @update:model-value="webNameError = false"
             >
               <template v-slot:prepend>
-                <q-icon name="lock_outline" color="red-8" size="20px" />
-              </template>
-              <template v-slot:append>
-                <q-icon
-                  :name="isPwd ? 'visibility_off' : 'visibility'"
-                  color="grey-5"
-                  size="20px"
-                  class="cursor-pointer"
-                  @click="isPwd = !isPwd"
-                />
+                <q-icon name="language" color="deep-orange-5" />
               </template>
             </q-input>
           </div>
+        </div>
 
+        <!-- ===== CARD: WISHES ===== -->
+        <div class="fest-card animate-in" style="animation-delay: 0.12s">
+          <div class="card-label">
+            <span class="label-dot label-dot--amber" />
+            คำอวยพร
+          </div>
+
+          <div class="card-header-row">
+            <div class="card-header-info">
+              <span class="card-header-count">{{ wishWordList.length }}</span>
+              <span class="card-header-unit">รายการ</span>
+            </div>
+            <q-btn
+              unelevated
+              color="deep-orange-5"
+              icon="add"
+              label="เพิ่มคำอวยพร"
+              class="add-btn"
+              @click="onAddWish"
+            />
+          </div>
+
+          <transition-group name="wish-list" tag="div" class="wish-list-wrapper">
+            <div v-for="(wish, i) in wishWordList" :key="wish + i" class="wish-item">
+              <div class="wish-number">{{ i + 1 }}</div>
+              <div class="wish-text">{{ wish }}</div>
+              <div class="wish-actions">
+                <button class="wish-btn wish-btn--edit" type="button" @click="editWish(i)">
+                  <q-icon name="edit" size="16px" />
+                </button>
+                <button class="wish-btn wish-btn--delete" type="button" @click="deleteWish(i)">
+                  <q-icon name="delete_outline" size="16px" />
+                </button>
+              </div>
+            </div>
+          </transition-group>
+
+          <div v-if="wishWordList.length === 0" class="empty-state">
+            <div class="empty-state-icon">💬</div>
+            <div class="empty-state-text">ยังไม่มีคำอวยพร</div>
+            <div class="empty-state-sub">เพิ่มคำอวยพรเพื่อให้ผู้ใช้เลือกส่งให้กัน</div>
+          </div>
+        </div>
+
+        <!-- ===== CARD: GREETING CARDS ===== -->
+        <div class="fest-card animate-in" style="animation-delay: 0.19s">
+          <div class="card-label">
+            <span class="label-dot label-dot--teal" />
+            การ์ดอวยพร
+          </div>
+
+          <div class="card-header-row">
+            <div class="card-header-info">
+              <span class="card-header-count">{{ cardFileList.length }}</span>
+              <span class="card-header-unit">รูป</span>
+            </div>
+            <q-btn
+              unelevated
+              color="teal-6"
+              icon="add_photo_alternate"
+              label="เพิ่มการ์ด"
+              class="add-btn"
+              @click="onAddCard"
+            />
+          </div>
+
+          <div v-if="cardFileList.length > 0" class="card-grid">
+            <div v-for="(file, i) in cardFileList" :key="i" class="card-thumb">
+              <q-img :src="getFilePreview(file)" ratio="1" fit="contain" class="card-thumb-img" />
+              <button class="card-thumb-remove" type="button" @click="removeCard(i)">
+                <q-icon name="close" size="14px" />
+              </button>
+            </div>
+          </div>
+
+          <div v-else class="empty-state">
+            <div class="empty-state-icon">🃏</div>
+            <div class="empty-state-text">ยังไม่มีการ์ด</div>
+            <div class="empty-state-sub">อัปโหลดรูปสวยๆ เพื่อใช้เป็นการ์ดอวยพร</div>
+          </div>
+        </div>
+
+        <!-- ===== SUBMIT ===== -->
+        <div class="animate-in" style="animation-delay: 0.25s">
           <button
-            type="submit"
-            class="login-btn"
-            :class="{ 'login-btn--loading': loading }"
+            type="button"
+            class="submit-btn"
+            :class="{ loading }"
             :disabled="loading"
+            @click="submitAdd"
           >
-            <span v-if="!loading" class="login-btn-inner">
-              <q-icon name="login" size="18px" />
-              เข้าสู่ระบบ
+            <span v-if="!loading" class="submit-btn-inner">
+              <q-icon name="check_circle" size="20px" />
+              บันทึกเทศกาล
             </span>
-            <span v-else class="login-btn-inner">
-              <q-circular-progress indeterminate size="18px" color="white" />
-              กำลังเข้าสู่ระบบ...
+            <span v-else class="submit-btn-inner">
+              <q-circular-progress indeterminate size="20px" color="white" />
+              กำลังบันทึก...
             </span>
           </button>
-        </q-form>
-
-        <div class="card-note">
-          <q-icon name="info_outline" size="13px" class="q-mr-xs" />
-          สำหรับผู้ดูแลระบบเท่านั้น
         </div>
       </div>
     </div>
-        <!-- ===== LOADING DIALOG ===== -->
-    <!-- ===== LOADING DIALOG ===== -->
-    <q-dialog v-model="showLoading" persistent no-backdrop-dismiss>
-      <div class="loading-dialog">
-        <!-- Orb spinner -->
-        <div class="ld-orb-wrap">
-          <div class="ld-orb-bg" />
-          <div class="ld-orb-ring1" />
-          <div class="ld-orb-ring2" />
-          <div class="ld-orb-inner">
-            <!-- 🎴 -->
-              <div class="brand-icon-wrap">
-            <q-icon name="celebration" size="2rem" color="white" />
-          </div>
-          </div>
+
+    <!-- ===== DIALOG: ADD WISH ===== -->
+    <q-dialog v-model="AddWishDialog" :maximized="$q.screen.lt.sm">
+      <div class="custom-dialog" :class="{ 'custom-dialog--mobile': $q.screen.lt.sm }">
+        <div class="custom-dialog-header">
+          <span>✨ เพิ่มคำอวยพร</span>
+          <button class="dialog-close" type="button" @click="AddWishDialog = false">
+            <q-icon name="close" size="18px" />
+          </button>
         </div>
-
-        <!-- Title -->
-        <div class="ld-title">กำลังโหลดข้อมูล</div>
-
-        <!-- Big % number -->
-        <div class="ld-pct-row">
-          <span class="ld-pct-num">{{ loadingPercent }}</span>
-          <span class="ld-pct-sym">%</span>
-        </div>
-
-        <!-- Step label -->
-        <div class="ld-sub">{{ loadingSteps[loadingStep]?.label ?? 'กำลังเริ่มต้น...' }}</div>
-
-        <!-- Step checklist -->
-        <div class="ld-steps">
-          <div
-            v-for="(s, i) in loadingSteps"
-            :key="i"
-            class="ld-step-row"
-            :class="{
-              'ld-step-row--done': i < loadingStep,
-              'ld-step-row--active': i === loadingStep,
-              'ld-step-row--pending': i > loadingStep,
-            }"
-          >
-            <div
-              class="ld-step-ic"
-              :class="{
-                'ld-step-ic--done': i < loadingStep,
-                'ld-step-ic--active': i === loadingStep,
-                'ld-step-ic--pending': i > loadingStep,
-              }"
-            >
-              <span v-if="i < loadingStep">✓</span>
-              <span v-else-if="i === loadingStep" class="ld-step-spinner" />
-              <span v-else>·</span>
-            </div>
-            <div class="ld-step-label">{{ s.label }}</div>
-            <div
-              class="ld-step-pct"
-              :class="{
-                'ld-step-pct--done': i < loadingStep,
-                'ld-step-pct--active': i === loadingStep,
-              }"
-            >
-              {{ i < loadingStep ? '✓' : i === loadingStep ? s.pct + '%' : '' }}
-            </div>
-          </div>
-        </div>
-
-        <!-- Progress bar -->
-        <div class="ld-bar-track">
-          <div class="ld-bar-fill" :style="{ width: loadingPercent + '%' }" />
-        </div>
-
-        <!-- Dot loader -->
-        <div class="ld-dots">
-          <span class="ld-dot" />
-          <span class="ld-dot" />
-          <span class="ld-dot" />
-        </div>
-      </div>
-    </q-dialog>
-    <!-- ===== AUTH RESULT DIALOG ===== -->
-    <q-dialog v-model="authDialog">
-      <div class="auth-dialog">
-        <div
-          class="auth-dialog-header"
-          :class="authDialogSuccess ? 'auth-dialog-header--success' : 'auth-dialog-header--error'"
-        >
-          <div class="auth-dialog-header-icon">
-            <q-icon
-              :name="authDialogSuccess ? 'check_circle' : 'error_outline'"
-              size="1.6rem"
-              color="white"
+        <q-form @submit.prevent.stop="addWishToList">
+          <div class="custom-dialog-body">
+            <q-input
+              v-model="tempWish"
+              label="คำอวยพร"
+              outlined
+              autofocus
+              placeholder="เช่น สุขสันต์วันสงกรานต์ ขอให้มีความสุขมากๆ"
+              class="custom-input"
+              :rules="[(val) => !!val.trim() || 'กรุณากรอกคำอวยพร']"
             />
           </div>
-          <div>
-            <div class="auth-dialog-title">
-              {{ authDialogSuccess ? 'เข้าสู่ระบบสำเร็จ' : 'เข้าสู่ระบบไม่สำเร็จ' }}
-            </div>
-            <div class="auth-dialog-sub">
-              {{ authDialogSuccess ? 'กำลังนำท่านเข้าสู่ระบบ...' : 'กรุณาตรวจสอบข้อมูลอีกครั้ง' }}
-            </div>
+          <div class="custom-dialog-footer">
+            <button
+              type="button"
+              class="dialog-btn dialog-btn--cancel"
+              @click="AddWishDialog = false"
+            >
+              ยกเลิก
+            </button>
+            <button type="submit" class="dialog-btn dialog-btn--confirm">บันทึก</button>
           </div>
-        </div>
-
-        <div class="auth-dialog-body">
-          <div class="auth-dialog-emoji">
-            {{ authDialogSuccess ? '🎉' : '🔐' }}
-          </div>
-          <p class="auth-dialog-msg">{{ authDialogMessage }}</p>
-        </div>
-
-        <!-- key บังคับ re-mount ทุกครั้งที่เปิด dialog ใหม่ -->
-        <div
-          :key="authDialogMessage"
-          class="auth-dialog-progress"
-          :class="
-            authDialogSuccess ? 'auth-dialog-progress--success' : 'auth-dialog-progress--error'
-          "
-          :style="{ animationDuration: authDialogSuccess ? '1.8s' : '2.5s' }"
-        />
+        </q-form>
       </div>
     </q-dialog>
+
+    <!-- ===== DIALOG: EDIT WISH ===== -->
+    <q-dialog v-model="EditWishDialog" :maximized="$q.screen.lt.sm">
+      <div class="custom-dialog" :class="{ 'custom-dialog--mobile': $q.screen.lt.sm }">
+        <div class="custom-dialog-header">
+          <span>✏️ แก้ไขคำอวยพร</span>
+          <button class="dialog-close" type="button" @click="EditWishDialog = false">
+            <q-icon name="close" size="18px" />
+          </button>
+        </div>
+        <q-form @submit.prevent.stop="updateWish">
+          <div class="custom-dialog-body">
+            <q-input
+              v-model="tempWish"
+              label="คำอวยพร"
+              outlined
+              autofocus
+              class="custom-input"
+              :rules="[(val) => !!val.trim() || 'กรุณากรอกคำอวยพร']"
+            />
+          </div>
+          <div class="custom-dialog-footer">
+            <button
+              type="button"
+              class="dialog-btn dialog-btn--cancel"
+              @click="EditWishDialog = false"
+            >
+              ยกเลิก
+            </button>
+            <button type="submit" class="dialog-btn dialog-btn--confirm">อัปเดต</button>
+          </div>
+        </q-form>
+      </div>
+    </q-dialog>
+
+    <!-- ===== DIALOG: DELETE ===== -->
+    <q-dialog v-model="deleteDialog" persistent>
+      <div class="custom-dialog">
+        <div class="custom-dialog-header custom-dialog-header--danger">
+          <span>🗑️ ยืนยันการลบ</span>
+          <button class="dialog-close" type="button" @click="deleteDialog = false">
+            <q-icon name="close" size="18px" />
+          </button>
+        </div>
+        <div class="custom-dialog-body">
+          <p class="delete-confirm-text">
+            คุณต้องการลบคำอวยพร<br />
+            <strong class="delete-target">"{{ itemToDelete }}"</strong><br />
+            ใช่หรือไม่?
+          </p>
+        </div>
+        <div class="custom-dialog-footer">
+          <button type="button" class="dialog-btn dialog-btn--cancel" @click="deleteDialog = false">
+            ยกเลิก
+          </button>
+          <button type="button" class="dialog-btn dialog-btn--danger" @click="confirmDelete">
+            ยืนยันการลบ
+          </button>
+        </div>
+      </div>
+    </q-dialog>
+
+    <!-- ===== DIALOG: ADD CARD ===== -->
+    <q-dialog v-model="showCardDialog" :maximized="$q.screen.lt.sm">
+      <div class="custom-dialog" :class="{ 'custom-dialog--mobile': $q.screen.lt.sm }">
+        <div class="custom-dialog-header">
+          <span>🃏 เพิ่มรูปการ์ด</span>
+          <button class="dialog-close" type="button" @click="showCardDialog = false">
+            <q-icon name="close" size="18px" />
+          </button>
+        </div>
+        <div class="custom-dialog-body">
+          <q-file
+            v-model="tempCardFile"
+            label="เลือกรูปภาพ"
+            outlined
+            accept=".jpg,.jpeg,.png,image/jpeg,image/png"
+            class="custom-input"
+            :error="!!cardErrorMsg"
+            :error-message="cardErrorMsg"
+            @update:model-value="addCardToList"
+          >
+            <template v-slot:prepend>
+              <q-icon name="add_photo_alternate" color="teal-6" />
+            </template>
+          </q-file>
+        </div>
+      </div>
+    </q-dialog>
+
+    <!-- ===== SUCCESS DIALOG ===== -->
+    <q-dialog v-model="showSuccessDialog">
+      <div class="success-dialog">
+        <div class="success-dialog-header">
+          <div class="success-dialog-header-icon">
+            <q-icon name="check_circle" size="1.6rem" color="white" />
+          </div>
+          <div>
+            <div class="success-dialog-title">บันทึกสำเร็จ!</div>
+            <div class="success-dialog-sub">กำลังนำท่านไปหน้ารายการ...</div>
+          </div>
+        </div>
+        <div class="success-dialog-body">
+          <div class="success-dialog-emoji">🎊</div>
+          <p class="success-dialog-msg">{{ successMessage }}</p>
+        </div>
+        <div :key="successMessage" class="success-dialog-progress" />
+      </div>
+    </q-dialog>
+
+    <!-- ===== CLICK PARTICLES ===== -->
     <teleport to="body">
       <div class="click-particles-root">
         <span v-for="p in activeParticles" :key="p.id" class="click-particle" :style="p.style" />
@@ -220,123 +463,356 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue';
-// import { useQuasar } from 'quasar';
-import { useRouter } from 'vue-router';
+import { ref, nextTick, onMounted, onUnmounted } from 'vue';
+import { useQuasar } from 'quasar';
 import { api } from 'src/boot/axios';
-import type { AxiosError } from 'axios';
+import { useRouter } from 'vue-router';
+import type { QFile } from 'quasar';
 
-// const $q     = useQuasar();
+const fileInput = ref<InstanceType<typeof QFile> | null>(null);
+const $q = useQuasar();
 const router = useRouter();
 
-const userName = ref('');
-const password = ref('');
-const isPwd = ref(true);
+const festivalName = ref('');
+const imageFile = ref<File | null>(null);
+const logoFile = ref<File | null>(null);
+const logoInput = ref<InstanceType<typeof QFile> | null>(null);
+const webName = ref('');
 const loading = ref(false);
 
-// ===== Auth Dialog =====
-const authDialog = ref(false);
-const authDialogSuccess = ref(false);
-const authDialogMessage = ref('');
+// ===== Error states =====
+const imageError = ref(false);
+const nameError = ref(false);
+const logoError = ref(false);
+const webNameError = ref(false);
 
-const openAuthDialog = (success: boolean, message: string) => {
-  authDialogSuccess.value = success;
-  authDialogMessage.value = message;
-  authDialog.value = true;
+// ===== Field refs for scroll =====
+const coverRef = ref<HTMLElement | null>(null);
+const nameRef = ref<HTMLElement | null>(null);
+const logoRef = ref<HTMLElement | null>(null);
+const webNameRef = ref<HTMLElement | null>(null);
 
-  setTimeout(
-    () => {
-      authDialog.value = false;
-      if (success) void router.push('/admin/festival');
-    },
-    success ? 1800 : 2500,
-  );
-};
+const AddWishDialog = ref(false);
+const EditWishDialog = ref(false);
+const editingIndex = ref<number | null>(null);
+const showCardDialog = ref(false);
+const deleteDialog = ref(false);
+const deleteIndex = ref<number | null>(null);
+const itemToDelete = ref<string | null>(null);
 
-// ===== Loading state =====
-// ===== Loading state =====
-const showLoading = ref(false);
-const loadingStep = ref(0);
-const loadingPercent = ref(0);
+const tempWish = ref('');
+const wishWordList = ref<string[]>([]);
 
-const loadingSteps = [
-  { label: 'โหลดข้อมูลล็อคอิน', pct: 20 },
-  { label: 'รับข้อมูลล็อคอิน', pct: 45 },
-  { label: 'ตรวจสอบข้อมูลล็อคอิน', pct: 80 },
-  { label: 'คืนข้อมูล', pct: 100 },
-];
+const tempCardFile = ref<File | null>(null);
+const cardFileList = ref<File[]>([]);
 
-let pctAnimTimer: ReturnType<typeof setInterval> | null = null;
+// ===== Success Dialog =====
+const showSuccessDialog = ref(false);
+const successMessage = ref('');
 
-const animatePct = (target: number) => {
-  if (pctAnimTimer) clearInterval(pctAnimTimer);
-  const start = loadingPercent.value;
-  const dur = 800;
-  const t0 = Date.now();
-  pctAnimTimer = setInterval(() => {
-    const p = Math.min(1, (Date.now() - t0) / dur);
-    loadingPercent.value = Math.round(start + (target - start) * p);
-    if (p >= 1) {
-      clearInterval(pctAnimTimer!);
-      pctAnimTimer = null;
-    }
-  }, 16);
-};
-
-const startLoading = () => {
-  showLoading.value = true;
-  loadingStep.value = 0;
-  loadingPercent.value = 0;
-  animatePct(5);
-};
-
-const stopLoading = () => {
-  loadingStep.value = loadingSteps.length; // ทุก step = done
-  animatePct(100);
+const openSuccessDialog = (message: string) => {
+  successMessage.value = message;
+  showSuccessDialog.value = true;
   setTimeout(() => {
-    showLoading.value = false;
-  }, 1000);
+    showSuccessDialog.value = false;
+    void router.push('/admin/festival');
+  }, 2000);
 };
 
-const onSubmit = async () => {
-  startLoading();
-  try {
-      loadingStep.value = 1;
-      animatePct(loadingSteps[1]!.pct);
-    const data = {
-      userName: userName.value,
-      password: password.value,
-    }
-      
-    const response = await api.post('/auth/login', data);
-      loadingStep.value = 2;
-      animatePct(loadingSteps[2]!.pct);
-    const { accessToken, refreshToken, uId, firstName, userName: uName } = response.data.user.user;
+/* ===== WISH ===== */
+const onAddWish = () => {
+  tempWish.value = '';
+  AddWishDialog.value = true;
+};
 
-    localStorage.setItem('accessToken', accessToken);
-    localStorage.setItem('refreshToken', refreshToken);
-    localStorage.setItem('userId', uId);
-    localStorage.setItem('firstName', firstName);
-    localStorage.setItem('username', uName);
-  loadingStep.value = 3;
-    if (response.status === 201) {
-      stopLoading();
-      openAuthDialog(true, response.data.message || 'เข้าสู่ระบบสำเร็จ');
-    }
-  } catch (err: unknown) {
-    const error = err as AxiosError<{ message: string }>;
-    const errorResponse = error.response;
-    // const msg = errorResponse?.status === 404
-    //   ? (errorResponse.data?.message);
-    let msg = '';
+const addWishToList = () => {
+  if (!tempWish.value.trim()) return;
+  wishWordList.value.push(tempWish.value.trim());
+  tempWish.value = '';
+  AddWishDialog.value = false;
+};
 
-    if (errorResponse?.status === 404) {
-      msg = errorResponse?.data?.message;
-    }
+const editWish = (index: number) => {
+  const wish = wishWordList.value[index];
+  if (!wish) return;
+  tempWish.value = wish;
+  editingIndex.value = index;
+  EditWishDialog.value = true;
+};
 
-    openAuthDialog(false, msg);
+const updateWish = () => {
+  if (editingIndex.value === null) return;
+  if (!tempWish.value.trim()) return;
+  wishWordList.value[editingIndex.value] = tempWish.value.trim();
+  tempWish.value = '';
+  editingIndex.value = null;
+  EditWishDialog.value = false;
+};
+
+const deleteWish = (i: number) => {
+  const item = wishWordList.value[i];
+  if (!item) return;
+  deleteIndex.value = i;
+  itemToDelete.value = item;
+  deleteDialog.value = true;
+};
+
+const confirmDelete = () => {
+  if (deleteIndex.value === null) return;
+  wishWordList.value.splice(deleteIndex.value, 1);
+  deleteIndex.value = null;
+  itemToDelete.value = null;
+  deleteDialog.value = false;
+};
+
+/* ===== CARD ===== */
+const onAddCard = () => {
+  showCardDialog.value = true;
+};
+
+// const addCardToList = () => {
+//   if (!tempCardFile.value) return;
+//   cardFileList.value.push(tempCardFile.value);
+//   tempCardFile.value = null;
+//   showCardDialog.value = false;
+// };
+const cardErrorMsg = ref('กรุณาอัปโหลดรูปการ์ด');
+
+const addCardToList = () => {
+  const file = tempCardFile.value;
+  if (!file) return;
+
+  cardErrorMsg.value = '';
+
+  const allowedTypes = ['image/jpeg', 'image/png'];
+  if (!allowedTypes.includes(file.type)) {
+    cardErrorMsg.value = 'รองรับเฉพาะ JPG และ PNG';
+    tempCardFile.value = null;
+    return;
   }
-  
+
+  if (file.size > 2 * 1024 * 1024) {
+    cardErrorMsg.value = 'ขนาดไฟล์ต้องไม่เกิน 2 MB';
+    tempCardFile.value = null;
+    return;
+  }
+
+  const url = URL.createObjectURL(file);
+  const img = new Image();
+
+  img.onload = () => {
+    URL.revokeObjectURL(url);
+    if (img.width !== 691 || img.height !== 691) {
+      cardErrorMsg.value = `ขนาดรูปต้องเป็น 691×691 px  (พบ ${img.width}×${img.height})`;
+      tempCardFile.value = null;
+      return;
+    }
+
+    cardFileList.value.push(file);
+    tempCardFile.value = null;
+    showCardDialog.value = false;
+  };
+
+  img.src = url;
+};
+
+const removeCard = (i: number) => {
+  cardFileList.value.splice(i, 1);
+};
+
+/* ===== UTIL ===== */
+const getFilePreview = (file: File) => URL.createObjectURL(file);
+
+/* ===== VALIDATE & SCROLL ===== */
+
+// const onFestivalNameChange = (val: string | number | null) => {
+//   nameError.value = false;
+
+//   if (typeof val !== 'string') return;
+
+//   const pattern = /^[^-\s]+-[^-\s]+-\d{4}$/;
+
+//   if (val && !pattern.test(val)) {
+//     nameError.value = true;
+//   }
+// };
+
+const onFestivalNameChange = (val: string | number | null) => {
+  nameError.value = false;
+
+  if (typeof val !== 'string') return;
+
+  // const pattern = /^[^-]+-[^-]+-\d{4}$/;
+  const pattern = /^[^-].*[^-]-[^-]+-\d{4}$/;
+  if (val && !pattern.test(val.trim())) {
+    nameError.value = true;
+  }
+};
+
+const imageErrorMsg = ref('กรุณาอัปโหลดรูปหน้าปก');
+
+const onImageSelected = (file: File | null) => {
+  imageError.value = false;
+  imageErrorMsg.value = 'กรุณาอัปโหลดรูปหน้าปก';
+  if (!file) return;
+
+  // ตรวจ size ≤ 2MB
+  if (file.size > 2 * 1024 * 1024) {
+    imageError.value = true;
+    imageErrorMsg.value = 'ขนาดไฟล์ต้องไม่เกิน 2 MB';
+    imageFile.value = null;
+    return;
+  }
+
+  // ตรวจ dimensions 1199×581
+  const url = URL.createObjectURL(file);
+  const img = new Image();
+  img.onload = () => {
+    URL.revokeObjectURL(url);
+    if (img.width !== 1199 || img.height !== 581) {
+      imageError.value = true;
+      imageErrorMsg.value = `ขนาดรูปต้องเป็น 1199×581 px (พบ ${img.width}×${img.height})`;
+      imageFile.value = null;
+    }
+  };
+  img.src = url;
+};
+
+const logoErrorMsg = ref('กรุณาอัปโหลดโลโก้');
+
+const onLogoSelected = (file: File | null) => {
+  logoError.value = false;
+  logoErrorMsg.value = 'กรุณาอัปโหลดโลโก้';
+  if (!file) return;
+
+  if (file.size > 2 * 1024 * 1024) {
+    logoError.value = true;
+    logoErrorMsg.value = 'ขนาดไฟล์ต้องไม่เกิน 2 MB';
+    logoFile.value = null;
+  }
+
+  // ตรวจ dimensions 1199×581
+  const url1 = URL.createObjectURL(file);
+  const img1 = new Image();
+  img1.onload = () => {
+    URL.revokeObjectURL(url1);
+    if (img1.width !== 100 || img1.height !== 100) {
+      logoError.value = true;
+      logoErrorMsg.value = `ขนาดรูปต้องเป็น 100×100 px (พบ ${img1.width}×${img1.height})`;
+      logoFile.value = null;
+    }
+  };
+  img1.src = url1;
+};
+
+const validateAndScroll = async (): Promise<boolean> => {
+  // Reset all errors
+  imageError.value = false;
+  nameError.value = false;
+  logoError.value = false;
+  webNameError.value = false;
+
+  const isImageValid = !!imageFile.value;
+  // const isNameValid =
+  //   typeof festivalName.value === 'string' && festivalName.value.trim().length > 0;
+  const isNameValid =
+    typeof festivalName.value === 'string' && /^[^-]+-[^-]+-\d{4}$/.test(festivalName.value.trim());
+  const isLogoValid = !!logoFile.value;
+  const isWebNameValid = typeof webName.value === 'string' && webName.value.trim().length > 0;
+
+  if (!isImageValid) imageError.value = true;
+  if (!isNameValid) nameError.value = true;
+  if (!isLogoValid) logoError.value = true;
+  if (!isWebNameValid) webNameError.value = true;
+
+  const hasError = !isImageValid || !isNameValid || !isLogoValid || !isWebNameValid;
+
+  if (hasError) {
+    await nextTick();
+
+    // Scroll to the first field with an error (in DOM order)
+    const targets: Array<{ valid: boolean; el: HTMLElement | null }> = [
+      { valid: isImageValid, el: coverRef.value },
+      { valid: isNameValid, el: nameRef.value },
+      { valid: isLogoValid, el: logoRef.value },
+      { valid: isWebNameValid, el: webNameRef.value },
+    ];
+
+    const firstErrorEl = targets.find((t) => !t.valid)?.el;
+    if (firstErrorEl) {
+      firstErrorEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }
+
+  return !hasError;
+};
+
+// const onFestivalNameChange = (val: string) => {
+//   nameError.value = false;
+
+//   // regex: ข้อความ-ข้อความ-ตัวเลข(4หลัก)
+//   const pattern = /^[^-\s]+-[^-\s]+-\d{4}$/;
+
+//   if (val && !pattern.test(val)) {
+//     nameError.value = true;
+//   }
+// };
+
+/* ===== API ===== */
+const submitAdd = async () => {
+  const isValid = await validateAndScroll();
+  if (!isValid) return;
+
+  loading.value = true;
+  try {
+    let festivalImageName = '';
+    if (imageFile.value) {
+      const fd = new FormData();
+      fd.append('singleFile', imageFile.value);
+      const res = await api.post('/upload', fd);
+      festivalImageName = res.data.image;
+    }
+
+    let festivalLogoName = '';
+    if (logoFile.value) {
+      const fd = new FormData();
+      fd.append('singleFile', logoFile.value);
+      const res = await api.post('/upload', fd);
+      festivalLogoName = res.data.image;
+    }
+
+    let cardImageNames: string[] = [];
+    if (cardFileList.value.length > 0) {
+      const uploadPromises = cardFileList.value.map(async (file) => {
+        const formData = new FormData();
+        formData.append('singleFile', file);
+        const res = await api.post('/upload', formData);
+        return res.data.image as string;
+      });
+      cardImageNames = await Promise.all(uploadPromises);
+    }
+
+    const payload = {
+      festivalName: festivalName.value,
+      image: festivalImageName,
+      logo: festivalLogoName,
+      webName: webName.value,
+      wisher: wishWordList.value.map((word) => ({ wishWord: word })),
+      card: cardImageNames.map((imgName) => ({ imageCard: imgName })),
+    };
+
+    const response = await api.post('/admin/festival', payload);
+    openSuccessDialog(response.data.message || 'บันทึกเทศกาลสำเร็จ');
+  } catch {
+    $q.notify({
+      color: 'negative',
+      message: 'เกิดข้อผิดพลาด กรุณาลองใหม่',
+      icon: 'warning',
+      position: 'top',
+    });
+  } finally {
+    loading.value = false;
+  }
 };
 
 // ============================================================
@@ -420,7 +896,6 @@ const spawnParticles = (x: number, y: number) => {
     const shape = pickShape();
     const isEmoji = shape === 'emoji';
 
-    // 8 zone ให้กระจายทั่วจอ
     const zone = i % 8;
     let targetX: number, targetY: number;
     switch (zone) {
@@ -498,170 +973,99 @@ onUnmounted(() => {
 </script>
 
 <style lang="scss" scoped>
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&family=Sarabun:wght@400;500;600;700&family=Prompt:wght@500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&family=Prompt:wght@400;500;600;700&display=swap');
 
-// ============================================================
-// TOKENS — Rose/Gold palette
-// ============================================================
-$rose: #be123c;
-$rose-mid: #e11d48;
-$rose-light: #fb7185;
-$gold: #ca8a04;
-$gold-light: #fbbf24;
-$amber: #f59e0b;
+/* ===== TOKENS ===== */
+$indigo-deep: #1a1460;
+$indigo-mid: #2d2d8a;
+$gold: #f5a623;
+$gold-light: #ffd166;
+$coral: #ff6b6b;
+$teal: #0d9488;
 $surface: #ffffff;
-$text-main: #4a0010;
-$text-muted: #9ca3af;
+$surface-2: #f7f5ff;
+$text-main: #1a1460;
+$text-muted: #8b87b0;
+$radius-card: 20px;
+$radius-btn: 12px;
+$error-red: #e53935;
 
-// ============================================================
-// PAGE — bg โทน rose อ่อน
-// ============================================================
-.login-page {
-  font-family: 'Noto Sans Thai', 'Sarabun', sans-serif;
-  background: linear-gradient(150deg, #fff1f2 0%, #fdf4ff 50%, #fff7ed 100%);
+/* ===== PAGE ===== */
+.create-festival-page {
+  font-family: 'Noto Sans Thai', 'Prompt', sans-serif;
+  background: linear-gradient(160deg, #f0edff 0%, #fff8ee 50%, #e8f9f6 100%);
   min-height: 100vh;
+  padding-bottom: 3rem;
+}
+
+/* ===== HERO ===== */
+.hero-header {
   position: relative;
   overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  background: linear-gradient(135deg, $indigo-deep 0%, $indigo-mid 50%, #4a2080 100%);
+  padding: 3rem 1.5rem 4.5rem;
+  text-align: center;
 }
 
-// ============================================================
-// BLOBS — rose / gold / amber
-// ============================================================
-.bg-blob {
+.hero-orb {
   position: absolute;
   border-radius: 50%;
-  pointer-events: none;
-  filter: blur(60px);
+  opacity: 0.15;
 }
-
-.bg-blob-1 {
-  width: 420px;
-  height: 420px;
-  background: rgba(251, 113, 133, 0.18); // $rose-light
-  top: -110px;
-  left: -110px;
-  animation: drift 9s ease-in-out infinite;
-}
-
-.bg-blob-2 {
-  width: 300px;
-  height: 300px;
-  background: rgba(251, 191, 36, 0.14); // $gold-light
-  bottom: -80px;
+.hero-orb-1 {
+  width: 280px;
+  height: 280px;
+  background: $gold;
+  top: -80px;
   right: -60px;
-  animation: drift 11s ease-in-out infinite reverse;
+  animation: float 6s ease-in-out infinite;
+}
+.hero-orb-2 {
+  width: 180px;
+  height: 180px;
+  background: $teal;
+  bottom: -40px;
+  left: -40px;
+  animation: float 8s ease-in-out infinite reverse;
+}
+.hero-orb-3 {
+  width: 120px;
+  height: 120px;
+  background: $gold-light;
+  top: 20px;
+  left: 30%;
+  animation: float 5s ease-in-out infinite 1s;
 }
 
-.bg-blob-3 {
-  width: 200px;
-  height: 200px;
-  background: rgba(190, 18, 60, 0.1); // $rose
-  top: 38%;
-  left: 62%;
-  animation: drift 7s ease-in-out infinite 2s;
-}
-
-@keyframes drift {
+@keyframes float {
   0%,
   100% {
-    transform: translateY(0) scale(1);
+    transform: translateY(0px);
   }
   50% {
-    transform: translateY(-20px) scale(1.06);
+    transform: translateY(-16px);
   }
 }
 
-// ============================================================
-// CENTER
-// ============================================================
-.login-center {
+.hero-content {
   position: relative;
   z-index: 2;
-  width: 100%;
-  max-width: 420px;
-  padding: 1rem;
-  animation: fadeUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-@keyframes fadeUp {
-  from {
-    opacity: 0;
-    transform: translateY(28px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.hero-icon {
+  font-size: 3.5rem;
+  line-height: 1;
+  margin-bottom: 0.75rem;
+  animation: pop 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
 }
 
-// ============================================================
-// CARD — shadow โทน rose
-// ============================================================
-.login-card {
-  background: rgba(255, 255, 255, 0.88);
-  backdrop-filter: blur(20px);
-  border-radius: 24px;
-  padding: 2rem 2rem 1.5rem;
-  box-shadow:
-    0 8px 40px rgba(190, 18, 60, 0.14),
-    0 2px 8px rgba(0, 0, 0, 0.06),
-    0 0 0 1px rgba(190, 18, 60, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.7);
-
-  @media (max-width: 480px) {
-    border-radius: 20px;
-    padding: 1.5rem 1.25rem 1.25rem;
-  }
-}
-
-// ============================================================
-// BRAND — icon gradient rose
-// ============================================================
-.brand-section {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  margin-bottom: 1.5rem;
-}
-
-.brand-icon-wrap {
-  // width: 64px;
-  // height: 64px;
-  // border-radius: 18px;
-  // background: linear-gradient(135deg, #7f1d1d 0%, $rose-mid 50%, #db2777 100%);
-  // display: flex;
-  // align-items: center;
-  // justify-content: center;
-  // box-shadow:
-  //   0 6px 24px rgba(190, 18, 60, 0.38),
-  //   0 0 0 4px rgba(251, 113, 133, 0.14);
-  // margin-bottom: 4px;
-  // animation: icon-pop 0.55s cubic-bezier(0.36, 0.07, 0.19, 0.97) both 0.1s;
-    width: 64px;
-  height: 64px;
-  border-radius: 18px;
-  background: linear-gradient(135deg, #7f1d1d 0%, $rose-mid 50%, #db2777 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow:
-    0 6px 24px rgba(190, 18, 60, 0.38),
-    0 0 0 4px rgba(251, 113, 133, 0.14);
-  margin-bottom: 4px;
-  animation: icon-pop 0.55s cubic-bezier(0.36, 0.07, 0.19, 0.97) both 0.1s;
-}
-
-@keyframes icon-pop {
+@keyframes pop {
   0% {
-    transform: scale(0.6);
+    transform: scale(0.5);
     opacity: 0;
   }
   80% {
-    transform: scale(1.08);
+    transform: scale(1.1);
   }
   100% {
     transform: scale(1);
@@ -669,432 +1073,649 @@ $text-muted: #9ca3af;
   }
 }
 
-.brand-title {
+.hero-title {
   font-family: 'Prompt', sans-serif;
-  font-size: 1.15rem;
+  font-size: clamp(1.6rem, 5vw, 2.4rem);
   font-weight: 700;
-  color: $text-main;
-  letter-spacing: -0.01em;
+  color: #fff;
+  margin: 0 0 0.4rem;
+  letter-spacing: -0.02em;
 }
 
-.brand-sub {
-  font-size: 0.78rem;
-  color: $text-muted;
-  text-align: center;
-  line-height: 1.4;
+.hero-sub {
+  font-size: clamp(0.85rem, 3vw, 1rem);
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
 }
 
-// ============================================================
-// DIVIDER — rose tint
-// ============================================================
-.card-divider {
+/* ===== FORM BODY ===== */
+.form-body {
+  margin-top: -2rem;
+}
+
+.form-container {
+  max-width: 620px;
+  margin: 0 auto;
+  padding: 0 1rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* ===== CARDS ===== */
+.fest-card {
+  background: $surface;
+  border-radius: $radius-card;
+  padding: 1.5rem;
+  box-shadow:
+    0 4px 24px rgba(26, 20, 96, 0.08),
+    0 1px 4px rgba(26, 20, 96, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+}
+
+.card-label {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: $text-muted;
+  text-transform: uppercase;
   margin-bottom: 1.25rem;
+}
 
-  &::before,
-  &::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: rgba(190, 18, 60, 0.12);
+.label-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: $indigo-mid;
+  flex-shrink: 0;
+
+  &--amber {
+    background: $gold;
+  }
+  &--teal {
+    background: $teal;
   }
 }
 
-.card-divider-text {
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: $text-muted;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  white-space: nowrap;
+/* ===== FIELD GROUP ===== */
+.field-group {
+  scroll-margin-top: 80px;
 }
 
-// ============================================================
-// FORM
-// ============================================================
-.login-form {
+/* ===== ERROR STATES ===== */
+.upload-zone--error {
+  border-color: $error-red !important;
+  border-style: solid !important;
+  background: #fff5f5 !important;
+  animation: shake 0.35s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+
+.error-msg {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: $error-red;
+  font-size: 0.78rem;
+  font-weight: 500;
+  margin-top: 6px;
+  padding: 0 2px;
+}
+
+/* Error fade transition */
+.err-fade-enter-active {
+  transition: all 0.25s ease;
+}
+.err-fade-leave-active {
+  transition: all 0.2s ease;
+}
+.err-fade-enter-from {
+  opacity: 0;
+  transform: translateY(-4px);
+}
+.err-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-4px);
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-5px);
+  }
+  40% {
+    transform: translateX(5px);
+  }
+  60% {
+    transform: translateX(-4px);
+  }
+  80% {
+    transform: translateX(4px);
+  }
+}
+
+/* ===== COVER UPLOAD ===== */
+.cover-upload-zone {
+  border-radius: 14px;
+  overflow: hidden;
+  cursor: pointer;
+  border: 2px dashed rgba(45, 45, 138, 0.25);
+  transition:
+    border-color 0.2s,
+    background 0.2s,
+    transform 0.2s;
+  background: $surface-2;
+
+  &:hover {
+    border-color: $indigo-mid;
+    transform: translateY(-2px);
+  }
+}
+
+.cover-img {
+  border-radius: 12px;
+}
+
+.cover-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(26, 20, 96, 0.5);
   display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  opacity: 0;
+  transition: opacity 0.2s;
+  color: white;
+  font-size: 0.85rem;
+  font-weight: 500;
+
+  .cover-upload-zone:hover & {
+    opacity: 1;
+  }
 }
 
-.field-wrap {
+.cover-placeholder {
+  padding: 2.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.cover-placeholder-icon {
+  font-size: 2.5rem;
+}
+.cover-placeholder-text {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: $text-main;
+}
+.cover-placeholder-sub {
+  font-size: 0.78rem;
+  color: $text-muted;
+}
+
+.cover-resize-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 10px;
+  padding: 5px 14px;
+  border-radius: 20px;
+  background: rgba(45, 45, 138, 0.07);
+  border: 1px solid rgba(45, 45, 138, 0.15);
+  color: $indigo-mid;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition:
+    background 0.2s,
+    border-color 0.2s,
+    transform 0.15s;
+
+  &:hover {
+    background: rgba(45, 45, 138, 0.14);
+    border-color: rgba(45, 45, 138, 0.3);
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+/* ===== LOGO UPLOAD ===== */
+.logo-upload-zone {
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  border: 2px dashed rgba(45, 45, 138, 0.25);
+  transition:
+    border-color 0.2s,
+    background 0.2s,
+    transform 0.2s;
+  background: $surface-2;
+  max-width: 140px;
+
+  &:hover {
+    border-color: $indigo-mid;
+    transform: translateY(-2px);
+  }
+}
+
+.logo-preview {
+  border-radius: 10px;
+}
+
+.logo-placeholder {
+  padding: 1.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+}
+
+.logo-placeholder-icon {
+  font-size: 2rem;
+}
+
+/* ===== INPUT ===== */
+.custom-input :deep(.q-field__control) {
+  border-radius: 12px !important;
+}
+
+/* ===== CARD HEADER ROW ===== */
+.card-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   margin-bottom: 1rem;
 }
 
-.field-label {
+.card-header-info {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+}
+
+.card-header-count {
+  font-family: 'Prompt', sans-serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: $indigo-mid;
+  line-height: 1;
+}
+
+.card-header-unit {
+  font-size: 0.85rem;
+  color: $text-muted;
+}
+
+.add-btn {
+  border-radius: $radius-btn !important;
+  font-weight: 600 !important;
+  font-family: 'Noto Sans Thai', sans-serif !important;
+  letter-spacing: 0 !important;
+}
+
+/* ===== WISH LIST ===== */
+.wish-list-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.wish-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: $surface-2;
+  border-radius: 12px;
+  border: 1px solid rgba(45, 45, 138, 0.08);
+  transition:
+    box-shadow 0.2s,
+    transform 0.2s;
+
+  &:hover {
+    box-shadow: 0 4px 16px rgba(45, 45, 138, 0.1);
+    transform: translateX(2px);
+  }
+}
+
+.wish-number {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, $indigo-mid, #6b5ce7);
+  color: white;
+  font-size: 0.72rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.wish-text {
+  // flex: 1;
+  // font-size: 0.92rem;
+  // color: $text-main;
+  // font-weight: 500;
+  // overflow: hidden;
+  // text-overflow: ellipsis;
+  // white-space: nowrap;
+  flex: 1;
+  font-size: 0.92rem;
+  color: $text-main;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.wish-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.wish-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background 0.15s,
+    transform 0.1s;
+
+  &:active {
+    transform: scale(0.92);
+  }
+
+  &--edit {
+    background: rgba(245, 166, 35, 0.1);
+    color: #c47a00;
+    &:hover {
+      background: rgba(245, 166, 35, 0.2);
+    }
+  }
+  &--delete {
+    background: rgba(255, 107, 107, 0.1);
+    color: $coral;
+    &:hover {
+      background: rgba(255, 107, 107, 0.2);
+    }
+  }
+}
+
+/* ===== WISH LIST TRANSITION ===== */
+.wish-list-enter-active,
+.wish-list-leave-active {
+  transition: all 0.3s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+.wish-list-enter-from {
+  opacity: 0;
+  transform: translateX(-16px);
+}
+.wish-list-leave-to {
+  opacity: 0;
+  transform: translateX(16px) scale(0.95);
+}
+
+/* ===== CARD GRID ===== */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+
+  @media (min-width: 480px) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.card-thumb {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
+
+  &:hover {
+    transform: scale(1.03);
+  }
+}
+
+.card-thumb-img {
   display: block;
-  font-size: 0.8rem;
+  border-radius: 12px;
+}
+
+.card-thumb-remove {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(26, 20, 96, 0.75);
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+
+  &:hover {
+    background: $coral;
+  }
+}
+
+/* ===== EMPTY STATE ===== */
+.empty-state {
+  text-align: center;
+  padding: 1.5rem 1rem;
+}
+.empty-state-icon {
+  font-size: 2rem;
+  margin-bottom: 6px;
+}
+.empty-state-text {
+  font-size: 0.92rem;
   font-weight: 600;
   color: $text-main;
-  margin-bottom: 6px;
-  letter-spacing: 0.02em;
+  margin-bottom: 4px;
+}
+.empty-state-sub {
+  font-size: 0.78rem;
+  color: $text-muted;
 }
 
-.styled-input {
-  :deep(.q-field__control) {
-    border-radius: 12px !important;
-    background: rgba(255, 241, 242, 0.7); // rose-50 อ่อนๆ
-    transition: box-shadow 0.2s;
-  }
-
-  :deep(.q-field--focused .q-field__control) {
-    box-shadow: 0 0 0 3px rgba(190, 18, 60, 0.14) !important;
-  }
-}
-
-// ============================================================
-// BUTTON — gradient rose เหมือน festival-header
-// ============================================================
-.login-btn {
+/* ===== SUBMIT BUTTON ===== */
+.submit-btn {
   width: 100%;
-  padding: 13px;
-  border-radius: 14px;
+  padding: 1rem;
+  border-radius: 16px;
   border: none;
-  background: linear-gradient(135deg, #7f1d1d 0%, $rose-mid 50%, #db2777 100%);
+  background: linear-gradient(135deg, $indigo-deep 0%, $indigo-mid 50%, #5a3ea0 100%);
   color: white;
   font-family: 'Noto Sans Thai', 'Prompt', sans-serif;
-  font-size: 1rem;
+  font-size: 1.05rem;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 5px 20px rgba(190, 18, 60, 0.38);
+  box-shadow: 0 6px 24px rgba(45, 45, 138, 0.35);
   transition:
     transform 0.2s,
     box-shadow 0.2s,
     opacity 0.2s;
-  margin-top: 0.5rem;
   letter-spacing: 0.01em;
 
-  &:hover:not(:disabled) {
+  &:hover:not(.loading):not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 8px 28px rgba(190, 18, 60, 0.48);
+    box-shadow: 0 10px 32px rgba(45, 45, 138, 0.4);
   }
-
-  &:active:not(:disabled) {
+  &:active:not(.loading) {
     transform: translateY(0);
   }
-
-  &--loading,
+  &.loading,
   &:disabled {
-    opacity: 0.72;
+    opacity: 0.75;
     cursor: not-allowed;
   }
 }
 
-.login-btn-inner {
+.submit-btn-inner {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
 }
 
-// ============================================================
-// NOTE
-// ============================================================
-.card-note {
+/* ===== DIALOG ===== */
+.custom-dialog {
+  background: $surface;
+  border-radius: 20px;
+  overflow: hidden;
+  min-width: 320px;
+  max-width: 420px;
+  width: 100%;
+  box-shadow: 0 20px 60px rgba(26, 20, 96, 0.2);
+
+  &--mobile {
+    border-radius: 20px 20px 0 0;
+    max-width: 100%;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+  }
+}
+
+.custom-dialog-header {
   display: flex;
   align-items: center;
-  justify-content: center;
-  margin-top: 1.25rem;
-  font-size: 0.72rem;
+  justify-content: space-between;
+  padding: 1.1rem 1.25rem 0.9rem;
+  font-family: 'Prompt', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: $text-main;
+  border-bottom: 1px solid rgba(45, 45, 138, 0.07);
+  background: $surface-2;
+
+  &--danger {
+    background: #fff1f1;
+  }
+}
+
+.dialog-close {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: none;
+  background: rgba(45, 45, 138, 0.07);
   color: $text-muted;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+
+  &:hover {
+    background: rgba(45, 45, 138, 0.14);
+  }
 }
-$indigo-deep: #1a1460;
-$indigo-mid: #2d2d8a;
-$indigo-soft: #eeeeff;
-$gold: #f5a623;
-$teal: #0d9488;
-$white: #ffffff;
-$surface: #f5f4ff;
-$muted: #8b87b0;
 
-$indigo-deep: #1a1460;
-$indigo-mid: #2d2d8a;
+.custom-dialog-body {
+  padding: 1.25rem;
+}
 
-.loading-dialog {
-  background: #fff;
-  border-radius: 24px;
-  padding: 2rem 1.75rem 1.75rem;
-  width: min(340px, 92vw);
+.custom-dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 0.75rem 1.25rem 1.25rem;
+}
+
+.dialog-btn {
+  padding: 9px 22px;
+  border-radius: 10px;
+  border: none;
+  font-family: 'Noto Sans Thai', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    transform 0.1s,
+    background 0.15s;
+
+  &:active {
+    transform: scale(0.96);
+  }
+
+  &--cancel {
+    background: rgba(45, 45, 138, 0.07);
+    color: $text-muted;
+    &:hover {
+      background: rgba(45, 45, 138, 0.12);
+    }
+  }
+  &--confirm {
+    background: linear-gradient(135deg, $indigo-mid, #6b5ce7);
+    color: white;
+    box-shadow: 0 3px 12px rgba(45, 45, 138, 0.3);
+    &:hover {
+      box-shadow: 0 5px 16px rgba(45, 45, 138, 0.4);
+    }
+  }
+  &--danger {
+    background: linear-gradient(135deg, #e53935, #c62828);
+    color: white;
+    box-shadow: 0 3px 12px rgba(229, 57, 53, 0.3);
+  }
+}
+
+.delete-confirm-text {
   text-align: center;
-  box-shadow: 0 24px 64px rgba(26, 20, 96, 0.22);
-  font-family: 'Noto Sans Thai', 'Prompt', sans-serif;
-  outline: none;
+  font-size: 0.92rem;
+  color: $text-main;
+  line-height: 1.8;
+  margin: 0;
 }
-
-/* ── Orb ── */
-.ld-orb-wrap {
-  position: relative;
-  width: 90px;
-  height: 90px;
-  margin: 0 auto 1.25rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.ld-orb-bg {
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #1a1460, #6b5ce7, #a78bfa);
-  animation: ldOrbPulse 2s ease-in-out infinite;
-}
-.ld-orb-ring1 {
-  position: absolute;
-  inset: -7px;
-  border-radius: 50%;
-  border: 2.5px solid transparent;
-  border-top-color: #a78bfa;
-  border-right-color: #6b5ce7;
-  animation: ldSpin 1.1s linear infinite;
-}
-.ld-orb-ring2 {
-  position: absolute;
-  inset: -14px;
-  border-radius: 50%;
-  border: 1.5px solid transparent;
-  border-bottom-color: rgba(167, 139, 250, 0.28);
-  animation: ldSpin 2.2s linear infinite reverse;
-}
-.ld-orb-inner {
-  position: relative;
-  z-index: 2;
-  width: 58px;
-  height: 58px;
-  border-radius: 50%;
-  background: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 22px;
-}
-@keyframes ldSpin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-@keyframes ldOrbPulse {
-  0%,
-  100% {
-    box-shadow: 0 0 0 0 rgba(107, 92, 231, 0.3);
-  }
-  50% {
-    box-shadow: 0 0 0 12px rgba(107, 92, 231, 0);
-  }
-}
-
-/* ── Text ── */
-.ld-title {
-  font-family: 'Prompt', sans-serif;
-  font-size: 1.05rem;
+.delete-target {
+  color: $coral;
   font-weight: 700;
-  color: $indigo-deep;
-  margin-bottom: 0.1rem;
-}
-.ld-pct-row {
-  display: flex;
-  align-items: baseline;
-  justify-content: center;
-  gap: 3px;
-  margin-bottom: 0.2rem;
-}
-.ld-pct-num {
-  font-family: 'Prompt', sans-serif;
-  font-size: 2.8rem;
-  font-weight: 800;
-  color: $indigo-mid;
-  line-height: 1;
-  transition: all 0.05s;
-  min-width: 3ch;
-  text-align: right;
-}
-.ld-pct-sym {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: #6b5ce7;
-}
-.ld-sub {
-  font-size: 0.76rem;
-  color: #8b87b0;
-  min-height: 1rem;
-  margin-bottom: 1rem;
-  transition: opacity 0.3s;
 }
 
-/* ── Step list ── */
-.ld-steps {
-  display: flex;
-  flex-direction: column;
-  border: 1px solid rgba(45, 45, 138, 0.07);
-  border-radius: 14px;
-  overflow: hidden;
-  margin-bottom: 1rem;
-  text-align: left;
-}
-.ld-step-row {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  padding: 9px 13px;
-  border-bottom: 1px solid rgba(45, 45, 138, 0.06);
-  transition: background 0.35s;
-  &:last-child {
-    border-bottom: none;
-  }
-  &--done {
-    background: rgba(34, 197, 94, 0.05);
-  }
-  &--active {
-    background: rgba(99, 102, 241, 0.07);
-  }
-  &--pending {
-    background: transparent;
-  }
-}
-.ld-step-ic {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 11px;
-  font-weight: 700;
-  &--done {
-    background: #dcfce7;
-    color: #16a34a;
-  }
-  &--active {
-    background: $indigo-soft;
-    animation: ldIcPulse 1s ease-in-out infinite;
-  }
-  &--pending {
-    background: #f3f4f6;
-    color: #d1d5db;
-  }
-}
-@keyframes ldIcPulse {
-  0%,
-  100% {
-    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.3);
-  }
-  50% {
-    box-shadow: 0 0 0 5px rgba(99, 102, 241, 0);
-  }
-}
-.ld-step-spinner {
-  display: inline-block;
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  border: 2px solid #6366f1;
-  border-top-color: transparent;
-  animation: ldSpin 0.7s linear infinite;
-}
-.ld-step-label {
-  flex: 1;
-  font-size: 0.79rem;
-  line-height: 1.35;
-  .ld-step-row--done & {
-    color: #374151;
-  }
-  .ld-step-row--active & {
-    color: $indigo-deep;
-    font-weight: 700;
-  }
-  .ld-step-row--pending & {
-    color: #9ca3af;
-  }
-}
-.ld-step-pct {
-  font-size: 0.7rem;
-  font-weight: 700;
-  min-width: 28px;
-  text-align: right;
-  &--done {
-    color: #16a34a;
-  }
-  &--active {
-    color: #6366f1;
-  }
-}
-
-/* ── Progress bar ── */
-.ld-bar-track {
-  height: 6px;
-  border-radius: 3px;
-  background: rgba(45, 45, 138, 0.08);
-  overflow: hidden;
-  margin-bottom: 0.85rem;
-}
-.ld-bar-fill {
-  height: 100%;
-  border-radius: 3px;
-  background: linear-gradient(90deg, $indigo-mid, #a78bfa);
-  transition: width 0.55s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* ── Dot loader ── */
-.ld-dots {
-  display: flex;
-  gap: 6px;
-  justify-content: center;
-}
-.ld-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: $indigo-mid;
-  display: inline-block;
-  animation: ldDotB 1.2s ease-in-out infinite;
-  &:nth-child(2) {
-    animation-delay: 0.2s;
-  }
-  &:nth-child(3) {
-    animation-delay: 0.4s;
-  }
-}
-@keyframes ldDotB {
-  0%,
-  80%,
-  100% {
-    transform: scale(0.7);
-    opacity: 0.35;
-  }
-  40% {
-    transform: scale(1.1);
-    opacity: 1;
-  }
-}
-// ============================================================
-// AUTH DIALOG
-// ============================================================
-.auth-dialog {
+/* ===== SUCCESS DIALOG ===== */
+.success-dialog {
   background: #fff;
   border-radius: 24px;
   overflow: hidden;
   width: 340px;
   max-width: 92vw;
-  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 24px 64px rgba(26, 20, 96, 0.18);
 }
 
-.auth-dialog-header {
+.success-dialog-header {
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 1.25rem 1.5rem;
-
-  &--success {
-    background: linear-gradient(135deg, #14532d, #16a34a);
-  }
-  &--error {
-    background: linear-gradient(135deg, #7f1d1d, #dc2626);
-  }
+  background: linear-gradient(135deg, #14532d, #16a34a);
 }
 
-.auth-dialog-header-icon {
+.success-dialog-header-icon {
   width: 44px;
   height: 44px;
   border-radius: 12px;
@@ -1106,33 +1727,32 @@ $indigo-mid: #2d2d8a;
   flex-shrink: 0;
 }
 
-.auth-dialog-title {
+.success-dialog-title {
   font-family: 'Prompt', sans-serif;
   font-size: 1rem;
   font-weight: 700;
   color: #fff;
   line-height: 1.2;
 }
-
-.auth-dialog-sub {
+.success-dialog-sub {
   font-size: 0.75rem;
   color: rgba(255, 255, 255, 0.72);
   margin-top: 2px;
 }
 
-.auth-dialog-body {
+.success-dialog-body {
   padding: 1.5rem 1.5rem 0.75rem;
   text-align: center;
 }
 
-.auth-dialog-emoji {
+.success-dialog-emoji {
   font-size: 3rem;
   margin-bottom: 0.75rem;
   display: block;
-  animation: authPop 0.45s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+  animation: successPop 0.45s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
 }
 
-@keyframes authPop {
+@keyframes successPop {
   0% {
     transform: scale(0.5);
     opacity: 0;
@@ -1146,67 +1766,71 @@ $indigo-mid: #2d2d8a;
   }
 }
 
-.auth-dialog-msg {
+.success-dialog-msg {
   font-size: 0.92rem;
   font-weight: 600;
+  color: #374151;
+  background: #f0fdf4;
   border-radius: 10px;
   padding: 10px 14px;
   margin: 0;
   line-height: 1.6;
-
-  // สีตาม state — ใช้ parent selector trick ผ่าน Vue class binding ไม่ได้ใน scoped
-  // จึงใช้ color default แล้วให้ header บอก context
-  color: #374151;
-  background: #f3f4f6;
 }
 
-.auth-dialog-footer {
-  padding: 0.75rem 1.5rem 1.25rem;
-  display: flex;
-  justify-content: center;
+.success-dialog-progress {
+  height: 4px;
+  width: 100%;
+  background: linear-gradient(90deg, #14532d, #16a34a);
+  animation: progressShrink 2s linear forwards;
+  transform-origin: left;
 }
 
-.auth-dialog-btn {
-  display: inline-flex;
-  align-items: center;
-  padding: 10px 28px;
-  border-radius: 12px;
-  border: none;
-  font-family: 'Noto Sans Thai', 'Prompt', sans-serif;
-  font-size: 0.9rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition:
-    transform 0.18s,
-    box-shadow 0.18s;
-  color: white;
-
-  &:hover {
-    transform: translateY(-2px);
+@keyframes progressShrink {
+  from {
+    transform: scaleX(1);
   }
-  &:active {
-    transform: scale(0.97);
-  }
-
-  &--success {
-    background: linear-gradient(135deg, #14532d, #16a34a);
-    box-shadow: 0 4px 16px rgba(22, 163, 74, 0.35);
-    &:hover {
-      box-shadow: 0 6px 22px rgba(22, 163, 74, 0.45);
-    }
-  }
-
-  &--error {
-    background: linear-gradient(135deg, #7f1d1d, #dc2626);
-    box-shadow: 0 4px 16px rgba(220, 38, 38, 0.35);
-    &:hover {
-      box-shadow: 0 6px 22px rgba(220, 38, 38, 0.45);
-    }
+  to {
+    transform: scaleX(0);
   }
 }
-// ============================================================
-// CLICK PARTICLES
-// ============================================================
+
+/* ===== ANIMATIONS ===== */
+.animate-in {
+  animation: slideUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 599px) {
+  .fest-card {
+    padding: 1.1rem;
+  }
+  .hero-header {
+    padding: 2.25rem 1rem 3.5rem;
+  }
+  .form-container {
+    padding: 0 0.75rem 1rem;
+    gap: 1rem;
+  }
+  .card-header-count {
+    font-size: 1.6rem;
+  }
+  .wish-text {
+    max-width: 160px;
+  }
+}
+
+/* ===== CLICK PARTICLES ===== */
 .click-particles-root {
   position: fixed;
   inset: 0;
@@ -1229,7 +1853,6 @@ $indigo-mid: #2d2d8a;
   &[style*='--shape: square'] {
     border-radius: 3px;
   }
-
   &[style*='--shape: star'] {
     border-radius: 0;
     clip-path: polygon(
@@ -1245,7 +1868,6 @@ $indigo-mid: #2d2d8a;
       39% 35%
     );
   }
-
   &[style*='--shape: triangle'] {
     background: transparent !important;
     border-left: calc(var(--size) * 0.5) solid transparent;
@@ -1255,14 +1877,12 @@ $indigo-mid: #2d2d8a;
     width: 0 !important;
     height: 0 !important;
   }
-
   &[style*='--shape: emoji'] {
     background: transparent;
     border-radius: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-
     &::after {
       content: var(--emoji-content);
       font-size: var(--size);

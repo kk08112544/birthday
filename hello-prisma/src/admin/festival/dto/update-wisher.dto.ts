@@ -1,13 +1,11 @@
 import { IsNumber, IsOptional, IsString } from 'class-validator';
 // IsNumber,
 export class UpdateWisherDto {
-
   @IsNumber()
-    @IsOptional()
-    wId!: number;
+  @IsOptional()
+  wId!: number;
 
-    @IsString()
-    @IsOptional()
+  @IsString()
+  @IsOptional()
   wishWord!: string;
-
 }

@@ -20,12 +20,12 @@
         </div>
       </q-toolbar>
     </q-header>
-   
+
     <!-- ===== BANNER ===== -->
     <div class="banner-section">
       <!-- Decorative top wave -->
       <div class="banner-top-deco" />
-      
+
       <div class="banner-wrap">
         <!-- <q-img
           :src="image"
@@ -37,17 +37,11 @@
         <!-- <br>
         <br>
         <br> -->
-        <br>
-        <br>
-        <br>
-        <br>
-           <q-img
-          :src="image"
-          class="banner-img"
-          fit="cover"
-          :ratio="18/9"
-          
-        >
+        <br />
+        <br />
+        <br />
+
+        <q-img :src="image" class="banner-img" fit="cover" :ratio="18 / 9">
           <template v-slot:loading>
             <div class="banner-loading">
               <div class="banner-loading-inner">
@@ -193,11 +187,33 @@
         </div>
       </div>
     </q-footer>
+    <q-dialog v-model="alertDialog.show" persistent>
+  <q-card class="alert-card">
+    <div class="alert-icon-wrap" :class="`alert-icon-wrap--${alertDialog.type}`">
+      <div class="alert-icon-ring">
+        <q-icon :name="alertDialog.icon" size="34px" color="white" />
+      </div>
+    </div>
+    <q-card-section class="alert-body">
+      <div class="alert-title">{{ alertDialog.title }}</div>
+      <div class="alert-message">{{ alertDialog.message }}</div>
+    </q-card-section>
+    <q-card-actions align="center" class="alert-actions">
+      <q-btn
+        unelevated
+        :label="alertDialog.btnLabel || 'ตกลง'"
+        class="alert-btn"
+        :class="`alert-btn--${alertDialog.type}`"
+        @click="alertDialog.show = false"
+      />
+    </q-card-actions>
+  </q-card>
+</q-dialog>
   </q-layout>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, reactive } from 'vue';
 import { useQuasar } from 'quasar';
 import { api } from 'src/boot/axios';
 import { useRoute } from 'vue-router';
@@ -218,6 +234,39 @@ const isListActive = computed(() => route.path.startsWith(`/${currentId.value}/l
 const isHomeActive = computed(() => route.path === `/${currentId.value}`);
 
 const webName = ref('ระบบบริหารจัดการอวยพรเนื่องในโอกาสต่างๆ ของกรมฯ');
+
+
+type AlertType = 'error' | 'success' | 'warning' | 'info';
+
+const alertDialog = reactive({
+  show: false,
+  type: 'error' as AlertType,
+  icon: 'report_problem',
+  title: '',
+  message: '',
+  btnLabel: 'ตกลง',
+});
+
+const showAlert = (
+  message: string,
+  type: AlertType = 'error',
+  title?: string,
+  btnLabel = 'ตกลง',
+) => {
+  const config: Record<AlertType, { icon: string; title: string }> = {
+    error: { icon: 'error_outline', title: 'เกิดข้อผิดพลาด' },
+    success: { icon: 'check_circle_outline', title: 'สำเร็จ' },
+    warning: { icon: 'warning_amber', title: 'คำเตือน' },
+    info: { icon: 'info_outline', title: 'แจ้งเตือน' },
+  };
+  alertDialog.type = type;
+  alertDialog.icon = config[type].icon;
+  alertDialog.title = title ?? config[type].title;
+  alertDialog.message = message;
+  alertDialog.btnLabel = btnLabel;
+  alertDialog.show = true;
+};
+
 
 // onMounted(async () => {
 //   try {
@@ -241,6 +290,8 @@ const getImageUrl = async (imagePath: string): Promise<string> => {
   }
 };
 
+
+
 const fetchFestival = async (id: string) => {
   $q.loading.show();
   try {
@@ -252,11 +303,7 @@ const fetchFestival = async (id: string) => {
       localStorage.setItem('festivalId', id);
     }
   } catch {
-    $q.notify({
-      color: 'negative',
-      message: 'ไม่สามารถโหลดข้อมูลเทศกาลได้',
-      icon: 'report_problem',
-    });
+    showAlert('ไม่สามารถโหลดข้อมูลเทศกาลได้', 'error');
   } finally {
     $q.loading.hide();
   }
@@ -265,22 +312,39 @@ const fetchFestival = async (id: string) => {
 // ============================================================
 // Watch route id
 // ============================================================
+
 watch(
   currentId,
   async (id) => {
+    console.log('currentId changed:', id); // ← เช็คว่า watch นี้ทำงานไหม
     try {
       const res = await api.get(`/festival/${id}`);
-      webName.value =
-        res.data?.festival?.webName ?? 'ระบบบริหารจัดการอวยพรเนื่องในโอกาสต่างๆ ของกรมฯ';
+      console.log('festival data:', res.data); // ← ดูว่า logoName มีค่าไหม
+      const festivalData = res.data?.festival;
 
+      webName.value = festivalData?.webName ?? 'ระบบบริหารจัดการอวยพรเนื่องในโอกาสต่างๆ ของกรมฯ';
       document.title = webName.value;
-    } catch {
-      console.error('โหลดชื่อไม่สำเร็จ');
+      console.log('logo :', festivalData.logo);
+      if (festivalData?.logo) {
+        console.log('logoName from API:', festivalData.logo); // ← เช็ค field name
+        const url = await getImageUrl(festivalData.logo);
+        console.log('blob url:', url); // ← เช็คว่า blob สร้างได้ไหม
+
+        let favicon = document.querySelector('#dynamic-favicon') as HTMLLinkElement;
+        if (!favicon) {
+          favicon = document.createElement('link');
+          favicon.id = 'dynamic-favicon';
+          favicon.rel = 'icon';
+          document.head.appendChild(favicon);
+        }
+        favicon.href = url;
+      }
+    } catch (error) {
+      console.error('โหลดข้อมูลไม่สำเร็จ:', error);
     }
   },
   { immediate: true },
 );
-
 watch(
   () => route.params.id,
   (newId) => {
@@ -369,7 +433,7 @@ $nav-h: 52px;
   font-weight: 700;
   color: white;
   // white-space: nowrap;
-   overflow: hidden;
+  overflow: hidden;
   text-overflow: ellipsis;
   display: block;
   letter-spacing: 0.01em;
@@ -452,11 +516,13 @@ $nav-h: 52px;
 // }
 .banner-section {
   background: linear-gradient(180deg, #fff1f2 0%, #fce7f3 100%);
-  padding: 32px 0, 0;   // ← เพิ่มจาก 20px → 48px
+  padding:
+    32px 0,
+    0; // ← เพิ่มจาก 20px → 48px
   position: relative;
 
   @media (max-width: 768px) {
-    padding: 18px 12px 0;  // ← เพิ่มจาก 16px → 32px
+    padding: 18px 12px 0; // ← เพิ่มจาก 16px → 32px
   }
 
   // @media (max-width: 480px) {
@@ -920,5 +986,64 @@ $nav-h: 52px;
     flex-direction: column;
     gap: 3px;
   }
+}
+.alert-card {
+  width: 340px;
+  max-width: 92vw;
+  border-radius: 20px !important;
+  overflow: hidden;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.18) !important;
+  font-family: 'Sarabun', 'Noto Sans Thai', sans-serif;
+}
+.alert-icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 28px 0 20px;
+  &--error { background: linear-gradient(135deg, #7f1d1d, #e11d48); }
+  &--success { background: linear-gradient(135deg, #14532d, #16a34a); }
+  &--warning { background: linear-gradient(135deg, #78350f, #f59e0b); }
+  &--info { background: linear-gradient(135deg, #1e3a5f, #2563eb); }
+}
+.alert-icon-ring {
+  width: 62px;
+  height: 62px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.18);
+  border: 2px solid rgba(255,255,255,0.32);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.alert-body {
+  padding: 20px 24px 8px !important;
+  text-align: center;
+}
+.alert-title {
+  font-family: 'Prompt', 'Noto Sans Thai', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #4a0010;
+  margin-bottom: 8px;
+}
+.alert-message {
+  font-size: 0.92rem;
+  color: #64748b;
+  line-height: 1.65;
+}
+.alert-actions {
+  padding: 12px 24px 22px !important;
+}
+.alert-btn {
+  min-width: 110px;
+  border-radius: 10px !important;
+  font-family: 'Sarabun', 'Noto Sans Thai', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 8px 28px !important;
+  &--error { background: linear-gradient(135deg, #e11d48, #db2777) !important; color: #fff !important; }
+  &--success { background: linear-gradient(135deg, #16a34a, #15803d) !important; color: #fff !important; }
+  &--warning { background: linear-gradient(135deg, #f59e0b, #d97706) !important; color: #fff !important; }
+  &--info { background: linear-gradient(135deg, #2563eb, #1d4ed8) !important; color: #fff !important; }
 }
 </style>

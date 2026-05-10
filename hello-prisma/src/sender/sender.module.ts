@@ -3,6 +3,7 @@ import { SenderService } from './sender.service';
 import { SenderController } from './sender.controller';
 import { SenderRepositories } from './sender.repositories';
 import { PrismaService } from '../prisma.service';
+import { FestivalRepositories } from 'src/festival/festival.repositories';
 import { UnpoliteRepositories } from 'src/unpolite/unpolite.repositories';
 import { ExceptionsModule } from 'src/common/exception/exception.module';
 
@@ -10,6 +11,7 @@ import { ExceptionsModule } from 'src/common/exception/exception.module';
   imports: [ExceptionsModule],
   controllers: [SenderController],
   providers: [
+    FestivalRepositories,
     SenderService,
     SenderRepositories,
     PrismaService,

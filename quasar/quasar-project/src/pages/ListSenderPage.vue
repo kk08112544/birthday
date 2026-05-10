@@ -1,6 +1,13 @@
 <template>
-  <q-page class="sender-page">
-    <!-- ===== HERO FILTER HEADER ===== -->
+  <q-page class="list-sender-page">
+    <!-- ===== BG DECORATION ===== -->
+    <div class="bg-deco" aria-hidden="true">
+      <div class="bg-deco-blob bg-deco-blob-1" />
+      <div class="bg-deco-blob bg-deco-blob-2" />
+      <div class="bg-deco-blob bg-deco-blob-3" />
+    </div>
+
+    <!-- ===== FILTER HERO ===== -->
     <div class="filter-hero">
       <div class="filter-hero-blob filter-hero-blob-1" />
       <div class="filter-hero-blob filter-hero-blob-2" />
@@ -11,210 +18,226 @@
           <div class="filter-hero-icon">
             <q-icon name="people" size="1.6rem" color="white" />
           </div>
-          <div>
+          <div class="filter-hero-text">
             <h1 class="filter-hero-title">รายการผู้ร่วมส่งคำอวยพร</h1>
             <p class="filter-hero-sub">
               <span class="filter-count-chip">
-                <q-icon name="how_to_reg" size="14px" class="q-mr-xs" />
-                {{ pagination.rowsNumber }} คน
+                <q-icon name="how_to_reg" size="13px" />
+                {{ pagination.rowsNumber.toLocaleString() }} คน
+              </span>
+              <span v-if="hasActiveFilter" class="filter-active-chip">
+                <q-icon name="filter_alt" size="13px" />
+                กำลังกรอง
               </span>
             </p>
           </div>
         </div>
 
-        <!-- Filter grid -->
-        <div class="filter-grid">
-          <!-- <q-select
-            v-model="selectedMonth"
-            :options="monthOptions"
-            label="เดือน"
-            outlined dense emit-value map-options
-            bg-color="white" clearable
-            class="filter-field"
-            @update:model-value="onSearch"
-          >
-            <template v-slot:prepend>
-              <q-icon name="calendar_month" color="teal-6" size="18px" />
-            </template>
-          </q-select> -->
-          <q-select
-            v-model="selectedMonth"
-            :options="monthOptions"
-            label="เดือน"
-            outlined
-            dense
-            emit-value
-            map-options
-            bg-color="white"
-            clearable
-            class="filter-field month-select"
-            popup-content-class="month-select-popup"
-            @update:model-value="onSearch"
-          >
-            <template v-slot:prepend>
-              <q-icon name="calendar_month" color="teal-6" size="18px" />
-            </template>
+        <!-- Filter panel -->
+        <div class="filter-panel">
+          <div class="filter-panel-label">
+            <q-icon name="manage_search" size="16px" />
+            ค้นหาและกรอง
+          </div>
 
-            <!-- ค่าที่เลือก -->
-            <template v-slot:selected-item="scope">
-              <div class="month-selected">
-                <span class="month-selected-text">{{ scope.opt.label }}</span>
-              </div>
-            </template>
+          <div class="filter-grid">
+            <!-- เดือน -->
+            <q-select
+              v-model="selectedMonth"
+              :options="monthOptions"
+              label="เดือน"
+              outlined
+              dense
+              emit-value
+              map-options
+              bg-color="white"
+              clearable
+              class="filter-field month-select"
+              popup-content-class="month-select-popup"
+              @keydown.enter="onSearch"
+            >
+              <template v-slot:prepend>
+                <q-icon name="calendar_month" color="teal-6" size="16px" />
+              </template>
+              <template v-slot:selected-item="scope">
+                <span class="filter-selected-text">{{ scope.opt.label }}</span>
+              </template>
+              <template v-slot:option="scope">
+                <q-item v-bind="scope.itemProps" class="month-option">
+                  <q-item-section avatar>
+                    <div class="month-option-num">{{ scope.opt.value }}</div>
+                  </q-item-section>
+                  <q-item-section>
+                    <q-item-label class="month-option-label">{{ scope.opt.label }}</q-item-label>
+                  </q-item-section>
+                  <q-item-section side v-if="selectedMonth === scope.opt.value">
+                    <q-icon name="check_circle" color="teal-6" size="16px" />
+                  </q-item-section>
+                </q-item>
+              </template>
+              <template v-slot:no-option>
+                <div class="select-no-option">
+                  <q-icon name="search_off" size="1.4rem" color="grey-4" />
+                  <span>ไม่พบข้อมูล</span>
+                </div>
+              </template>
+            </q-select>
 
-            <!-- แต่ละ option -->
-            <template v-slot:option="scope">
-              <q-item v-bind="scope.itemProps" class="month-option">
-                <q-item-section avatar>
-                  <div class="month-option-num">{{ scope.opt.value }}</div>
-                </q-item-section>
-                <q-item-section>
-                  <q-item-label class="month-option-label">{{ scope.opt.label }}</q-item-label>
-                </q-item-section>
-                <q-item-section side v-if="selectedMonth === scope.opt.value">
-                  <q-icon name="check_circle" color="teal-6" size="16px" />
-                </q-item-section>
-              </q-item>
-            </template>
+            <!-- ปี -->
+            <q-select
+              v-model="selectedYear"
+              :options="filterYearOptions"
+              label="ปี พ.ศ."
+              outlined
+              dense
+              use-input
+              fill-input
+              hide-selected
+              input-debounce="0"
+              emit-value
+              map-options
+              bg-color="white"
+              clearable
+              class="filter-field year-select"
+              popup-content-class="year-select-popup"
+              @filter="filterYearFn"
+              @keydown.enter="onSearch"
+            >
+              <template v-slot:prepend>
+                <q-icon name="event" color="teal-6" size="16px" />
+              </template>
+              <template v-slot:option="scope">
+                <q-item v-bind="scope.itemProps" class="year-option">
+                  <q-item-section avatar>
+                    <div class="year-option-badge">
+                      <q-icon name="calendar_today" size="12px" color="teal-6" />
+                    </div>
+                  </q-item-section>
+                  <q-item-section>
+                    <q-item-label class="year-option-label">{{ scope.opt.label }}</q-item-label>
+                    <q-item-label caption class="year-option-caption"
+                      >ค.ศ. {{ scope.opt.value }}</q-item-label
+                    >
+                  </q-item-section>
+                  <q-item-section side v-if="selectedYear === scope.opt.value">
+                    <q-icon name="check_circle" color="teal-6" size="16px" />
+                  </q-item-section>
+                </q-item>
+              </template>
+              <template v-slot:no-option>
+                <div class="select-no-option">
+                  <q-icon name="search_off" size="1.4rem" color="grey-4" />
+                  <span>ไม่พบข้อมูลปี</span>
+                </div>
+              </template>
+            </q-select>
 
-            <template v-slot:no-option>
-              <div class="month-no-option">
-                <q-icon name="search_off" size="1.5rem" color="grey-4" />
-                <span>ไม่พบข้อมูล</span>
-              </div>
-            </template>
-          </q-select>
-          <!-- <q-select
-            v-model="selectedYear"
-            :options="filterYearOptions"
-            label="ปี พ.ศ."
-            outlined dense use-input fill-input hide-selected
-            input-debounce="0" emit-value map-options
-            bg-color="white" clearable
-            class="filter-field"
-            @filter="filterYearFn"
-            @update:model-value="onSearch"
-          >
-            <template v-slot:prepend>
-              <q-icon name="event" color="teal-6" size="18px" />
-            </template>
-            <template v-slot:no-option>
-              <q-item>
-                <q-item-section class="text-grey">ไม่พบข้อมูลปี</q-item-section>
-              </q-item>
-            </template>
-          </q-select> -->
-          <q-select
-            v-model="selectedYear"
-            :options="filterYearOptions"
-            label="ปี พ.ศ."
-            outlined
-            dense
-            use-input
-            fill-input
-            hide-selected
-            input-debounce="0"
-            emit-value
-            map-options
-            bg-color="white"
-            clearable
-            class="filter-field year-select"
-            popup-content-class="year-select-popup"
-            @filter="filterYearFn"
-            @update:model-value="onSearch"
-          >
-            <template v-slot:prepend>
-              <q-icon name="event" color="teal-6" size="18px" />
-            </template>
+            <!-- ชื่อ -->
+            <q-input
+              dense
+              outlined
+              v-model="fullname"
+              placeholder="ชื่อ-นามสกุล"
+              bg-color="white"
+              clearable
+              class="filter-field"
+              @keydown.enter="onSearch"
+            >
+              <template v-slot:prepend>
+                <q-icon name="person_search" color="indigo-5" size="16px" />
+              </template>
+            </q-input>
 
-            <!-- แต่ละ option -->
-            <template v-slot:option="scope">
-              <q-item v-bind="scope.itemProps" class="year-option">
-                <q-item-section avatar>
-                  <div class="year-option-badge">
-                    <q-icon name="calendar_today" size="13px" color="teal-6" />
-                  </div>
-                </q-item-section>
-                <q-item-section>
-                  <q-item-label class="year-option-label">{{ scope.opt.label }}</q-item-label>
-                  <q-item-label caption class="year-option-caption">
-                    ค.ศ. {{ scope.opt.value }}
-                  </q-item-label>
-                </q-item-section>
-                <q-item-section side v-if="selectedYear === scope.opt.value">
-                  <q-icon name="check_circle" color="teal-6" size="16px" />
-                </q-item-section>
-              </q-item>
-            </template>
+            <!-- ตำแหน่ง -->
+            <q-input
+              dense
+              outlined
+              v-model="position"
+              placeholder="ตำแหน่ง"
+              bg-color="white"
+              clearable
+              class="filter-field"
+              @keydown.enter="onSearch"
+            >
+              <template v-slot:prepend>
+                <q-icon name="badge" color="indigo-5" size="16px" />
+              </template>
+            </q-input>
 
-            <template v-slot:no-option>
-              <div class="year-no-option">
-                <q-icon name="search_off" size="1.5rem" color="grey-4" />
-                <span>ไม่พบข้อมูลปี</span>
-              </div>
-            </template>
-          </q-select>
-          <q-input
-            dense
-            outlined
-            debounce="300"
-            v-model="fullname"
-            placeholder="ชื่อ-นามสกุล"
-            bg-color="white"
-            clearable
-            class="filter-field"
-            @update:model-value="onSearch"
-          >
-            <template v-slot:prepend>
-              <q-icon name="person_search" color="indigo-5" size="18px" />
-            </template>
-          </q-input>
+            <!-- กอง/สำนัก -->
+            <q-input
+              dense
+              outlined
+              v-model="department"
+              placeholder="กอง / สำนัก / ศูนย์"
+              bg-color="white"
+              clearable
+              class="filter-field filter-field--dept"
+              @keydown.enter="onSearch"
+            >
+              <template v-slot:prepend>
+                <q-icon name="domain" color="indigo-5" size="16px" />
+              </template>
+            </q-input>
+          </div>
 
-          <q-input
-            dense
-            outlined
-            debounce="300"
-            v-model="position"
-            placeholder="ตำแหน่ง"
-            bg-color="white"
-            clearable
-            class="filter-field"
-            @update:model-value="onSearch"
-          >
-            <template v-slot:prepend>
-              <q-icon name="badge" color="indigo-5" size="18px" />
-            </template>
-          </q-input>
+          <!-- Action buttons -->
+          <div class="filter-actions">
+            <!-- Clear -->
+            <button class="btn-clear" :disabled="!hasActiveFilter" @click="clearFilter">
+              <q-icon name="clear_all" size="17px" />
+              <span>ล้างตัวกรอง</span>
+              <span v-if="hasActiveFilter" class="btn-clear-badge">
+                {{ activeFilterCount }}
+              </span>
+            </button>
 
-          <q-input
-            dense
-            outlined
-            debounce="250"
-            v-model="department"
-            placeholder="กอง/สำนัก/ศูนย์"
-            bg-color="white"
-            clearable
-            class="filter-field filter-field--wide"
-            @update:model-value="onSearch"
-          >
-            <template v-slot:prepend>
-              <q-icon name="domain" color="indigo-5" size="18px" />
-            </template>
-          </q-input>
+            <!-- Search -->
+            <button
+              class="btn-search"
+              :class="{ 'btn-search--loading': loading }"
+              :disabled="loading"
+              @click="onSearch"
+            >
+              <span v-if="!loading" class="btn-search-inner">
+                <q-icon name="search" size="19px" />
+                <span>ค้นหา</span>
+              </span>
+              <span v-else class="btn-search-inner">
+                <q-circular-progress indeterminate size="18px" color="white" />
+                <span>กำลังค้นหา...</span>
+              </span>
+            </button>
+          </div>
         </div>
       </div>
     </div>
 
     <!-- ===== CONTENT ===== -->
     <div class="content-area">
+      <!-- Result bar -->
+      <div v-if="!loading && rows.length > 0" class="result-bar">
+        <div class="result-bar-left">
+          <span class="result-num">{{ pagination.rowsNumber.toLocaleString() }}</span>
+          <span class="result-unit">รายการที่พบ</span>
+          <span v-if="hasActiveFilter" class="result-filter-note"> · จากการกรอง </span>
+        </div>
+        <div class="result-bar-right">
+          <span class="result-page-info">
+            หน้า {{ pagination.page }} /
+            {{ Math.ceil(pagination.rowsNumber / pagination.rowsPerPage) || 1 }}
+          </span>
+        </div>
+      </div>
+
       <!-- Loading skeleton -->
       <div v-if="loading" class="card-grid">
         <div v-for="n in 12" :key="n" class="sender-card sender-card--skeleton">
-          <q-skeleton square style="height: 180px" />
+          <div class="skeleton-img" />
           <div class="card-body">
-            <q-skeleton type="text" width="75%" />
-            <q-skeleton type="text" width="55%" class="q-mt-xs" />
-            <q-skeleton type="text" width="40%" class="q-mt-xs" />
+            <div class="skeleton-line skeleton-line--w75" />
+            <div class="skeleton-line skeleton-line--w55 q-mt-xs" />
+            <div class="skeleton-line skeleton-line--w40 q-mt-xs" />
           </div>
         </div>
       </div>
@@ -229,27 +252,29 @@
           @click="fetchSenderById(row.sId)"
         >
           <div class="card-img-wrap">
-            <q-img v-if="row.url" :src="row.url" :ratio="1" class="card-img">
+            <q-img v-if="row.url" :src="row.url" :ratio="1" class="card-img" fit="cover">
               <div class="card-img-overlay" />
             </q-img>
             <div v-else class="card-img-placeholder">
-              <q-icon name="person" size="2.5rem" color="indigo-2" />
+              <div class="card-avatar-fallback">
+                <q-icon name="person" size="2.2rem" color="indigo-2" />
+              </div>
             </div>
-            <div v-if="row.wishWord" class="card-wish-preview">
-              <q-icon name="format_quote" size="12px" class="q-mr-xs" />
-              {{ row.wishWord.slice(0, 22) }}{{ row.wishWord.length > 22 ? '…' : '' }}
+            <div v-if="row.wishWord" class="card-wish-badge">
+              <q-icon name="format_quote" size="11px" />
+              {{ row.wishWord.slice(0, 20) }}{{ row.wishWord.length > 20 ? '…' : '' }}
             </div>
           </div>
           <div class="card-body">
             <div class="card-name">{{ row.fullname }}</div>
             <div class="card-position">{{ row.position }}</div>
             <div class="card-dept">
-              <q-icon name="domain" size="12px" class="q-mr-xs" />
+              <q-icon name="domain" size="11px" />
               {{ row.department }}
             </div>
           </div>
           <div class="card-cta">
-            <q-icon name="visibility" size="14px" class="q-mr-xs" />
+            <q-icon name="visibility" size="13px" />
             ดูคำอวยพร
           </div>
         </div>
@@ -257,9 +282,19 @@
 
       <!-- Empty state -->
       <div v-else class="empty-state">
-        <div class="empty-emoji">🔍</div>
-        <div class="empty-title">ไม่พบข้อมูล</div>
-        <div class="empty-sub">ลองปรับตัวกรองแล้วค้นหาใหม่อีกครั้ง</div>
+        <div class="empty-emoji">
+          {{ hasActiveFilter ? '🔍' : '👥' }}
+        </div>
+        <div class="empty-title">
+          {{ hasActiveFilter ? 'ไม่พบข้อมูลที่ตรงกัน' : 'ยังไม่มีข้อมูล' }}
+        </div>
+        <div class="empty-sub">
+          {{ hasActiveFilter ? 'ลองปรับเงื่อนไขการค้นหาใหม่' : 'ยังไม่มีผู้ร่วมส่งคำอวยพร' }}
+        </div>
+        <button v-if="hasActiveFilter" class="empty-clear-btn" @click="clearFilter">
+          <q-icon name="clear_all" size="16px" />
+          ล้างตัวกรอง
+        </button>
       </div>
 
       <!-- Pagination -->
@@ -279,7 +314,7 @@
           <span class="rpp-label">แสดง</span>
           <q-select
             v-model="pagination.rowsPerPage"
-            :options="[12, 24, 48]"
+            :options="[10, 15, 20, 25, 50, 100]"
             dense
             outlined
             class="rpp-select"
@@ -314,12 +349,12 @@
           <div class="detail-name">{{ selectedSender?.fullname }}</div>
           <div class="detail-position">{{ selectedSender?.position }}</div>
           <div class="detail-dept">
-            <q-icon name="domain" size="14px" class="q-mr-xs" />
+            <q-icon name="domain" size="13px" class="q-mr-xs" />
             {{ selectedSender?.department }}
           </div>
           <div class="detail-wish-card">
             <div class="detail-wish-label">
-              <q-icon name="favorite" size="14px" color="pink-4" class="q-mr-xs" />
+              <q-icon name="favorite" size="13px" color="pink-4" class="q-mr-xs" />
               คำอวยพร
             </div>
             <blockquote class="detail-wish-text">{{ selectedSender?.wishWord }}</blockquote>
@@ -333,31 +368,22 @@
         </div>
       </div>
     </q-dialog>
-    <!-- ===== LOADING DIALOG ===== -->
+
     <!-- ===== LOADING DIALOG ===== -->
     <q-dialog v-model="showLoading" persistent no-backdrop-dismiss>
       <div class="loading-dialog">
-        <!-- Orb spinner -->
         <div class="ld-orb-wrap">
           <div class="ld-orb-bg" />
           <div class="ld-orb-ring1" />
           <div class="ld-orb-ring2" />
           <div class="ld-orb-inner">🎴</div>
         </div>
-
-        <!-- Title -->
         <div class="ld-title">กำลังโหลดข้อมูล</div>
-
-        <!-- Big % number -->
         <div class="ld-pct-row">
           <span class="ld-pct-num">{{ loadingPercent }}</span>
           <span class="ld-pct-sym">%</span>
         </div>
-
-        <!-- Step label -->
         <div class="ld-sub">{{ loadingSteps[loadingStep]?.label ?? 'กำลังเริ่มต้น...' }}</div>
-
-        <!-- Step checklist -->
         <div class="ld-steps">
           <div
             v-for="(s, i) in loadingSteps"
@@ -393,13 +419,9 @@
             </div>
           </div>
         </div>
-
-        <!-- Progress bar -->
         <div class="ld-bar-track">
           <div class="ld-bar-fill" :style="{ width: loadingPercent + '%' }" />
         </div>
-
-        <!-- Dot loader -->
         <div class="ld-dots">
           <span class="ld-dot" />
           <span class="ld-dot" />
@@ -407,9 +429,10 @@
         </div>
       </div>
     </q-dialog>
+
     <!-- ===== CLICK PARTICLES ===== -->
     <teleport to="body">
-      <div class="click-particles-root">
+      <div class="click-particles-root" aria-hidden="true">
         <span v-for="p in activeParticles" :key="p.id" class="click-particle" :style="p.style" />
       </div>
     </teleport>
@@ -417,7 +440,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { api } from 'src/boot/axios';
 import { useQuasar } from 'quasar';
 
@@ -433,7 +456,6 @@ interface SenderItem {
   card?: { imageCard: string };
   wish?: { wishWord: string };
 }
-
 interface TableRow {
   sId: number | string;
   fullname: string;
@@ -469,69 +491,85 @@ const yearOptions = ref<{ label: string; value: number }[]>([]);
 const filterYearOptions = ref<{ label: string; value: number }[]>([]);
 
 const generateThaiYearOptions = () => {
-  const currentYearCE = new Date().getFullYear();
+  const y = new Date().getFullYear();
   const years = [];
-  for (let year = currentYearCE; year >= 2016; year--) {
-    years.push({ label: `${year + 543}`, value: year });
-  }
+  for (let yr = y; yr >= 2016; yr--) years.push({ label: `${yr + 543}`, value: yr });
   yearOptions.value = years;
   filterYearOptions.value = years;
-  // selectedYear.value = currentYearCE;
 };
 
 const filterYearFn = (val: string, update: (fn: () => void) => void) => {
   update(() => {
-    if (val === '') {
-      filterYearOptions.value = yearOptions.value;
-      return;
-    }
-    const needle = val.toLowerCase();
-    filterYearOptions.value = yearOptions.value.filter((v) =>
-      v.label.toLowerCase().includes(needle),
-    );
+    filterYearOptions.value =
+      val === ''
+        ? yearOptions.value
+        : yearOptions.value.filter((v) => v.label.toLowerCase().includes(val.toLowerCase()));
   });
 };
 
-// ================= TABLE STATE =================
+// computed helpers
+const hasActiveFilter = computed(
+  () =>
+    !!selectedMonth.value ||
+    !!selectedYear.value ||
+    !!fullname.value?.trim() ||
+    !!position.value?.trim() ||
+    !!department.value?.trim(),
+);
+const activeFilterCount = computed(
+  () =>
+    [
+      selectedMonth.value,
+      selectedYear.value,
+      fullname.value,
+      position.value,
+      department.value,
+    ].filter((v) => !!v && (typeof v !== 'string' || v.trim().length > 0)).length,
+);
+
+const clearFilter = () => {
+  selectedMonth.value = null;
+  selectedYear.value = null;
+  fullname.value = null;
+  position.value = null;
+  department.value = null;
+  onSearch();
+};
+
+// ================= TABLE =================
 const rows = ref<TableRow[]>([]);
 const loading = ref(false);
-const pagination = ref({ page: 1, rowsPerPage: 10, rowsNumber: 0, sortBy: '', descending: false });
+const pagination = ref({ page: 1, rowsPerPage: 10, rowsNumber: 0 });
 
-// ===== LOADING DIALOG =====
-// ================= LOADING =================
+// ================= LOADING DIALOG =================
 const showLoading = ref(false);
 const loadingStep = ref(0);
 const loadingPercent = ref(0);
-
 const loadingSteps = [
   { label: 'โหลดข้อมูลผู้ส่งอวยพร', pct: 80 },
   { label: 'แสดงรายการผู้ส่งอวยพร', pct: 100 },
 ];
-
-let pctAnimTimer: ReturnType<typeof setInterval> | null = null;
+let pctTimer: ReturnType<typeof setInterval> | null = null;
 
 const animatePct = (target: number) => {
-  if (pctAnimTimer) clearInterval(pctAnimTimer);
+  if (pctTimer) clearInterval(pctTimer);
   const start = loadingPercent.value;
-  const dur = 800;
   const t0 = Date.now();
-  pctAnimTimer = setInterval(() => {
-    const p = Math.min(1, (Date.now() - t0) / dur);
+  pctTimer = setInterval(() => {
+    const p = Math.min(1, (Date.now() - t0) / 800);
     loadingPercent.value = Math.round(start + (target - start) * p);
     if (p >= 1) {
-      clearInterval(pctAnimTimer!);
-      pctAnimTimer = null;
+      clearInterval(pctTimer!);
+      pctTimer = null;
     }
   }, 16);
 };
-
 const startLoading = () => {
   showLoading.value = true;
   loadingStep.value = 0;
   loadingPercent.value = 0;
   animatePct(5);
 };
-
 const stopLoading = () => {
   loadingStep.value = loadingSteps.length;
   animatePct(100);
@@ -541,46 +579,37 @@ const stopLoading = () => {
 };
 
 // ================= IMAGE =================
-const getImageUrl = async (imagePath: string): Promise<string> => {
+const getImageUrl = async (path: string): Promise<string> => {
   try {
-    const response = await api.get(`/upload/${imagePath}`, { responseType: 'blob' });
-    return URL.createObjectURL(response.data as Blob);
+    const res = await api.get(`/upload/${path}`, { responseType: 'blob' });
+    return URL.createObjectURL(res.data as Blob);
   } catch {
     return '';
   }
 };
 
 // ================= FETCH LIST =================
-// ================= FETCH LIST =================
-const fetchSender = async (id: string): Promise<void> => {
+const fetchSender = async (id: string) => {
   startLoading();
-
   try {
-    // 👉 step 1
     loadingStep.value = 0;
-    animatePct(loadingSteps[loadingStep.value]?.pct ?? 100);
+    animatePct(loadingSteps[0]?.pct ?? 80);
+    const res = await api.get(`/sender/paginate/${Number(id)}`, {
+      params: {
+        page: pagination.value.page,
+        limit: pagination.value.rowsPerPage,
+        fullname: fullname.value || undefined,
+        position: position.value || undefined,
+        department: department.value || undefined,
+        month: selectedMonth.value || undefined,
+        year: selectedYear.value || undefined,
+      },
+    });
+    const list: SenderItem[] = res.data.sender?.data ?? [];
+    pagination.value.rowsNumber = res.data.sender?.total ?? 0;
 
-    const data = {
-      page: pagination.value.page,
-      limit: pagination.value.rowsPerPage,
-      fullname: fullname.value || undefined,
-      position: position.value || undefined,
-      department: department.value || undefined,
-      month: selectedMonth.value || undefined,
-      year: selectedYear.value || undefined,
-    };
-    console.log('FETCH PARAMS:', data);
-    const response = await api.get(`/sender/paginate/${Number(id)}`, { params: data });
-
-    const res = response.data;
-    const list: SenderItem[] = res.sender?.data ?? [];
-
-    pagination.value.rowsNumber = res.sender?.total ?? 0;
-
-    // 👉 step 2
     loadingStep.value = 1;
-    animatePct(loadingSteps[loadingStep.value]?.pct ?? 100);
-
+    animatePct(loadingSteps[1]?.pct ?? 100);
     rows.value = await Promise.all(
       list.map(async (item) => ({
         sId: item.sId,
@@ -591,72 +620,13 @@ const fetchSender = async (id: string): Promise<void> => {
         wishWord: item.wish?.wishWord || '',
       })),
     );
-  } catch (error) {
-    console.error('FETCH ERROR:', error);
+  } catch (e) {
+    console.error(e);
     rows.value = [];
   } finally {
     stopLoading();
   }
 };
-// const fetchSender = async (id: string): Promise<void> => {
-//   startLoading();
-
-//   try {
-//     // Step 1 — ดึงข้อมูลเดือนและปี
-//     // loadingStep.value = 0;
-//     // animatePct(loadingSteps[0]!.pct);
-//     // await new Promise((r) => setTimeout(r, 4000));  // 8 วิ
-//     // Step 2 — เตรียมแบบฟอร์มค้นหา
-//     // loadingStep.value = 1;
-//     // animatePct(loadingSteps[1]!.pct);
-//     await new Promise((r) => setTimeout(r, 12000)); // 12 วิ
-//     const data = {
-//       page: pagination.value.page,
-//       limit: pagination.value.rowsPerPage,
-//       fullname: fullname.value || undefined,
-//       position: position.value || undefined,
-//       department: department.value || undefined,
-//       month: selectedMonth.value || undefined,
-//       year: selectedYear.value || undefined,
-//     };
-
-//     const response = await api.get(`/sender/paginate/${Number(id)}`, { params: data });
-
-//     // Step 2 — เตรียมแบบฟอร์มค้นหา
-//     // loadingStep.value = 1;
-//     // animatePct(loadingSteps[1]!.pct);
-//     const res = response.data;
-//     const list: SenderItem[] = res.sender?.data ?? [];
-//     pagination.value.rowsNumber = res.sender?.total ?? 0;
-
-// //     // Step 2 — แสดงรายการผู้ส่งอวยพร
-// //     loadingStep.value = 2;
-// // // ลบ: const value = response.data?.someObject?.pct  ← เอาออกทั้งบรรทัด
-// // if (loadingSteps[2]) animatePct(loadingSteps[2].pct);  // ✅ เช็คก่อนเรียก
-// // await new Promise((r) => setTimeout(r, 4000));
-// //     await new Promise((r) => setTimeout(r, 4000)); // 8 วิ
-//     rows.value = await Promise.all(
-//       list.map(async (item) => ({
-//         sId: item.sId,
-//         fullname: item.fullname || '-',
-//         position: item.position || '-',
-//         department: item.department || '-',
-//         url: item.card?.imageCard ? await getImageUrl(item.card.imageCard) : '',
-//         wishWord: item.wish?.wishWord || '',
-//       })),
-//     );
-
-//     // Step 4 — แสดงรายการผู้ส่งอวยพร
-//     loadingStep.value = 3;
-//     animatePct(loadingSteps[3]!.pct);
-//     await new Promise((r) => setTimeout(r, 350));
-//   } catch (error) {
-//     console.error('FETCH ERROR:', error);
-//     rows.value = [];
-//   } finally {
-//     stopLoading();
-//   }
-// };
 
 // ================= FETCH DETAIL =================
 const showDialog = ref(false);
@@ -675,8 +645,8 @@ const fetchSenderById = async (id: number | string) => {
       wishWord: data.wish?.wishWord || '',
     };
     showDialog.value = true;
-  } catch (err) {
-    console.error(err);
+  } catch (e) {
+    console.error(e);
   }
 };
 
@@ -693,150 +663,14 @@ const onRppChange = () => {
   void fetchSender(props.id);
 };
 
-// ============================================================
-// CLICK PARTICLES
-// ============================================================
+// ================= PARTICLES =================
 interface Particle {
   id: number;
   style: Record<string, string>;
 }
 type ShapeType = 'circle' | 'square' | 'star' | 'triangle' | 'emoji';
-
 const activeParticles = ref<Particle[]>([]);
 let particleId = 0;
-
-// const PARTICLE_COLORS = [
-//   '#e11d48',
-//   '#fbbf24',
-//   '#6366f1',
-//   '#22c55e',
-//   '#fb7185',
-//   '#f59e0b',
-//   '#a78bfa',
-//   '#34d399',
-//   '#f472b6',
-//   '#38bdf8',
-//   '#4ade80',
-//   '#facc15',
-//   '#ff6b6b',
-//   '#ffd93d',
-//   '#6bcb77',
-//   '#4d96ff',
-// ];
-
-// const PARTICLE_EMOJIS = [
-//   '🎉',
-//   '✨',
-//   '🎊',
-//   '⭐',
-//   '💫',
-//   '🌟',
-//   '🎈',
-//   '🌸',
-//   '🌺',
-//   '🌼',
-//   '🎀',
-//   '💥',
-//   '🎆',
-//   '🎇',
-//   '🦋',
-//   '🍀',
-//   '❄️',
-//   '🎵',
-//   '💎',
-//   '🏵️',
-// ];
-
-// const SHAPES: ShapeType[] = ['circle', 'square', 'star', 'triangle', 'emoji'];
-// const WEIGHTS = [0.25, 0.2, 0.2, 0.15, 0.2];
-
-// function pickShape(): ShapeType {
-//   const r = Math.random();
-//   let c = 0;
-//   for (let i = 0; i < SHAPES.length; i++) {
-//     c += WEIGHTS[i] ?? 0;
-//     if (r < c) return SHAPES[i] ?? 'circle';
-//   }
-//   return 'circle';
-// }
-
-// const spawnParticles = (x: number, y: number) => {
-//   const count = 36 + Math.floor(Math.random() * 12);
-//   const W = window.innerWidth;
-//   const H = window.innerHeight;
-
-//   for (let i = 0; i < count; i++) {
-//     const id = ++particleId;
-//     const size = 7 + Math.random() * 11;
-//     const color = PARTICLE_COLORS[Math.floor(Math.random() * PARTICLE_COLORS.length)] ?? '#fbbf24';
-//     const dur = 1.2 + Math.random() * 1.2;
-//     const emoji = PARTICLE_EMOJIS[Math.floor(Math.random() * PARTICLE_EMOJIS.length)] ?? '🎉';
-//     const shape = pickShape();
-//     const isEmoji = shape === 'emoji';
-
-//     // 8 zone ให้กระจายทั่วจอ
-//     const zone = i % 8;
-//     let targetX: number, targetY: number;
-//     switch (zone) {
-//       case 0:
-//         targetX = Math.random() * W * 0.35;
-//         targetY = Math.random() * H * 0.35;
-//         break;
-//       case 1:
-//         targetX = W * 0.25 + Math.random() * W * 0.5;
-//         targetY = Math.random() * H * 0.25;
-//         break;
-//       case 2:
-//         targetX = W * 0.65 + Math.random() * W * 0.35;
-//         targetY = Math.random() * H * 0.35;
-//         break;
-//       case 3:
-//         targetX = W * 0.65 + Math.random() * W * 0.35;
-//         targetY = H * 0.25 + Math.random() * H * 0.5;
-//         break;
-//       case 4:
-//         targetX = W * 0.65 + Math.random() * W * 0.35;
-//         targetY = H * 0.65 + Math.random() * H * 0.35;
-//         break;
-//       case 5:
-//         targetX = W * 0.25 + Math.random() * W * 0.5;
-//         targetY = H * 0.75 + Math.random() * H * 0.25;
-//         break;
-//       case 6:
-//         targetX = Math.random() * W * 0.35;
-//         targetY = H * 0.65 + Math.random() * H * 0.35;
-//         break;
-//       case 7:
-//         targetX = Math.random() * W * 0.25;
-//         targetY = H * 0.25 + Math.random() * H * 0.5;
-//         break;
-//       default:
-//         targetX = Math.random() * W;
-//         targetY = Math.random() * H;
-//     }
-
-//     const style: Record<string, string> = {
-//       '--x': `${x}px`,
-//       '--y': `${y}px`,
-//       '--dx': `${targetX - x}px`,
-//       '--dy': `${targetY - y}px`,
-//       '--dur': `${dur}s`,
-//       '--color': isEmoji ? 'transparent' : color,
-//       '--size': isEmoji ? '22px' : `${size}px`,
-//       '--shape': shape,
-//       '--emoji-content': isEmoji ? `"${emoji}"` : '""',
-//       '--rot': `${Math.random() * 720 - 360}deg`,
-//     };
-
-//     activeParticles.value.push({ id, style });
-//     setTimeout(
-//       () => {
-//         activeParticles.value = activeParticles.value.filter((p) => p.id !== id);
-//       },
-//       dur * 1000 + 200,
-//     );
-//   }
-// };
 const PARTICLE_COLORS = [
   '#e11d48',
   '#fbbf24',
@@ -850,14 +684,7 @@ const PARTICLE_COLORS = [
   '#38bdf8',
   '#4ade80',
   '#facc15',
-  '#ff6b6b',
-  '#ffd93d',
-  '#6bcb77',
-  '#4d96ff',
 ];
-
-// const PARTICLE_EMOJIS = ['🎉', '✨', '🎊', '⭐', '💫', '🌟', '🎈', '🌸'];
-
 const PARTICLE_EMOJIS = [
   '🎉',
   '✨',
@@ -881,41 +708,31 @@ const PARTICLE_EMOJIS = [
   '🏵️',
 ];
 
-// type ShapeType = 'circle' | 'square' | 'star' | 'emoji';
-
 const spawnParticles = (x: number, y: number) => {
-  const count = 12 + Math.floor(Math.random() * 6); // 12–18 particles (ลดจาก 36–48)
-
+  const count = 12 + Math.floor(Math.random() * 6);
   for (let i = 0; i < count; i++) {
     const id = ++particleId;
     const size = 6 + Math.random() * 7;
     const color = PARTICLE_COLORS[Math.floor(Math.random() * PARTICLE_COLORS.length)] ?? '#fbbf24';
-    const dur = 0.7 + Math.random() * 0.5; // สั้นลง 0.7–1.2s (จาก 1.2–2.4s)
+    const dur = 0.7 + Math.random() * 0.5;
     const emoji = PARTICLE_EMOJIS[Math.floor(Math.random() * PARTICLE_EMOJIS.length)] ?? '🎉';
-
     const shapes: ShapeType[] = ['circle', 'circle', 'square', 'star', 'emoji'];
     const shape = shapes[Math.floor(Math.random() * shapes.length)] ?? 'circle';
     const isEmoji = shape === 'emoji';
-
-    // กระจายรอบจุดคลิกในรัศมี 80–160px แทนการกระเด็นทั่วจอ
     const angle = (i / count) * Math.PI * 2 + (Math.random() - 0.5) * 0.8;
     const dist = 80 + Math.random() * 80;
-    const dx = Math.cos(angle) * dist;
-    const dy = Math.sin(angle) * dist;
-
     const style: Record<string, string> = {
       '--x': `${x}px`,
       '--y': `${y}px`,
-      '--dx': `${dx}px`,
-      '--dy': `${dy}px`,
+      '--dx': `${Math.cos(angle) * dist}px`,
+      '--dy': `${Math.sin(angle) * dist}px`,
       '--dur': `${dur}s`,
       '--color': isEmoji ? 'transparent' : color,
       '--size': isEmoji ? '18px' : `${size}px`,
       '--shape': shape,
       '--emoji-content': isEmoji ? `"${emoji}"` : '""',
-      '--rot': `${Math.random() * 360 - 180}deg`, // หมุนน้อยลง (จาก ±360 → ±180)
+      '--rot': `${Math.random() * 360 - 180}deg`,
     };
-
     activeParticles.value.push({ id, style });
     setTimeout(
       () => {
@@ -925,22 +742,20 @@ const spawnParticles = (x: number, y: number) => {
     );
   }
 };
-
 const handleGlobalClick = (e: MouseEvent) => {
   spawnParticles(e.clientX, e.clientY);
 };
 
-// ================= INIT =================
+// ================= LIFECYCLE =================
 onMounted(() => {
   generateThaiYearOptions();
   void fetchSender(props.id);
   document.addEventListener('click', handleGlobalClick);
 });
-
 onUnmounted(() => {
   document.removeEventListener('click', handleGlobalClick);
+  if (pctTimer) clearInterval(pctTimer);
 });
-
 watch(
   () => props.id,
   (newId) => {
@@ -954,60 +769,108 @@ watch(
 
 <style lang="scss" scoped>
 @use 'sass:color';
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&family=Prompt:wght@500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800&family=Prompt:wght@500;600;700;800&display=swap');
 
-// ============================================================
-// TOKENS
-// ============================================================
+/* ── TOKENS ── */
 $indigo: #4338ca;
 $indigo-mid: #6366f1;
 $indigo-soft: #eef2ff;
+$indigo-deep: #1a1460;
+$indigo-dark: #2d2d8a;
 $teal: #0d9488;
+$teal-light: #ccfbf1;
 $surface: #ffffff;
 $text-main: #1e1b4b;
 $text-muted: #6b7280;
-$radius-card: 16px;
+$error-red: #e53935;
+$r-card: 16px;
 
-$indigo-deep: #1a1460;
-$indigo-mid: #2d2d8a;
-
-.sender-page {
+/* ── PAGE ── */
+.list-sender-page {
   font-family: 'Noto Sans Thai', 'Prompt', sans-serif;
   background: linear-gradient(150deg, #eef2ff 0%, #f5f3ff 40%, #f0fdfa 100%);
   min-height: 100vh;
-}
-// ============================================================
-// FILTER HERO
-// ============================================================
-.filter-hero {
   position: relative;
-  overflow: hidden;
-  background: linear-gradient(135deg, #312e81 0%, $indigo 45%, $indigo-mid 100%);
-  padding: 2rem 1.5rem 3.5rem;
 }
 
+/* ── BG DECO ── */
+.bg-deco {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+.bg-deco-blob {
+  position: absolute;
+  border-radius: 50%;
+  animation: blobDrift var(--dur, 10s) ease-in-out infinite var(--delay, 0s);
+}
+.bg-deco-blob-1 {
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.07) 0%, transparent 70%);
+  top: -100px;
+  right: -100px;
+  --dur: 9s;
+}
+.bg-deco-blob-2 {
+  width: 360px;
+  height: 360px;
+  background: radial-gradient(circle, rgba(13, 148, 136, 0.06) 0%, transparent 70%);
+  bottom: -80px;
+  left: -80px;
+  --dur: 11s;
+  --delay: 1s;
+}
+.bg-deco-blob-3 {
+  width: 260px;
+  height: 260px;
+  background: radial-gradient(circle, rgba(167, 139, 250, 0.06) 0%, transparent 70%);
+  top: 45%;
+  left: 35%;
+  --dur: 8s;
+  --delay: 2s;
+}
+@keyframes blobDrift {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-18px) scale(1.04);
+  }
+}
+
+/* ── FILTER HERO ── */
+.filter-hero {
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+  background: linear-gradient(135deg, #312e81 0%, $indigo 40%, #6d28d9 80%, #0d7a6e 130%);
+  padding: 2.25rem 1.5rem 4rem;
+}
 .filter-hero-blob {
   position: absolute;
   border-radius: 50%;
-  opacity: 0.1;
+  pointer-events: none;
+  animation: drift 8s ease-in-out infinite;
 }
 .filter-hero-blob-1 {
   width: 320px;
   height: 320px;
-  background: #a5b4fc;
+  background: rgba(165, 180, 252, 0.12);
   top: -100px;
   right: -80px;
-  animation: drift 8s ease-in-out infinite;
 }
 .filter-hero-blob-2 {
   width: 180px;
   height: 180px;
-  background: $teal;
+  background: rgba(13, 148, 136, 0.12);
   bottom: -60px;
   left: -40px;
-  animation: drift 10s ease-in-out infinite reverse;
+  animation-duration: 10s;
+  animation-direction: reverse;
 }
-
 @keyframes drift {
   0%,
   100% {
@@ -1025,103 +888,138 @@ $indigo-mid: #2d2d8a;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 1.5rem;
 }
 
+/* Title row */
 .filter-hero-title-row {
   display: flex;
   align-items: center;
   gap: 14px;
 }
-
 .filter-hero-icon {
-  width: 50px;
-  height: 50px;
-  border-radius: 14px;
+  width: 52px;
+  height: 52px;
+  border-radius: 15px;
+  flex-shrink: 0;
   background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(6px);
+  backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.22);
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
 }
-
+.filter-hero-text {
+  flex: 1;
+}
 .filter-hero-title {
   font-family: 'Prompt', sans-serif;
-  font-size: clamp(1.1rem, 4vw, 1.65rem);
-  font-weight: 700;
+  font-size: clamp(1.1rem, 4vw, 1.7rem);
+  font-weight: 800;
   color: #fff;
-  margin: 0 0 4px;
+  margin: 0 0 5px;
+  letter-spacing: -0.02em;
   line-height: 1.2;
 }
-
 .filter-hero-sub {
   margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
 }
-
 .filter-count-chip {
   display: inline-flex;
   align-items: center;
+  gap: 5px;
   background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(4px);
   border: 1px solid rgba(255, 255, 255, 0.22);
   border-radius: 20px;
-  padding: 4px 12px;
-  font-size: 0.82rem;
+  padding: 3px 12px;
+  font-size: 0.8rem;
   color: rgba(255, 255, 255, 0.9);
-  font-weight: 500;
+  font-weight: 600;
 }
-
-// ===== MONTH SELECT =====
-.month-select {
-  :deep(.q-field__control) {
-    border-radius: 14px !important;
-    border: 1.5px solid rgba(13, 148, 136, 0.2) !important;
-    background: linear-gradient(135deg, #f0fdfa, #fff) !important;
-    transition:
-      border-color 0.2s,
-      box-shadow 0.2s !important;
-    min-height: 44px !important;
+.filter-active-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(245, 166, 35, 0.25);
+  border: 1px solid rgba(245, 166, 35, 0.4);
+  border-radius: 20px;
+  padding: 3px 12px;
+  font-size: 0.78rem;
+  color: #fde68a;
+  font-weight: 600;
+  animation: activeChipPulse 2s ease infinite;
+}
+@keyframes activeChipPulse {
+  0%,
+  100% {
+    opacity: 1;
   }
-
-  :deep(.q-field--focused .q-field__control) {
-    border-color: rgba(13, 148, 136, 0.5) !important;
-    box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1) !important;
-  }
-
-  :deep(.q-field__label) {
-    color: #6b7280 !important;
-    font-size: 0.85rem !important;
-  }
-
-  :deep(.q-field__native) {
-    font-weight: 600 !important;
-    color: #1e1b4b !important;
+  50% {
+    opacity: 0.7;
   }
 }
 
-.month-selected {
+/* Filter panel */
+.filter-panel {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  padding: 1.25rem 1.25rem 1rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+}
+.filter-panel-label {
   display: flex;
   align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.65);
+  margin-bottom: 1rem;
 }
 
-.month-selected-text {
-  font-size: 0.88rem;
-  font-weight: 600;
-  color: #1e1b4b;
+.filter-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+  @media (max-width: 900px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+  }
+}
+.filter-field {
+  :deep(.q-field__control) {
+    border-radius: 12px !important;
+    transition:
+      box-shadow 0.2s,
+      border-color 0.2s !important;
+  }
+  :deep(.q-field__control:hover) {
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12) !important;
+  }
+}
+.filter-field--dept {
+  @media (min-width: 901px) {
+    grid-column: span 2;
+  }
 }
 
-// Popup
-// :global(.month-select-popup) {
-//   border-radius: 16px !important;
-//   box-shadow: 0 8px 32px rgba(13, 148, 136, 0.15) !important;
-//   border: 1px solid rgba(13, 148, 136, 0.12) !important;
-//   overflow: hidden;
-//   padding: 4px !important;
-// }
-
-// แก้เป็น
+/* Month select */
+.month-select :deep(.q-field__control) {
+  border-radius: 12px !important;
+  background: linear-gradient(135deg, #f0fdfa, #fff) !important;
+  border: 1.5px solid rgba(13, 148, 136, 0.22) !important;
+}
 :global(.month-select-popup) {
   border-radius: 16px !important;
   box-shadow: 0 8px 32px rgba(13, 148, 136, 0.15) !important;
@@ -1130,28 +1028,16 @@ $indigo-mid: #2d2d8a;
   max-height: 280px !important;
   padding: 4px !important;
 }
-
 .month-option {
   border-radius: 10px !important;
   margin: 2px 4px !important;
-  transition: background 0.15s !important;
-
-  &:hover {
-    background: rgba(13, 148, 136, 0.06) !important;
-  }
-
-  :deep(&.q-item--active) {
-    background: rgba(13, 148, 136, 0.1) !important;
-  }
 }
-
 .month-option-num {
   width: 28px;
   height: 28px;
   border-radius: 8px;
-  background: linear-gradient(135deg, #ccfbf1, #f0fdfa);
-  color: #0d9488;
-  font-family: 'Prompt', sans-serif;
+  background: linear-gradient(135deg, $teal-light, #f0fdfa);
+  color: $teal;
   font-size: 0.72rem;
   font-weight: 700;
   display: flex;
@@ -1159,62 +1045,18 @@ $indigo-mid: #2d2d8a;
   justify-content: center;
   border: 1px solid rgba(13, 148, 136, 0.15);
 }
-
 .month-option-label {
   font-size: 0.88rem !important;
   font-weight: 500 !important;
-  color: #1e1b4b !important;
+  color: $text-main !important;
 }
 
-.month-no-option {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  padding: 1.5rem;
-  color: #9ca3af;
-  font-size: 0.85rem;
+/* Year select */
+.year-select :deep(.q-field__control) {
+  border-radius: 12px !important;
+  background: linear-gradient(135deg, #f0fdfa, #fff) !important;
+  border: 1.5px solid rgba(13, 148, 136, 0.22) !important;
 }
-
-// ===== YEAR SELECT =====
-.year-select {
-  :deep(.q-field__control) {
-    border-radius: 14px !important;
-    border: 1.5px solid rgba(13, 148, 136, 0.2) !important;
-    background: linear-gradient(135deg, #f0fdfa, #fff) !important;
-    transition:
-      border-color 0.2s,
-      box-shadow 0.2s !important;
-    min-height: 44px !important;
-  }
-
-  :deep(.q-field--focused .q-field__control) {
-    border-color: rgba(13, 148, 136, 0.5) !important;
-    box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1) !important;
-  }
-
-  :deep(.q-field__label) {
-    color: #6b7280 !important;
-    font-size: 0.85rem !important;
-  }
-
-  :deep(.q-field__input) {
-    font-family: 'Prompt', sans-serif !important;
-    font-weight: 600 !important;
-    color: #1e1b4b !important;
-    font-size: 0.88rem !important;
-  }
-}
-
-// Popup
-// :global(.year-select-popup) {
-//   border-radius: 16px !important;
-//   box-shadow: 0 8px 32px rgba(13, 148, 136, 0.15) !important;
-//   border: 1px solid rgba(13, 148, 136, 0.12) !important;
-//   overflow: hidden;
-//   padding: 4px !important;
-// }
-// แก้เป็น
 :global(.year-select-popup) {
   border-radius: 16px !important;
   box-shadow: 0 8px 32px rgba(13, 148, 136, 0.15) !important;
@@ -1223,120 +1065,260 @@ $indigo-mid: #2d2d8a;
   max-height: 280px !important;
   padding: 4px !important;
 }
-
 .year-option {
   border-radius: 10px !important;
   margin: 2px 4px !important;
-  transition: background 0.15s !important;
-
-  &:hover {
-    background: rgba(13, 148, 136, 0.06) !important;
-  }
-
-  :deep(&.q-item--active) {
-    background: rgba(13, 148, 136, 0.1) !important;
-  }
 }
-
 .year-option-badge {
   width: 28px;
   height: 28px;
   border-radius: 8px;
-  background: linear-gradient(135deg, #ccfbf1, #f0fdfa);
+  background: linear-gradient(135deg, $teal-light, #f0fdfa);
   display: flex;
   align-items: center;
   justify-content: center;
   border: 1px solid rgba(13, 148, 136, 0.15);
-  flex-shrink: 0;
 }
-
 .year-option-label {
-  font-family: 'Prompt', sans-serif !important;
   font-size: 0.9rem !important;
   font-weight: 700 !important;
-  color: #1e1b4b !important;
-  line-height: 1.2 !important;
+  color: $text-main !important;
 }
-
 .year-option-caption {
   font-size: 0.72rem !important;
   color: #9ca3af !important;
-  margin-top: 1px !important;
 }
 
-.year-no-option {
+.select-no-option {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   padding: 1.5rem;
   color: #9ca3af;
   font-size: 0.85rem;
 }
-// ============================================================
-// FILTER GRID
-// ============================================================
-.filter-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
+.filter-selected-text {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: $text-main;
+}
 
-  @media (max-width: 900px) {
-    grid-template-columns: repeat(2, 1fr);
-  }
+/* ── ACTION BUTTONS ── */
+.filter-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
   @media (max-width: 480px) {
-    grid-template-columns: 1fr;
+    justify-content: stretch;
   }
 }
 
-.filter-field {
-  :deep(.q-field__control) {
-    border-radius: 12px !important;
-    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.08);
+/* Clear button */
+.btn-clear {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 20px;
+  border-radius: 12px;
+  border: none;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  color: rgba(255, 255, 255, 0.82);
+  font-family: 'Noto Sans Thai', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    transform 0.15s,
+    opacity 0.2s;
+  @media (max-width: 480px) {
+    flex: 1;
+    justify-content: center;
   }
-  :deep(.q-field__label) {
-    font-family: 'Noto Sans Thai', sans-serif;
+
+  &:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
+  }
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
   }
 }
-
-.filter-field--wide {
-  @media (min-width: 901px) {
-    grid-column: span 2;
-  }
+.btn-clear-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(245, 166, 35, 0.4);
+  color: #fde68a;
+  font-size: 0.7rem;
+  font-weight: 800;
 }
 
-// ============================================================
-// CONTENT
-// ============================================================
+/* Search button */
+.btn-search {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 32px;
+  border-radius: 12px;
+  border: none;
+  background: linear-gradient(135deg, #fff 0%, #f0fdf4 100%);
+  color: $indigo-deep;
+  font-family: 'Prompt', 'Noto Sans Thai', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.18),
+    0 2px 8px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s,
+    opacity 0.2s;
+  position: relative;
+  overflow: hidden;
+  @media (max-width: 480px) {
+    flex: 2;
+    justify-content: center;
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, transparent 0%, rgba(99, 102, 241, 0.06) 100%);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  &:hover:not(.btn-search--loading):not(:disabled) {
+    transform: translateY(-3px);
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.22),
+      0 4px 12px rgba(0, 0, 0, 0.12);
+    &::before {
+      opacity: 1;
+    }
+  }
+  &:active:not(.btn-search--loading) {
+    transform: translateY(-1px);
+  }
+  &.btn-search--loading,
+  &:disabled {
+    opacity: 0.75;
+    cursor: not-allowed;
+    transform: none;
+  }
+}
+.btn-search-inner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  z-index: 1;
+}
+
+/* ── CONTENT ── */
 .content-area {
+  position: relative;
+  z-index: 1;
   max-width: 1200px;
-  margin: -1.75rem auto 0;
+  margin: -2rem auto 0;
   padding: 0 1rem 3rem;
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
 }
 
-// ============================================================
-// CARD GRID
-// ============================================================
+/* Result bar */
+.result-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  border-radius: 14px;
+  padding: 0.75rem 1.25rem;
+  box-shadow: 0 2px 12px rgba(67, 56, 202, 0.07);
+}
+.result-bar-left {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.result-num {
+  font-family: 'Prompt', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: $indigo;
+}
+.result-unit {
+  font-size: 0.82rem;
+  color: $text-muted;
+}
+.result-filter-note {
+  font-size: 0.78rem;
+  color: $teal;
+  font-weight: 600;
+}
+.result-page-info {
+  font-size: 0.78rem;
+  color: $text-muted;
+}
+
+/* ── CARD GRID ── */
+// .card-grid {
+//   display: grid;
+//   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+//   gap: 1rem;
+//   @media (max-width: 600px) {
+//     grid-template-columns: repeat(2, 1fr);
+//     gap: 0.75rem;
+//   }
+// }
 .card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  grid-template-columns: repeat(5, 1fr);
   gap: 1rem;
+
+  @media (max-width: 1200px) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  @media (max-width: 900px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
 
   @media (max-width: 600px) {
     grid-template-columns: repeat(2, 1fr);
     gap: 0.75rem;
   }
+
+  @media (max-width: 400px) {
+    grid-template-columns: 1fr;
+  }
 }
 
-// ============================================================
-// SENDER CARD
-// ============================================================
+/* ── SENDER CARD ── */
 .sender-card {
   background: $surface;
-  border-radius: $radius-card;
+  border-radius: $r-card;
   overflow: hidden;
   cursor: pointer;
   box-shadow:
@@ -1353,7 +1335,6 @@ $indigo-mid: #2d2d8a;
   &:hover {
     transform: translateY(-6px) scale(1.01);
     box-shadow: 0 14px 40px rgba(67, 56, 202, 0.16);
-
     .card-cta {
       opacity: 1;
       transform: translateY(0);
@@ -1362,12 +1343,10 @@ $indigo-mid: #2d2d8a;
       opacity: 1;
     }
   }
-
   &--skeleton {
     pointer-events: none;
   }
 }
-
 @keyframes cardIn {
   from {
     opacity: 0;
@@ -1383,11 +1362,9 @@ $indigo-mid: #2d2d8a;
   position: relative;
   background: $indigo-soft;
 }
-
 .card-img {
   display: block;
 }
-
 .card-img-overlay {
   position: absolute;
   inset: 0;
@@ -1395,50 +1372,54 @@ $indigo-mid: #2d2d8a;
   opacity: 0;
   transition: opacity 0.22s;
 }
-
 .card-img-placeholder {
   height: 160px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: linear-gradient(135deg, $indigo-soft, #e0e7ff);
-
   @media (max-width: 480px) {
     height: 130px;
   }
 }
-
-.card-wish-preview {
+.card-avatar-fallback {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(99, 102, 241, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.card-wish-badge {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
   background: linear-gradient(to top, rgba(49, 46, 129, 0.82), transparent);
   color: rgba(255, 255, 255, 0.9);
-  font-size: 0.68rem;
+  font-size: 0.67rem;
   font-style: italic;
-  padding: 18px 10px 8px;
+  padding: 18px 10px 7px;
   display: flex;
   align-items: flex-end;
+  gap: 3px;
   line-height: 1.4;
 }
-
 .card-body {
   padding: 10px 12px 6px;
   flex: 1;
 }
-
 .card-name {
   font-family: 'Prompt', sans-serif;
   font-size: clamp(0.78rem, 2vw, 0.88rem);
-  font-weight: 600;
+  font-weight: 700;
   color: $text-main;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   margin-bottom: 2px;
 }
-
 .card-position {
   font-size: 0.72rem;
   color: $text-muted;
@@ -1447,24 +1428,24 @@ $indigo-mid: #2d2d8a;
   text-overflow: ellipsis;
   margin-bottom: 2px;
 }
-
 .card-dept {
   display: flex;
   align-items: center;
-  font-size: 0.68rem;
+  gap: 3px;
+  font-size: 0.67rem;
   color: color.adjust($text-muted, $lightness: 10%);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-
 .card-cta {
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 5px;
   padding: 8px;
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 700;
   color: $indigo;
   background: $indigo-soft;
   border-top: 1px solid rgba(99, 102, 241, 0.1);
@@ -1475,34 +1456,101 @@ $indigo-mid: #2d2d8a;
     transform 0.22s;
 }
 
-// ============================================================
-// EMPTY STATE
-// ============================================================
+/* Skeleton */
+.sender-card--skeleton .card-body {
+  padding: 12px;
+}
+.skeleton-img {
+  height: 160px;
+  background: linear-gradient(90deg, #eef2ff 25%, #e0e7ff 50%, #eef2ff 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease infinite;
+  @media (max-width: 480px) {
+    height: 130px;
+  }
+}
+.skeleton-line {
+  height: 12px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #eef2ff 25%, #e0e7ff 50%, #eef2ff 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease infinite;
+}
+.skeleton-line--w75 {
+  width: 75%;
+}
+.skeleton-line--w55 {
+  width: 55%;
+}
+.skeleton-line--w40 {
+  width: 40%;
+}
+@keyframes shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/* ── EMPTY ── */
 .empty-state {
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 4rem 1rem;
+  text-align: center;
 }
 .empty-emoji {
   font-size: 3.5rem;
   margin-bottom: 12px;
+  animation: emptyBounce 2s ease infinite;
+}
+@keyframes emptyBounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
 }
 .empty-title {
   font-family: 'Prompt', sans-serif;
   font-size: 1.05rem;
   font-weight: 700;
   color: $text-main;
+  margin-bottom: 4px;
 }
 .empty-sub {
   font-size: 0.83rem;
   color: $text-muted;
-  margin-top: 4px;
+  margin-bottom: 1.25rem;
+}
+.empty-clear-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 24px;
+  border-radius: 12px;
+  border: none;
+  background: $indigo-soft;
+  color: $indigo;
+  font-family: 'Noto Sans Thai', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    transform 0.15s;
+  &:hover {
+    background: #e0e7ff;
+    transform: translateY(-2px);
+  }
 }
 
-// ============================================================
-// PAGINATION
-// ============================================================
+/* ── PAGINATION ── */
 .pagination-row {
   display: flex;
   align-items: center;
@@ -1516,7 +1564,6 @@ $indigo-mid: #2d2d8a;
   align-items: center;
   gap: 8px;
 }
-
 .rpp-select {
   width: 70px;
   :deep(.q-field__control) {
@@ -1530,9 +1577,7 @@ $indigo-mid: #2d2d8a;
   color: $text-muted;
 }
 
-// ============================================================
-// DETAIL DIALOG
-// ============================================================
+/* ── DETAIL DIALOG ── */
 .detail-dialog {
   background: $surface;
   border-radius: 22px;
@@ -1542,7 +1587,6 @@ $indigo-mid: #2d2d8a;
   box-shadow: 0 24px 64px rgba(67, 56, 202, 0.2);
   display: flex;
   flex-direction: column;
-
   &--mobile {
     border-radius: 20px 20px 0 0;
     width: 100%;
@@ -1553,10 +1597,9 @@ $indigo-mid: #2d2d8a;
     right: 0;
   }
 }
-
 .detail-img-wrap {
   position: relative;
-  background: linear-gradient(135deg, $indigo, $indigo-mid);
+  background: linear-gradient(135deg, $indigo-deep, $indigo-dark);
 }
 .detail-img {
   display: block;
@@ -1589,10 +1632,12 @@ $indigo-mid: #2d2d8a;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.15s;
-
+  transition:
+    background 0.15s,
+    transform 0.15s;
   &:hover {
     background: rgba(255, 255, 255, 0.35);
+    transform: rotate(90deg);
   }
 }
 .detail-body {
@@ -1601,7 +1646,7 @@ $indigo-mid: #2d2d8a;
 .detail-name {
   font-family: 'Prompt', sans-serif;
   font-size: 1.15rem;
-  font-weight: 700;
+  font-weight: 800;
   color: $text-main;
   margin-bottom: 3px;
 }
@@ -1613,6 +1658,7 @@ $indigo-mid: #2d2d8a;
 .detail-dept {
   display: flex;
   align-items: center;
+  gap: 4px;
   font-size: 0.8rem;
   color: color.adjust($text-muted, $lightness: 8%);
   margin-bottom: 1rem;
@@ -1627,7 +1673,7 @@ $indigo-mid: #2d2d8a;
   display: flex;
   align-items: center;
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 700;
   color: $indigo;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -1660,48 +1706,12 @@ $indigo-mid: #2d2d8a;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.15s;
-
   &:hover {
     background: rgba(67, 56, 202, 0.14);
   }
 }
 
-// ============================================================
-// RESPONSIVE
-// ============================================================
-@media (max-width: 600px) {
-  .filter-hero {
-    padding: 1.5rem 1rem 3rem;
-  }
-  .content-area {
-    padding: 0 0.75rem 2.5rem;
-  }
-  .filter-hero-icon {
-    width: 42px;
-    height: 42px;
-  }
-  .pagination-row {
-    flex-direction: column;
-  }
-}
-
-// // ============================================================
-// // CARD TRANSITION
-// // ============================================================
-// .card-pop-enter-active {
-//   transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-// }
-// .card-pop-leave-active {
-//   transition: all 0.2s ease;
-// }
-// .card-pop-enter-from {
-//   opacity: 0;
-//   transform: scale(0.94) translateY(12px);
-// }
-// .card-pop-leave-to {
-//   opacity: 0;
-//   transform: scale(0.96);
-// }
+/* ── LOADING DIALOG ── */
 .loading-dialog {
   background: #fff;
   border-radius: 24px;
@@ -1712,8 +1722,6 @@ $indigo-mid: #2d2d8a;
   font-family: 'Noto Sans Thai', 'Prompt', sans-serif;
   outline: none;
 }
-
-/* ── Orb ── */
 .ld-orb-wrap {
   position: relative;
   width: 90px;
@@ -1773,8 +1781,6 @@ $indigo-mid: #2d2d8a;
     box-shadow: 0 0 0 12px rgba(107, 92, 231, 0);
   }
 }
-
-/* ── Text ── */
 .ld-title {
   font-family: 'Prompt', sans-serif;
   font-size: 1.05rem;
@@ -1793,9 +1799,8 @@ $indigo-mid: #2d2d8a;
   font-family: 'Prompt', sans-serif;
   font-size: 2.8rem;
   font-weight: 800;
-  color: $indigo-mid;
+  color: $indigo-dark;
   line-height: 1;
-  transition: all 0.05s;
   min-width: 3ch;
   text-align: right;
 }
@@ -1809,10 +1814,7 @@ $indigo-mid: #2d2d8a;
   color: #8b87b0;
   min-height: 1rem;
   margin-bottom: 1rem;
-  transition: opacity 0.3s;
 }
-
-/* ── Step list ── */
 .ld-steps {
   display: flex;
   flex-direction: column;
@@ -1837,9 +1839,6 @@ $indigo-mid: #2d2d8a;
   }
   &--active {
     background: rgba(99, 102, 241, 0.07);
-  }
-  &--pending {
-    background: transparent;
   }
 }
 .ld-step-ic {
@@ -1910,8 +1909,6 @@ $indigo-mid: #2d2d8a;
     color: #6366f1;
   }
 }
-
-/* ── Progress bar ── */
 .ld-bar-track {
   height: 6px;
   border-radius: 3px;
@@ -1922,11 +1919,9 @@ $indigo-mid: #2d2d8a;
 .ld-bar-fill {
   height: 100%;
   border-radius: 3px;
-  background: linear-gradient(90deg, $indigo-mid, #a78bfa);
+  background: linear-gradient(90deg, $indigo-dark, #a78bfa);
   transition: width 0.55s cubic-bezier(0.4, 0, 0.2, 1);
 }
-
-/* ── Dot loader ── */
 .ld-dots {
   display: flex;
   gap: 6px;
@@ -1936,7 +1931,7 @@ $indigo-mid: #2d2d8a;
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: $indigo-mid;
+  background: $indigo-dark;
   display: inline-block;
   animation: ldDotB 1.2s ease-in-out infinite;
   &:nth-child(2) {
@@ -1959,16 +1954,57 @@ $indigo-mid: #2d2d8a;
   }
 }
 
-// ============================================================
-// CLICK PARTICLES
-// ============================================================
+/* ── CARD TRANSITION ── */
+.card-pop-enter-active {
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.card-pop-leave-active {
+  transition: all 0.2s ease;
+}
+.card-pop-enter-from {
+  opacity: 0;
+  transform: scale(0.94) translateY(12px);
+}
+.card-pop-leave-to {
+  opacity: 0;
+  transform: scale(0.96);
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 600px) {
+  .filter-hero {
+    padding: 1.5rem 1rem 3.5rem;
+  }
+  .content-area {
+    padding: 0 0.75rem 2.5rem;
+  }
+  .filter-hero-icon {
+    width: 42px;
+    height: 42px;
+  }
+  .filter-panel {
+    padding: 1rem;
+  }
+  .filter-actions {
+    flex-direction: column;
+  }
+  .btn-clear,
+  .btn-search {
+    width: 100%;
+    justify-content: center;
+  }
+  .pagination-row {
+    flex-direction: column;
+  }
+}
+
+/* ── CLICK PARTICLES ── */
 .click-particles-root {
   position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: 99999;
 }
-
 .click-particle {
   position: fixed;
   left: var(--x);
@@ -1980,11 +2016,9 @@ $indigo-mid: #2d2d8a;
   will-change: transform, opacity;
   animation: clickFall var(--dur) cubic-bezier(0.2, 0.9, 0.4, 1) forwards;
   border-radius: 50%;
-
   &[style*='--shape: square'] {
     border-radius: 3px;
   }
-
   &[style*='--shape: star'] {
     border-radius: 0;
     clip-path: polygon(
@@ -2000,7 +2034,6 @@ $indigo-mid: #2d2d8a;
       39% 35%
     );
   }
-
   &[style*='--shape: triangle'] {
     background: transparent !important;
     border-left: calc(var(--size) * 0.5) solid transparent;
@@ -2010,14 +2043,12 @@ $indigo-mid: #2d2d8a;
     width: 0 !important;
     height: 0 !important;
   }
-
   &[style*='--shape: emoji'] {
     background: transparent;
     border-radius: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-
     &::after {
       content: var(--emoji-content);
       font-size: var(--size);
@@ -2025,11 +2056,10 @@ $indigo-mid: #2d2d8a;
     }
   }
 }
-
 @keyframes clickFall {
   0% {
     opacity: 1;
-    transform: translate(-50%, -50%) translate(0px, 0px) rotate(0deg) scale(1);
+    transform: translate(-50%, -50%) translate(0, 0) rotate(0deg) scale(1);
   }
   12% {
     opacity: 1;

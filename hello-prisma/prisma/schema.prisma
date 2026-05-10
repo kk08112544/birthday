@@ -53,6 +53,11 @@ model Festival {
   image        String
   logo         String?
   webName      String?
+  startDate    DateTime
+  endDate      DateTime
+  isEdit       Boolean @default(true)
+  isDelete     Boolean @default(true)
+  isEditEndDate Boolean @default(true)
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
   deletedAt    DateTime?

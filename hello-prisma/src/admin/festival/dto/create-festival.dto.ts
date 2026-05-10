@@ -4,6 +4,7 @@ import {
   ValidateNested,
   IsArray,
   IsOptional,
+  IsDateString,
 } from 'class-validator';
 import { CreateWisherDto } from './create-wisher.dto';
 import { CreateCardDto } from './create-card.dto';
@@ -19,10 +20,18 @@ export class CreateFestivalDto {
   @IsNotEmpty()
   @IsString()
   logo!: string;
-  
+
   @IsNotEmpty()
   @IsString()
   webName!: string;
+
+  @IsNotEmpty()
+  @IsDateString()
+  startDate!: Date;
+
+  @IsNotEmpty()
+  @IsDateString()
+  endDate!: Date;
 
   @IsOptional()
   @IsArray()

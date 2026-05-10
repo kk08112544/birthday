@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { CreateSenderDto } from './dto/create-sender.dto';
 // import { UpdateSenderDto } from './dto/update-sender.dto';
+import { FestivalRepositories } from '../festival/festival.repositories';
 import { SenderRepositories } from './sender.repositories';
 import { UnpoliteRepositories } from 'src/unpolite/unpolite.repositories';
 import { PaginationSenderDto } from './dto/pagination-sender.dto';
-
 import { STATUS } from 'src/common/status';
 import { MESSAGE } from 'src/common/message';
 import { ExceptionsService } from 'src/common/exception/exception.service';
@@ -12,20 +12,22 @@ import { ExceptionsService } from 'src/common/exception/exception.service';
 @Injectable()
 export class SenderService {
   constructor(
+    private readonly festivalRepositories: FestivalRepositories,
     private readonly senderRepositories: SenderRepositories,
     private readonly unpoliteRepositories: UnpoliteRepositories,
     private readonly exceptionsService: ExceptionsService,
   ) {}
 
   async create(createSenderDto: CreateSenderDto) {
-    const check = await this.unpoliteRepositories.findWord(createSenderDto);
-    if (check) {
+    const checkWord = await this.unpoliteRepositories.findWord(createSenderDto);
+    if (checkWord) {
       // return {
       //   status: STATUS.ERROR,
       //   message: MESSAGE.SENDER.BAD_WORD_FOUND,
       // };
       this.exceptionsService.throwFoundBadWord();
     }
+
     const data = await this.senderRepositories.create(createSenderDto);
     return {
       sender: data,

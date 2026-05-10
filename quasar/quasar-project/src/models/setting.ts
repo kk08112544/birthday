@@ -2,5 +2,5 @@
 export interface FestivalSettings {
   fId: number;
   webName: string;
-  logo: string;
+  logoName: string;
 }
