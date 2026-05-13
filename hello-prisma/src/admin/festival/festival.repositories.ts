@@ -162,130 +162,6 @@ export class AdminFestivalRepositories {
     return data;
   }
 
-  // async update(
-  //   id: number,
-  //   updateFestivalDto: UpdateFestivalDto,
-  // ): Promise<ResponseFestivalDto> {
-  //   const data = await this.prisma.festival.update({
-  //     where: {
-  //       fId: Number(id),
-  //       deletedAt: null,
-  //     },
-  //     data: {
-  //       festivalName: updateFestivalDto.festivalName,
-  //     },
-  //     include: {
-  //       wisher: {
-  //         where: {
-  //           deletedAt: null, // ดึงเฉพาะ wisher ที่ยังไม่ถูกลบ
-  //         },
-  //       },
-  //       card: {
-  //         where: {
-  //           deletedAt: null, // ดึงเฉพาะ card ที่ยังไม่ถูกลบ
-  //         },
-  //       },
-  //     },
-  //   });
-  //   return data;
-  // }4
-  //   async update(
-  //   id: number,
-  //   updateFestivalDto: UpdateFestivalDto,
-  // ): Promise<ResponseFestivalDto> {
-  //   const { festivalName, image, wisher, card } = updateFestivalDto;
-
-  //   return await this.prisma.$transaction(async (tx) => {
-  //     // 1. ตรวจสอบว่ามี Festival อยู่จริงและดึงข้อมูลเดิมพร้อม Relations มาดู
-  //     const existing = await tx.festival.findUnique({
-  //       where: { fId: Number(id) },
-  //       include: {
-  //         wisher: { where: { deletedAt: null } },
-  //         card: { where: { deletedAt: null } },
-  //       },
-  //     });
-
-  //     if (!existing || existing.deletedAt) {
-  //       throw new Error('Festival not found');
-  //     }
-
-  //     // 2. จัดการข้อมูล WISHER (Concept: Keep, Update, or Create)
-  //     if (wisher) {
-  //       const wisherIdsToKeep = wisher.filter((w) => w.wId).map((w) => w.wId!);
-
-  //       // Soft Delete ตัวที่ไม่อยู่ใน List ใหม่
-  //       await tx.wisher.updateMany({
-  //         where: {
-  //           festivalId: Number(id),
-  //           wId: { notIn: wisherIdsToKeep },
-  //           deletedAt: null,
-  //         },
-  //         data: { deletedAt: new Date() },
-  //       });
-
-  //       // วนลูปเพื่อ Update หรือ Create
-  //       for (const wData of wisher) {
-  //         if (wData.wId) {
-  //           await tx.wisher.update({
-  //             where: { wId: wData.wId },
-  //             data: { wishWord: wData.wishWord },
-  //           });
-  //         } else {
-  //           await tx.wisher.create({
-  //             data: {
-  //               wishWord: wData.wishWord,
-  //               festivalId: Number(id),
-  //             },
-  //           });
-  //         }
-  //       }
-  //     }
-
-  //     // 3. จัดการข้อมูล CARD (Concept: Keep, Update, or Create)
-  //     if (card) {
-  //       const cardIdsToKeep = card.filter((c) => c.cId).map((c) => c.cId!);
-
-  //       // Soft Delete ตัวที่ไม่อยู่ใน List ใหม่
-  //       await tx.card.updateMany({
-  //         where: {
-  //           festivalId: Number(id),
-  //           cId: { notIn: cardIdsToKeep },
-  //           deletedAt: null,
-  //         },
-  //         data: { deletedAt: new Date() },
-  //       });
-
-  //       for (const cData of card) {
-  //         if (cData.cId) {
-  //           await tx.card.update({
-  //             where: { cId: cData.cId },
-  //             data: { imageCard: cData.imageCard },
-  //           });
-  //         } else {
-  //           await tx.card.create({
-  //             data: {
-  //               imageCard: cData.imageCard,
-  //               festivalId: Number(id),
-  //             },
-  //           });
-  //         }
-  //       }
-  //     }
-
-  //     // 4. Update ข้อมูลหลักของ Festival และ Return ผลลัพธ์
-  //     return await tx.festival.update({
-  //       where: { fId: Number(id) },
-  //       data: {
-  //         festivalName,
-  //         image,
-  //       },
-  //       include: {
-  //         wisher: { where: { deletedAt: null } },
-  //         card: { where: { deletedAt: null } },
-  //       },
-  //     });
-  //   });
-  // }
   async update(
     id: number,
     updateFestivalDto: UpdateFestivalDto,
@@ -299,6 +175,7 @@ export class AdminFestivalRepositories {
       webName,
       startDate,
       endDate,
+      isEditEndDate,
     } = updateFestivalDto;
 
     return await this.prisma.$transaction(async (tx) => {
@@ -382,6 +259,7 @@ export class AdminFestivalRepositories {
           image,
           logo,
           webName,
+          isEditEndDate: Boolean(isEditEndDate),
           ...(startDate && {
             startDate: new Date(startDate),
           }),
@@ -434,5 +312,89 @@ export class AdminFestivalRepositories {
       },
     });
     return data;
+  }
+
+  async findUpdateExits(id: number): Promise<boolean> {
+    const data = await this.prisma.festival.findFirst({
+      where: {
+        fId: Number(id),
+        deletedAt: null,
+        isEdit: Boolean(true),
+      },
+      include: {
+        wisher: {
+          where: {
+            deletedAt: null,
+          },
+        },
+        card: {
+          where: {
+            deletedAt: null,
+          },
+        },
+      },
+    });
+    return !!data;
+  }
+
+  async findUpdateEndDateExits(id: number): Promise<boolean> {
+    const data = await this.prisma.festival.findFirst({
+      where: {
+        fId: Number(id),
+        deletedAt: null,
+        isEditEndDate: Boolean(true),
+      },
+      include: {
+        wisher: {
+          where: {
+            deletedAt: null,
+          },
+        },
+        card: {
+          where: {
+            deletedAt: null,
+          },
+        },
+      },
+    });
+    return !!data;
+  }
+
+  async findEndDate(id: number): Promise<Date | null> {
+    const data = await this.prisma.festival.findFirst({
+      where: {
+        fId: Number(id),
+        deletedAt: null,
+        isEditEndDate: true,
+      },
+      select: {
+        endDate: true,
+      },
+    });
+
+    return data?.endDate ?? null;
+  }
+
+  async findDeleteExits(id: number): Promise<boolean> {
+    const data = await this.prisma.festival.findFirst({
+      where: {
+        fId: Number(id),
+        deletedAt: null,
+        isDelete: Boolean(true),
+      },
+      include: {
+        wisher: {
+          where: {
+            deletedAt: null,
+          },
+        },
+        card: {
+          where: {
+            deletedAt: null,
+          },
+        },
+      },
+    });
+    return !!data;
   }
 }

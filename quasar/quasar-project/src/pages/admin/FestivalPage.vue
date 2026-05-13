@@ -116,12 +116,20 @@
               <q-icon name="link" size="13px" class="q-mr-xs" />
               ดูหน้าเทศกาล
             </div>
+            <!-- ✅ เพิ่มตรงนี้ -->
+            <div
+              class="card-status"
+              :class="row.isActive ? 'card-status--active' : 'card-status--inactive'"
+            >
+              <span class="status-dot" />
+              {{ row.isActive ? 'อยู่ระหว่างการใช้งาน' : 'ไม่อยู่ระหว่างช่วงบริการ' }}
+            </div>
           </div>
 
           <!-- Card actions -->
           <div class="card-actions">
             <router-link
-              v-if="row.actions.update"
+              v-if="row.actions.update && row.isEditEndDate"
               :to="`/admin/edit/${row.fId}`"
               class="card-action-btn card-action-btn--edit"
             >
@@ -137,7 +145,7 @@
               <!-- <span>แก้ไข</span> -->
             </router-link>
             <button
-              v-if="row.actions.delete"
+              v-if="row.actions.delete && row.isDelete"
               class="card-action-btn card-action-btn--delete"
               @click="onDelete(row)"
             >
@@ -315,22 +323,6 @@ import { api } from 'src/boot/axios';
 import type { AxiosError } from 'axios';
 
 const $q = useQuasar();
-
-// ================= TYPES =================
-interface FestivalItem {
-  fId: number | string;
-  festivalName: string;
-  image: string;
-}
-
-interface TableRow {
-  displayIndex: number;
-  fId: number | string;
-  festivalName: string;
-  image: string;
-  actions: { create: boolean; view: boolean; update: boolean; delete: boolean };
-}
-
 // ================= STATE =================
 const rows = ref<TableRow[]>([]);
 const loading = ref(false);
@@ -342,6 +334,28 @@ const pagination = ref({
   rowsPerPage: 10,
   rowsNumber: 0,
 });
+
+// ================= TYPES =================
+interface FestivalItem {
+  fId: number | string;
+  festivalName: string;
+  image: string;
+  startDate?: string; // ✅ เพิ่ม
+  endDate?: string; // ✅ เพิ่ม
+  isEditEndDate: boolean;
+  isDelete: boolean;
+}
+
+interface TableRow {
+  displayIndex: number;
+  fId: number | string;
+  festivalName: string;
+  image: string;
+  isActive: boolean; // ✅ เพิ่ม
+  isEditEndDate: boolean;
+  isDelete: boolean;
+  actions: { create: boolean; view: boolean; update: boolean; delete: boolean };
+}
 
 // ===== Error Dialog =====
 const showErrorDialog = ref(false);
@@ -383,15 +397,29 @@ const fetchFestival = async () => {
     const startIndex = (pagination.value.page - 1) * pagination.value.rowsPerPage;
 
     rows.value = await Promise.all(
-      list.map(async (item, index) => ({
-        displayIndex: startIndex + index + 1,
-        fId: item.fId,
-        festivalName: item.festivalName || '-',
-        image: item.image ? await getImageUrl(item.image) : '',
-        actions: { create: false, view: true, update: true, delete: true },
-      })),
-    );
+      list.map(async (item, index) => {
+        const now = new Date();
+        const start = item.startDate ? new Date(item.startDate) : null;
+        const end = item.endDate ? new Date(item.endDate) : null;
+        // const isActive = !!start && !!end && now >= start && now <= end; // ✅
 
+        if (end) {
+          end.setHours(23, 59, 59, 999);
+        }
+
+        const isActive = !!start && !!end && now >= start && now <= end;
+        return {
+          displayIndex: startIndex + index + 1,
+          fId: item.fId,
+          festivalName: item.festivalName || '-',
+          image: item.image ? await getImageUrl(item.image) : '',
+          isActive, // ✅
+          isEditEndDate: item.isEditEndDate,
+          isDelete: item.isDelete,
+          actions: { create: false, view: true, update: true, delete: true },
+        };
+      }),
+    );
     pagination.value.rowsNumber = res.festival?.total ?? 0;
   } catch {
     openErrorDialog('ไม่สามารถโหลดข้อมูลได้');
@@ -434,21 +462,6 @@ const confirmDelete = async () => {
     isSubmitting.value = false;
     itemToDelete.value = null;
   }
-};
-
-// ================= EVENTS =================
-const onSearch = () => {
-  pagination.value.page = 1;
-  void fetchFestival();
-};
-
-const onPageChange = () => {
-  void fetchFestival();
-};
-
-const onRppChange = () => {
-  pagination.value.page = 1;
-  void fetchFestival();
 };
 
 // ============================================================
@@ -593,6 +606,21 @@ const spawnParticles = (x: number, y: number) => {
       dur * 1000 + 200,
     );
   }
+};
+
+// ================= EVENTS =================
+const onSearch = () => {
+  pagination.value.page = 1;
+  void fetchFestival();
+};
+
+const onPageChange = () => {
+  void fetchFestival();
+};
+
+const onRppChange = () => {
+  pagination.value.page = 1;
+  void fetchFestival();
 };
 
 const handleGlobalClick = (e: MouseEvent) => {
@@ -947,6 +975,56 @@ $radius: 18px;
   align-items: center;
   font-size: 0.72rem;
   color: $text-muted;
+}
+
+// ============================================================
+// CARD STATUS BADGE
+// ============================================================
+.card-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 6px;
+  padding: 3px 9px;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+
+  &--active {
+    background: #dcfce7;
+    color: #15803d;
+    .status-dot {
+      background: #16a34a;
+      box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.25);
+      animation: pulse-green 1.8s ease-in-out infinite;
+    }
+  }
+
+  &--inactive {
+    background: #f6f3f3;
+    color: #9ca3af;
+    .status-dot {
+      background: #860d17;
+    }
+  }
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+@keyframes pulse-green {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 5px rgba(22, 163, 74, 0);
+  }
 }
 
 // ============================================================

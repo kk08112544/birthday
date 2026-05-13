@@ -494,7 +494,13 @@ const errorMessage = ref('');
 
 type Wisher = { wId: number; wishWord: string };
 type FestivalCard = { cId: number; imageCard: string };
-type FestivalResponse = { fId: number; wisher: Wisher[]; card: FestivalCard[] };
+type FestivalResponse = {
+  fId: number;
+  startDate: string;
+  endDate: string;
+  wisher: Wisher[];
+  card: FestivalCard[];
+};
 
 const options = ref<{ label: string; value: number }[]>([]);
 

@@ -5,9 +5,9 @@ export class ResponseFestivalDto {
   image!: string;
   startDate!: Date;
   endDate!: Date;
-   isEdit?: Boolean;
-  isDelete?: Boolean;
-  isEditEndDate?: Boolean;
+  isEdit?: boolean;
+  isDelete?: boolean;
+  isEditEndDate?: boolean;
   // ใน Schema คือ Wisher[] ดังนั้นต้องเป็น Array ของ Object
   wisher!: {
     wId: number;

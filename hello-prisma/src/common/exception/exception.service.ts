@@ -46,6 +46,18 @@ export class ExceptionsService {
     throw new NotFoundException(MESSAGE.CARD.NOT_FOUND);
   }
 
+  throwFestivalEditForbidden(): never {
+    throw new ForbiddenException(MESSAGE.FESTIVAL.FESTIVAL_NOT_EDIT);
+  }
+
+  throwFestivalDELETEForbidden(): never {
+    throw new ForbiddenException(MESSAGE.FESTIVAL.FESTIVAL_NOT_DELETE);
+  }
+
+  throwFestivalEndDateForbidden(): never {
+    throw new ForbiddenException(MESSAGE.FESTIVAL.FESTIVAL_NOT_EDIT);
+  }
+
   throwDateNotService(): never {
     throw new ForbiddenException(MESSAGE.SENDER.NOT_SERVICE);
   }

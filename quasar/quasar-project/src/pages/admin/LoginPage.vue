@@ -143,14 +143,11 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue';
-// import { useQuasar } from 'quasar';
 import { useRouter } from 'vue-router';
 import { api } from 'src/boot/axios';
 import type { AxiosError } from 'axios';
 
-// const $q     = useQuasar();
 const router = useRouter();
-
 const userName = ref('');
 const password = ref('');
 const isPwd = ref(true);

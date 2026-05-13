@@ -22,12 +22,6 @@
             ข้อมูลเทศกาล
           </div>
           <div ref="coverRef" class="field-group">
-            <!-- <div class="cover-upload-zone" ref="coverRef" @click="fileInput?.pickFiles()"> -->
-            <!-- <div
-            class="cover-upload-zone"
-            :class="{ 'upload-zone--error': imageError }"
-            @click="fileInput?.pickFiles()"
-          > -->
             <div class="cover-upload-zone">
               <q-img
                 v-if="imageFile || existingImageUrl"
@@ -35,102 +29,20 @@
                 class="cover-img"
                 fit="contain"
                 :ratio="16 / 9"
-              >
-                <!-- <div class="cover-overlay">
-                <q-icon name="photo_camera" size="28px" color="white" />
-                <span>เปลี่ยนรูป</span>
-              </div> -->
-              </q-img>
-              <!-- <div v-else class="cover-placeholder">
-              <div class="cover-placeholder-icon">🖼️</div>
-              <div class="cover-placeholder-text">คลิกเพื่ออัปโหลดรูปหน้าปก</div>
-              <div class="cover-placeholder-sub">PNG, JPG ขนาดไม่เกิน 5MB</div>
-            </div> -->
-              <!-- <div v-else class="cover-placeholder">
-              <div class="cover-placeholder-icon">🖼️</div>
-              <div class="cover-placeholder-text">คลิกเพื่ออัปโหลดรูปหน้าปก</div>
-              <div class="cover-placeholder-sub">
-                PNG, JPG ขนาดไม่เกิน 2MB ขนาด 1199 x 581 pixel
-              </div>
-              <a
-                href="https://www.iloveimg.com/resize-image"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="cover-resize-link"
-                @click.stop
-              >
-                <q-icon name="open_in_new" size="13px" />
-                แปลงขนาดรูปภาพที่นี่
-              </a>
-            </div> -->
+              />
             </div>
-            <!-- <transition name="err-fade">
-              <div v-if="imageError" class="error-msg">
-                <q-icon name="error_outline" size="14px" />
-                กรุณาอัปโหลดรูปหน้าปกตามคุณสมบัติที่กำหนด
-              </div>
-            </transition> -->
           </div>
 
-          <!-- <q-file v-model="imageFile" ref="fileInput" accept="image/*" class="hidden" /> -->
-          <!-- <q-file
-            v-model="imageFile"
-            ref="fileInput"
-            accept=".jpg,.jpeg,.png,image/jpeg,image/png"
-            class="hidden"
-            @update:model-value="onImageSelected"
-          /> -->
-
           <div ref="nameRef" class="q-mt-md field-group">
-            <!-- <q-input
-              outlined
-              v-model="festivalName"
-              label="ชื่อเทศกาล"
-              placeholder="เช่น วันสงกรานต์ 2568"
-              dense
-              autofocus
-              :error="nameError"
-              :error-message="nameError ? 'ชื่อเทศกาลจำเป็นต้องกรอก' : ''"
-              class="custom-input"
-               @update:model-value="nameError = false"
-            > -->
-            <!-- <q-input
-              outlined
-              v-model="festivalName"
-              dense
-              autofocus
-              class="custom-input"
-              @update:model-value="onFestivalNameChange"
-              readonly
-            > -->
             <q-input outlined v-model="festivalName" dense autofocus class="custom-input" readonly>
               <template v-slot:prepend>
                 <q-icon name="festival" color="deep-orange-5" />
               </template>
             </q-input>
-            <!-- <q-input
-              outlined
-              v-model="festivalName"
-              label="ชื่อเทศกาล"
-              placeholder="เช่น วันสงกรานต์ 2568"
-              dense
-              autofocus
-              :error="nameError"
-  :error-message="nameError ? 'รูปแบบต้องเป็น เทศกาล-หน่วยงาน-ปี เช่น สงกรานต์-IT-2568' : ''"
-              class="custom-input"
-                 @update:model-value="onFestivalNameChange"
-            >
-              <template v-slot:prepend>
-                <q-icon name="festival" color="deep-orange-5" />
-              </template>
-            </q-input> -->
           </div>
+
           <!-- LOGO UPLOAD -->
           <div ref="logoRef" class="q-mt-md field-group">
-            <!-- <div 
-                 class="logo-upload-zone"  
-                 :class="{ 'upload-zone--error': logoError }"
-                 @click="logoInput?.pickFiles()"> -->
             <div class="logo-upload-zone">
               <q-img
                 v-if="logoFile"
@@ -138,32 +50,10 @@
                 class="logo-preview"
                 :ratio="1"
                 fit="contain"
-              >
-                <!-- <div class="cover-overlay">
-                  <q-icon name="photo_camera" size="20px" color="white" />
-                  <span>เปลี่ยน Logo</span>
-                </div> -->
-              </q-img>
-              <!-- <div v-else class="logo-placeholder">
-                <div class="logo-placeholder-icon">🏷️</div>
-                <div class="cover-placeholder-text">คลิกเพื่ออัปโหลด Logo</div>
-                <div class="cover-placeholder-sub">PNG, JPG — แนะนำสี่เหลี่ยมจัตุรัส</div>
-              </div> -->
-              <!-- <transition name="err-fade">
-              <div v-if="logoError" class="error-msg">
-                <q-icon name="error_outline" size="14px" />
-                กรุณาอัปโหลด Logo
-              </div>
-            </transition> -->
+              />
             </div>
-            <!-- <q-file 
-              v-model="logoFile" 
-              ref="logoInput"    
-              accept=".jpg,.jpeg,.png,image/jpeg,image/png"
-              class="hidden" 
-               @update:model-value="onLogoSelected"
-            /> -->
           </div>
+
           <div ref="webNameRef" class="q-mt-md field-group">
             <q-input v-model="webName" outlined dense class="custom-input" readonly>
               <template v-slot:prepend>
@@ -171,6 +61,7 @@
               </template>
             </q-input>
           </div>
+
           <!-- ===== DATE RANGE SECTION ===== -->
           <div ref="dateRef" class="q-mt-lg field-group">
             <div class="date-section-header">
@@ -201,9 +92,6 @@
                     {{ startDate ? formatDateThai(startDate) : 'ยังไม่ได้เลือก' }}
                   </div>
                 </div>
-                <!-- <button v-if="startDate" class="date-chip-clear" type="button" @click="startDate = ''">
-                  <q-icon name="close" size="12px" />
-                </button> -->
               </div>
 
               <div class="date-range-arrow">
@@ -227,9 +115,6 @@
                     {{ endDate ? formatDateThai(endDate) : 'ยังไม่ได้เลือก' }}
                   </div>
                 </div>
-                <!-- <button v-if="endDate" class="date-chip-clear" type="button" @click="endDate = ''">
-                  <q-icon name="close" size="12px" />
-                </button> -->
               </div>
             </div>
 
@@ -250,7 +135,7 @@
               </div>
             </transition>
 
-            <!-- Calendar grid: desktop side-by-side, mobile stacked -->
+            <!-- Calendar grid -->
             <div class="calendars-wrap">
               <!-- START DATE -->
               <div class="calendar-block">
@@ -261,7 +146,8 @@
                     formatDateThai(startDate)
                   }}</span>
                 </div>
-                <div class="cal-wrapper cal-wrapper--start">
+
+                <div class="cal-wrapper cal-wrapper--start cal-readonly">
                   <q-date
                     v-model="startDate"
                     :options="startDateOptions"
@@ -269,9 +155,7 @@
                     text-color="white"
                     flat
                     minimal
-                    disable
                     class="fest-calendar"
-                    @update:model-value="onStartDateChange"
                   />
                 </div>
               </div>
@@ -283,7 +167,7 @@
                   <span>วันสิ้นสุด</span>
                   <span v-if="endDate" class="cal-label-date">{{ formatDateThai(endDate) }}</span>
                 </div>
-                <div class="cal-wrapper cal-wrapper--end">
+                <!-- <div class="cal-wrapper cal-wrapper--end">
                   <q-date
                     v-model="endDate"
                     :options="endDateOptions"
@@ -294,6 +178,29 @@
                     disable
                     class="fest-calendar"
                     @update:model-value="onEndDateChange"
+                  />
+                </div> -->
+                <!-- <div class="cal-wrapper cal-wrapper--end" >
+  <q-date
+    v-model="endDate"
+    :options="endDateOptions"
+    color="teal-6"
+    text-color="white"
+    flat
+    minimal
+    class="fest-calendar"
+    @update:model-value="onEndDateChange"
+  />
+</div> -->
+                <div class="cal-wrapper cal-wrapper--end cal-readonly">
+                  <q-date
+                    v-model="endDate"
+                    :options="endDateOptions"
+                    color="teal-6"
+                    text-color="white"
+                    flat
+                    minimal
+                    class="fest-calendar"
                   />
                 </div>
               </div>
@@ -313,14 +220,6 @@
               <span class="card-header-count">{{ wishWordList.length }}</span>
               <span class="card-header-unit">รายการ</span>
             </div>
-            <!-- <q-btn
-              unelevated
-              color="deep-orange-5"
-              icon="add"
-              label="เพิ่มคำอวยพร"
-              class="add-btn"
-              @click="onAddWish"
-            /> -->
           </div>
 
           <transition-group name="wish-list" tag="div" class="wish-list-wrapper">
@@ -331,14 +230,11 @@
             >
               <div class="wish-number">{{ i + 1 }}</div>
               <div class="wish-text">{{ wish.wishWord }}</div>
-              <!-- <div class="wish-actions">
-                <button class="wish-btn wish-btn--edit" type="button" @click="editWish(i)">
-                  <q-icon name="edit" size="16px" />
+              <div class="wish-actions">
+                <button class="wish-btn wish-btn--view" type="button" @click="viewWish(i)">
+                  <q-icon name="visibility" size="16px" />
                 </button>
-                <button class="wish-btn wish-btn--delete" type="button" @click="deleteWish(i)">
-                  <q-icon name="delete_outline" size="16px" />
-                </button>
-              </div> -->
+              </div>
             </div>
           </transition-group>
 
@@ -363,32 +259,14 @@
               }}</span>
               <span class="card-header-unit">รูป</span>
             </div>
-            <!-- <q-btn
-              unelevated
-              color="teal-6"
-              icon="add_photo_alternate"
-              label="เพิ่มการ์ด"
-              class="add-btn"
-              @click="onAddCard"
-            /> -->
           </div>
 
           <div v-if="existingCards.length > 0 || cardFileList.length > 0" class="card-grid">
-            <div
-              v-for="card in existingCards"
-              :key="'existing-' + card.cId"
-              class="card-thumb"
-            >
+            <div v-for="card in existingCards" :key="'existing-' + card.cId" class="card-thumb">
               <q-img :src="card.previewUrl" ratio="1" fit="contain" class="card-thumb-img" />
-              <!-- <button class="card-thumb-remove" type="button" @click="removeExistingCard(i)">
-                <q-icon name="close" size="14px" />
-              </button> -->
             </div>
             <div v-for="(file, i) in cardFileList" :key="'new-' + i" class="card-thumb">
               <q-img :src="getFilePreview(file)" ratio="1" fit="contain" class="card-thumb-img" />
-              <!-- <button class="card-thumb-remove" type="button" @click="removeCard(i)">
-                <q-icon name="close" size="14px" />
-              </button> -->
             </div>
           </div>
 
@@ -400,14 +278,6 @@
         </div>
 
         <!-- ===== SUBMIT ===== -->
-        <!-- <div class="animate-in" style="animation-delay: 0.25s">
-          <button
-            type="button"
-            class="submit-btn"
-            :class="{ loading }"
-            :disabled="loading"
-            @click="submitEdit"
-          > -->
         <div class="animate-in" style="animation-delay: 0.25s">
           <button
             type="button"
@@ -429,264 +299,30 @@
       </div>
     </div>
 
-    <!-- ===== DIALOG: ADD WISH =====
-    <q-dialog v-model="AddWishDialog" :maximized="$q.screen.lt.sm">
+    <!-- ===== DIALOG: VIEW WISH ===== -->
+    <q-dialog v-model="ViewWishDialog" :maximized="$q.screen.lt.sm">
       <div class="custom-dialog" :class="{ 'custom-dialog--mobile': $q.screen.lt.sm }">
         <div class="custom-dialog-header">
-          <span>✨ เพิ่มคำอวยพร</span>
-          <button class="dialog-close" type="button" @click="AddWishDialog = false">
-            <q-icon name="close" size="18px" />
-          </button>
-        </div>
-        <q-form @submit.prevent.stop="addWishToList">
-          <div class="custom-dialog-body">
-            <q-input
-              v-model="tempWish"
-              label="คำอวยพร"
-              outlined
-              autofocus
-              placeholder="เช่น สุขสันต์วันสงกรานต์ ขอให้มีความสุขมากๆ"
-              class="custom-input"
-              :rules="[(val) => !!val.trim() || 'กรุณากรอกคำอวยพร']"
-            />
-          </div>
-          <div class="custom-dialog-footer">
-            <button
-              type="button"
-              class="dialog-btn dialog-btn--cancel"
-              @click="AddWishDialog = false"
-            >
-              ยกเลิก
-            </button>
-            <button type="submit" class="dialog-btn dialog-btn--confirm">บันทึก</button>
-          </div>
-        </q-form>
-      </div>
-    </q-dialog> -->
-
-    <!-- ===== DIALOG: EDIT WISH ===== -->
-    <!-- <q-dialog v-model="EditWishDialog" :maximized="$q.screen.lt.sm">
-      <div class="custom-dialog" :class="{ 'custom-dialog--mobile': $q.screen.lt.sm }">
-        <div class="custom-dialog-header">
-          <span>✏️ แก้ไขคำอวยพร</span>
-          <button class="dialog-close" type="button" @click="EditWishDialog = false">
-            <q-icon name="close" size="18px" />
-          </button>
-        </div>
-        <q-form @submit.prevent.stop="updateWish">
-          <div class="custom-dialog-body">
-            <q-input
-              v-model="tempWish"
-              label="คำอวยพร"
-              outlined
-              autofocus
-              class="custom-input"
-              :rules="[(val) => !!val.trim() || 'กรุณากรอกคำอวยพร']"
-            />
-          </div>
-          <div class="custom-dialog-footer">
-            <button
-              type="button"
-              class="dialog-btn dialog-btn--cancel"
-              @click="EditWishDialog = false"
-            >
-              ยกเลิก
-            </button>
-            <button type="submit" class="dialog-btn dialog-btn--confirm">อัปเดต</button>
-          </div>
-        </q-form>
-      </div>
-    </q-dialog> -->
-
-    <!-- ===== DIALOG: DELETE WISH ===== -->
-    <!-- <q-dialog v-model="deleteDialog" persistent>
-      <div class="custom-dialog">
-        <div class="custom-dialog-header custom-dialog-header--danger">
-          <span>🗑️ ยืนยันการลบ</span>
-          <button class="dialog-close" type="button" @click="deleteDialog = false">
+          <span>💬 คำอวยพร</span>
+          <button class="dialog-close" type="button" @click="ViewWishDialog = false">
             <q-icon name="close" size="18px" />
           </button>
         </div>
         <div class="custom-dialog-body">
-          <p class="delete-confirm-text">
-            คุณต้องการลบคำอวยพร<br />
-            <strong class="delete-target">"{{ itemToDelete }}"</strong><br />
-            ใช่หรือไม่?
-          </p>
+          <div class="view-wish-number">รายการที่ {{ viewingIndex + 1 }}</div>
+          <div class="view-wish-text">{{ viewingWishText }}</div>
         </div>
         <div class="custom-dialog-footer">
-          <button type="button" class="dialog-btn dialog-btn--cancel" @click="deleteDialog = false">
-            ยกเลิก
-          </button>
-          <button type="button" class="dialog-btn dialog-btn--danger" @click="confirmDelete">
-            ยืนยันการลบ
-          </button>
-        </div>
-      </div>
-    </q-dialog> -->
-
-    <!-- ===== DIALOG: ADD CARD ===== -->
-    <!-- <q-dialog v-model="showCardDialog" :maximized="$q.screen.lt.sm">
-      <div class="custom-dialog" :class="{ 'custom-dialog--mobile': $q.screen.lt.sm }">
-        <div class="custom-dialog-header">
-          <span>🃏 เพิ่มรูปการ์ด</span>
-          <button class="dialog-close" type="button" @click="showCardDialog = false">
-            <q-icon name="close" size="18px" />
-          </button>
-        </div>
-        <div class="custom-dialog-body">
-          <q-file
-            v-model="tempCardFile"
-            label="เลือกรูปภาพ"
-            outlined
-            accept="image/*"
-            class="custom-input"
-            @update:model-value="addCardToList"
-          >
-            <template v-slot:prepend>
-              <q-icon name="add_photo_alternate" color="teal-6" />
-            </template>
-          </q-file>
-        </div>
-      </div>
-    </q-dialog> -->
-    <!-- <q-dialog v-model="showCardDialog" :maximized="$q.screen.lt.sm">
-      <div class="custom-dialog" :class="{ 'custom-dialog--mobile': $q.screen.lt.sm }">
-        <div class="custom-dialog-header">
-          <span>🃏 เพิ่มรูปการ์ด</span>
-          <button class="dialog-close" type="button" @click="showCardDialog = false">
-            <q-icon name="close" size="18px" />
-          </button>
-        </div>
-        <div class="custom-dialog-body">
-          <q-file
-            v-model="tempCardFile"
-            label="เลือกรูปภาพ"
-            outlined
-            accept=".jpg,.jpeg,.png,image/jpeg,image/png"
-            class="custom-input"
-             :error="!!cardErrorMsg"
-    :error-message="cardErrorMsg"
-            @update:model-value="addCardToList"
-          >
-            <template v-slot:prepend>
-              <q-icon name="add_photo_alternate" color="teal-6" />
-            </template>
-          </q-file>
-        </div>
-      </div>
-    </q-dialog> -->
-
-    <!-- ===== SUCCESS DIALOG (บันทึกสำเร็จ) ===== -->
-    <!-- <q-dialog v-model="showSuccessDialog">
-      <div class="result-dialog">
-        <div class="result-dialog-header result-dialog-header--success">
-          <div class="result-dialog-icon">
-            <q-icon name="check_circle" size="1.6rem" color="white" />
-          </div>
-          <div>
-            <div class="result-dialog-title">บันทึกสำเร็จ!</div>
-            <div class="result-dialog-sub">กำลังนำท่านไปหน้ารายการ...</div>
-          </div>
-        </div>
-        <div class="result-dialog-body">
-          <div class="result-dialog-emoji">🎊</div>
-          <p class="result-dialog-msg result-dialog-msg--success">{{ successMessage }}</p>
-        </div>
-        <div
-          :key="'s-' + successMessage"
-          class="result-dialog-progress result-dialog-progress--success"
-        />
-      </div>
-    </q-dialog> -->
-
-    <!-- ===== ERROR DIALOG (เกิดข้อผิดพลาด) ===== -->
-    <!-- <q-dialog v-model="showErrorDialog">
-      <div class="result-dialog">
-        <div class="result-dialog-header result-dialog-header--error">
-          <div class="result-dialog-icon">
-            <q-icon name="error_outline" size="1.6rem" color="white" />
-          </div>
-          <div>
-            <div class="result-dialog-title">เกิดข้อผิดพลาด</div>
-            <div class="result-dialog-sub">กรุณาลองใหม่อีกครั้ง</div>
-          </div>
-        </div>
-        <div class="result-dialog-body">
-          <div class="result-dialog-emoji">⚠️</div>
-          <p class="result-dialog-msg result-dialog-msg--error">{{ errorMessage }}</p>
-        </div>
-        <div
-          :key="'e-' + errorMessage"
-          class="result-dialog-progress result-dialog-progress--error"
-        />
-      </div>
-    </q-dialog> -->
-
-    <!-- ===== VALIDATION DIALOG (ข้อมูลไม่ครบ) ===== -->
-    <!-- <q-dialog v-model="showValidationDialog">
-      <div class="result-dialog">
-        <div class="result-dialog-header result-dialog-header--warning">
-          <div class="result-dialog-icon">
-            <q-icon name="warning_amber" size="1.6rem" color="white" />
-          </div>
-          <div>
-            <div class="result-dialog-title">ข้อมูลไม่ครบถ้วน</div>
-            <div class="result-dialog-sub">กรุณาตรวจสอบข้อมูลอีกครั้ง</div>
-          </div>
-        </div>
-        <div class="result-dialog-body">
-          <div class="result-dialog-emoji">📋</div>
-          <p class="result-dialog-msg result-dialog-msg--warning">{{ validationMessage }}</p>
-        </div>
-        <div class="result-dialog-footer">
           <button
             type="button"
             class="dialog-btn dialog-btn--confirm"
-            @click="showValidationDialog = false"
+            @click="ViewWishDialog = false"
           >
-            รับทราบ
+            ปิด
           </button>
         </div>
       </div>
-    </q-dialog> -->
-
-    <!-- ===== FETCH ERROR DIALOG (โหลดข้อมูลไม่สำเร็จ) ===== -->
-    <!-- <q-dialog v-model="showFetchErrorDialog">
-      <div class="result-dialog">
-        <div class="result-dialog-header result-dialog-header--error">
-          <div class="result-dialog-icon">
-            <q-icon name="cloud_off" size="1.6rem" color="white" />
-          </div>
-          <div>
-            <div class="result-dialog-title">โหลดข้อมูลไม่สำเร็จ</div>
-            <div class="result-dialog-sub">กรุณาลองใหม่อีกครั้ง</div>
-          </div>
-        </div>
-        <div class="result-dialog-body">
-          <div class="result-dialog-emoji">🌐</div>
-          <p class="result-dialog-msg result-dialog-msg--error">
-            ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้
-          </p>
-        </div>
-        <div class="result-dialog-footer">
-          <button
-            type="button"
-            class="dialog-btn dialog-btn--confirm"
-            @click="showFetchErrorDialog = false"
-          >
-            รับทราบ
-          </button>
-        </div>
-      </div>
-    </q-dialog> -->
-
-    <!-- ===== CLICK PARTICLES ===== -->
-    <!-- <teleport to="body">
-      <div class="click-particles-root">
-        <span v-for="p in activeParticles" :key="p.id" class="click-particle" :style="p.style" />
-      </div>
-    </teleport> -->
+    </q-dialog>
   </q-page>
 </template>
 
@@ -694,11 +330,8 @@
 import { ref, onMounted, computed } from 'vue';
 import { useQuasar } from 'quasar';
 import { api } from 'src/boot/axios';
-// import { useRouter, useRoute } from 'vue-router';
 import { useRouter, useRoute } from 'vue-router';
-// import type { QFile } from 'quasar';
 
-// const fileInput = ref<InstanceType<typeof QFile> | null>(null);
 const $q = useQuasar();
 const router = useRouter();
 const route = useRoute();
@@ -730,8 +363,8 @@ interface FestivalData {
   image: string;
   logo: string;
   webName: string;
-  startDate?: string; // ← เพิ่ม
-  endDate?: string; // ← เพิ่ม
+  startDate?: string;
+  endDate?: string;
   wisher?: WisherApi[];
   card?: CardApi[];
 }
@@ -741,19 +374,17 @@ const festivalId = ref<string | null>(null);
 const festivalName = ref('');
 const imageFile = ref<File | null>(null);
 const logoFile = ref<File | null>(null);
-// const logoInput = ref<InstanceType<typeof QFile> | null>(null);
 const webName = ref('');
 const existingImageUrl = ref<string>('');
 const existingImageName = ref<string>('');
 const loading = ref(false);
 
 /* ===== DATE STATE ===== */
-const startDate = ref(''); // format: YYYY/MM/DD (Quasar default)
+const startDate = ref('');
 const endDate = ref('');
 const dateError = ref(false);
 const dateErrorMsg = ref('');
 
-// Duration in days
 const durationDays = computed(() => {
   if (!startDate.value || !endDate.value) return -1;
   const s = new Date(startDate.value.replace(/\//g, '-'));
@@ -761,7 +392,6 @@ const durationDays = computed(() => {
   return Math.round((e.getTime() - s.getTime()) / (1000 * 60 * 60 * 24));
 });
 
-// Format date to Thai display
 const formatDateThai = (dateStr: string): string => {
   if (!dateStr) return '';
   const d = new Date(dateStr.replace(/\//g, '-'));
@@ -782,7 +412,6 @@ const formatDateThai = (dateStr: string): string => {
   return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear() + 543}`;
 };
 
-// สร้าง todayStr ครั้งเดียวตอน mount (format YYYY/MM/DD ตาม Quasar)
 const todayStr = (() => {
   const d = new Date();
   const y = d.getFullYear();
@@ -791,91 +420,40 @@ const todayStr = (() => {
   return `${y}/${m}/${day}`;
 })();
 
-// startDate — block วันในอดีต + block วันที่เกิน endDate
 const startDateOptions = (dateStr: string): boolean => {
+  if (dateStr === startDate.value) return true; // ← เช็คก่อน
   if (dateStr < todayStr) return false;
   if (!endDate.value) return true;
   return dateStr <= endDate.value;
 };
 
-// endDate — block วันในอดีต + block วันก่อน startDate
 const endDateOptions = (dateStr: string): boolean => {
+  if (dateStr === endDate.value) return true; // ← เช็คก่อน
   if (dateStr < todayStr) return false;
   if (!startDate.value) return true;
   return dateStr >= startDate.value;
 };
 
-const onStartDateChange = (val: string) => {
-  dateError.value = false;
-  // if end is before new start, clear end
-  if (endDate.value && val > endDate.value) {
-    endDate.value = '';
-  }
-};
-
-const onEndDateChange = () => {
-  dateError.value = false;
-};
-
-// เพิ่ม template refs ที่ขาดหายไป
-// const coverRef = ref<HTMLElement | null>(null);
-// const nameRef = ref<HTMLElement | null>(null);
-// const logoRef = ref<HTMLElement | null>(null);
-// const webNameRef = ref<HTMLElement | null>(null);
-
-// ===== Error states =====
-// const imageError = ref(false);
-// const nameError = ref(false);
-// const logoError = ref(false);
-// const webNameError = ref(false);
-
-// Dialog: บันทึกสำเร็จ
-// const showSuccessDialog = ref(false);
-// const successMessage = ref('');
-
-// Dialog: เกิดข้อผิดพลาด (submit)
-// const showErrorDialog = ref(false);
-// const errorMessage = ref('');
-
-// Dialog: ข้อมูลไม่ครบ (validation)
-// const showValidationDialog = ref(false);
-// const validationMessage = ref('');
-
-// Dialog: โหลดข้อมูลไม่สำเร็จ (fetch)
+/* ===== DIALOG STATE ===== */
 const showFetchErrorDialog = ref(false);
 
-/* ===== DIALOG HELPERS ===== */
-// const openSuccessDialog = (msg: string) => {
-//   successMessage.value = msg;
-//   showSuccessDialog.value = true;
-// };
-
-// const openErrorDialog = (msg: string) => {
-//   errorMessage.value = msg;
-//   showErrorDialog.value = true;
-//   setTimeout(() => {
-//     showErrorDialog.value = false;
-//   }, 2500);
-// };
-
-// const openValidationDialog = (msg: string) => {
-//   validationMessage.value = msg;
-//   showValidationDialog.value = true;
-// };
-
-/* ===== WISH DIALOG STATE ===== */
-// const AddWishDialog = ref(false);
-// const EditWishDialog = ref(false);
-// const editingIndex = ref<number | null>(null);
-// const showCardDialog = ref(false);
-// const deleteDialog = ref(false);
-// const deleteIndex = ref<number | null>(null);
-// const itemToDelete = ref<string | null>(null);
-
-// const tempWish = ref('');
+/* ===== WISH LIST ===== */
 const wishWordList = ref<WishItem[]>([]);
 
-// const tempCardFile = ref<File | null>(null);
+/* ===== VIEW WISH DIALOG ===== */
+const ViewWishDialog = ref(false);
+const viewingIndex = ref<number>(0);
+const viewingWishText = ref<string>('');
+
+const viewWish = (index: number) => {
+  const wish = wishWordList.value[index];
+  if (!wish) return;
+  viewingIndex.value = index;
+  viewingWishText.value = wish.wishWord;
+  ViewWishDialog.value = true;
+};
+
+/* ===== CARDS ===== */
 const cardFileList = ref<File[]>([]);
 const existingCards = ref<ExistingCard[]>([]);
 
@@ -893,16 +471,27 @@ const getImageUrl = async (imagePath: string): Promise<string> => {
 /* ===== API: ดึงข้อมูล festival ===== */
 const fetchFestivalId = async (id: string) => {
   $q.loading.show();
-  festivalId.value = id; // ← เพิ่มบรรทัดนี้
+  festivalId.value = id;
   try {
     const response = await api.get(`/festival/${Number(id)}`);
     const data: FestivalData = response.data.festival;
 
     festivalName.value = data.festivalName;
     webName.value = data.webName;
-    // logoFile.value = data.logo ? await getImageUrl(data.logo) : null;
-    if (data.startDate) startDate.value = data.startDate.replace(/-/g, '/');
-    if (data.endDate) endDate.value = data.endDate.replace(/-/g, '/');
+    // if (data.startDate) startDate.value = data.startDate.replace(/-/g, '/');
+    // if (data.endDate) endDate.value = data.endDate.replace(/-/g, '/');
+    if (data.startDate) startDate.value = data.startDate.substring(0, 10).replace(/-/g, '/');
+    if (data.endDate) endDate.value = data.endDate.substring(0, 10).replace(/-/g, '/');
+    console.log(
+      'startDate:',
+      startDate.value,
+      '| todayStr:',
+      todayStr,
+      '| เท่ากัน?',
+      startDate.value === todayStr,
+      '| น้อยกว่า today?',
+      startDate.value < todayStr,
+    );
     if (data.image) {
       existingImageName.value = data.image;
       existingImageUrl.value = await getImageUrl(data.image);
@@ -934,125 +523,11 @@ const fetchFestivalId = async (id: string) => {
     localStorage.setItem('festivalId', id);
   } catch (error) {
     console.error(error);
-    showFetchErrorDialog.value = true; // เปลี่ยนจาก $q.notify
+    showFetchErrorDialog.value = true;
   } finally {
     $q.loading.hide();
   }
 };
-
-/* ===== WISH ===== */
-// const onAddWish = () => {
-//   tempWish.value = '';
-//   AddWishDialog.value = true;
-// };
-
-// const addWishToList = () => {
-//   if (!tempWish.value.trim()) return;
-//   wishWordList.value.push({ wishWord: tempWish.value.trim() });
-//   tempWish.value = '';
-//   AddWishDialog.value = false;
-// };
-
-// const editWish = (index: number) => {
-//   const wish = wishWordList.value[index];
-//   if (!wish) return;
-//   tempWish.value = wish.wishWord;
-//   editingIndex.value = index;
-//   EditWishDialog.value = true;
-// };
-
-// const updateWish = () => {
-//   if (editingIndex.value === null) return;
-//   if (!tempWish.value.trim()) return;
-//   const existing = wishWordList.value[editingIndex.value];
-//   // wishWordList.value[editingIndex.value] = {
-//   //   wId: existing?.wId,
-//   //   wishWord: tempWish.value.trim(),
-//   // };
-//   wishWordList.value[editingIndex.value] = {
-//     ...(existing?.wId !== undefined ? { wId: existing.wId } : {}),
-//     wishWord: tempWish.value.trim(),
-//   };
-//   tempWish.value = '';
-//   editingIndex.value = null;
-//   EditWishDialog.value = false;
-// };
-
-// const deleteWish = (i: number) => {
-//   const item = wishWordList.value[i];
-//   if (!item) return;
-//   deleteIndex.value = i;
-//   itemToDelete.value = item.wishWord;
-//   deleteDialog.value = true;
-// };
-
-// const confirmDelete = () => {
-//   if (deleteIndex.value === null) return;
-//   wishWordList.value.splice(deleteIndex.value, 1);
-//   deleteIndex.value = null;
-//   itemToDelete.value = null;
-//   deleteDialog.value = false;
-// };
-
-// /* ===== CARD ===== */
-// const onAddCard = () => {
-//   showCardDialog.value = true;
-// };
-
-// const addCardToList = () => {
-//   if (!tempCardFile.value) return;
-//   cardFileList.value.push(tempCardFile.value);
-//   tempCardFile.value = null;
-//   showCardDialog.value = false;
-
-// };
-
-// const cardErrorMsg = ref('กรุณาอัปโหลดรูปการ์ด')
-// const cardErrorMsg  = ref();
-// const addCardToList = () => {
-//   const file = tempCardFile.value;
-//   if (!file) return;
-
-//   cardErrorMsg.value = '';
-
-//   const allowedTypes = ['image/jpeg', 'image/png'];
-//   if (!allowedTypes.includes(file.type)) {
-//     cardErrorMsg.value = 'รองรับเฉพาะ JPG และ PNG';
-//     tempCardFile.value = null;
-//     return;
-//   }
-
-//   if (file.size > 2 * 1024 * 1024) {
-//     cardErrorMsg.value = 'ขนาดไฟล์ต้องไม่เกิน 2 MB';
-//     tempCardFile.value = null;
-//     return;
-//   }
-
-//   const url = URL.createObjectURL(file);
-//   const img = new Image();
-
-//   img.onload = () => {
-//     URL.revokeObjectURL(url);
-//     if (img.width !== 691 || img.height !== 691) {
-//       cardErrorMsg.value = `ขนาดรูปต้องเป็น 691×691 px (พบ ${img.width}×${img.height})`;
-//       tempCardFile.value = null;
-//       return;
-//     }
-
-//     cardFileList.value.push(file);
-//     tempCardFile.value = null;
-//     showCardDialog.value = false;
-//   };
-
-//   img.src = url;
-// };
-
-// const removeCard = (i: number) => {
-//   cardFileList.value.splice(i, 1);
-// };
-// const removeExistingCard = (i: number) => {
-//   existingCards.value.splice(i, 1);
-// };
 
 /* ===== UTIL ===== */
 const objectUrlCache = new WeakMap<File, string>();
@@ -1063,201 +538,7 @@ const getFilePreview = (file: File): string => {
   return url;
 };
 
-// const onFestivalNameChange = (val: string | number | null) => {
-//   nameError.value = false;
-
-//   if (typeof val !== 'string') return;
-
-//   const pattern = /^[^-].*[^-]-[^-]+-\d{4}$/;
-
-//   if (val && !pattern.test(val)) {
-//     nameError.value = true;
-//   }
-// };
-
-// const imageErrorMsg = ref('กรุณาอัปโหลดรูปหน้าปก');
-
-// const onImageSelected = (file: File | null) => {
-//   imageError.value = false;
-//   imageErrorMsg.value = 'กรุณาอัปโหลดรูปหน้าปก';
-//   if (!file) return;
-
-//   // ตรวจ size ≤ 2MB
-//   if (file.size > 2 * 1024 * 1024) {
-//     imageError.value = true;
-//     imageErrorMsg.value = 'ขนาดไฟล์ต้องไม่เกิน 2 MB';
-//     imageFile.value = null;
-//     existingImageUrl.value = '';   // ✅ clear รูปเก่า
-//     return;
-//   }
-
-//   // ตรวจ dimensions 1199×581
-//   const url = URL.createObjectURL(file);
-//   const img = new Image();
-//   img.onload = () => {
-//     URL.revokeObjectURL(url);
-//     if (img.width !== 1199 || img.height !== 581) {
-//       imageError.value = true;
-//       imageErrorMsg.value = `ขนาดรูปต้องเป็น 1199×581 px (พบ ${img.width}×${img.height})`;
-//       imageFile.value = null;
-//       existingImageUrl.value = '';   // ✅ clear รูปเก่า
-//       return;
-//     }
-//   };
-//   img.src = url;
-// };
-
-// const logoErrorMsg = ref('กรุณาอัปโหลดโลโก้');
-
-// const onLogoSelected = (file:File | null) => {
-//   logoError.value =false;
-//   logoErrorMsg.value = 'กรุณาอัปโหลดโลโก้';
-//   if(!file) return;
-
-//   if(file.size > 2 * 1024 * 1024){
-//     logoError.value =true;
-//     logoErrorMsg.value = 'ขนาดไฟล์ต้องไม่เกิน 2 MB';
-//     logoFile.value = null;
-
-//   }
-
-//   // ตรวจ dimensions 1199×581
-//   const url1 = URL.createObjectURL(file);
-//   const img1 = new Image();
-//   img1.onload = () => {
-//     URL.revokeObjectURL(url1);
-//     if (img1.width !== 100 || img1.height !== 100) {
-//       logoError.value = true;
-//       logoErrorMsg.value = `ขนาดรูปต้องเป็น 100×100 px (พบ ${img1.width}×${img1.height})`;
-//       logoFile.value = null;
-//     }
-//   };
-//   img1.src = url1;
-// }
-// const validateAndScroll = async (): Promise<boolean> => {
-//   // Reset all errors
-//   imageError.value = false;
-//   nameError.value = false;
-//   logoError.value = false;
-//   webNameError.value = false;
-
-//   const isImageValid = !!imageFile.value || !!existingImageUrl.value;
-//   console.log('festivalName:', festivalName.value);
-
-//   const isNameValid =
-//     // typeof festivalName.value === 'string' &&
-//     // /^[^-\s]+-[^-\s]+-\d{4}$/.test(festivalName.value);
-//     typeof festivalName.value === 'string' && /^[^-]+-[^-]+-\d{4}$/.test(festivalName.value);
-//   console.log('isNameValid:', isNameValid);
-//   const isLogoValid = !!logoFile.value;
-//   const isWebNameValid = typeof webName.value === 'string' && webName.value.trim().length > 0;
-
-//   if (!isImageValid) imageError.value = true;
-//   if (!isNameValid) nameError.value = true;
-//   if (!isLogoValid) logoError.value = true;
-//   if (!isWebNameValid) webNameError.value = true;
-
-//   const hasError = !isImageValid || !isNameValid || !isLogoValid || !isWebNameValid;
-
-//   if (hasError) {
-//     await nextTick();
-
-//     // Scroll to the first field with an error (in DOM order)
-//     const targets: Array<{ valid: boolean; el: HTMLElement | null }> = [
-//       { valid: isImageValid, el: coverRef.value },
-//       { valid: isNameValid, el: nameRef.value },
-//       { valid: isLogoValid, el: logoRef.value },
-//       { valid: isWebNameValid, el: webNameRef.value },
-//     ];
-
-//     const firstErrorEl = targets.find((t) => !t.valid)?.el;
-//     if (firstErrorEl) {
-//       firstErrorEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-//     }
-//   }
-
-//   return !hasError;
-// };
-
-/* ===== SUBMIT ===== */
-// const submitEdit = async () => {
-//   const isValid = await validateAndScroll();
-//   if (!isValid) return;
-
-//   loading.value = true;
-//   try {
-//     let festivalImageName = existingImageName.value;
-
-//     if (imageFile.value) {
-//       const fd = new FormData();
-//       fd.append('singleFile', imageFile.value);
-//       const res = await api.post('/upload', fd);
-//       festivalImageName = res.data.image;
-//     }
-
-//     let festivalLogoName = '';
-//     if (logoFile.value) {
-//       const fd = new FormData();
-//       fd.append('singleFile', logoFile.value);
-//       const res = await api.post('/upload', fd);
-//       festivalLogoName = res.data.image;
-//     }
-
-//     let newCardImageNames: string[] = [];
-//     if (cardFileList.value.length > 0) {
-//       const uploadPromises = cardFileList.value.map(async (file) => {
-//         const formData = new FormData();
-//         formData.append('singleFile', file);
-//         const res = await api.post('/upload', formData);
-//         return res.data.image as string;
-//       });
-//       newCardImageNames = await Promise.all(uploadPromises);
-//     }
-
-//     const allCards = [
-//       ...existingCards.value.map((c) => ({ cId: c.cId, imageCard: c.imageName })),
-//       ...newCardImageNames.map((imgName) => ({ imageCard: imgName })),
-//     ];
-
-//     const payload = {
-//       festivalName: festivalName.value,
-//       image: festivalImageName,
-//       logo: festivalLogoName,
-//       webName: webName.value,
-//       wisher: wishWordList.value.map((w) => ({
-//         ...(w.wId !== undefined ? { wId: w.wId } : {}),
-//         wishWord: w.wishWord,
-//       })),
-//       card: allCards,
-//     };
-
-//     let response;
-//     if (festivalId.value) {
-//       response = await api.patch(`/admin/festival/${festivalId.value}`, payload);
-//     } else {
-//       response = await api.post('/admin/festival', payload);
-//     }
-
-//     // เปลี่ยนจาก $q.notify → success dialog แล้ว redirect หลัง 2 วิ
-//     openSuccessDialog(response.data.message || 'บันทึกเทศกาลสำเร็จแล้ว');
-//     // setTimeout(async () => {
-//     //   showSuccessDialog.value = false;
-//     //   await router.push('/admin/festival');
-//     // }, 2000);
-//     setTimeout(() => {
-//       showSuccessDialog.value = false;
-//       void router.push('/admin/festival');
-//     }, 2000);
-//   } catch {
-//     openErrorDialog('เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง'); // เปลี่ยนจาก $q.notify
-//   } finally {
-//     loading.value = false;
-//   }
-// };
-
-// ============================================================
-// CLICK PARTICLES
-// ============================================================
+/* ===== CLICK PARTICLES ===== */
 interface Particle {
   id: number;
   style: Record<string, string>;
@@ -1597,7 +878,6 @@ $error-red: #e53935;
     transform 0.2s;
   background: $surface-2;
   max-width: 140px;
-
   &:hover {
     border-color: $indigo-mid;
     transform: translateY(-2px);
@@ -1625,7 +905,6 @@ $error-red: #e53935;
   border-color: $error-red !important;
   border-style: solid !important;
   background: #fff5f5 !important;
-  animation: shake 0.35s cubic-bezier(0.36, 0.07, 0.19, 0.97);
 }
 
 .error-msg {
@@ -1657,24 +936,6 @@ $error-red: #e53935;
 .cover-img {
   border-radius: 12px;
 }
-.cover-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(26, 20, 96, 0.5);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  opacity: 0;
-  transition: opacity 0.2s;
-  color: white;
-  font-size: 0.85rem;
-  font-weight: 500;
-  .cover-upload-zone:hover & {
-    opacity: 1;
-  }
-}
 .cover-placeholder {
   padding: 2.5rem 1rem;
   display: flex;
@@ -1695,42 +956,12 @@ $error-red: #e53935;
   color: $text-muted;
 }
 
-.cover-resize-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  margin-top: 10px;
-  padding: 5px 14px;
-  border-radius: 20px;
-  background: rgba(45, 45, 138, 0.07);
-  border: 1px solid rgba(45, 45, 138, 0.15);
-  color: $indigo-mid;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-decoration: none;
-  transition:
-    background 0.2s,
-    border-color 0.2s,
-    transform 0.15s;
-
-  &:hover {
-    background: rgba(45, 45, 138, 0.14);
-    border-color: rgba(45, 45, 138, 0.3);
-    transform: translateY(-1px);
-  }
-
-  &:active {
-    transform: translateY(0);
-  }
-}
-
 /* ===== INPUT ===== */
 .custom-input :deep(.q-field__control) {
   border-radius: 12px !important;
 }
-/* ─────────────────────────────────────────
-   DATE SECTION
-───────────────────────────────────────── */
+
+/* ===== DATE SECTION ===== */
 .date-section-header {
   display: flex;
   align-items: center;
@@ -1766,7 +997,6 @@ $error-red: #e53935;
   margin-top: 2px;
 }
 
-/* Date summary chips */
 .date-summary-row {
   display: flex;
   align-items: center;
@@ -1838,27 +1068,6 @@ $error-red: #e53935;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.date-chip-clear {
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  border: none;
-  flex-shrink: 0;
-  background: rgba(45, 45, 138, 0.1);
-  color: $text-muted;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition:
-    background 0.15s,
-    transform 0.15s;
-  &:hover {
-    background: rgba(229, 57, 53, 0.15);
-    color: $error-red;
-    transform: scale(1.1);
-  }
-}
 .date-range-arrow {
   color: $text-muted;
   flex-shrink: 0;
@@ -1868,7 +1077,6 @@ $error-red: #e53935;
   }
 }
 
-/* Duration badge */
 .duration-badge {
   display: inline-flex;
   align-items: center;
@@ -1892,7 +1100,6 @@ $error-red: #e53935;
   transform: scale(0.85);
 }
 
-/* Calendars grid */
 .calendars-wrap {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1952,7 +1159,6 @@ $error-red: #e53935;
   }
 }
 
-/* Calendar wrapper with custom border glow */
 .cal-wrapper {
   border-radius: 18px;
   overflow: hidden;
@@ -1969,7 +1175,11 @@ $error-red: #e53935;
   }
 }
 
-/* q-date deep overrides */
+.cal-readonly {
+  pointer-events: none;
+  opacity: 0.75;
+}
+
 .fest-calendar {
   width: 100% !important;
   border-radius: 16px !important;
@@ -2005,6 +1215,7 @@ $error-red: #e53935;
     font-weight: 700 !important;
   }
 }
+
 /* ===== CARD HEADER ROW ===== */
 .card-header-row {
   display: flex;
@@ -2071,13 +1282,6 @@ $error-red: #e53935;
   flex-shrink: 0;
 }
 .wish-text {
-  //   flex: 1;
-  //   font-size: 0.92rem;
-  //   color: $text-main;
-  //   font-weight: 500;
-  //   overflow: hidden;
-  //   text-overflow: ellipsis;
-  //   white-space: nowrap;
   flex: 1;
   font-size: 0.92rem;
   color: $text-main;
@@ -2103,6 +1307,13 @@ $error-red: #e53935;
     transform 0.1s;
   &:active {
     transform: scale(0.92);
+  }
+  &--view {
+    background: rgba(45, 45, 138, 0.08);
+    color: $indigo-mid;
+    &:hover {
+      background: rgba(45, 45, 138, 0.18);
+    }
   }
   &--edit {
     background: rgba(245, 166, 35, 0.1);
@@ -2133,6 +1344,27 @@ $error-red: #e53935;
   transform: translateX(16px) scale(0.95);
 }
 
+/* ===== VIEW WISH DIALOG CONTENT ===== */
+.view-wish-number {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: $text-muted;
+  margin-bottom: 10px;
+}
+
+.view-wish-text {
+  font-size: 1rem;
+  font-weight: 600;
+  color: $text-main;
+  background: $surface-2;
+  border-radius: 12px;
+  padding: 14px 16px;
+  line-height: 1.7;
+  border: 1px solid rgba(45, 45, 138, 0.08);
+}
+
 /* ===== CARD GRID ===== */
 .card-grid {
   display: grid;
@@ -2156,25 +1388,6 @@ $error-red: #e53935;
   display: block;
   border-radius: 12px;
 }
-.card-thumb-remove {
-  position: absolute;
-  top: 5px;
-  right: 5px;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  border: none;
-  background: rgba(26, 20, 96, 0.75);
-  color: white;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.15s;
-  &:hover {
-    background: $coral;
-  }
-}
 
 /* ===== EMPTY STATE ===== */
 .empty-state {
@@ -2197,68 +1410,30 @@ $error-red: #e53935;
 }
 
 /* ===== SUBMIT BUTTON ===== */
-// .submit-btn {
-//   width: 100%;
-//   padding: 1rem;
-//   border-radius: 16px;
-//   border: none;
-//   background: linear-gradient(135deg, $indigo-deep 0%, $indigo-mid 50%, #a21515 100%);
-//   color: white;
-//   font-family: 'Noto Sans Thai', 'Prompt', sans-serif;
-//   font-size: 1.05rem;
-//   font-weight: 700;
-//   cursor: pointer;
-//   box-shadow: 0 6px 24px rgba(228, 4, 23, 0.35);
-//   transition:
-//     transform 0.2s,
-//     box-shadow 0.2s,
-//     opacity 0.2s;
-//   letter-spacing: 0.01em;
-//   &:hover:not(.loading):not(:disabled) {
-//     transform: translateY(-2px);
-//     box-shadow: 0 10px 32px rgba(227, 3, 11, 0.4);
-//   }
-//   &:active:not(.loading) {
-//     transform: translateY(0);
-//   }
-//   &.loading,
-//   &:disabled {
-//     opacity: 0.75;
-//     cursor: not-allowed;
-//   }
-// }
 .submit-btn {
   width: 100%;
   padding: 1rem;
   border-radius: 16px;
   border: none;
-
   background: linear-gradient(135deg, #b91c1c 0%, #dc2626 50%, #ef4444 100%);
-
   color: white;
   font-family: 'Noto Sans Thai', 'Prompt', sans-serif;
   font-size: 1.05rem;
   font-weight: 700;
   cursor: pointer;
-
   box-shadow: 0 6px 24px rgba(220, 38, 38, 0.35);
-
   transition:
     transform 0.2s,
     box-shadow 0.2s,
     opacity 0.2s;
-
   letter-spacing: 0.01em;
-
   &:hover:not(.loading):not(:disabled) {
     transform: translateY(-2px);
     box-shadow: 0 10px 32px rgba(220, 38, 38, 0.45);
   }
-
   &:active:not(.loading) {
     transform: translateY(0);
   }
-
   &.loading,
   &:disabled {
     opacity: 0.75;
@@ -2272,7 +1447,7 @@ $error-red: #e53935;
   gap: 8px;
 }
 
-/* ===== WISH DIALOGS ===== */
+/* ===== DIALOGS ===== */
 .custom-dialog {
   background: $surface;
   border-radius: 20px;
@@ -2364,143 +1539,6 @@ $error-red: #e53935;
     background: linear-gradient(135deg, #e53935, #c62828);
     color: white;
     box-shadow: 0 3px 12px rgba(229, 57, 53, 0.3);
-  }
-}
-
-.delete-confirm-text {
-  text-align: center;
-  font-size: 0.92rem;
-  color: $text-main;
-  line-height: 1.8;
-  margin: 0;
-}
-.delete-target {
-  color: $coral;
-  font-weight: 700;
-}
-
-/* ===== RESULT DIALOGS ===== */
-.result-dialog {
-  background: #fff;
-  border-radius: 24px;
-  overflow: hidden;
-  width: 340px;
-  max-width: 92vw;
-  box-shadow: 0 24px 64px rgba(26, 20, 96, 0.18);
-}
-
-.result-dialog-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 1.25rem 1.5rem;
-  &--success {
-    background: linear-gradient(135deg, $green-dark, $green);
-  }
-  &--error {
-    background: linear-gradient(135deg, #7f1d1d, #dc2626);
-  }
-  &--warning {
-    background: linear-gradient(135deg, $amber-dark, $amber);
-  }
-}
-
-.result-dialog-icon {
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.18);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.result-dialog-title {
-  font-family: 'Prompt', sans-serif;
-  font-size: 1rem;
-  font-weight: 700;
-  color: #fff;
-  line-height: 1.2;
-}
-.result-dialog-sub {
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.72);
-  margin-top: 2px;
-}
-
-.result-dialog-body {
-  padding: 1.5rem 1.5rem 0.75rem;
-  text-align: center;
-}
-
-.result-dialog-emoji {
-  font-size: 3rem;
-  margin-bottom: 0.75rem;
-  display: block;
-  animation: resultPop 0.45s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
-}
-
-@keyframes resultPop {
-  0% {
-    transform: scale(0.5);
-    opacity: 0;
-  }
-  80% {
-    transform: scale(1.15);
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
-.result-dialog-msg {
-  font-size: 0.92rem;
-  font-weight: 600;
-  color: #374151;
-  border-radius: 10px;
-  padding: 10px 14px;
-  margin: 0;
-  line-height: 1.6;
-  &--success {
-    background: $green-soft;
-  }
-  &--error {
-    background: #fef2f2;
-  }
-  &--warning {
-    background: $amber-soft;
-  }
-}
-
-.result-dialog-footer {
-  display: flex;
-  justify-content: flex-end;
-  padding: 0.75rem 1.5rem 1.25rem;
-}
-
-.result-dialog-progress {
-  height: 4px;
-  width: 100%;
-  transform-origin: left;
-  animation: progressShrink 2s linear forwards;
-  &--success {
-    background: linear-gradient(90deg, $green-dark, $green);
-  }
-  &--error {
-    background: linear-gradient(90deg, #7f1d1d, #dc2626);
-    animation-duration: 2.5s;
-  }
-}
-
-@keyframes progressShrink {
-  from {
-    transform: scaleX(1);
-  }
-  to {
-    transform: scaleX(0);
   }
 }
 

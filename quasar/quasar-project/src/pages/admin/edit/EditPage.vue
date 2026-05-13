@@ -23,10 +23,20 @@
           </div>
           <div ref="coverRef" class="field-group">
             <!-- <div class="cover-upload-zone" ref="coverRef" @click="fileInput?.pickFiles()"> -->
+            <!-- <div
+              class="cover-upload-zone"
+              :class="{ 'upload-zone--error': imageError
+
+              }"
+              @click="fileInput?.pickFiles()"
+            > -->
             <div
               class="cover-upload-zone"
-              :class="{ 'upload-zone--error': imageError }"
-              @click="fileInput?.pickFiles()"
+              :class="{
+                'upload-zone--error': imageError,
+                'upload-zone--disabled': !isEdit,
+              }"
+              @click="isEdit && fileInput?.pickFiles()"
             >
               <q-img
                 v-if="imageFile || existingImageUrl"
@@ -35,7 +45,8 @@
                 fit="contain"
                 :ratio="16 / 9"
               >
-                <div class="cover-overlay">
+                <!-- <div class="cover-overlay"> -->
+                <div v-if="isEdit" class="cover-overlay">
                   <q-icon name="photo_camera" size="28px" color="white" />
                   <span>เปลี่ยนรูป</span>
                 </div>
@@ -96,6 +107,7 @@
             <q-input
               outlined
               v-model="festivalName"
+              :disable="!isEdit"
               label="ชื่อเทศกาล"
               placeholder="เช่น สงกรานต์-IT-2568"
               hint="รูปแบบ: เทศกาล-หน่วยงาน-ปี"
@@ -131,10 +143,18 @@
           </div>
           <!-- LOGO UPLOAD -->
           <div ref="logoRef" class="q-mt-md field-group">
-            <div
+            <!-- <div
               class="logo-upload-zone"
               :class="{ 'upload-zone--error': logoError }"
               @click="logoInput?.pickFiles()"
+            > -->
+            <div
+              class="logo-upload-zone"
+              :class="{
+                'upload-zone--error': logoError,
+                'upload-zone--disabled': !isEdit,
+              }"
+              @click="isEdit && logoInput?.pickFiles()"
             >
               <q-img
                 v-if="logoFile"
@@ -143,7 +163,11 @@
                 :ratio="1"
                 fit="contain"
               >
-                <div class="cover-overlay">
+                <!-- <div  class="cover-overlay">
+                  <q-icon name="photo_camera" size="20px" color="white" />
+                  <span>เปลี่ยน Logo</span>
+                </div> -->
+                <div v-if="isEdit" class="cover-overlay">
                   <q-icon name="photo_camera" size="20px" color="white" />
                   <span>เปลี่ยน Logo</span>
                 </div>
@@ -169,8 +193,23 @@
             />
           </div>
           <div ref="webNameRef" class="q-mt-md field-group">
+            <!-- <q-input
+              v-model="webName"
+              label="ชื่อเว็บไซต์ (URL slug)"
+              placeholder="เช่น songkran-2568"
+              outlined
+              dense
+              lazy-rules
+              :rules="[
+                (val) =>
+                  (typeof val === 'string' && val.trim().length > 0) ||
+                  'ชื่อเว็บไซต์จำเป็นต้องกรอก',
+              ]"
+              class="custom-input"
+            > -->
             <q-input
               v-model="webName"
+              :disable="!isEdit"
               label="ชื่อเว็บไซต์ (URL slug)"
               placeholder="เช่น songkran-2568"
               outlined
@@ -223,6 +262,7 @@
                   class="date-chip-clear"
                   type="button"
                   @click="startDate = ''"
+                  :disabled="!isEdit"
                 >
                   <q-icon name="close" size="12px" />
                 </button>
@@ -249,7 +289,13 @@
                     {{ endDate ? formatDateThai(endDate) : 'ยังไม่ได้เลือก' }}
                   </div>
                 </div>
-                <button v-if="endDate" class="date-chip-clear" type="button" @click="endDate = ''">
+                <button
+                  v-if="endDate"
+                  class="date-chip-clear"
+                  type="button"
+                  @click="endDate = ''"
+                  :disabled="!isEditEndDate"
+                >
                   <q-icon name="close" size="12px" />
                 </button>
               </div>
@@ -283,7 +329,22 @@
                     formatDateThai(startDate)
                   }}</span>
                 </div>
-                <div class="cal-wrapper cal-wrapper--start">
+                <!-- <div class="cal-wrapper cal-wrapper--start">
+                
+                      <q-date
+                    v-model="startDate"
+                    :disable="!isEdit"
+                    :options="startDateOptions"
+                    color="indigo-6"
+                    text-color="white"
+                    flat
+                    minimal
+                    class="fest-calendar"
+                    @update:model-value="onStartDateChange"
+                  />
+                </div> -->
+                <!-- START DATE -->
+                <div class="cal-wrapper cal-wrapper--start" :class="{ 'cal-readonly': !isEdit }">
                   <q-date
                     v-model="startDate"
                     :options="startDateOptions"
@@ -304,7 +365,24 @@
                   <span>วันสิ้นสุด</span>
                   <span v-if="endDate" class="cal-label-date">{{ formatDateThai(endDate) }}</span>
                 </div>
-                <div class="cal-wrapper cal-wrapper--end">
+                <!-- <div class="cal-wrapper cal-wrapper--end">
+                  <q-date
+                    v-model="endDate"
+                    :disable="!isEditEndDate"
+                    :options="endDateOptions"
+                    color="teal-6"
+                    text-color="white"
+                    flat
+                    minimal
+                    class="fest-calendar"
+                    @update:model-value="onEndDateChange"
+                  />
+                </div> -->
+                <!-- END DATE -->
+                <div
+                  class="cal-wrapper cal-wrapper--end"
+                  :class="{ 'cal-readonly': !isEditEndDate }"
+                >
                   <q-date
                     v-model="endDate"
                     :options="endDateOptions"
@@ -334,6 +412,7 @@
               <span class="card-header-unit">รายการ</span>
             </div>
             <q-btn
+              :disable="!isEdit"
               unelevated
               color="deep-orange-5"
               icon="add"
@@ -351,14 +430,30 @@
             >
               <div class="wish-number">{{ i + 1 }}</div>
               <div class="wish-text">{{ wish.wishWord }}</div>
-              <div class="wish-actions">
+              <!-- <div v-if="isEdit" class="wish-actions">
                 <button class="wish-btn wish-btn--edit" type="button" @click="editWish(i)">
                   <q-icon name="edit" size="16px" />
                 </button>
                 <button class="wish-btn wish-btn--delete" type="button" @click="deleteWish(i)">
                   <q-icon name="delete_outline" size="16px" />
                 </button>
-              </div>
+              </div> -->
+              <button
+                class="wish-btn wish-btn--edit"
+                :disabled="!isEdit"
+                type="button"
+                @click="editWish(i)"
+              >
+                <q-icon name="edit" size="16px" />
+              </button>
+              <button
+                class="wish-btn wish-btn--delete"
+                :disabled="!isEdit"
+                type="button"
+                @click="deleteWish(i)"
+              >
+                <q-icon name="delete_outline" size="16px" />
+              </button>
             </div>
           </transition-group>
 
@@ -384,6 +479,7 @@
               <span class="card-header-unit">รูป</span>
             </div>
             <q-btn
+              :disable="!isEdit"
               unelevated
               color="teal-6"
               icon="add_photo_alternate"
@@ -400,13 +496,18 @@
               class="card-thumb"
             >
               <q-img :src="card.previewUrl" ratio="1" fit="contain" class="card-thumb-img" />
-              <button class="card-thumb-remove" type="button" @click="removeExistingCard(i)">
+              <button
+                v-if="isEdit"
+                class="card-thumb-remove"
+                type="button"
+                @click="removeExistingCard(i)"
+              >
                 <q-icon name="close" size="14px" />
               </button>
             </div>
             <div v-for="(file, i) in cardFileList" :key="'new-' + i" class="card-thumb">
               <q-img :src="getFilePreview(file)" ratio="1" fit="contain" class="card-thumb-img" />
-              <button class="card-thumb-remove" type="button" @click="removeCard(i)">
+              <button v-if="isEdit" class="card-thumb-remove" type="button" @click="removeCard(i)">
                 <q-icon name="close" size="14px" />
               </button>
             </div>
@@ -421,11 +522,18 @@
 
         <!-- ===== SUBMIT ===== -->
         <div class="animate-in" style="animation-delay: 0.25s">
-          <button
+          <!-- <button
             type="button"
             class="submit-btn"
             :class="{ loading }"
             :disabled="loading"
+            @click="submitEdit"
+          > -->
+          <button
+            type="button"
+            class="submit-btn"
+            :class="{ loading }"
+            :disabled="loading || !isEditEndDate"
             @click="submitEdit"
           >
             <span v-if="!loading" class="submit-btn-inner">
@@ -743,6 +851,8 @@ interface FestivalData {
   webName: string;
   startDate?: string; // ← เพิ่ม
   endDate?: string; // ← เพิ่ม
+  isEdit: boolean; // ← เพิ่ม
+  isEditEndDate: boolean; // ← เพิ่ม
   wisher?: WisherApi[];
   card?: CardApi[];
 }
@@ -761,6 +871,10 @@ const loading = ref(false);
 /* ===== DATE STATE ===== */
 const startDate = ref(''); // format: YYYY/MM/DD (Quasar default)
 const endDate = ref('');
+// ใต้ const loading = ref(false);  — เพิ่ม 2 state
+// ใต้ const loading = ref(false);  — เพิ่ม 2 state
+const isEdit = ref(true);
+const isEditEndDate = ref(true);
 const dateError = ref(false);
 const dateErrorMsg = ref('');
 
@@ -814,14 +928,28 @@ const todayStr = (() => {
 })();
 
 // startDate — block วันในอดีต + block วันที่เกิน endDate
+// const startDateOptions = (dateStr: string): boolean => {
+//   if (dateStr < todayStr) return false;
+//   if (!endDate.value) return true;
+//   return dateStr <= endDate.value;
+// };
+
+// // endDate — block วันในอดีต + block วันก่อน startDate
+// const endDateOptions = (dateStr: string): boolean => {
+//   if (dateStr < todayStr) return false;
+//   if (!startDate.value) return true;
+//   return dateStr >= startDate.value;
+// };
+
 const startDateOptions = (dateStr: string): boolean => {
+  if (dateStr === startDate.value) return true; // ← เช็คก่อน
   if (dateStr < todayStr) return false;
   if (!endDate.value) return true;
   return dateStr <= endDate.value;
 };
 
-// endDate — block วันในอดีต + block วันก่อน startDate
 const endDateOptions = (dateStr: string): boolean => {
+  if (dateStr === endDate.value) return true; // ← เช็คก่อน
   if (dateStr < todayStr) return false;
   if (!startDate.value) return true;
   return dateStr >= startDate.value;
@@ -923,10 +1051,24 @@ const fetchFestivalId = async (id: string) => {
 
     festivalName.value = data.festivalName;
     webName.value = data.webName;
+    isEdit.value = data.isEdit; // ← เพิ่ม
+    isEditEndDate.value = data.isEditEndDate; // ← เพิ่ม
     // logoFile.value = data.logo ? await getImageUrl(data.logo) : null;
     // ── เพิ่ม 2 บรรทัดนี้ ──
-    if (data.startDate) startDate.value = data.startDate.replace(/-/g, '/');
-    if (data.endDate) endDate.value = data.endDate.replace(/-/g, '/');
+    // if (data.startDate) startDate.value = data.startDate.replace(/-/g, '/');
+    // if (data.endDate) endDate.value = data.endDate.replace(/-/g, '/');
+    if (data.startDate) startDate.value = data.startDate.substring(0, 10).replace(/-/g, '/');
+    if (data.endDate) endDate.value = data.endDate.substring(0, 10).replace(/-/g, '/');
+    console.log(
+      'startDate:',
+      startDate.value,
+      '| todayStr:',
+      todayStr,
+      '| เท่ากัน?',
+      startDate.value === todayStr,
+      '| น้อยกว่า today?',
+      startDate.value < todayStr,
+    );
     if (data.image) {
       existingImageName.value = data.image;
       existingImageUrl.value = await getImageUrl(data.image);
@@ -1165,6 +1307,20 @@ const validateAndScroll = async (): Promise<boolean> => {
   webNameError.value = false;
   dateError.value = false; // ← reset date error
   dateErrorMsg.value = ''; // ← reset date error msg
+
+  // ถ้า isEdit = false → validate เฉพาะ endDate (ถ้า isEditEndDate = true)
+  if (!isEdit.value) {
+    if (isEditEndDate.value) {
+      if (startDate.value && !endDate.value) {
+        dateError.value = true;
+        dateErrorMsg.value = 'กรุณาเลือกวันสิ้นสุดด้วย';
+        await nextTick();
+        dateRef.value?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return false;
+      }
+    }
+    return true;
+  }
 
   const isImageValid = !!imageFile.value || !!existingImageUrl.value;
   const isNameValid =
@@ -1663,7 +1819,11 @@ $error-red: #e53935;
   background: #fff5f5 !important;
   animation: shake 0.35s cubic-bezier(0.36, 0.07, 0.19, 0.97);
 }
-
+.upload-zone--disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  pointer-events: none;
+}
 .error-msg {
   display: flex;
   align-items: center;
@@ -2005,6 +2165,10 @@ $error-red: #e53935;
   }
 }
 
+.cal-readonly {
+  pointer-events: none;
+  opacity: 0.75;
+}
 /* q-date deep overrides */
 .fest-calendar {
   width: 100% !important;

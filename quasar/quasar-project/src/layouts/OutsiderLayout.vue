@@ -188,27 +188,27 @@
       </div>
     </q-footer>
     <q-dialog v-model="alertDialog.show" persistent>
-  <q-card class="alert-card">
-    <div class="alert-icon-wrap" :class="`alert-icon-wrap--${alertDialog.type}`">
-      <div class="alert-icon-ring">
-        <q-icon :name="alertDialog.icon" size="34px" color="white" />
-      </div>
-    </div>
-    <q-card-section class="alert-body">
-      <div class="alert-title">{{ alertDialog.title }}</div>
-      <div class="alert-message">{{ alertDialog.message }}</div>
-    </q-card-section>
-    <q-card-actions align="center" class="alert-actions">
-      <q-btn
-        unelevated
-        :label="alertDialog.btnLabel || 'ตกลง'"
-        class="alert-btn"
-        :class="`alert-btn--${alertDialog.type}`"
-        @click="alertDialog.show = false"
-      />
-    </q-card-actions>
-  </q-card>
-</q-dialog>
+      <q-card class="alert-card">
+        <div class="alert-icon-wrap" :class="`alert-icon-wrap--${alertDialog.type}`">
+          <div class="alert-icon-ring">
+            <q-icon :name="alertDialog.icon" size="34px" color="white" />
+          </div>
+        </div>
+        <q-card-section class="alert-body">
+          <div class="alert-title">{{ alertDialog.title }}</div>
+          <div class="alert-message">{{ alertDialog.message }}</div>
+        </q-card-section>
+        <q-card-actions align="center" class="alert-actions">
+          <q-btn
+            unelevated
+            :label="alertDialog.btnLabel || 'ตกลง'"
+            class="alert-btn"
+            :class="`alert-btn--${alertDialog.type}`"
+            @click="alertDialog.show = false"
+          />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </q-layout>
 </template>
 
@@ -234,7 +234,6 @@ const isListActive = computed(() => route.path.startsWith(`/${currentId.value}/l
 const isHomeActive = computed(() => route.path === `/${currentId.value}`);
 
 const webName = ref('ระบบบริหารจัดการอวยพรเนื่องในโอกาสต่างๆ ของกรมฯ');
-
 
 type AlertType = 'error' | 'success' | 'warning' | 'info';
 
@@ -267,7 +266,6 @@ const showAlert = (
   alertDialog.show = true;
 };
 
-
 // onMounted(async () => {
 //   try {
 //     const res = await api.get(`/festival/${currentId.value}`);
@@ -289,8 +287,6 @@ const getImageUrl = async (imagePath: string): Promise<string> => {
     return '';
   }
 };
-
-
 
 const fetchFestival = async (id: string) => {
   $q.loading.show();
@@ -1000,17 +996,25 @@ $nav-h: 52px;
   align-items: center;
   justify-content: center;
   padding: 28px 0 20px;
-  &--error { background: linear-gradient(135deg, #7f1d1d, #e11d48); }
-  &--success { background: linear-gradient(135deg, #14532d, #16a34a); }
-  &--warning { background: linear-gradient(135deg, #78350f, #f59e0b); }
-  &--info { background: linear-gradient(135deg, #1e3a5f, #2563eb); }
+  &--error {
+    background: linear-gradient(135deg, #7f1d1d, #e11d48);
+  }
+  &--success {
+    background: linear-gradient(135deg, #14532d, #16a34a);
+  }
+  &--warning {
+    background: linear-gradient(135deg, #78350f, #f59e0b);
+  }
+  &--info {
+    background: linear-gradient(135deg, #1e3a5f, #2563eb);
+  }
 }
 .alert-icon-ring {
   width: 62px;
   height: 62px;
   border-radius: 50%;
-  background: rgba(255,255,255,0.18);
-  border: 2px solid rgba(255,255,255,0.32);
+  background: rgba(255, 255, 255, 0.18);
+  border: 2px solid rgba(255, 255, 255, 0.32);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1041,9 +1045,21 @@ $nav-h: 52px;
   font-size: 0.95rem;
   font-weight: 600;
   padding: 8px 28px !important;
-  &--error { background: linear-gradient(135deg, #e11d48, #db2777) !important; color: #fff !important; }
-  &--success { background: linear-gradient(135deg, #16a34a, #15803d) !important; color: #fff !important; }
-  &--warning { background: linear-gradient(135deg, #f59e0b, #d97706) !important; color: #fff !important; }
-  &--info { background: linear-gradient(135deg, #2563eb, #1d4ed8) !important; color: #fff !important; }
+  &--error {
+    background: linear-gradient(135deg, #e11d48, #db2777) !important;
+    color: #fff !important;
+  }
+  &--success {
+    background: linear-gradient(135deg, #16a34a, #15803d) !important;
+    color: #fff !important;
+  }
+  &--warning {
+    background: linear-gradient(135deg, #f59e0b, #d97706) !important;
+    color: #fff !important;
+  }
+  &--info {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
+    color: #fff !important;
+  }
 }
 </style>

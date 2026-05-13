@@ -6,6 +6,8 @@ export const MESSAGE = {
     UPDATE_SUCCESS: 'แก้ไขขื่อเทศกาลสำเร็จ',
     INVALID_FESTIVALID: 'ไม่มีเทศกาลนี้ในระบบ',
     DELETE_SUCCESS: 'ลบข้อมูลเทศกาลสำเร็จ',
+    FESTIVAL_NOT_EDIT: 'ไม่สามารถแก้ไขข้อมูลเทศกาลได้',
+    FESTIVAL_NOT_DELETE: 'ไม่สามารถลบข้อมูลเทศกาลได้',
     // FESTIVAL_CONFLICT: 'มีข้อมูลเทศกาลแล้ว',
   },
   SENDER: {
@@ -14,7 +16,7 @@ export const MESSAGE = {
     GET_SUCCESS: 'แสดงรายการข้อมูลผู้ส่งคำอวยพรสำเร็จ',
     NOT_FOUND: 'ไม่พบผู้ส่งคำอวยพร',
     BAD_WORD_FOUND: 'ไม่บันทึกคำไม่สุภาพ',
-    NOT_SERVICE: 'ไม่อยู่ในช่วงบริการ',
+    NOT_SERVICE: ' ไม่อยู่ในช่วงเทศกาล',
   },
   UNPOLITE: {
     CREATE_SUCCESS: 'สร้างคำไม่สุภาพสำเร็จ',

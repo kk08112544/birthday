@@ -7,6 +7,8 @@ export class UpdateFestivalDto {
   webName?: string;
   startDate?: Date;
   endDate?: Date;
+
+  isEditEndDate?: boolean;
   wisher?: UpdateWisherDto[];
   card?: UpdateCardDto[];
 }

@@ -13,11 +13,6 @@ export class AdminFestivalService {
     private exceptionService: ExceptionsService,
   ) {}
   async create(createFestivalDto: CreateFestivalDto) {
-    // const check = await this.adminFestivalRepositories.findAll();
-    // if (check) {
-    //   this.exceptionService.throwFestivalConflict();
-    // }
-    // return 'This action adds a new festival';
     const data = await this.adminFestivalRepositories.create(createFestivalDto);
     return {
       festival: data,
@@ -63,11 +58,11 @@ export class AdminFestivalService {
   }
 
   async update(id: number, updateFestivalDto: UpdateFestivalDto) {
-    const check = await this.adminFestivalRepositories.findById(id);
+    const checkEndDate = await this.adminFestivalRepositories.findEndDate(id);
 
-    if (!check) {
-      this.exceptionService.throwInvalidFestival();
-    }
+    updateFestivalDto.isEditEndDate = !(
+      checkEndDate && new Date(checkEndDate) < new Date()
+    );
 
     const data = await this.adminFestivalRepositories.update(
       id,
@@ -82,9 +77,9 @@ export class AdminFestivalService {
   }
 
   async delete(id: number) {
-    const check = await this.adminFestivalRepositories.findById(id);
+    const check = await this.adminFestivalRepositories.findDeleteExits(id);
     if (!check) {
-      this.exceptionService.throwInvalidFestival();
+      this.exceptionService.throwFestivalDELETEForbidden();
     }
     const data = await this.adminFestivalRepositories.delete(id);
     return {
