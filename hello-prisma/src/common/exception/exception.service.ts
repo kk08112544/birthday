@@ -13,7 +13,7 @@ import { MESSAGE } from 'src/common/message';
 export class ExceptionsService {
   //   constructor(private readonly i18n: I18nService) {}
 
-  // User-related exceptions
+  // Sender exceptions
   throwSenderNotFound(): never {
     throw new NotFoundException(MESSAGE.SENDER.NOT_FOUND);
   }
@@ -60,5 +60,13 @@ export class ExceptionsService {
 
   throwDateNotService(): never {
     throw new ForbiddenException(MESSAGE.SENDER.NOT_SERVICE);
+  }
+
+  throwRoleForbidden(): never {
+    throw new ForbiddenException(MESSAGE.AUTH.ROLE_NOT_ACCESS);
+  }
+
+  throwAdminNotFound(): never {
+    throw new NotFoundException(MESSAGE.ADMIN.NOT_FOUND);
   }
 }

@@ -31,6 +31,7 @@ export const MESSAGE = {
     INVALID_RENEW_TOKEN: 'รีนิวโทเค็นไม่ถูกต้อง',
     LOGIN_SUCCESS: 'เข้าสู่ระบบสำเร็จ',
     RENEW_TOKEN_SUCCESS: 'รีนิวโทเค็นสำเร็จ',
+    ROLE_NOT_ACCESS: 'บทบาทนี้ไม่มีสิทธิ์เข้าถึง',
   },
   WISH: {
     CREATE_SUCCESS: 'สร้างคำอวยพรสำเร็จ',
@@ -50,5 +51,13 @@ export const MESSAGE = {
     FILE_EMPTY: 'ไม่พบไฟล์ที่ส่ง',
     FILE_DOUBLE_NAME: 'นามสกุลไฟล์ซ้อน',
     // FILE_S
+  },
+
+  ADMIN: {
+    CREATE_SUCCESS: 'สร้างแอดมินสำเร็จ',
+    UPDATE_SUCCESS: 'แก้ไขแอดมินสำเร็จ',
+    GET_SUCCESS: 'แสดงรายการแอดมินสำเร็จ',
+    DELETE_SUCCESS: 'ลบแอดมินสำเร็จ',
+    NOT_FOUND: 'ไม่พบรายชื่อแอดมิน',
   },
 };

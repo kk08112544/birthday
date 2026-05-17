@@ -115,9 +115,9 @@
                   </q-item-section>
                   <q-item-section>
                     <q-item-label class="year-option-label">{{ scope.opt.label }}</q-item-label>
-                    <q-item-label caption class="year-option-caption"
-                      >ค.ศ. {{ scope.opt.value }}</q-item-label
-                    >
+                    <q-item-label caption class="year-option-caption">
+                      ค.ศ. {{ scope.opt.value }}
+                    </q-item-label>
                   </q-item-section>
                   <q-item-section side v-if="selectedYear === scope.opt.value">
                     <q-icon name="check_circle" color="teal-6" size="16px" />
@@ -183,7 +183,6 @@
 
           <!-- Action buttons -->
           <div class="filter-actions">
-            <!-- Clear -->
             <button class="btn-clear" :disabled="!hasActiveFilter" @click="clearFilter">
               <q-icon name="clear_all" size="17px" />
               <span>ล้างตัวกรอง</span>
@@ -192,7 +191,6 @@
               </span>
             </button>
 
-            <!-- Search -->
             <button
               class="btn-search"
               :class="{ 'btn-search--loading': loading }"
@@ -220,7 +218,7 @@
         <div class="result-bar-left">
           <span class="result-num">{{ pagination.rowsNumber.toLocaleString() }}</span>
           <span class="result-unit">รายการที่พบ</span>
-          <span v-if="hasActiveFilter" class="result-filter-note"> · จากการกรอง </span>
+          <span v-if="hasActiveFilter" class="result-filter-note"> · จากการกรอง</span>
         </div>
         <div class="result-bar-right">
           <span class="result-page-info">
@@ -232,7 +230,7 @@
 
       <!-- Loading skeleton -->
       <div v-if="loading" class="card-grid">
-        <div v-for="n in 12" :key="n" class="sender-card sender-card--skeleton">
+        <div v-for="n in 10" :key="n" class="sender-card sender-card--skeleton">
           <div class="skeleton-img" />
           <div class="card-body">
             <div class="skeleton-line skeleton-line--w75" />
@@ -249,7 +247,7 @@
           :key="row.sId"
           class="sender-card"
           :style="{ animationDelay: `${Math.min(idx, 11) * 0.04}s` }"
-          @click="fetchSenderById(row.sId)"
+          @click="openDetail(row.sId)"
         >
           <div class="card-img-wrap">
             <q-img v-if="row.url" :src="row.url" :ratio="1" class="card-img" fit="cover">
@@ -282,9 +280,7 @@
 
       <!-- Empty state -->
       <div v-else class="empty-state">
-        <div class="empty-emoji">
-          {{ hasActiveFilter ? '🔍' : '👥' }}
-        </div>
+        <div class="empty-emoji">{{ hasActiveFilter ? '🔍' : '👥' }}</div>
         <div class="empty-title">
           {{ hasActiveFilter ? 'ไม่พบข้อมูลที่ตรงกัน' : 'ยังไม่มีข้อมูล' }}
         </div>
@@ -444,10 +440,7 @@ import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { api } from 'src/boot/axios';
 import { useQuasar } from 'quasar';
 
-const props = defineProps<{ id: string }>();
-const $q = useQuasar();
-
-// ================= TYPES =================
+// ─── Types ────────────────────────────────────────────────────────────────────
 interface SenderItem {
   sId: number | string;
   fullname: string;
@@ -456,6 +449,7 @@ interface SenderItem {
   card?: { imageCard: string };
   wish?: { wishWord: string };
 }
+
 interface TableRow {
   sId: number | string;
   fullname: string;
@@ -465,12 +459,23 @@ interface TableRow {
   wishWord: string;
 }
 
-// ================= FILTER STATE =================
+interface Particle {
+  id: number;
+  style: Record<string, string>;
+}
+
+type ShapeType = 'circle' | 'square' | 'star' | 'emoji';
+
+// ─── Props ────────────────────────────────────────────────────────────────────
+const props = defineProps<{ id: string }>();
+const $q = useQuasar();
+
+// ─── Filter State ─────────────────────────────────────────────────────────────
 const selectedMonth = ref<number | null>(null);
 const selectedYear = ref<number | null>(null);
-const fullname = ref<string | null>(null);
-const position = ref<string | null>(null);
-const department = ref<string | null>(null);
+const fullname = ref<string>('');
+const position = ref<string>('');
+const department = ref<string>('');
 
 const monthOptions = [
   { label: 'มกราคม', value: 1 },
@@ -485,29 +490,29 @@ const monthOptions = [
   { label: 'ตุลาคม', value: 10 },
   { label: 'พฤศจิกายน', value: 11 },
   { label: 'ธันวาคม', value: 12 },
-];
+] as const;
 
 const yearOptions = ref<{ label: string; value: number }[]>([]);
 const filterYearOptions = ref<{ label: string; value: number }[]>([]);
 
 const generateThaiYearOptions = () => {
-  const y = new Date().getFullYear();
-  const years = [];
-  for (let yr = y; yr >= 2016; yr--) years.push({ label: `${yr + 543}`, value: yr });
-  yearOptions.value = years;
-  filterYearOptions.value = years;
+  const currentYear = new Date().getFullYear();
+  const options = [];
+  for (let y = currentYear; y >= 2016; y--) {
+    options.push({ label: `${y + 543}`, value: y });
+  }
+  yearOptions.value = options;
+  filterYearOptions.value = options;
 };
 
 const filterYearFn = (val: string, update: (fn: () => void) => void) => {
   update(() => {
-    filterYearOptions.value =
-      val === ''
-        ? yearOptions.value
-        : yearOptions.value.filter((v) => v.label.toLowerCase().includes(val.toLowerCase()));
+    filterYearOptions.value = val
+      ? yearOptions.value.filter((v) => v.label.includes(val))
+      : yearOptions.value;
   });
 };
 
-// computed helpers
 const hasActiveFilter = computed(
   () =>
     !!selectedMonth.value ||
@@ -516,6 +521,7 @@ const hasActiveFilter = computed(
     !!position.value?.trim() ||
     !!department.value?.trim(),
 );
+
 const activeFilterCount = computed(
   () =>
     [
@@ -530,18 +536,22 @@ const activeFilterCount = computed(
 const clearFilter = () => {
   selectedMonth.value = null;
   selectedYear.value = null;
-  fullname.value = null;
-  position.value = null;
-  department.value = null;
+  fullname.value = '';
+  position.value = '';
+  department.value = '';
   onSearch();
 };
 
-// ================= TABLE =================
+// ─── Table State ──────────────────────────────────────────────────────────────
 const rows = ref<TableRow[]>([]);
 const loading = ref(false);
 const pagination = ref({ page: 1, rowsPerPage: 10, rowsNumber: 0 });
 
-// ================= LOADING DIALOG =================
+// ─── Dialog State ─────────────────────────────────────────────────────────────
+const showDialog = ref(false);
+const selectedSender = ref<TableRow | null>(null);
+
+// ─── Loading Dialog ───────────────────────────────────────────────────────────
 const showLoading = ref(false);
 const loadingStep = ref(0);
 const loadingPercent = ref(0);
@@ -549,128 +559,19 @@ const loadingSteps = [
   { label: 'โหลดข้อมูลผู้ส่งอวยพร', pct: 80 },
   { label: 'แสดงรายการผู้ส่งอวยพร', pct: 100 },
 ];
+
 let pctTimer: ReturnType<typeof setInterval> | null = null;
 
-const animatePct = (target: number) => {
-  if (pctTimer) clearInterval(pctTimer);
-  const start = loadingPercent.value;
-  const t0 = Date.now();
-  pctTimer = setInterval(() => {
-    const p = Math.min(1, (Date.now() - t0) / 800);
-    loadingPercent.value = Math.round(start + (target - start) * p);
-    if (p >= 1) {
-      clearInterval(pctTimer!);
-      pctTimer = null;
-    }
-  }, 16);
-};
-const startLoading = () => {
-  showLoading.value = true;
-  loadingStep.value = 0;
-  loadingPercent.value = 0;
-  animatePct(5);
-};
-const stopLoading = () => {
-  loadingStep.value = loadingSteps.length;
-  animatePct(100);
-  setTimeout(() => {
-    showLoading.value = false;
-  }, 1000);
-};
+// Blob URL tracking for cleanup
+const blobUrls: string[] = [];
 
-// ================= IMAGE =================
-const getImageUrl = async (path: string): Promise<string> => {
-  try {
-    const res = await api.get(`/upload/${path}`, { responseType: 'blob' });
-    return URL.createObjectURL(res.data as Blob);
-  } catch {
-    return '';
-  }
-};
+// Abort controller for cancelling in-flight requests
+let fetchAbortController: AbortController | null = null;
 
-// ================= FETCH LIST =================
-const fetchSender = async (id: string) => {
-  startLoading();
-  try {
-    loadingStep.value = 0;
-    animatePct(loadingSteps[0]?.pct ?? 80);
-    const res = await api.get(`/sender/paginate/${Number(id)}`, {
-      params: {
-        page: pagination.value.page,
-        limit: pagination.value.rowsPerPage,
-        fullname: fullname.value || undefined,
-        position: position.value || undefined,
-        department: department.value || undefined,
-        month: selectedMonth.value || undefined,
-        year: selectedYear.value || undefined,
-      },
-    });
-    const list: SenderItem[] = res.data.sender?.data ?? [];
-    pagination.value.rowsNumber = res.data.sender?.total ?? 0;
-
-    loadingStep.value = 1;
-    animatePct(loadingSteps[1]?.pct ?? 100);
-    rows.value = await Promise.all(
-      list.map(async (item) => ({
-        sId: item.sId,
-        fullname: item.fullname || '-',
-        position: item.position || '-',
-        department: item.department || '-',
-        url: item.card?.imageCard ? await getImageUrl(item.card.imageCard) : '',
-        wishWord: item.wish?.wishWord || '',
-      })),
-    );
-  } catch (e) {
-    console.error(e);
-    rows.value = [];
-  } finally {
-    stopLoading();
-  }
-};
-
-// ================= FETCH DETAIL =================
-const showDialog = ref(false);
-const selectedSender = ref<TableRow | null>(null);
-
-const fetchSenderById = async (id: number | string) => {
-  try {
-    const res = await api.get(`/sender/${id}`);
-    const data = res.data.sender;
-    selectedSender.value = {
-      sId: data.sId,
-      fullname: data.fullname,
-      position: data.position,
-      department: data.department,
-      url: data.card?.imageCard ? await getImageUrl(data.card.imageCard) : '',
-      wishWord: data.wish?.wishWord || '',
-    };
-    showDialog.value = true;
-  } catch (e) {
-    console.error(e);
-  }
-};
-
-// ================= EVENTS =================
-const onSearch = () => {
-  pagination.value.page = 1;
-  void fetchSender(props.id);
-};
-const onPageChange = () => {
-  void fetchSender(props.id);
-};
-const onRppChange = () => {
-  pagination.value.page = 1;
-  void fetchSender(props.id);
-};
-
-// ================= PARTICLES =================
-interface Particle {
-  id: number;
-  style: Record<string, string>;
-}
-type ShapeType = 'circle' | 'square' | 'star' | 'triangle' | 'emoji';
+// ─── Particles ────────────────────────────────────────────────────────────────
 const activeParticles = ref<Particle[]>([]);
 let particleId = 0;
+
 const PARTICLE_COLORS = [
   '#e11d48',
   '#fbbf24',
@@ -685,6 +586,7 @@ const PARTICLE_COLORS = [
   '#4ade80',
   '#facc15',
 ];
+
 const PARTICLE_EMOJIS = [
   '🎉',
   '✨',
@@ -708,19 +610,154 @@ const PARTICLE_EMOJIS = [
   '🏵️',
 ];
 
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+const animatePct = (target: number) => {
+  if (pctTimer) clearInterval(pctTimer);
+  const start = loadingPercent.value;
+  const t0 = Date.now();
+  pctTimer = setInterval(() => {
+    const p = Math.min(1, (Date.now() - t0) / 800);
+    loadingPercent.value = Math.round(start + (target - start) * p);
+    if (p >= 1) {
+      clearInterval(pctTimer!);
+      pctTimer = null;
+    }
+  }, 16);
+};
+
+const startLoading = () => {
+  showLoading.value = true;
+  loadingStep.value = 0;
+  loadingPercent.value = 0;
+  animatePct(5);
+};
+
+const stopLoading = () => {
+  loadingStep.value = loadingSteps.length;
+  animatePct(100);
+  setTimeout(() => {
+    showLoading.value = false;
+  }, 1000);
+};
+
+/** Fetch a blob URL and track it for cleanup on unmount. */
+const getImageUrl = async (path: string): Promise<string> => {
+  try {
+    const res = await api.get(`/upload/${path}`, { responseType: 'blob' });
+    const url = URL.createObjectURL(res.data as Blob);
+    blobUrls.push(url);
+    return url;
+  } catch {
+    return '';
+  }
+};
+
+// ─── Data Fetching ────────────────────────────────────────────────────────────
+const fetchSender = async (id: string) => {
+  // Cancel any pending request before starting a new one
+  fetchAbortController?.abort();
+  fetchAbortController = new AbortController();
+
+  startLoading();
+  loading.value = true;
+
+  try {
+    loadingStep.value = 0;
+    animatePct(loadingSteps[0]?.pct ?? 80);
+
+    const res = await api.get(`/sender/paginate/${Number(id)}`, {
+      signal: fetchAbortController.signal,
+      params: {
+        page: pagination.value.page,
+        limit: pagination.value.rowsPerPage,
+        fullname: fullname.value.trim() || undefined,
+        position: position.value.trim() || undefined,
+        department: department.value.trim() || undefined,
+        month: selectedMonth.value || undefined,
+        year: selectedYear.value || undefined,
+      },
+    });
+
+    const list: SenderItem[] = res.data.sender?.data ?? [];
+    pagination.value.rowsNumber = res.data.sender?.total ?? 0;
+
+    loadingStep.value = 1;
+    animatePct(loadingSteps[1]?.pct ?? 100);
+
+    rows.value = await Promise.all(
+      list.map(
+        async (item): Promise<TableRow> => ({
+          sId: item.sId,
+          fullname: item.fullname || '-',
+          position: item.position || '-',
+          department: item.department || '-',
+          url: item.card?.imageCard ? await getImageUrl(item.card.imageCard) : '',
+          wishWord: item.wish?.wishWord || '',
+        }),
+      ),
+    );
+  } catch (err) {
+    // Ignore abort errors — they're intentional (new search started)
+    if (err instanceof Error && err.name === 'AbortError') return;
+    console.error('fetchSender error:', err);
+    rows.value = [];
+  } finally {
+    loading.value = false;
+    stopLoading();
+  }
+};
+
+const openDetail = async (id: number | string) => {
+  try {
+    const res = await api.get(`/sender/${id}`);
+    const data = res.data.sender;
+    selectedSender.value = {
+      sId: data.sId,
+      fullname: data.fullname,
+      position: data.position,
+      department: data.department,
+      url: data.card?.imageCard ? await getImageUrl(data.card.imageCard) : '',
+      wishWord: data.wish?.wishWord || '',
+    };
+    showDialog.value = true;
+  } catch (err) {
+    console.error('openDetail error:', err);
+  }
+};
+
+// ─── Pagination Events ────────────────────────────────────────────────────────
+const onSearch = () => {
+  pagination.value.page = 1;
+  void fetchSender(props.id);
+};
+
+const onPageChange = () => {
+  void fetchSender(props.id);
+};
+
+const onRppChange = () => {
+  pagination.value.page = 1;
+  void fetchSender(props.id);
+};
+
+// ─── Click Particles ──────────────────────────────────────────────────────────
 const spawnParticles = (x: number, y: number) => {
   const count = 12 + Math.floor(Math.random() * 6);
+
   for (let i = 0; i < count; i++) {
     const id = ++particleId;
     const size = 6 + Math.random() * 7;
-    const color = PARTICLE_COLORS[Math.floor(Math.random() * PARTICLE_COLORS.length)] ?? '#fbbf24';
+    const color = PARTICLE_COLORS[Math.floor(Math.random() * PARTICLE_COLORS.length)]!;
     const dur = 0.7 + Math.random() * 0.5;
-    const emoji = PARTICLE_EMOJIS[Math.floor(Math.random() * PARTICLE_EMOJIS.length)] ?? '🎉';
+    const emoji = PARTICLE_EMOJIS[Math.floor(Math.random() * PARTICLE_EMOJIS.length)]!;
+
     const shapes: ShapeType[] = ['circle', 'circle', 'square', 'star', 'emoji'];
-    const shape = shapes[Math.floor(Math.random() * shapes.length)] ?? 'circle';
+    const shape = shapes[Math.floor(Math.random() * shapes.length)]!;
     const isEmoji = shape === 'emoji';
+
     const angle = (i / count) * Math.PI * 2 + (Math.random() - 0.5) * 0.8;
     const dist = 80 + Math.random() * 80;
+
     const style: Record<string, string> = {
       '--x': `${x}px`,
       '--y': `${y}px`,
@@ -733,6 +770,7 @@ const spawnParticles = (x: number, y: number) => {
       '--emoji-content': isEmoji ? `"${emoji}"` : '""',
       '--rot': `${Math.random() * 360 - 180}deg`,
     };
+
     activeParticles.value.push({ id, style });
     setTimeout(
       () => {
@@ -742,24 +780,30 @@ const spawnParticles = (x: number, y: number) => {
     );
   }
 };
+
 const handleGlobalClick = (e: MouseEvent) => {
   spawnParticles(e.clientX, e.clientY);
 };
 
-// ================= LIFECYCLE =================
+// ─── Lifecycle ────────────────────────────────────────────────────────────────
 onMounted(() => {
   generateThaiYearOptions();
   void fetchSender(props.id);
   document.addEventListener('click', handleGlobalClick);
 });
+
 onUnmounted(() => {
   document.removeEventListener('click', handleGlobalClick);
   if (pctTimer) clearInterval(pctTimer);
+  fetchAbortController?.abort();
+  // Revoke all blob URLs to prevent memory leaks
+  blobUrls.forEach((url) => URL.revokeObjectURL(url));
 });
+
 watch(
   () => props.id,
-  (newId) => {
-    if (newId) {
+  (newId, oldId) => {
+    if (newId && newId !== oldId) {
       pagination.value.page = 1;
       void fetchSender(newId);
     }
@@ -771,21 +815,20 @@ watch(
 @use 'sass:color';
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700;800&family=Prompt:wght@500;600;700;800&display=swap');
 
-/* ── TOKENS ── */
+// ─── Design Tokens ────────────────────────────────────────────────────────────
 $indigo: #4338ca;
 $indigo-mid: #6366f1;
 $indigo-soft: #eef2ff;
-$indigo-deep: #1a1460;
+$indigo-deep: #1e1b4b;
 $indigo-dark: #2d2d8a;
 $teal: #0d9488;
 $teal-light: #ccfbf1;
 $surface: #ffffff;
 $text-main: #1e1b4b;
 $text-muted: #6b7280;
-$error-red: #e53935;
 $r-card: 16px;
 
-/* ── PAGE ── */
+// ─── Page ─────────────────────────────────────────────────────────────────────
 .list-sender-page {
   font-family: 'Noto Sans Thai', 'Prompt', sans-serif;
   background: linear-gradient(150deg, #eef2ff 0%, #f5f3ff 40%, #f0fdfa 100%);
@@ -793,18 +836,20 @@ $r-card: 16px;
   position: relative;
 }
 
-/* ── BG DECO ── */
+// ─── BG Decoration ───────────────────────────────────────────────────────────
 .bg-deco {
   position: fixed;
   inset: 0;
   z-index: 0;
   pointer-events: none;
 }
+
 .bg-deco-blob {
   position: absolute;
   border-radius: 50%;
   animation: blobDrift var(--dur, 10s) ease-in-out infinite var(--delay, 0s);
 }
+
 .bg-deco-blob-1 {
   width: 500px;
   height: 500px;
@@ -813,6 +858,7 @@ $r-card: 16px;
   right: -100px;
   --dur: 9s;
 }
+
 .bg-deco-blob-2 {
   width: 360px;
   height: 360px;
@@ -822,6 +868,7 @@ $r-card: 16px;
   --dur: 11s;
   --delay: 1s;
 }
+
 .bg-deco-blob-3 {
   width: 260px;
   height: 260px;
@@ -831,6 +878,7 @@ $r-card: 16px;
   --dur: 8s;
   --delay: 2s;
 }
+
 @keyframes blobDrift {
   0%,
   100% {
@@ -841,7 +889,7 @@ $r-card: 16px;
   }
 }
 
-/* ── FILTER HERO ── */
+// ─── Filter Hero ──────────────────────────────────────────────────────────────
 .filter-hero {
   position: relative;
   z-index: 1;
@@ -849,12 +897,14 @@ $r-card: 16px;
   background: linear-gradient(135deg, #312e81 0%, $indigo 40%, #6d28d9 80%, #0d7a6e 130%);
   padding: 2.25rem 1.5rem 4rem;
 }
+
 .filter-hero-blob {
   position: absolute;
   border-radius: 50%;
   pointer-events: none;
   animation: drift 8s ease-in-out infinite;
 }
+
 .filter-hero-blob-1 {
   width: 320px;
   height: 320px;
@@ -862,6 +912,7 @@ $r-card: 16px;
   top: -100px;
   right: -80px;
 }
+
 .filter-hero-blob-2 {
   width: 180px;
   height: 180px;
@@ -871,6 +922,7 @@ $r-card: 16px;
   animation-duration: 10s;
   animation-direction: reverse;
 }
+
 @keyframes drift {
   0%,
   100% {
@@ -891,12 +943,12 @@ $r-card: 16px;
   gap: 1.5rem;
 }
 
-/* Title row */
 .filter-hero-title-row {
   display: flex;
   align-items: center;
   gap: 14px;
 }
+
 .filter-hero-icon {
   width: 52px;
   height: 52px;
@@ -910,9 +962,11 @@ $r-card: 16px;
   justify-content: center;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
 }
+
 .filter-hero-text {
   flex: 1;
 }
+
 .filter-hero-title {
   font-family: 'Prompt', sans-serif;
   font-size: clamp(1.1rem, 4vw, 1.7rem);
@@ -922,6 +976,7 @@ $r-card: 16px;
   letter-spacing: -0.02em;
   line-height: 1.2;
 }
+
 .filter-hero-sub {
   margin: 0;
   display: flex;
@@ -929,6 +984,7 @@ $r-card: 16px;
   gap: 8px;
   flex-wrap: wrap;
 }
+
 .filter-count-chip {
   display: inline-flex;
   align-items: center;
@@ -942,6 +998,7 @@ $r-card: 16px;
   color: rgba(255, 255, 255, 0.9);
   font-weight: 600;
 }
+
 .filter-active-chip {
   display: inline-flex;
   align-items: center;
@@ -955,6 +1012,7 @@ $r-card: 16px;
   font-weight: 600;
   animation: activeChipPulse 2s ease infinite;
 }
+
 @keyframes activeChipPulse {
   0%,
   100% {
@@ -965,7 +1023,7 @@ $r-card: 16px;
   }
 }
 
-/* Filter panel */
+// ─── Filter Panel ─────────────────────────────────────────────────────────────
 .filter-panel {
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(16px);
@@ -974,6 +1032,7 @@ $r-card: 16px;
   padding: 1.25rem 1.25rem 1rem;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
 }
+
 .filter-panel-label {
   display: flex;
   align-items: center;
@@ -990,6 +1049,7 @@ $r-card: 16px;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 0.75rem;
+
   @media (max-width: 900px) {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -997,6 +1057,7 @@ $r-card: 16px;
     grid-template-columns: 1fr;
   }
 }
+
 .filter-field {
   :deep(.q-field__control) {
     border-radius: 12px !important;
@@ -1004,22 +1065,24 @@ $r-card: 16px;
       box-shadow 0.2s,
       border-color 0.2s !important;
   }
+
   :deep(.q-field__control:hover) {
     box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12) !important;
   }
 }
+
 .filter-field--dept {
   @media (min-width: 901px) {
     grid-column: span 2;
   }
 }
 
-/* Month select */
 .month-select :deep(.q-field__control) {
   border-radius: 12px !important;
   background: linear-gradient(135deg, #f0fdfa, #fff) !important;
   border: 1.5px solid rgba(13, 148, 136, 0.22) !important;
 }
+
 :global(.month-select-popup) {
   border-radius: 16px !important;
   box-shadow: 0 8px 32px rgba(13, 148, 136, 0.15) !important;
@@ -1028,10 +1091,12 @@ $r-card: 16px;
   max-height: 280px !important;
   padding: 4px !important;
 }
+
 .month-option {
   border-radius: 10px !important;
   margin: 2px 4px !important;
 }
+
 .month-option-num {
   width: 28px;
   height: 28px;
@@ -1045,18 +1110,19 @@ $r-card: 16px;
   justify-content: center;
   border: 1px solid rgba(13, 148, 136, 0.15);
 }
+
 .month-option-label {
   font-size: 0.88rem !important;
   font-weight: 500 !important;
   color: $text-main !important;
 }
 
-/* Year select */
 .year-select :deep(.q-field__control) {
   border-radius: 12px !important;
   background: linear-gradient(135deg, #f0fdfa, #fff) !important;
   border: 1.5px solid rgba(13, 148, 136, 0.22) !important;
 }
+
 :global(.year-select-popup) {
   border-radius: 16px !important;
   box-shadow: 0 8px 32px rgba(13, 148, 136, 0.15) !important;
@@ -1065,10 +1131,12 @@ $r-card: 16px;
   max-height: 280px !important;
   padding: 4px !important;
 }
+
 .year-option {
   border-radius: 10px !important;
   margin: 2px 4px !important;
 }
+
 .year-option-badge {
   width: 28px;
   height: 28px;
@@ -1079,11 +1147,13 @@ $r-card: 16px;
   justify-content: center;
   border: 1px solid rgba(13, 148, 136, 0.15);
 }
+
 .year-option-label {
   font-size: 0.9rem !important;
   font-weight: 700 !important;
   color: $text-main !important;
 }
+
 .year-option-caption {
   font-size: 0.72rem !important;
   color: #9ca3af !important;
@@ -1098,13 +1168,14 @@ $r-card: 16px;
   color: #9ca3af;
   font-size: 0.85rem;
 }
+
 .filter-selected-text {
   font-size: 0.88rem;
   font-weight: 600;
   color: $text-main;
 }
 
-/* ── ACTION BUTTONS ── */
+// ─── Action Buttons ───────────────────────────────────────────────────────────
 .filter-actions {
   display: flex;
   align-items: center;
@@ -1112,22 +1183,21 @@ $r-card: 16px;
   gap: 0.75rem;
   margin-top: 1rem;
   flex-wrap: wrap;
+
   @media (max-width: 480px) {
     justify-content: stretch;
   }
 }
 
-/* Clear button */
 .btn-clear {
   display: inline-flex;
   align-items: center;
   gap: 7px;
   padding: 10px 20px;
   border-radius: 12px;
-  border: none;
+  border: 1px solid rgba(255, 255, 255, 0.22);
   background: rgba(255, 255, 255, 0.12);
   backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.22);
   color: rgba(255, 255, 255, 0.82);
   font-family: 'Noto Sans Thai', sans-serif;
   font-size: 0.88rem;
@@ -1137,6 +1207,7 @@ $r-card: 16px;
     background 0.2s,
     transform 0.15s,
     opacity 0.2s;
+
   @media (max-width: 480px) {
     flex: 1;
     justify-content: center;
@@ -1146,14 +1217,17 @@ $r-card: 16px;
     background: rgba(255, 255, 255, 0.2);
     transform: translateY(-1px);
   }
+
   &:active:not(:disabled) {
     transform: translateY(0);
   }
+
   &:disabled {
     opacity: 0.45;
     cursor: not-allowed;
   }
 }
+
 .btn-clear-badge {
   display: inline-flex;
   align-items: center;
@@ -1167,7 +1241,6 @@ $r-card: 16px;
   font-weight: 800;
 }
 
-/* Search button */
 .btn-search {
   display: inline-flex;
   align-items: center;
@@ -1191,6 +1264,7 @@ $r-card: 16px;
     opacity 0.2s;
   position: relative;
   overflow: hidden;
+
   @media (max-width: 480px) {
     flex: 2;
     justify-content: center;
@@ -1204,18 +1278,22 @@ $r-card: 16px;
     opacity: 0;
     transition: opacity 0.2s;
   }
+
   &:hover:not(.btn-search--loading):not(:disabled) {
     transform: translateY(-3px);
     box-shadow:
       0 8px 32px rgba(0, 0, 0, 0.22),
       0 4px 12px rgba(0, 0, 0, 0.12);
+
     &::before {
       opacity: 1;
     }
   }
+
   &:active:not(.btn-search--loading) {
     transform: translateY(-1px);
   }
+
   &.btn-search--loading,
   &:disabled {
     opacity: 0.75;
@@ -1223,6 +1301,7 @@ $r-card: 16px;
     transform: none;
   }
 }
+
 .btn-search-inner {
   display: flex;
   align-items: center;
@@ -1231,7 +1310,7 @@ $r-card: 16px;
   z-index: 1;
 }
 
-/* ── CONTENT ── */
+// ─── Content Area ─────────────────────────────────────────────────────────────
 .content-area {
   position: relative;
   z-index: 1;
@@ -1243,7 +1322,6 @@ $r-card: 16px;
   gap: 1.25rem;
 }
 
-/* Result bar */
 .result-bar {
   display: flex;
   align-items: center;
@@ -1257,41 +1335,37 @@ $r-card: 16px;
   padding: 0.75rem 1.25rem;
   box-shadow: 0 2px 12px rgba(67, 56, 202, 0.07);
 }
+
 .result-bar-left {
   display: flex;
   align-items: baseline;
   gap: 6px;
 }
+
 .result-num {
   font-family: 'Prompt', sans-serif;
   font-size: 1.4rem;
   font-weight: 800;
   color: $indigo;
 }
+
 .result-unit {
   font-size: 0.82rem;
   color: $text-muted;
 }
+
 .result-filter-note {
   font-size: 0.78rem;
   color: $teal;
   font-weight: 600;
 }
+
 .result-page-info {
   font-size: 0.78rem;
   color: $text-muted;
 }
 
-/* ── CARD GRID ── */
-// .card-grid {
-//   display: grid;
-//   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-//   gap: 1rem;
-//   @media (max-width: 600px) {
-//     grid-template-columns: repeat(2, 1fr);
-//     gap: 0.75rem;
-//   }
-// }
+// ─── Card Grid ────────────────────────────────────────────────────────────────
 .card-grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
@@ -1300,22 +1374,19 @@ $r-card: 16px;
   @media (max-width: 1200px) {
     grid-template-columns: repeat(4, 1fr);
   }
-
   @media (max-width: 900px) {
     grid-template-columns: repeat(3, 1fr);
   }
-
   @media (max-width: 600px) {
     grid-template-columns: repeat(2, 1fr);
     gap: 0.75rem;
   }
-
   @media (max-width: 400px) {
     grid-template-columns: 1fr;
   }
 }
 
-/* ── SENDER CARD ── */
+// ─── Sender Card ──────────────────────────────────────────────────────────────
 .sender-card {
   background: $surface;
   border-radius: $r-card;
@@ -1335,18 +1406,22 @@ $r-card: 16px;
   &:hover {
     transform: translateY(-6px) scale(1.01);
     box-shadow: 0 14px 40px rgba(67, 56, 202, 0.16);
+
     .card-cta {
       opacity: 1;
       transform: translateY(0);
     }
+
     .card-img-overlay {
       opacity: 1;
     }
   }
+
   &--skeleton {
     pointer-events: none;
   }
 }
+
 @keyframes cardIn {
   from {
     opacity: 0;
@@ -1362,9 +1437,11 @@ $r-card: 16px;
   position: relative;
   background: $indigo-soft;
 }
+
 .card-img {
   display: block;
 }
+
 .card-img-overlay {
   position: absolute;
   inset: 0;
@@ -1372,16 +1449,19 @@ $r-card: 16px;
   opacity: 0;
   transition: opacity 0.22s;
 }
+
 .card-img-placeholder {
   height: 160px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: linear-gradient(135deg, $indigo-soft, #e0e7ff);
+
   @media (max-width: 480px) {
     height: 130px;
   }
 }
+
 .card-avatar-fallback {
   width: 64px;
   height: 64px;
@@ -1391,6 +1471,7 @@ $r-card: 16px;
   align-items: center;
   justify-content: center;
 }
+
 .card-wish-badge {
   position: absolute;
   bottom: 0;
@@ -1406,10 +1487,12 @@ $r-card: 16px;
   gap: 3px;
   line-height: 1.4;
 }
+
 .card-body {
   padding: 10px 12px 6px;
   flex: 1;
 }
+
 .card-name {
   font-family: 'Prompt', sans-serif;
   font-size: clamp(0.78rem, 2vw, 0.88rem);
@@ -1420,6 +1503,7 @@ $r-card: 16px;
   text-overflow: ellipsis;
   margin-bottom: 2px;
 }
+
 .card-position {
   font-size: 0.72rem;
   color: $text-muted;
@@ -1428,6 +1512,7 @@ $r-card: 16px;
   text-overflow: ellipsis;
   margin-bottom: 2px;
 }
+
 .card-dept {
   display: flex;
   align-items: center;
@@ -1438,6 +1523,7 @@ $r-card: 16px;
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
 .card-cta {
   display: flex;
   align-items: center;
@@ -1456,19 +1542,22 @@ $r-card: 16px;
     transform 0.22s;
 }
 
-/* Skeleton */
+// ─── Skeleton ─────────────────────────────────────────────────────────────────
 .sender-card--skeleton .card-body {
   padding: 12px;
 }
+
 .skeleton-img {
   height: 160px;
   background: linear-gradient(90deg, #eef2ff 25%, #e0e7ff 50%, #eef2ff 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s ease infinite;
+
   @media (max-width: 480px) {
     height: 130px;
   }
 }
+
 .skeleton-line {
   height: 12px;
   border-radius: 6px;
@@ -1476,6 +1565,7 @@ $r-card: 16px;
   background-size: 200% 100%;
   animation: shimmer 1.5s ease infinite;
 }
+
 .skeleton-line--w75 {
   width: 75%;
 }
@@ -1485,6 +1575,7 @@ $r-card: 16px;
 .skeleton-line--w40 {
   width: 40%;
 }
+
 @keyframes shimmer {
   from {
     background-position: 200% 0;
@@ -1494,7 +1585,7 @@ $r-card: 16px;
   }
 }
 
-/* ── EMPTY ── */
+// ─── Empty State ──────────────────────────────────────────────────────────────
 .empty-state {
   display: flex;
   flex-direction: column;
@@ -1502,11 +1593,13 @@ $r-card: 16px;
   padding: 4rem 1rem;
   text-align: center;
 }
+
 .empty-emoji {
   font-size: 3.5rem;
   margin-bottom: 12px;
   animation: emptyBounce 2s ease infinite;
 }
+
 @keyframes emptyBounce {
   0%,
   100% {
@@ -1516,6 +1609,7 @@ $r-card: 16px;
     transform: translateY(-8px);
   }
 }
+
 .empty-title {
   font-family: 'Prompt', sans-serif;
   font-size: 1.05rem;
@@ -1523,11 +1617,13 @@ $r-card: 16px;
   color: $text-main;
   margin-bottom: 4px;
 }
+
 .empty-sub {
   font-size: 0.83rem;
   color: $text-muted;
   margin-bottom: 1.25rem;
 }
+
 .empty-clear-btn {
   display: inline-flex;
   align-items: center;
@@ -1544,13 +1640,14 @@ $r-card: 16px;
   transition:
     background 0.2s,
     transform 0.15s;
+
   &:hover {
     background: #e0e7ff;
     transform: translateY(-2px);
   }
 }
 
-/* ── PAGINATION ── */
+// ─── Pagination ───────────────────────────────────────────────────────────────
 .pagination-row {
   display: flex;
   align-items: center;
@@ -1559,25 +1656,29 @@ $r-card: 16px;
   gap: 12px;
   padding-top: 0.5rem;
 }
+
 .rpp-wrap {
   display: flex;
   align-items: center;
   gap: 8px;
 }
+
 .rpp-select {
   width: 70px;
+
   :deep(.q-field__control) {
     border-radius: 10px !important;
     min-height: 36px !important;
     font-size: 0.82rem;
   }
 }
+
 .rpp-label {
   font-size: 0.82rem;
   color: $text-muted;
 }
 
-/* ── DETAIL DIALOG ── */
+// ─── Detail Dialog ────────────────────────────────────────────────────────────
 .detail-dialog {
   background: $surface;
   border-radius: 22px;
@@ -1587,6 +1688,7 @@ $r-card: 16px;
   box-shadow: 0 24px 64px rgba(67, 56, 202, 0.2);
   display: flex;
   flex-direction: column;
+
   &--mobile {
     border-radius: 20px 20px 0 0;
     width: 100%;
@@ -1597,13 +1699,16 @@ $r-card: 16px;
     right: 0;
   }
 }
+
 .detail-img-wrap {
   position: relative;
   background: linear-gradient(135deg, $indigo-deep, $indigo-dark);
 }
+
 .detail-img {
   display: block;
 }
+
 .detail-img-placeholder {
   height: 220px;
   display: flex;
@@ -1611,12 +1716,14 @@ $r-card: 16px;
   justify-content: center;
   background: linear-gradient(135deg, #312e81, $indigo);
 }
+
 .detail-img-gradient {
   position: absolute;
   inset: 0;
   background: linear-gradient(to bottom, transparent 50%, rgba(30, 27, 75, 0.5) 100%);
   pointer-events: none;
 }
+
 .detail-close-btn {
   position: absolute;
   top: 12px;
@@ -1635,14 +1742,17 @@ $r-card: 16px;
   transition:
     background 0.15s,
     transform 0.15s;
+
   &:hover {
     background: rgba(255, 255, 255, 0.35);
     transform: rotate(90deg);
   }
 }
+
 .detail-body {
   padding: 1.25rem 1.5rem 0.75rem;
 }
+
 .detail-name {
   font-family: 'Prompt', sans-serif;
   font-size: 1.15rem;
@@ -1650,11 +1760,13 @@ $r-card: 16px;
   color: $text-main;
   margin-bottom: 3px;
 }
+
 .detail-position {
   font-size: 0.88rem;
   color: $text-muted;
   margin-bottom: 4px;
 }
+
 .detail-dept {
   display: flex;
   align-items: center;
@@ -1663,12 +1775,14 @@ $r-card: 16px;
   color: color.adjust($text-muted, $lightness: 8%);
   margin-bottom: 1rem;
 }
+
 .detail-wish-card {
   background: linear-gradient(135deg, $indigo-soft, #e0e7ff);
   border-radius: 14px;
   padding: 1rem 1.1rem;
   border-left: 3px solid $indigo-mid;
 }
+
 .detail-wish-label {
   display: flex;
   align-items: center;
@@ -1679,6 +1793,7 @@ $r-card: 16px;
   text-transform: uppercase;
   margin-bottom: 8px;
 }
+
 .detail-wish-text {
   font-size: 0.92rem;
   font-style: italic;
@@ -1688,11 +1803,13 @@ $r-card: 16px;
   border: none;
   padding: 0;
 }
+
 .detail-footer {
   padding: 0.75rem 1.5rem 1.25rem;
   display: flex;
   justify-content: flex-end;
 }
+
 .detail-close-text-btn {
   display: inline-flex;
   align-items: center;
@@ -1706,12 +1823,13 @@ $r-card: 16px;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.15s;
+
   &:hover {
     background: rgba(67, 56, 202, 0.14);
   }
 }
 
-/* ── LOADING DIALOG ── */
+// ─── Loading Dialog ───────────────────────────────────────────────────────────
 .loading-dialog {
   background: #fff;
   border-radius: 24px;
@@ -1722,6 +1840,7 @@ $r-card: 16px;
   font-family: 'Noto Sans Thai', 'Prompt', sans-serif;
   outline: none;
 }
+
 .ld-orb-wrap {
   position: relative;
   width: 90px;
@@ -1731,6 +1850,7 @@ $r-card: 16px;
   align-items: center;
   justify-content: center;
 }
+
 .ld-orb-bg {
   position: absolute;
   inset: 0;
@@ -1738,6 +1858,7 @@ $r-card: 16px;
   background: linear-gradient(135deg, #1a1460, #6b5ce7, #a78bfa);
   animation: ldOrbPulse 2s ease-in-out infinite;
 }
+
 .ld-orb-ring1 {
   position: absolute;
   inset: -7px;
@@ -1747,6 +1868,7 @@ $r-card: 16px;
   border-right-color: #6b5ce7;
   animation: ldSpin 1.1s linear infinite;
 }
+
 .ld-orb-ring2 {
   position: absolute;
   inset: -14px;
@@ -1755,6 +1877,7 @@ $r-card: 16px;
   border-bottom-color: rgba(167, 139, 250, 0.28);
   animation: ldSpin 2.2s linear infinite reverse;
 }
+
 .ld-orb-inner {
   position: relative;
   z-index: 2;
@@ -1767,11 +1890,13 @@ $r-card: 16px;
   justify-content: center;
   font-size: 22px;
 }
+
 @keyframes ldSpin {
   to {
     transform: rotate(360deg);
   }
 }
+
 @keyframes ldOrbPulse {
   0%,
   100% {
@@ -1781,6 +1906,7 @@ $r-card: 16px;
     box-shadow: 0 0 0 12px rgba(107, 92, 231, 0);
   }
 }
+
 .ld-title {
   font-family: 'Prompt', sans-serif;
   font-size: 1.05rem;
@@ -1788,6 +1914,7 @@ $r-card: 16px;
   color: $indigo-deep;
   margin-bottom: 0.1rem;
 }
+
 .ld-pct-row {
   display: flex;
   align-items: baseline;
@@ -1795,6 +1922,7 @@ $r-card: 16px;
   gap: 3px;
   margin-bottom: 0.2rem;
 }
+
 .ld-pct-num {
   font-family: 'Prompt', sans-serif;
   font-size: 2.8rem;
@@ -1804,17 +1932,20 @@ $r-card: 16px;
   min-width: 3ch;
   text-align: right;
 }
+
 .ld-pct-sym {
   font-size: 1.1rem;
   font-weight: 700;
   color: #6b5ce7;
 }
+
 .ld-sub {
   font-size: 0.76rem;
   color: #8b87b0;
   min-height: 1rem;
   margin-bottom: 1rem;
 }
+
 .ld-steps {
   display: flex;
   flex-direction: column;
@@ -1824,6 +1955,7 @@ $r-card: 16px;
   margin-bottom: 1rem;
   text-align: left;
 }
+
 .ld-step-row {
   display: flex;
   align-items: center;
@@ -1831,6 +1963,7 @@ $r-card: 16px;
   padding: 9px 13px;
   border-bottom: 1px solid rgba(45, 45, 138, 0.06);
   transition: background 0.35s;
+
   &:last-child {
     border-bottom: none;
   }
@@ -1841,6 +1974,7 @@ $r-card: 16px;
     background: rgba(99, 102, 241, 0.07);
   }
 }
+
 .ld-step-ic {
   width: 20px;
   height: 20px;
@@ -1851,6 +1985,7 @@ $r-card: 16px;
   justify-content: center;
   font-size: 11px;
   font-weight: 700;
+
   &--done {
     background: #dcfce7;
     color: #16a34a;
@@ -1864,6 +1999,7 @@ $r-card: 16px;
     color: #d1d5db;
   }
 }
+
 @keyframes ldIcPulse {
   0%,
   100% {
@@ -1873,6 +2009,7 @@ $r-card: 16px;
     box-shadow: 0 0 0 5px rgba(99, 102, 241, 0);
   }
 }
+
 .ld-step-spinner {
   display: inline-block;
   width: 9px;
@@ -1882,10 +2019,12 @@ $r-card: 16px;
   border-top-color: transparent;
   animation: ldSpin 0.7s linear infinite;
 }
+
 .ld-step-label {
   flex: 1;
   font-size: 0.79rem;
   line-height: 1.35;
+
   .ld-step-row--done & {
     color: #374151;
   }
@@ -1897,11 +2036,13 @@ $r-card: 16px;
     color: #9ca3af;
   }
 }
+
 .ld-step-pct {
   font-size: 0.7rem;
   font-weight: 700;
   min-width: 28px;
   text-align: right;
+
   &--done {
     color: #16a34a;
   }
@@ -1909,6 +2050,7 @@ $r-card: 16px;
     color: #6366f1;
   }
 }
+
 .ld-bar-track {
   height: 6px;
   border-radius: 3px;
@@ -1916,17 +2058,20 @@ $r-card: 16px;
   overflow: hidden;
   margin-bottom: 0.85rem;
 }
+
 .ld-bar-fill {
   height: 100%;
   border-radius: 3px;
   background: linear-gradient(90deg, $indigo-dark, #a78bfa);
   transition: width 0.55s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
 .ld-dots {
   display: flex;
   gap: 6px;
   justify-content: center;
 }
+
 .ld-dot {
   width: 7px;
   height: 7px;
@@ -1934,6 +2079,7 @@ $r-card: 16px;
   background: $indigo-dark;
   display: inline-block;
   animation: ldDotB 1.2s ease-in-out infinite;
+
   &:nth-child(2) {
     animation-delay: 0.2s;
   }
@@ -1941,6 +2087,7 @@ $r-card: 16px;
     animation-delay: 0.4s;
   }
 }
+
 @keyframes ldDotB {
   0%,
   80%,
@@ -1954,7 +2101,7 @@ $r-card: 16px;
   }
 }
 
-/* ── CARD TRANSITION ── */
+// ─── Card Transition ──────────────────────────────────────────────────────────
 .card-pop-enter-active {
   transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -1970,7 +2117,7 @@ $r-card: 16px;
   transform: scale(0.96);
 }
 
-/* ── RESPONSIVE ── */
+// ─── Responsive ───────────────────────────────────────────────────────────────
 @media (max-width: 600px) {
   .filter-hero {
     padding: 1.5rem 1rem 3.5rem;
@@ -1998,13 +2145,14 @@ $r-card: 16px;
   }
 }
 
-/* ── CLICK PARTICLES ── */
+// ─── Click Particles ──────────────────────────────────────────────────────────
 .click-particles-root {
   position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: 99999;
 }
+
 .click-particle {
   position: fixed;
   left: var(--x);
@@ -2016,9 +2164,11 @@ $r-card: 16px;
   will-change: transform, opacity;
   animation: clickFall var(--dur) cubic-bezier(0.2, 0.9, 0.4, 1) forwards;
   border-radius: 50%;
+
   &[style*='--shape: square'] {
     border-radius: 3px;
   }
+
   &[style*='--shape: star'] {
     border-radius: 0;
     clip-path: polygon(
@@ -2034,21 +2184,14 @@ $r-card: 16px;
       39% 35%
     );
   }
-  &[style*='--shape: triangle'] {
-    background: transparent !important;
-    border-left: calc(var(--size) * 0.5) solid transparent;
-    border-right: calc(var(--size) * 0.5) solid transparent;
-    border-bottom: var(--size) solid var(--color);
-    border-radius: 0;
-    width: 0 !important;
-    height: 0 !important;
-  }
+
   &[style*='--shape: emoji'] {
     background: transparent;
     border-radius: 0;
     display: flex;
     align-items: center;
     justify-content: center;
+
     &::after {
       content: var(--emoji-content);
       font-size: var(--size);
@@ -2056,6 +2199,7 @@ $r-card: 16px;
     }
   }
 }
+
 @keyframes clickFall {
   0% {
     opacity: 1;

@@ -53,21 +53,40 @@ const routes: RouteRecordRaw[] = [
     ],
   },
   {
-    path: '/',
+    path: '/backoffice',
     component: () => import('src/layouts/AdminLayout.vue'),
-    children: [{ path: 'login', component: () => import('pages/admin/LoginPage.vue') }],
+    children: [{ path: 'login', component: () => import('src/pages/backoffice/LoginPage.vue') }],
   },
   {
-    path: '/admin',
+    path: '/backoffice/festival',
     component: () => import('src/layouts/AdminLayout.vue'),
     meta: { requiresAuth: true },
     children: [
-      { path: 'festival', component: () => import('pages/admin/FestivalPage.vue') },
-      { path: 'unpolite', component: () => import('pages/admin/UnpolitePage.vue') },
-      { path: 'create', component: () => import('pages/admin/create/CreatePage.vue') },
-      { path: 'edit/:id', component: () => import('pages/admin/edit/EditPage.vue'), props: true },
-      { path: 'view/:id', component: () => import('pages/admin/view/ViewPage.vue'), props: true },
+      { path: '', component: () => import('pages/backoffice/festival/FestivalPage.vue') },
+      { path: 'create', component: () => import('src/pages/backoffice/festival/CreatePage.vue') },
+      {
+        path: 'edit/:id',
+        component: () => import('src/pages/backoffice/festival/EditPage.vue'),
+        props: true,
+      },
+      {
+        path: 'view/:id',
+        component: () => import('pages/backoffice/festival/ViewPage.vue'),
+        props: true,
+      },
     ],
+  },
+  {
+    path: '/backoffice/admin',
+    component: () => import('src/layouts/AdminLayout.vue'),
+    meta: { requiresAuth: true },
+    children: [{ path: '', component: () => import('pages/backoffice/admin/AdminPage.vue') }],
+  },
+  {
+    path: '/backoffice',
+    component: () => import('src/layouts/AdminLayout.vue'),
+    meta: { requiresAuth: true },
+    children: [{ path: 'unpolite', component: () => import('pages/backoffice/UnpolitePage.vue') }],
   },
   // Always leave this as last one,
   // but you can also remove it

@@ -3,7 +3,6 @@
     <!-- ===== HEADER ===== -->
     <q-header class="festival-header">
       <q-toolbar class="festival-toolbar">
-        <!-- Festival icon -->
         <div class="header-emblem">
           <q-icon name="celebration" size="20px" color="white" />
         </div>
@@ -12,7 +11,6 @@
           <span class="festival-title-text">{{ festivalName || 'เทศกาลอวยพร' }}</span>
         </q-toolbar-title>
 
-        <!-- Decorative dots -->
         <div class="header-dots gt-xs">
           <span class="dot dot-1" />
           <span class="dot dot-2" />
@@ -23,24 +21,8 @@
 
     <!-- ===== BANNER ===== -->
     <div class="banner-section">
-      <!-- Decorative top wave -->
-      <div class="banner-top-deco" />
-
       <div class="banner-wrap">
-        <!-- <q-img
-          :src="image"
-          class="banner-img"
-          fit="contain"
-          :ratio="$q.screen.xs ? 4 / 3 : $q.screen.sm ? 16 / 9 : 21 / 9"
-          
-        > -->
-        <!-- <br>
-        <br>
-        <br> -->
-        <br />
-        <br />
-        <br />
-
+        <br /><br /><br />
         <q-img :src="image" class="banner-img" fit="cover" :ratio="18 / 9">
           <template v-slot:loading>
             <div class="banner-loading">
@@ -56,51 +38,35 @@
               <span>ไม่สามารถโหลดรูปภาพได้</span>
             </div>
           </template>
-
-          <!-- Overlay gradient -->
           <div class="banner-overlay" />
-
-          <!-- Festival name on image -->
-          <!-- <div class="banner-caption" v-if="festivalName">
-            <div class="banner-caption-tag">🎊 เทศกาล</div>
-            <div class="banner-caption-name">{{ festivalName }}</div>
-          </div> -->
         </q-img>
-
-        <!-- Shimmer bar under banner -->
         <div class="banner-shimmer-bar" />
       </div>
     </div>
 
     <!-- ===== NAV BAR ===== -->
-    <div class="nav-wrap">
-      <div class="nav-inner">
-        <!-- ร่วมส่งคำอวยพร -->
+    <div class="nav-bar-wrap">
+      <div class="nav-bar">
         <router-link
           :to="`/${currentId}`"
-          class="nav-tab"
-          :class="{ 'nav-tab--active': isHomeActive }"
+          class="nav-item"
+          :class="{ 'nav-item--active': isHomeActive }"
         >
-          <div class="nav-tab-icon">
-            <q-icon name="favorite" size="18px" />
-          </div>
-          <span class="nav-tab-label">ร่วมส่งคำอวยพร</span>
-          <div class="nav-tab-pill" />
+          <div class="nav-item-icon"><q-icon name="favorite" size="18px" /></div>
+          <span>ร่วมส่งคำอวยพร</span>
+          <div class="nav-item-indicator" />
         </router-link>
 
-        <div class="nav-separator" />
+        <div class="nav-divider" />
 
-        <!-- รายชื่อผู้ร่วมอวยพร -->
         <router-link
           :to="`/${currentId}/list`"
-          class="nav-tab"
-          :class="{ 'nav-tab--active': isListActive }"
+          class="nav-item"
+          :class="{ 'nav-item--active': isListActive }"
         >
-          <div class="nav-tab-icon">
-            <q-icon name="people" size="18px" />
-          </div>
-          <span class="nav-tab-label">รายชื่อผู้ร่วมอวยพร</span>
-          <div class="nav-tab-pill" />
+          <div class="nav-item-icon"><q-icon name="people" size="18px" /></div>
+          <span>รายชื่อผู้ร่วมอวยพร</span>
+          <div class="nav-item-indicator" />
         </router-link>
       </div>
     </div>
@@ -110,83 +76,7 @@
       <router-view :id="currentId" />
     </q-page-container>
 
-    <!-- ===== FOOTER ===== -->
-    <q-footer class="site-footer">
-      <!-- Top decorative wave -->
-      <div class="footer-wave">
-        <svg viewBox="0 0 1440 60" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M0,30 C360,60 1080,0 1440,30 L1440,60 L0,60 Z" fill="rgba(255,255,255,0.04)" />
-        </svg>
-      </div>
-
-      <div class="footer-inner">
-        <div class="footer-grid">
-          <!-- Brand -->
-          <div class="footer-col footer-col--brand">
-            <div class="footer-logo">
-              <div class="footer-logo-icon">
-                <q-icon name="celebration" size="18px" color="white" />
-              </div>
-              <span class="footer-logo-name">Festival Greeting LDD</span>
-            </div>
-            <p class="footer-desc">
-              ร่วมเฉลิมฉลองเนื่องในโอกาสต่างๆ ด้วยคำอวยพร ความสุข และพลังใจดีๆ ให้แก่ผู้บริหาร
-              บุคลากร และเครือข่าย ของกรมพัฒนาที่ดิน
-            </p>
-          </div>
-
-          <!-- Quick Links -->
-          <div class="footer-col">
-            <div class="footer-heading">เมนูทางลัด</div>
-            <nav class="footer-links">
-              <router-link :to="`/${currentId}`" class="footer-link">
-                <q-icon name="favorite_border" size="13px" class="q-mr-xs" />
-                ร่วมส่งคำอวยพร
-              </router-link>
-              <router-link :to="`/${currentId}/list`" class="footer-link">
-                <q-icon name="people_outline" size="13px" class="q-mr-xs" />
-                รายชื่อผู้ร่วมอวยพร
-              </router-link>
-              <!-- <router-link to="/login" class="footer-link">
-                <q-icon name="manage_accounts" size="13px" class="q-mr-xs" />
-                สำหรับแอดมิน
-              </router-link> -->
-            </nav>
-          </div>
-
-          <!-- Contact -->
-          <div class="footer-col">
-            <div class="footer-heading">ติดต่อสอบถาม</div>
-            <div class="footer-contacts">
-              <a
-                href="https://webapp.ldd.go.th/ICTWeb/index.php"
-                target="_blank"
-                class="footer-contact footer-link"
-              >
-                <q-icon name="apartment" size="14px" class="footer-contact-icon" />
-                <span>ศูนย์เทคโนโลยีสารสนเทศฯ กรมพัฒนาที่ดิน</span>
-              </a>
-              <div class="footer-contact">
-                <q-icon name="account_circle" size="14px" class="footer-contact-icon" />
-                <span>กลุ่มฐานข้อมูลสารสนเทศ</span>
-              </div>
-              <div class="footer-contact">
-                <q-icon name="call" size="14px" class="footer-contact-icon" />
-                <span>02-562-5100 ต่อ 1328</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="footer-divider" />
-
-        <div class="footer-bottom">
-          <span>กรมพัฒนาที่ดิน ถนนพหลโยธิน แขวงลาดยาว เขตจตุจักร กรุงเทพฯ 10900</span>
-          <span class="footer-sep gt-xs">·</span>
-          <span>โทร. 1760 ต่อ 1275</span>
-        </div>
-      </div>
-    </q-footer>
+    <!-- ===== ALERT DIALOG ===== -->
     <q-dialog v-model="alertDialog.show" persistent>
       <q-card class="alert-card">
         <div class="alert-icon-wrap" :class="`alert-icon-wrap--${alertDialog.type}`">
@@ -209,95 +99,183 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
+
+    <!-- ===== FOOTER ===== -->
+    <q-footer class="site-footer">
+      <div class="footer-inner">
+        <div class="footer-grid">
+          <div class="footer-col footer-col--brand">
+            <div class="footer-brand">
+              <div class="footer-brand-icon">
+                <q-icon name="celebration" size="20px" color="white" />
+              </div>
+              <span class="footer-brand-name">Festival Greeting LDD</span>
+            </div>
+            <p class="footer-desc">
+              ร่วมเฉลิมฉลองเนื่องในโอกาสต่างๆ ด้วยคำอวยพร ความสุข และพลังใจดีๆ ให้แก่ผู้บริหาร
+              บุคลากร และเครือข่าย ของกรมพัฒนาที่ดิน
+            </p>
+          </div>
+
+          <div class="footer-col">
+            <div class="footer-col-title">เมนูทางลัด</div>
+            <div class="footer-links">
+              <router-link :to="`/${currentId}`" class="footer-link">
+                <q-icon name="favorite_border" size="14px" class="q-mr-xs" />ร่วมส่งคำอวยพร
+              </router-link>
+              <router-link :to="`/${currentId}/list`" class="footer-link">
+                <q-icon name="people_outline" size="14px" class="q-mr-xs" />รายชื่อผู้ร่วมอวยพร
+              </router-link>
+            </div>
+          </div>
+
+          <div class="footer-col">
+            <div class="footer-col-title">ติดต่อสอบถาม</div>
+            <div class="footer-contacts">
+              <a
+                href="https://webapp.ldd.go.th/ICTWeb/index.php"
+                target="_blank"
+                class="footer-contact-item footer-link"
+              >
+                <q-icon name="apartment" size="15px" class="footer-contact-icon" />
+                <span>ศูนย์เทคโนโลยีสารสนเทศฯ กรมพัฒนาที่ดิน</span>
+              </a>
+              <div class="footer-contact-item">
+                <q-icon name="account_circle" size="15px" class="footer-contact-icon" />
+                <span>กลุ่มฐานข้อมูลสารสนเทศ</span>
+              </div>
+              <div class="footer-contact-item">
+                <q-icon name="call" size="15px" class="footer-contact-icon" />
+                <span>02-562-5100 ต่อ 1328</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="footer-divider" />
+
+        <div class="footer-bottom">
+          <span>กรมพัฒนาที่ดิน ถนนพหลโยธิน แขวงลาดยาว เขตจตุจักร กรุงเทพฯ 10900</span>
+          <span class="footer-bottom-sep gt-xs">·</span>
+          <span>โทร. 1760 ต่อ 1275</span>
+        </div>
+      </div>
+    </q-footer>
   </q-layout>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, reactive } from 'vue';
+import { ref, reactive, computed, watch } from 'vue';
 import { useQuasar } from 'quasar';
-import { api } from 'src/boot/axios';
 import { useRoute } from 'vue-router';
+import { api } from 'src/boot/axios';
 
+// ─── Types ────────────────────────────────────────────────────────────────────
+type AlertType = 'error' | 'success' | 'warning' | 'info';
+
+interface AlertConfig {
+  icon: string;
+  title: string;
+}
+
+interface AlertDialog {
+  show: boolean;
+  type: AlertType;
+  icon: string;
+  title: string;
+  message: string;
+  btnLabel: string;
+}
+
+interface FestivalData {
+  festivalName: string;
+  image?: string;
+  logo?: string;
+  webName?: string;
+}
+
+// ─── Router / Quasar ─────────────────────────────────────────────────────────
 const route = useRoute();
 const $q = useQuasar();
 
-const image = ref('');
-const festivalName = ref('');
+// ─── Festival State ───────────────────────────────────────────────────────────
+const image = ref<string>('');
+const festivalName = ref<string>('');
 
-// ดึง ID จาก URL หรือ localStorage fallback
-const currentId = computed(
+/** ดึง ID จาก URL params → localStorage fallback */
+const currentId = computed<string>(
   () => (route.params.id as string) || localStorage.getItem('festivalId') || '1',
 );
 
-// Active nav
+// ─── Nav Active State ─────────────────────────────────────────────────────────
 const isListActive = computed(() => route.path.startsWith(`/${currentId.value}/list`));
 const isHomeActive = computed(() => route.path === `/${currentId.value}`);
 
-const webName = ref('ระบบบริหารจัดการอวยพรเนื่องในโอกาสต่างๆ ของกรมฯ');
-
-type AlertType = 'error' | 'success' | 'warning' | 'info';
-
-const alertDialog = reactive({
+// ─── Alert Dialog ─────────────────────────────────────────────────────────────
+const alertDialog = reactive<AlertDialog>({
   show: false,
-  type: 'error' as AlertType,
+  type: 'error',
   icon: 'report_problem',
   title: '',
   message: '',
   btnLabel: 'ตกลง',
 });
 
+const ALERT_CONFIG: Record<AlertType, AlertConfig> = {
+  error: { icon: 'error_outline', title: 'เกิดข้อผิดพลาด' },
+  success: { icon: 'check_circle_outline', title: 'สำเร็จ' },
+  warning: { icon: 'warning_amber', title: 'คำเตือน' },
+  info: { icon: 'info_outline', title: 'แจ้งเตือน' },
+};
+
 const showAlert = (
   message: string,
   type: AlertType = 'error',
   title?: string,
   btnLabel = 'ตกลง',
-) => {
-  const config: Record<AlertType, { icon: string; title: string }> = {
-    error: { icon: 'error_outline', title: 'เกิดข้อผิดพลาด' },
-    success: { icon: 'check_circle_outline', title: 'สำเร็จ' },
-    warning: { icon: 'warning_amber', title: 'คำเตือน' },
-    info: { icon: 'info_outline', title: 'แจ้งเตือน' },
-  };
+): void => {
   alertDialog.type = type;
-  alertDialog.icon = config[type].icon;
-  alertDialog.title = title ?? config[type].title;
+  alertDialog.icon = ALERT_CONFIG[type].icon;
+  alertDialog.title = title ?? ALERT_CONFIG[type].title;
   alertDialog.message = message;
   alertDialog.btnLabel = btnLabel;
   alertDialog.show = true;
 };
 
-// onMounted(async () => {
-//   try {
-//     const res = await api.get(`/festival/${currentId.value}`);
-//     webName.value = res.data?.festival?.webName ?? 'ระบบบริหารจัดการอวยพรเนื่องในโอกาสต่างๆ ของกรมฯ';
-//     document.title = webName.value;
-//   } catch (err) {
-//     console.error('โหลดชื่อไม่สำเร็จ');
-//   }
-// });
-
-// ============================================================
-// Helpers
-// ============================================================
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+/** Fetches a file from the upload endpoint and returns a blob URL. */
 const getImageUrl = async (imagePath: string): Promise<string> => {
   try {
-    const response = await api(`/upload/${imagePath}`, { responseType: 'blob' });
-    return URL.createObjectURL(response.data);
+    const res = await api(`/upload/${imagePath}`, { responseType: 'blob' });
+    return URL.createObjectURL(res.data as Blob);
   } catch {
     return '';
   }
 };
 
-const fetchFestival = async (id: string) => {
+/** Injects or updates the page favicon. */
+const setFavicon = (href: string): void => {
+  let el = document.querySelector<HTMLLinkElement>('#dynamic-favicon');
+  if (!el) {
+    el = document.createElement('link');
+    el.id = 'dynamic-favicon';
+    el.rel = 'icon';
+    document.head.appendChild(el);
+  }
+  el.href = href;
+};
+
+// ─── Data Fetching ────────────────────────────────────────────────────────────
+/** โหลด banner image + festivalName */
+const fetchFestival = async (id: string): Promise<void> => {
   $q.loading.show();
   try {
-    const response = await api.get(`/festival/${Number(id)}`);
-    if (response.data) {
-      const data = response.data.festival;
-      festivalName.value = data.festivalName;
-      image.value = data.image ? await getImageUrl(data.image) : '';
-      localStorage.setItem('festivalId', id);
-    }
+    const res = await api.get(`/festival/${Number(id)}`);
+    const data: FestivalData = res.data.festival;
+
+    festivalName.value = data.festivalName;
+    image.value = data.image ? await getImageUrl(data.image) : '';
+    localStorage.setItem('festivalId', id);
   } catch {
     showAlert('ไม่สามารถโหลดข้อมูลเทศกาลได้', 'error');
   } finally {
@@ -305,51 +283,32 @@ const fetchFestival = async (id: string) => {
   }
 };
 
-// ============================================================
-// Watch route id
-// ============================================================
+/** โหลด document.title + favicon */
+const fetchMeta = async (id: string): Promise<void> => {
+  try {
+    const res = await api.get(`/festival/${id}`);
+    const data: FestivalData = res.data?.festival;
 
-watch(
-  currentId,
-  async (id) => {
-    console.log('currentId changed:', id); // ← เช็คว่า watch นี้ทำงานไหม
-    try {
-      const res = await api.get(`/festival/${id}`);
-      console.log('festival data:', res.data); // ← ดูว่า logoName มีค่าไหม
-      const festivalData = res.data?.festival;
+    document.title = data?.webName ?? 'ระบบบริหารจัดการอวยพรเนื่องในโอกาสต่างๆ ของกรมฯ';
 
-      webName.value = festivalData?.webName ?? 'ระบบบริหารจัดการอวยพรเนื่องในโอกาสต่างๆ ของกรมฯ';
-      document.title = webName.value;
-      console.log('logo :', festivalData.logo);
-      if (festivalData?.logo) {
-        console.log('logoName from API:', festivalData.logo); // ← เช็ค field name
-        const url = await getImageUrl(festivalData.logo);
-        console.log('blob url:', url); // ← เช็คว่า blob สร้างได้ไหม
-
-        let favicon = document.querySelector('#dynamic-favicon') as HTMLLinkElement;
-        if (!favicon) {
-          favicon = document.createElement('link');
-          favicon.id = 'dynamic-favicon';
-          favicon.rel = 'icon';
-          document.head.appendChild(favicon);
-        }
-        favicon.href = url;
-      }
-    } catch (error) {
-      console.error('โหลดข้อมูลไม่สำเร็จ:', error);
+    if (data?.logo) {
+      const url = await getImageUrl(data.logo);
+      if (url) setFavicon(url);
     }
-  },
-  { immediate: true },
-);
+  } catch (err) {
+    console.error('โหลด meta ไม่สำเร็จ:', err);
+  }
+};
+
+// ─── Watchers ─────────────────────────────────────────────────────────────────
+watch(currentId, (id) => void fetchMeta(id), { immediate: true });
+
 watch(
   () => route.params.id,
   (newId) => {
     const storedId = localStorage.getItem('festivalId');
-    if (newId && newId !== storedId) {
-      localStorage.setItem('festivalId', newId as string);
-    }
-    const finalId = (newId as string) || storedId || '1';
-    if (finalId) void fetchFestival(finalId);
+    if (newId && newId !== storedId) localStorage.setItem('festivalId', newId as string);
+    void fetchFestival((newId as string) || storedId || '1');
   },
   { immediate: true },
 );
@@ -358,9 +317,7 @@ watch(
 <style lang="scss" scoped>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&family=Sarabun:wght@400;500;600;700&family=Prompt:wght@500;600;700&display=swap');
 
-// ============================================================
-// TOKENS
-// ============================================================
+// ─── Design Tokens ────────────────────────────────────────────────────────────
 $rose: #be123c;
 $rose-mid: #e11d48;
 $rose-light: #fb7185;
@@ -372,9 +329,7 @@ $text-main: #4a0010;
 $text-muted: #9ca3af;
 $nav-h: 52px;
 
-// ============================================================
-// HEADER
-// ============================================================
+// ─── HEADER ───────────────────────────────────────────────────────────────────
 .festival-header {
   background: linear-gradient(135deg, #7f1d1d 0%, $rose-mid 50%, #db2777 100%) !important;
   box-shadow: 0 2px 24px rgba(190, 18, 60, 0.35) !important;
@@ -398,21 +353,9 @@ $nav-h: 52px;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  animation: pulse-emblem 3s ease-in-out infinite;
 }
 
-// @keyframes pulse-emblem {
-//   0%,
-//   100% {
-//     box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.2);
-//   }
-//   50% {
-//     box-shadow: 0 0 0 6px rgba(255, 255, 255, 0);
-//   }
-// }
-
 .festival-title {
-  // overflow: hidden;
   font-family: 'Sarabun', 'Noto Sans Thai', sans-serif;
   font-size: clamp(12px, 3vw, 17px);
   font-weight: 600;
@@ -428,7 +371,6 @@ $nav-h: 52px;
   font-size: clamp(13px, 3.5vw, 20px);
   font-weight: 700;
   color: white;
-  // white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   display: block;
@@ -480,118 +422,29 @@ $nav-h: 52px;
   }
 }
 
-// ============================================================
-// BANNER
-// ============================================================
-// .banner-section {
-//   background: linear-gradient(180deg, #fff1f2 0%, #fce7f3 100%);
-//   padding: 32px 48px 0;
-//   position: relative;
-
-//   @media (max-width: 768px) {
-//     padding: 18px 18px 0;
-//   }
-//   @media (max-width: 480px) {
-//     padding: 8px 0 0;
-//   }
-// }
-// .banner-section {
-//   background: linear-gradient(180deg, #fff1f2 0%, #fce7f3 100%);
-//   padding: 20px 0px 0;
-//   // padding: 32px 0, 0;
-//   position: relative;
-
-//   @media (max-width: 768px) {
-//     // padding: 18px 18px 0;
-//     // padding: 18px 12px 0;
-//     padding: 16px 0px 0;
-//   }
-//   // @media (max-width: 480px) {
-//   //   padding: 8px 0 0;
-//   // }
-// }
+// ─── BANNER ───────────────────────────────────────────────────────────────────
 .banner-section {
   background: linear-gradient(180deg, #fff1f2 0%, #fce7f3 100%);
-  padding:
-    32px 0,
-    0; // ← เพิ่มจาก 20px → 48px
+  padding: 4px 0 0;
   position: relative;
 
   @media (max-width: 768px) {
-    padding: 18px 12px 0; // ← เพิ่มจาก 16px → 32px
+    padding: 18px 12px 0;
   }
-
-  // @media (max-width: 480px) {
-  //   padding: 8px 0 0 0;
-  // }
 }
 
-.banner-top-deco {
-  display: none; // optional accent bar if desired
-}
-
-// .banner-wrap {
-//   max-width: 1200px;
-//   margin: 0 auto;
-//   border-radius: 24px;
-//   overflow: hidden;
-//   box-shadow:
-//     0 8px 40px rgba(190, 18, 60, 0.18),
-//     0 2px 6px rgba(0, 0, 0, 0.06),
-//     0 0 0 1px rgba(190, 18, 60, 0.08);
-
-//   @media (max-width: 768px) {
-//     border-radius: 16px;
-//     box-shadow: 0 4px 24px rgba(190, 18, 60, 0.12);
-//   }
-
-//   @media (max-width: 480px) {
-//     border-radius: 0;
-//     box-shadow: none;
-//   }
-// }
 .banner-wrap {
   max-width: 1200px;
-  // margin: 0 auto;
-  margin: 0 auto;
-  // margin:auto;
-  // border-radius: 24px;
-  // overflow: hidden;
-  // box-shadow:
-  //   0 8px 40px rgba(190, 18, 60, 0.18),
-  //   0 2px 6px rgba(0, 0, 0, 0.06),
-  //   0 0 0 1px rgba(190, 18, 60, 0.08);
+  margin: auto;
 
   @media (max-width: 768px) {
     border-radius: 16px;
-    // box-shadow: 0 4px 24px rgba(190, 18, 60, 0.12);
+    overflow: hidden;
   }
   @media (max-width: 480px) {
     border-radius: 0;
-    // box-shadow: none;
   }
 }
-
-// .banner-wrap {
-//   max-width: 1200px;
-//   // margin: 0 auto;
-//   margin:auto;
-//   // border-radius: 24px;
-//   // overflow: hidden;
-//   // box-shadow:
-//   //   0 8px 40px rgba(190, 18, 60, 0.18),
-//   //   0 2px 6px rgba(0, 0, 0, 0.06),
-//   //   0 0 0 1px rgba(190, 18, 60, 0.08);
-
-//   @media (max-width: 768px) {
-//     border-radius: 16px;
-//     // box-shadow: 0 4px 24px rgba(190, 18, 60, 0.12);
-//   }
-//   @media (max-width: 480px) {
-//     border-radius: 0;
-//     // box-shadow: none;
-//   }
-// }
 
 .banner-img {
   width: 100%;
@@ -634,43 +487,6 @@ $nav-h: 52px;
   pointer-events: none;
 }
 
-// .banner-caption {
-//   position: absolute;
-//   bottom: 1.5rem;
-//   left: 2rem;
-//   animation: slideUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) both 0.2s;
-
-//   @media (max-width: 480px) {
-//     bottom: 1rem;
-//     left: 1rem;
-//   }
-// }
-
-// .banner-caption-tag {
-//   display: inline-flex;
-//   align-items: center;
-//   background: rgba(255, 255, 255, 0.18);
-//   backdrop-filter: blur(8px);
-//   border: 1px solid rgba(255, 255, 255, 0.25);
-//   border-radius: 20px;
-//   padding: 3px 12px;
-//   font-size: 0.72rem;
-//   font-weight: 600;
-//   color: rgba(255, 255, 255, 0.92);
-//   letter-spacing: 0.05em;
-//   margin-bottom: 6px;
-// }
-
-// .banner-caption-name {
-//   font-family: 'Prompt', sans-serif;
-//   font-size: clamp(1.1rem, 5vw, 2.2rem);
-//   font-weight: 700;
-//   color: #fff;
-//   text-shadow: 0 2px 16px rgba(0, 0, 0, 0.3);
-//   line-height: 1.2;
-//   max-width: 600px;
-// }
-
 .banner-shimmer-bar {
   height: 4px;
   background: linear-gradient(90deg, $rose-mid, $gold-light, $rose-light, $rose-mid);
@@ -687,34 +503,23 @@ $nav-h: 52px;
   }
 }
 
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-// ============================================================
-// NAV BAR
-// ============================================================
-.nav-wrap {
+// ─── NAV BAR ──────────────────────────────────────────────────────────────────
+// ใช้ class เดียวกับ AdminLayout (.nav-bar-wrap / .nav-bar / .nav-item / .nav-item-indicator / .nav-divider)
+.nav-bar-wrap {
   background: $surface;
   border-bottom: 1px solid rgba(190, 18, 60, 0.1);
-  box-shadow: 0 3px 16px rgba(190, 18, 60, 0.07);
+  box-shadow: 0 2px 12px rgba(190, 18, 60, 0.07);
   position: sticky;
   top: 0;
   z-index: 100;
 }
 
-.nav-inner {
-  max-width: 1200px;
-  margin: 0 auto;
+.nav-bar {
   display: flex;
   align-items: stretch;
+  justify-content: center;
+  max-width: 1200px;
+  margin: 0 auto;
   padding: 0 1rem;
 
   @media (max-width: 480px) {
@@ -722,14 +527,14 @@ $nav-h: 52px;
   }
 }
 
-.nav-tab {
-  flex: 1;
+.nav-item {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 0 1rem;
+  padding: 0 28px;
   height: $nav-h;
+  flex: 1;
   font-family: 'Sarabun', 'Noto Sans Thai', sans-serif;
   font-size: clamp(0.85rem, 3vw, 1rem);
   font-weight: 600;
@@ -739,14 +544,15 @@ $nav-h: 52px;
   transition:
     color 0.2s,
     background 0.2s;
+  white-space: nowrap;
 
   @media (max-width: 480px) {
-    gap: 5px;
+    padding: 0 10px;
     font-size: 0.82rem;
-    padding: 0 0.5rem;
+    gap: 5px;
   }
 
-  .nav-tab-icon {
+  .nav-item-icon {
     display: flex;
     align-items: center;
     opacity: 0.55;
@@ -755,80 +561,154 @@ $nav-h: 52px;
       transform 0.2s;
   }
 
-  .nav-tab-pill {
+  .nav-item-indicator {
     position: absolute;
     bottom: 0;
     left: 50%;
     transform: translateX(-50%) scaleX(0);
-    width: 55%;
+    width: 60%;
     height: 3px;
     border-radius: 3px 3px 0 0;
     background: linear-gradient(90deg, $rose-mid, $rose-light);
-    transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   &:hover {
     color: $rose-mid;
-    background: rgba(190, 18, 60, 0.03);
+    background: rgba(190, 18, 60, 0.04);
 
-    .nav-tab-icon {
+    .nav-item-icon {
       opacity: 1;
-      transform: scale(1.12);
+      transform: scale(1.1);
     }
   }
 
   &--active {
     color: $rose-mid;
+    background: rgba(190, 18, 60, 0.05);
 
-    .nav-tab-icon {
+    .nav-item-icon {
       opacity: 1;
     }
-    .nav-tab-pill {
+    .nav-item-indicator {
       transform: translateX(-50%) scaleX(1);
     }
   }
 }
 
-.nav-separator {
+.nav-divider {
   width: 1px;
   background: rgba(190, 18, 60, 0.1);
-  margin: 10px 0;
+  margin: 8px 0;
   flex-shrink: 0;
 }
 
-// ============================================================
-// PAGE BG
-// ============================================================
+// ─── PAGE BG ──────────────────────────────────────────────────────────────────
 .page-bg {
   background: linear-gradient(155deg, #fff1f2 0%, #fdf4ff 50%, #fff7ed 100%);
   min-height: 60vh;
 }
 
-// ============================================================
-// FOOTER
-// ============================================================
-.site-footer {
-  background: linear-gradient(135deg, #7f1d1d 0%, #9f1239 50%, #881337 100%) !important;
-  border-top: 1px solid rgba(255, 255, 255, 0.07);
+// ─── ALERT DIALOG ─────────────────────────────────────────────────────────────
+.alert-card {
+  width: 340px;
+  max-width: 92vw;
+  border-radius: 20px !important;
+  overflow: hidden;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.18) !important;
+  font-family: 'Sarabun', 'Noto Sans Thai', sans-serif;
 }
 
-.footer-wave {
-  width: 100%;
-  overflow: hidden;
-  line-height: 0;
-  margin-bottom: -2px;
+.alert-icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 28px 0 20px;
 
-  svg {
-    width: 100%;
-    height: 40px;
-    display: block;
+  &--error {
+    background: linear-gradient(135deg, #7f1d1d, $rose-mid);
   }
+  &--success {
+    background: linear-gradient(135deg, #14532d, #16a34a);
+  }
+  &--warning {
+    background: linear-gradient(135deg, #78350f, $amber);
+  }
+  &--info {
+    background: linear-gradient(135deg, #1e3a5f, #2563eb);
+  }
+}
+
+.alert-icon-ring {
+  width: 62px;
+  height: 62px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+  border: 2px solid rgba(255, 255, 255, 0.32);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+}
+
+.alert-body {
+  padding: 20px 24px 8px !important;
+  text-align: center;
+}
+.alert-title {
+  font-family: 'Prompt', 'Noto Sans Thai', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: $text-main;
+  margin-bottom: 8px;
+}
+.alert-message {
+  font-size: 0.92rem;
+  color: #64748b;
+  line-height: 1.65;
+}
+.alert-actions {
+  padding: 12px 24px 22px !important;
+}
+
+.alert-btn {
+  min-width: 110px;
+  border-radius: 10px !important;
+  font-family: 'Sarabun', 'Noto Sans Thai', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 8px 28px !important;
+  letter-spacing: 0.01em;
+
+  &--error {
+    background: linear-gradient(135deg, $rose-mid, #db2777) !important;
+    color: #fff !important;
+  }
+  &--success {
+    background: linear-gradient(135deg, #16a34a, #15803d) !important;
+    color: #fff !important;
+  }
+  &--warning {
+    background: linear-gradient(135deg, $amber, #d97706) !important;
+    color: #fff !important;
+  }
+  &--info {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
+    color: #fff !important;
+  }
+}
+
+// ─── FOOTER ───────────────────────────────────────────────────────────────────
+// ใช้ class/token เดียวกับ AdminLayout ทั้งหมด
+.site-footer {
+  background: linear-gradient(135deg, #7f1d1d 0%, #9f1239 50%, #881337 100%) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .footer-inner {
   max-width: 1100px;
   margin: 0 auto;
-  padding: 2.5rem 1.5rem 1.5rem;
+  padding: 3rem 1.5rem 1.5rem;
 
   @media (max-width: 600px) {
     padding: 2rem 1rem 1.25rem;
@@ -844,7 +724,6 @@ $nav-h: 52px;
     grid-template-columns: 1fr 1fr;
     gap: 2rem;
   }
-
   @media (max-width: 480px) {
     grid-template-columns: 1fr;
     gap: 1.5rem;
@@ -852,46 +731,9 @@ $nav-h: 52px;
   }
 }
 
-.footer-logo {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 0.85rem;
-
-  @media (max-width: 480px) {
-    justify-content: center;
-  }
-}
-
-.footer-logo-icon {
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.footer-logo-name {
+.footer-col-title {
   font-family: 'Prompt', sans-serif;
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: #fff;
-}
-
-.footer-desc {
-  font-size: 0.83rem;
-  color: rgba(255, 255, 255, 0.6);
-  line-height: 1.8;
-  margin: 0;
-}
-
-.footer-heading {
-  font-family: 'Prompt', sans-serif;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.45);
   letter-spacing: 0.1em;
@@ -899,10 +741,46 @@ $nav-h: 52px;
   margin-bottom: 1rem;
 }
 
+.footer-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 0.9rem;
+
+  @media (max-width: 480px) {
+    justify-content: center;
+  }
+}
+
+.footer-brand-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.footer-brand-name {
+  font-family: 'Prompt', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+}
+.footer-desc {
+  font-size: 0.84rem;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.75;
+  margin: 0;
+}
+
 .footer-links {
   display: flex;
   flex-direction: column;
-  gap: 9px;
+  gap: 10px;
 
   @media (max-width: 480px) {
     align-items: center;
@@ -912,8 +790,8 @@ $nav-h: 52px;
 .footer-link {
   display: inline-flex;
   align-items: center;
-  color: rgba(255, 255, 255, 0.72);
-  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.86rem;
   text-decoration: none;
   transition:
     color 0.2s,
@@ -928,23 +806,24 @@ $nav-h: 52px;
 .footer-contacts {
   display: flex;
   flex-direction: column;
-  gap: 9px;
+  gap: 10px;
 
   @media (max-width: 480px) {
     align-items: center;
   }
 }
 
-.footer-contact {
+.footer-contact-item {
   display: flex;
   align-items: flex-start;
   gap: 8px;
-  color: rgba(255, 255, 255, 0.68);
-  font-size: 0.83rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.84rem;
   line-height: 1.5;
 
   @media (max-width: 480px) {
     justify-content: center;
+    align-items: center;
   }
 }
 
@@ -958,7 +837,7 @@ $nav-h: 52px;
 .footer-divider {
   height: 1px;
   background: rgba(255, 255, 255, 0.08);
-  margin: 1.75rem 0 1.25rem;
+  margin: 2rem 0 1.25rem;
 }
 
 .footer-bottom {
@@ -967,99 +846,20 @@ $nav-h: 52px;
   justify-content: center;
   flex-wrap: wrap;
   gap: 8px;
-  font-size: 0.77rem;
-  color: rgba(255, 255, 255, 0.38);
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.4);
   text-align: center;
-  line-height: 1.7;
+  line-height: 1.6;
 }
 
-.footer-sep {
+.footer-bottom-sep {
   opacity: 0.4;
 }
 
 @media (max-width: 480px) {
   .footer-bottom {
     flex-direction: column;
-    gap: 3px;
-  }
-}
-.alert-card {
-  width: 340px;
-  max-width: 92vw;
-  border-radius: 20px !important;
-  overflow: hidden;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.18) !important;
-  font-family: 'Sarabun', 'Noto Sans Thai', sans-serif;
-}
-.alert-icon-wrap {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 28px 0 20px;
-  &--error {
-    background: linear-gradient(135deg, #7f1d1d, #e11d48);
-  }
-  &--success {
-    background: linear-gradient(135deg, #14532d, #16a34a);
-  }
-  &--warning {
-    background: linear-gradient(135deg, #78350f, #f59e0b);
-  }
-  &--info {
-    background: linear-gradient(135deg, #1e3a5f, #2563eb);
-  }
-}
-.alert-icon-ring {
-  width: 62px;
-  height: 62px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.18);
-  border: 2px solid rgba(255, 255, 255, 0.32);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.alert-body {
-  padding: 20px 24px 8px !important;
-  text-align: center;
-}
-.alert-title {
-  font-family: 'Prompt', 'Noto Sans Thai', sans-serif;
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: #4a0010;
-  margin-bottom: 8px;
-}
-.alert-message {
-  font-size: 0.92rem;
-  color: #64748b;
-  line-height: 1.65;
-}
-.alert-actions {
-  padding: 12px 24px 22px !important;
-}
-.alert-btn {
-  min-width: 110px;
-  border-radius: 10px !important;
-  font-family: 'Sarabun', 'Noto Sans Thai', sans-serif;
-  font-size: 0.95rem;
-  font-weight: 600;
-  padding: 8px 28px !important;
-  &--error {
-    background: linear-gradient(135deg, #e11d48, #db2777) !important;
-    color: #fff !important;
-  }
-  &--success {
-    background: linear-gradient(135deg, #16a34a, #15803d) !important;
-    color: #fff !important;
-  }
-  &--warning {
-    background: linear-gradient(135deg, #f59e0b, #d97706) !important;
-    color: #fff !important;
-  }
-  &--info {
-    background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
-    color: #fff !important;
+    gap: 4px;
   }
 }
 </style>

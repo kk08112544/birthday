@@ -4,7 +4,7 @@
     <q-header class="admin-header">
       <q-toolbar class="admin-toolbar">
         <div class="header-logo">
-          <q-icon name="celebration" size="22px" color="white" />
+          <q-icon name="celebration" size="20px" color="white" />
         </div>
 
         <q-toolbar-title class="admin-title">
@@ -13,9 +13,14 @@
 
         <q-space />
 
-        <div class="admin-badge gt-xs" v-if="firstName">
+        <div class="admin-badge gt-xs" v-if="isLoggedIn">
           <q-icon name="admin_panel_settings" size="16px" />
           <span>{{ firstName }}</span>
+          <!-- Crown badge — superAdmin only -->
+          <div v-if="isSuperAdmin" class="super-crown">
+            <q-icon name="workspace_premium" size="16px" color="amber-4" />
+            <q-tooltip>Super Administrator</q-tooltip>
+          </div>
         </div>
 
         <q-btn
@@ -40,9 +45,9 @@
       </q-toolbar>
     </q-header>
 
-    <!-- ===== PAGE CONTENT (Quasar จัดการ offset header ให้อัตโนมัติ) ===== -->
+    <!-- ===== PAGE CONTENT ===== -->
     <q-page-container>
-      <!-- BANNER อยู่ใน page-container เพื่อให้ Quasar offset header ให้เอง -->
+      <!-- BANNER -->
       <div class="banner-section">
         <div class="banner-wrap">
           <q-img src="/ldd_banner.jpg" class="banner-img" fit="cover" :ratio="18 / 9">
@@ -69,15 +74,16 @@
       <!-- NAV BAR -->
       <div class="nav-bar-wrap">
         <div class="nav-bar">
+          <!-- เทศกาล -->
           <router-link
-            to="/admin/festival"
+            to="/backoffice/festival"
             class="nav-item"
             :class="{
               'nav-item--active':
-                route.path.startsWith('/admin/festival') ||
-                route.path.startsWith('/admin/edit') ||
-                route.path.startsWith('/admin/create') ||
-                route.path.startsWith('/admin/view'),
+                route.path.startsWith('/backoffice/festival') ||
+                route.path.startsWith('/backoffice/festival/create') ||
+                route.path.startsWith('/backoffice/festival/edit') ||
+                route.path.startsWith('/backoffice/festival/view'),
             }"
           >
             <div class="nav-item-icon"><q-icon name="celebration" size="18px" /></div>
@@ -87,15 +93,33 @@
 
           <div class="nav-divider" />
 
+          <!-- รายการคำต้องห้าม -->
           <router-link
-            to="/admin/unpolite"
+            to="/backoffice/unpolite"
             class="nav-item"
-            :class="{ 'nav-item--active': route.path === '/admin/unpolite' }"
+            :class="{ 'nav-item--active': route.path === '/backoffice/unpolite' }"
           >
             <div class="nav-item-icon"><q-icon name="block" size="18px" /></div>
             <span>รายการคำต้องห้าม</span>
             <div class="nav-item-indicator" />
           </router-link>
+
+          <!-- SuperAdmin nav item — จัดการผู้ใช้ -->
+          <template v-if="isSuperAdmin">
+            <div class="nav-divider" />
+            <router-link
+              to="/backoffice/users"
+              class="nav-item nav-item--super"
+              :class="{ 'nav-item--active': route.path.startsWith('/backoffice/users') }"
+            >
+              <div class="nav-item-icon"><q-icon name="manage_accounts" size="18px" /></div>
+              <span>จัดการผู้ใช้</span>
+              <div class="nav-super-badge">
+                <q-icon name="workspace_premium" size="13px" />
+              </div>
+              <div class="nav-item-indicator" />
+            </router-link>
+          </template>
         </div>
       </div>
 
@@ -149,11 +173,20 @@
           <div class="footer-col">
             <div class="footer-col-title">เมนูทางลัด</div>
             <div class="footer-links">
-              <router-link to="/admin/festival" class="footer-link">
+              <router-link to="/backoffice/festival" class="footer-link">
                 <q-icon name="celebration" size="14px" class="q-mr-xs" />เทศกาล
               </router-link>
-              <router-link to="/admin/unpolite" class="footer-link">
+              <router-link to="/backoffice/unpolite" class="footer-link">
                 <q-icon name="block" size="14px" class="q-mr-xs" />รายการคำต้องห้าม
+              </router-link>
+              <!-- Footer shortcut — superAdmin only -->
+              <router-link
+                v-if="isSuperAdmin"
+                to="/backoffice/users"
+                class="footer-link footer-link--super"
+              >
+                <q-icon name="manage_accounts" size="14px" class="q-mr-xs" />จัดการผู้ใช้
+                <q-icon name="workspace_premium" size="12px" class="q-ml-xs" color="amber-4" />
               </router-link>
             </div>
           </div>
@@ -195,91 +228,77 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted, watch } from 'vue';
-import { useQuasar } from 'quasar';
-import { api } from 'src/boot/axios';
 import { useRouter, useRoute } from 'vue-router';
 
-const route = useRoute();
-const $q = useQuasar();
-const router = useRouter();
-
-const firstName = ref(localStorage.getItem('firstName') || '');
-const isLoggedIn = computed(() => !!firstName.value);
-
-watch(
-  () => route.path,
-  () => {
-    firstName.value = localStorage.getItem('firstName') || '';
-  },
-  { immediate: true },
-);
-
+// ─── Types ────────────────────────────────────────────────────────────────────
 type AlertType = 'error' | 'success' | 'warning' | 'info';
 
-const alertDialog = reactive({
+interface AlertDialog {
+  show: boolean;
+  type: AlertType;
+  icon: string;
+  title: string;
+  message: string;
+  btnLabel: string;
+}
+
+// ─── Router ───────────────────────────────────────────────────────────────────
+const route = useRoute();
+const router = useRouter();
+
+// ─── Auth State ───────────────────────────────────────────────────────────────
+const firstName = ref<string>('');
+const userRole = ref<string>('');
+
+const isLoggedIn = computed(() => !!firstName.value);
+const isSuperAdmin = computed(() => userRole.value === 'superAdmin');
+
+/** Read auth fields from localStorage into reactive refs. */
+const syncAuthState = (): void => {
+  firstName.value = localStorage.getItem('firstName') ?? '';
+  userRole.value = localStorage.getItem('role') ?? '';
+};
+
+// Re-sync on every route change (e.g. after login redirect)
+watch(() => route.path, syncAuthState, { immediate: true });
+
+// ─── Alert Dialog ─────────────────────────────────────────────────────────────
+const alertDialog = reactive<AlertDialog>({
   show: false,
-  type: 'error' as AlertType,
+  type: 'error',
   icon: 'report_problem',
   title: '',
   message: '',
   btnLabel: 'ตกลง',
 });
 
-const showAlert = (
-  message: string,
-  type: AlertType = 'error',
-  title?: string,
-  btnLabel = 'ตกลง',
-) => {
-  const config: Record<AlertType, { icon: string; title: string }> = {
-    error: { icon: 'error_outline', title: 'เกิดข้อผิดพลาด' },
-    success: { icon: 'check_circle_outline', title: 'สำเร็จ' },
-    warning: { icon: 'warning_amber', title: 'คำเตือน' },
-    info: { icon: 'info_outline', title: 'แจ้งเตือน' },
-  };
-  alertDialog.type = type;
-  alertDialog.icon = config[type].icon;
-  alertDialog.title = title ?? config[type].title;
-  alertDialog.message = message;
-  alertDialog.btnLabel = btnLabel;
-  alertDialog.show = true;
+// ─── Logout ───────────────────────────────────────────────────────────────────
+const AUTH_KEYS: readonly string[] = [
+  'accessToken',
+  'refreshToken',
+  'username',
+  'userId',
+  'firstName',
+  'role',
+];
+
+const handleLogout = (): void => {
+  AUTH_KEYS.forEach((key) => localStorage.removeItem(key));
+  syncAuthState();
+  router.push('/backoffice/login').catch(console.error);
 };
 
-const fetchFestival = async () => {
-  $q.loading.show();
-  try {
-    const response = await api.get('/festival/all');
-    if (response.data?.festival?.length > 0) {
-      const data = response.data.festival[0];
-      localStorage.setItem('festivalId', String(data.fId));
-    }
-  } catch {
-    showAlert('ไม่สามารถโหลดข้อมูลได้ กรุณาลองใหม่อีกครั้ง', 'error');
-  } finally {
-    $q.loading.hide();
-  }
-};
-
-const handleLogout = () => {
-  localStorage.removeItem('accessToken');
-  localStorage.removeItem('refreshToken');
-  localStorage.removeItem('username');
-  localStorage.removeItem('userId');
-  localStorage.removeItem('firstName');
-  firstName.value = '';
-  router.push('/login').catch(console.error);
-};
-
+// ─── Lifecycle ────────────────────────────────────────────────────────────────
 onMounted(() => {
-  void fetchFestival();
   document.title = 'ระบบบริหารจัดการอวยพรเนื่องในโอกาสต่างๆ ของกรมฯ';
-  firstName.value = localStorage.getItem('firstName') || '';
+  syncAuthState();
 });
 </script>
 
 <style lang="scss" scoped>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&family=Sarabun:wght@400;500;600;700&family=Prompt:wght@500;600;700&display=swap');
 
+// ─── Design Tokens ────────────────────────────────────────────────────────────
 $rose: #be123c;
 $rose-mid: #e11d48;
 $rose-light: #fb7185;
@@ -291,9 +310,7 @@ $text-main: #4a0010;
 $text-muted: #9ca3af;
 $nav-h: 52px;
 
-// ============================================================
-// HEADER
-// ============================================================
+// ─── HEADER ───────────────────────────────────────────────────────────────────
 .admin-header {
   background: linear-gradient(135deg, #7f1d1d 0%, $rose-mid 50%, #db2777 100%) !important;
   box-shadow: 0 2px 20px rgba(190, 18, 60, 0.38) !important;
@@ -357,6 +374,25 @@ $nav-h: 52px;
   flex-shrink: 0;
 }
 
+// Animated gold crown for superAdmin
+.super-crown {
+  display: flex;
+  align-items: center;
+  animation: crown-glow 2.2s ease-in-out infinite;
+}
+
+@keyframes crown-glow {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 2px rgba(251, 191, 36, 0.6));
+    opacity: 0.85;
+  }
+  50% {
+    filter: drop-shadow(0 0 7px rgba(251, 191, 36, 0.95));
+    opacity: 1;
+  }
+}
+
 .logout-btn {
   background: rgba(255, 255, 255, 0.1) !important;
   border: 1px solid rgba(255, 255, 255, 0.2) !important;
@@ -365,6 +401,7 @@ $nav-h: 52px;
     background 0.2s,
     transform 0.15s !important;
   flex-shrink: 0;
+
   &:hover {
     background: rgba(255, 255, 255, 0.2) !important;
     transform: scale(1.05);
@@ -416,9 +453,7 @@ $nav-h: 52px;
   }
 }
 
-// ============================================================
-// BANNER — ไม่ต้องมี margin-top เพราะอยู่ใน q-page-container แล้ว
-// ============================================================
+// ─── BANNER ───────────────────────────────────────────────────────────────────
 .banner-section {
   background: linear-gradient(180deg, #fff1f2 0%, #fce7f3 100%);
   padding: 4px 0 0;
@@ -499,9 +534,7 @@ $nav-h: 52px;
   }
 }
 
-// ============================================================
-// NAV BAR — sticky ใน flow ปกติ ไม่ขัดกับ fixed header
-// ============================================================
+// ─── NAV BAR ──────────────────────────────────────────────────────────────────
 .nav-bar-wrap {
   background: $surface;
   border-bottom: 1px solid rgba(190, 18, 60, 0.1);
@@ -573,6 +606,7 @@ $nav-h: 52px;
   &:hover {
     color: $rose-mid;
     background: rgba(190, 18, 60, 0.04);
+
     .nav-item-icon {
       opacity: 1;
       transform: scale(1.1);
@@ -582,11 +616,34 @@ $nav-h: 52px;
   &--active {
     color: $rose-mid;
     background: rgba(190, 18, 60, 0.05);
+
     .nav-item-icon {
       opacity: 1;
     }
     .nav-item-indicator {
       transform: translateX(-50%) scaleX(1);
+    }
+  }
+
+  // ── SuperAdmin nav item ──────────────────────────────────────────────────────
+  &--super {
+    .nav-super-badge {
+      display: flex;
+      align-items: center;
+      color: $gold-light;
+      opacity: 0.65;
+      margin-left: -2px;
+      transition: opacity 0.2s;
+    }
+
+    &:hover .nav-super-badge,
+    &.nav-item--active .nav-super-badge {
+      opacity: 1;
+    }
+
+    // Gold indicator line when active
+    &.nav-item--active .nav-item-indicator {
+      background: linear-gradient(90deg, $gold, $gold-light);
     }
   }
 }
@@ -598,17 +655,13 @@ $nav-h: 52px;
   flex-shrink: 0;
 }
 
-// ============================================================
-// PAGE CONTENT
-// ============================================================
+// ─── PAGE CONTENT ─────────────────────────────────────────────────────────────
 .page-content {
   background: linear-gradient(150deg, #fff1f2 0%, #fdf4ff 50%, #fff7ed 100%);
   min-height: 60vh;
 }
 
-// ============================================================
-// ALERT DIALOG
-// ============================================================
+// ─── ALERT DIALOG ─────────────────────────────────────────────────────────────
 .alert-card {
   width: 340px;
   max-width: 92vw;
@@ -697,9 +750,7 @@ $nav-h: 52px;
   }
 }
 
-// ============================================================
-// FOOTER
-// ============================================================
+// ─── FOOTER ───────────────────────────────────────────────────────────────────
 .site-footer {
   background: linear-gradient(135deg, #7f1d1d 0%, #9f1239 50%, #881337 100%) !important;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
@@ -709,6 +760,7 @@ $nav-h: 52px;
   max-width: 1100px;
   margin: 0 auto;
   padding: 3rem 1.5rem 1.5rem;
+
   @media (max-width: 600px) {
     padding: 2rem 1rem 1.25rem;
   }
@@ -718,6 +770,7 @@ $nav-h: 52px;
   display: grid;
   grid-template-columns: 2fr 1fr 1.5fr;
   gap: 2.5rem;
+
   @media (max-width: 768px) {
     grid-template-columns: 1fr 1fr;
     gap: 2rem;
@@ -744,6 +797,7 @@ $nav-h: 52px;
   align-items: center;
   gap: 10px;
   margin-bottom: 0.9rem;
+
   @media (max-width: 480px) {
     justify-content: center;
   }
@@ -778,6 +832,7 @@ $nav-h: 52px;
   display: flex;
   flex-direction: column;
   gap: 10px;
+
   @media (max-width: 480px) {
     align-items: center;
   }
@@ -792,9 +847,19 @@ $nav-h: 52px;
   transition:
     color 0.2s,
     padding-left 0.2s;
+
   &:hover {
     color: $gold-light;
     padding-left: 4px;
+  }
+
+  // SuperAdmin footer link — subtle gold tint
+  &--super {
+    color: rgba(251, 191, 36, 0.65);
+
+    &:hover {
+      color: $gold-light;
+    }
   }
 }
 
@@ -802,6 +867,7 @@ $nav-h: 52px;
   display: flex;
   flex-direction: column;
   gap: 10px;
+
   @media (max-width: 480px) {
     align-items: center;
   }
@@ -814,6 +880,7 @@ $nav-h: 52px;
   color: rgba(255, 255, 255, 0.7);
   font-size: 0.84rem;
   line-height: 1.5;
+
   @media (max-width: 480px) {
     justify-content: center;
     align-items: center;

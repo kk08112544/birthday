@@ -69,7 +69,7 @@ api.interceptors.response.use(
       const refreshToken = localStorage.getItem('refreshToken');
       if (!refreshToken) throw new Error('No refresh token');
 
-      const response = await api.post('/auth/renew', { refreshToken });
+      const response = await api.post('/backoffice/auth/renew', { refreshToken });
       const { accessToken, refreshToken: newRefresh } = response.data.token;
 
       localStorage.setItem('accessToken', accessToken);

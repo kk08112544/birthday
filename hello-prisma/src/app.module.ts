@@ -6,13 +6,12 @@ import { AppService } from './app.service';
 import { PrismaModule } from './prisma.module';
 import { FestivalModule } from './festival/festival.module';
 import { SenderModule } from './sender/sender.module';
-import { AdminCardModule } from './admin/card/card.module';
-import { AdminUnpoliteModule } from './admin/unpolite/unpolite.module';
-import { AdminFestivalModule } from './admin/festival/festival.module';
-import { AdminWisherModule } from './admin/wisher/wisher.module';
+import { AdminUnpoliteModule } from './backoffice/unpolite/unpolite.module';
+import { AdminFestivalModule } from './backoffice/festival/festival.module';
+import { AdminModule } from './backoffice/admin/admin.module';
 import { UploadModule } from './upload/upload.module';
-import { AuthModule } from './auth/auth.module';
-import { AdminScheduleModule } from './admin/schedule/schedule.module';
+import { AuthModule } from './backoffice/auth/auth.module';
+import { AdminScheduleModule } from './backoffice/schedule/schedule.module';
 
 @Module({
   imports: [
@@ -25,10 +24,9 @@ import { AdminScheduleModule } from './admin/schedule/schedule.module';
     SenderModule,
     AdminUnpoliteModule,
     AdminFestivalModule,
-    AdminWisherModule,
-    AdminCardModule,
     UploadModule,
     AuthModule,
+    AdminModule,
     AdminScheduleModule, // ✅ เพิ่มตรงนี้
   ],
   controllers: [AppController],
