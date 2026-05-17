@@ -16,25 +16,30 @@ export class ScheduleService {
     try {
       const now = new Date();
 
-      // ✅ พรุ่งนี้ 00:00:00 → endDate < พรุ่งนี้ = วันนี้และก่อนหน้า
-      // เช่น 12/05/2569 < 13/05/2569 ✅
       const tomorrow = new Date(
         now.getFullYear(),
         now.getMonth(),
-        now.getDate() + 1,
+        now.getDate(),
       );
+
       this.logger.log(`📅 Tomorrow: ${tomorrow.toISOString()}`);
 
       const expiredFestivals = await this.prisma.festival.findMany({
         where: {
-          endDate: { lt: new Date() }, // endDate < GETDATE()
+          endDate: {
+            lt: tomorrow,
+          },
           deletedAt: null,
-          isEdit: Boolean(true),
-          isDelete: Boolean(true), // ✅ แก้จาก true → false
+          isEdit: true,
+          isDelete: true,
         },
-        select: { fId: true, endDate: true, isEdit: true, isDelete: true },
+        select: {
+          fId: true,
+          endDate: true,
+          isEdit: true,
+          isDelete: true,
+        },
       });
-
       this.logger.log(
         `🔍 Found ${expiredFestivals.length} records: ${JSON.stringify(expiredFestivals)}`,
       );

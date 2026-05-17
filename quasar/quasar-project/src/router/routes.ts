@@ -54,12 +54,12 @@ const routes: RouteRecordRaw[] = [
   },
   {
     path: '/backoffice',
-    component: () => import('src/layouts/AdminLayout.vue'),
+    component: () => import('src/layouts/BackofficeLayout.vue'),
     children: [{ path: 'login', component: () => import('src/pages/backoffice/LoginPage.vue') }],
   },
   {
     path: '/backoffice/festival',
-    component: () => import('src/layouts/AdminLayout.vue'),
+    component: () => import('src/layouts/BackofficeLayout.vue'),
     meta: { requiresAuth: true },
     children: [
       { path: '', component: () => import('pages/backoffice/festival/FestivalPage.vue') },
@@ -78,13 +78,13 @@ const routes: RouteRecordRaw[] = [
   },
   {
     path: '/backoffice/admin',
-    component: () => import('src/layouts/AdminLayout.vue'),
+    component: () => import('src/layouts/BackofficeLayout.vue'),
     meta: { requiresAuth: true },
     children: [{ path: '', component: () => import('pages/backoffice/admin/AdminPage.vue') }],
   },
   {
     path: '/backoffice',
-    component: () => import('src/layouts/AdminLayout.vue'),
+    component: () => import('src/layouts/BackofficeLayout.vue'),
     meta: { requiresAuth: true },
     children: [{ path: 'unpolite', component: () => import('pages/backoffice/UnpolitePage.vue') }],
   },
