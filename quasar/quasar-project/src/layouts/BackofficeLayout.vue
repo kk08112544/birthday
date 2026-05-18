@@ -108,10 +108,11 @@
           <template v-if="isSuperAdmin">
             <div class="nav-divider" />
             <router-link
-              to="/backoffice/users"
+              to="/backoffice/admin"
               class="nav-item nav-item--super"
-              :class="{ 'nav-item--active': route.path.startsWith('/backoffice/users') }"
+              :class="{ 'nav-item--active': route.path.startsWith('/backoffice/admin') }"
             >
+              <!-- :class="{ 'nav-item--active': route.path.startsWith('/backoffice/users') }" -->
               <div class="nav-item-icon"><q-icon name="manage_accounts" size="18px" /></div>
               <span>จัดการผู้ใช้</span>
               <div class="nav-super-badge">

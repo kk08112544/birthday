@@ -21,22 +21,16 @@
             <span class="label-dot" />
             ข้อมูลเทศกาล
           </div>
-          <div ref="coverRef" class="field-group">
-            <!-- <div class="cover-upload-zone" ref="coverRef" @click="fileInput?.pickFiles()"> -->
-            <!-- <div
-              class="cover-upload-zone"
-              :class="{ 'upload-zone--error': imageError
 
-              }"
-              @click="fileInput?.pickFiles()"
-            > -->
+          <!-- COVER IMAGE -->
+          <div ref="coverRef" class="field-group">
             <div
               class="cover-upload-zone"
               :class="{
                 'upload-zone--error': imageError,
-                'upload-zone--disabled': !isEdit && !isOwner,
+                'upload-zone--disabled': !canEdit,
               }"
-              @click="isEdit && fileInput?.pickFiles()"
+              @click="canEdit && fileInput?.pickFiles()"
             >
               <q-img
                 v-if="imageFile || existingImageUrl"
@@ -45,17 +39,11 @@
                 fit="contain"
                 :ratio="16 / 9"
               >
-                <!-- <div class="cover-overlay"> -->
-                <div v-if="isEdit" class="cover-overlay">
+                <div v-if="canEdit" class="cover-overlay">
                   <q-icon name="photo_camera" size="28px" color="white" />
                   <span>เปลี่ยนรูป</span>
                 </div>
               </q-img>
-              <!-- <div v-else class="cover-placeholder">
-              <div class="cover-placeholder-icon">🖼️</div>
-              <div class="cover-placeholder-text">คลิกเพื่ออัปโหลดรูปหน้าปก</div>
-              <div class="cover-placeholder-sub">PNG, JPG ขนาดไม่เกิน 5MB</div>
-            </div> -->
               <div v-else class="cover-placeholder">
                 <div class="cover-placeholder-icon">🖼️</div>
                 <div class="cover-placeholder-text">คลิกเพื่ออัปโหลดรูปหน้าปก</div>
@@ -82,7 +70,6 @@
             </transition>
           </div>
 
-          <!-- <q-file v-model="imageFile" ref="fileInput" accept="image/*" class="hidden" /> -->
           <q-file
             v-model="imageFile"
             ref="fileInput"
@@ -91,23 +78,12 @@
             @update:model-value="onImageSelected"
           />
 
+          <!-- FESTIVAL NAME -->
           <div ref="nameRef" class="q-mt-md field-group">
-            <!-- <q-input
-              outlined
-              v-model="festivalName"
-              label="ชื่อเทศกาล"
-              placeholder="เช่น วันสงกรานต์ 2568"
-              dense
-              autofocus
-              :error="nameError"
-              :error-message="nameError ? 'ชื่อเทศกาลจำเป็นต้องกรอก' : ''"
-              class="custom-input"
-               @update:model-value="nameError = false"
-            > -->
             <q-input
               outlined
               v-model="festivalName"
-              :disable="!isEdit && !isOwner"
+              :disable="!canEdit"
               label="ชื่อเทศกาล"
               placeholder="เช่น สงกรานต์-IT-2568"
               hint="รูปแบบ: เทศกาล-หน่วยงาน-ปี"
@@ -124,37 +100,17 @@
                 <q-icon name="festival" color="deep-orange-5" />
               </template>
             </q-input>
-            <!-- <q-input
-              outlined
-              v-model="festivalName"
-              label="ชื่อเทศกาล"
-              placeholder="เช่น วันสงกรานต์ 2568"
-              dense
-              autofocus
-              :error="nameError"
-  :error-message="nameError ? 'รูปแบบต้องเป็น เทศกาล-หน่วยงาน-ปี เช่น สงกรานต์-IT-2568' : ''"
-              class="custom-input"
-                 @update:model-value="onFestivalNameChange"
-            >
-              <template v-slot:prepend>
-                <q-icon name="festival" color="deep-orange-5" />
-              </template>
-            </q-input> -->
           </div>
+
           <!-- LOGO UPLOAD -->
           <div ref="logoRef" class="q-mt-md field-group">
-            <!-- <div
-              class="logo-upload-zone"
-              :class="{ 'upload-zone--error': logoError }"
-              @click="logoInput?.pickFiles()"
-            > -->
             <div
               class="logo-upload-zone"
               :class="{
                 'upload-zone--error': logoError,
-                'upload-zone--disabled': !isEdit,
+                'upload-zone--disabled': !canEdit,
               }"
-              @click="isEdit && logoInput?.pickFiles()"
+              @click="canEdit && logoInput?.pickFiles()"
             >
               <q-img
                 v-if="logoFile"
@@ -163,11 +119,7 @@
                 :ratio="1"
                 fit="contain"
               >
-                <!-- <div  class="cover-overlay">
-                  <q-icon name="photo_camera" size="20px" color="white" />
-                  <span>เปลี่ยน Logo</span>
-                </div> -->
-                <div v-if="isEdit" class="cover-overlay">
+                <div v-if="canEdit" class="cover-overlay">
                   <q-icon name="photo_camera" size="20px" color="white" />
                   <span>เปลี่ยน Logo</span>
                 </div>
@@ -192,24 +144,12 @@
               @update:model-value="onLogoSelected"
             />
           </div>
+
+          <!-- WEB NAME -->
           <div ref="webNameRef" class="q-mt-md field-group">
-            <!-- <q-input
-              v-model="webName"
-              label="ชื่อเว็บไซต์ (URL slug)"
-              placeholder="เช่น songkran-2568"
-              outlined
-              dense
-              lazy-rules
-              :rules="[
-                (val) =>
-                  (typeof val === 'string' && val.trim().length > 0) ||
-                  'ชื่อเว็บไซต์จำเป็นต้องกรอก',
-              ]"
-              class="custom-input"
-            > -->
             <q-input
               v-model="webName"
-              :disable="!isEdit"
+              :disable="!canEdit"
               label="ชื่อเว็บไซต์ (URL slug)"
               placeholder="เช่น songkran-2568"
               outlined
@@ -227,6 +167,7 @@
               </template>
             </q-input>
           </div>
+
           <!-- ===== DATE RANGE SECTION ===== -->
           <div ref="dateRef" class="q-mt-lg field-group">
             <div class="date-section-header">
@@ -261,8 +202,8 @@
                   v-if="startDate"
                   class="date-chip-clear"
                   type="button"
+                  :disabled="!canEdit"
                   @click="startDate = ''"
-                  :disabled="!isEdit"
                 >
                   <q-icon name="close" size="12px" />
                 </button>
@@ -293,8 +234,8 @@
                   v-if="endDate"
                   class="date-chip-clear"
                   type="button"
+                  :disabled="!canEditEndDate"
                   @click="endDate = ''"
-                  :disabled="!isEditEndDate"
                 >
                   <q-icon name="close" size="12px" />
                 </button>
@@ -310,7 +251,7 @@
               </div>
             </transition>
 
-            <!-- Error -->
+            <!-- Date error -->
             <transition name="err-fade">
               <div v-if="dateError" class="error-msg q-mt-xs">
                 <q-icon name="error_outline" size="14px" />
@@ -318,7 +259,7 @@
               </div>
             </transition>
 
-            <!-- Calendar grid: desktop side-by-side, mobile stacked -->
+            <!-- Calendars -->
             <div class="calendars-wrap">
               <!-- START DATE -->
               <div class="calendar-block">
@@ -329,22 +270,8 @@
                     formatDateThai(startDate)
                   }}</span>
                 </div>
-                <!-- <div class="cal-wrapper cal-wrapper--start">
-                
-                      <q-date
-                    v-model="startDate"
-                    :disable="!isEdit"
-                    :options="startDateOptions"
-                    color="indigo-6"
-                    text-color="white"
-                    flat
-                    minimal
-                    class="fest-calendar"
-                    @update:model-value="onStartDateChange"
-                  />
-                </div> -->
-                <!-- START DATE -->
-                <div class="cal-wrapper cal-wrapper--start" :class="{ 'cal-readonly': !isEdit }">
+                <div class="cal-wrapper cal-wrapper--start">
+                  <!-- :class="{ 'cal-readonly': !canEdit }" -->
                   <q-date
                     v-model="startDate"
                     :options="startDateOptions"
@@ -365,24 +292,10 @@
                   <span>วันสิ้นสุด</span>
                   <span v-if="endDate" class="cal-label-date">{{ formatDateThai(endDate) }}</span>
                 </div>
-                <!-- <div class="cal-wrapper cal-wrapper--end">
-                  <q-date
-                    v-model="endDate"
-                    :disable="!isEditEndDate"
-                    :options="endDateOptions"
-                    color="teal-6"
-                    text-color="white"
-                    flat
-                    minimal
-                    class="fest-calendar"
-                    @update:model-value="onEndDateChange"
-                  />
-                </div> -->
-                <!-- END DATE -->
                 <div
                   class="cal-wrapper cal-wrapper--end"
-                  :class="{ 'cal-readonly': !isEditEndDate }"
                 >
+                 <!-- :class="{ 'cal-readonly': !canEditEndDate }" -->
                   <q-date
                     v-model="endDate"
                     :options="endDateOptions"
@@ -412,7 +325,7 @@
               <span class="card-header-unit">รายการ</span>
             </div>
             <q-btn
-              :disable="!isEdit"
+              :disable="!canEdit"
               unelevated
               color="deep-orange-5"
               icon="add"
@@ -430,17 +343,9 @@
             >
               <div class="wish-number">{{ i + 1 }}</div>
               <div class="wish-text">{{ wish.wishWord }}</div>
-              <!-- <div v-if="isEdit" class="wish-actions">
-                <button class="wish-btn wish-btn--edit" type="button" @click="editWish(i)">
-                  <q-icon name="edit" size="16px" />
-                </button>
-                <button class="wish-btn wish-btn--delete" type="button" @click="deleteWish(i)">
-                  <q-icon name="delete_outline" size="16px" />
-                </button>
-              </div> -->
               <button
                 class="wish-btn wish-btn--edit"
-                :disabled="!isEdit"
+                :disabled="!canEdit"
                 type="button"
                 @click="editWish(i)"
               >
@@ -448,7 +353,7 @@
               </button>
               <button
                 class="wish-btn wish-btn--delete"
-                :disabled="!isEdit"
+                :disabled="!canEdit"
                 type="button"
                 @click="deleteWish(i)"
               >
@@ -479,7 +384,7 @@
               <span class="card-header-unit">รูป</span>
             </div>
             <q-btn
-              :disable="!isEdit"
+              :disable="!canEdit"
               unelevated
               color="teal-6"
               icon="add_photo_alternate"
@@ -497,7 +402,7 @@
             >
               <q-img :src="card.previewUrl" ratio="1" fit="contain" class="card-thumb-img" />
               <button
-                v-if="isEdit"
+                v-if="canEdit"
                 class="card-thumb-remove"
                 type="button"
                 @click="removeExistingCard(i)"
@@ -507,7 +412,7 @@
             </div>
             <div v-for="(file, i) in cardFileList" :key="'new-' + i" class="card-thumb">
               <q-img :src="getFilePreview(file)" ratio="1" fit="contain" class="card-thumb-img" />
-              <button v-if="isEdit" class="card-thumb-remove" type="button" @click="removeCard(i)">
+              <button v-if="canEdit" class="card-thumb-remove" type="button" @click="removeCard(i)">
                 <q-icon name="close" size="14px" />
               </button>
             </div>
@@ -522,18 +427,11 @@
 
         <!-- ===== SUBMIT ===== -->
         <div class="animate-in" style="animation-delay: 0.25s">
-          <!-- <button
-            type="button"
-            class="submit-btn"
-            :class="{ loading }"
-            :disabled="loading"
-            @click="submitEdit"
-          > -->
           <button
             type="button"
             class="submit-btn"
             :class="{ loading }"
-            :disabled="loading || !isEditEndDate"
+            :disabled="loading || !canEditEndDate"
             @click="submitEdit"
           >
             <span v-if="!loading" class="submit-btn-inner">
@@ -550,11 +448,11 @@
     </div>
 
     <!-- ===== DIALOG: ADD WISH ===== -->
-    <q-dialog v-model="AddWishDialog" :maximized="$q.screen.lt.sm">
+    <q-dialog v-model="addWishDialog" :maximized="$q.screen.lt.sm">
       <div class="custom-dialog" :class="{ 'custom-dialog--mobile': $q.screen.lt.sm }">
         <div class="custom-dialog-header">
           <span>✨ เพิ่มคำอวยพร</span>
-          <button class="dialog-close" type="button" @click="AddWishDialog = false">
+          <button class="dialog-close" type="button" @click="addWishDialog = false">
             <q-icon name="close" size="18px" />
           </button>
         </div>
@@ -574,7 +472,7 @@
             <button
               type="button"
               class="dialog-btn dialog-btn--cancel"
-              @click="AddWishDialog = false"
+              @click="addWishDialog = false"
             >
               ยกเลิก
             </button>
@@ -585,11 +483,11 @@
     </q-dialog>
 
     <!-- ===== DIALOG: EDIT WISH ===== -->
-    <q-dialog v-model="EditWishDialog" :maximized="$q.screen.lt.sm">
+    <q-dialog v-model="editWishDialog" :maximized="$q.screen.lt.sm">
       <div class="custom-dialog" :class="{ 'custom-dialog--mobile': $q.screen.lt.sm }">
         <div class="custom-dialog-header">
           <span>✏️ แก้ไขคำอวยพร</span>
-          <button class="dialog-close" type="button" @click="EditWishDialog = false">
+          <button class="dialog-close" type="button" @click="editWishDialog = false">
             <q-icon name="close" size="18px" />
           </button>
         </div>
@@ -608,7 +506,7 @@
             <button
               type="button"
               class="dialog-btn dialog-btn--cancel"
-              @click="EditWishDialog = false"
+              @click="editWishDialog = false"
             >
               ยกเลิก
             </button>
@@ -619,11 +517,11 @@
     </q-dialog>
 
     <!-- ===== DIALOG: DELETE WISH ===== -->
-    <q-dialog v-model="deleteDialog" persistent>
+    <q-dialog v-model="deleteWishDialog" persistent>
       <div class="custom-dialog">
         <div class="custom-dialog-header custom-dialog-header--danger">
           <span>🗑️ ยืนยันการลบ</span>
-          <button class="dialog-close" type="button" @click="deleteDialog = false">
+          <button class="dialog-close" type="button" @click="deleteWishDialog = false">
             <q-icon name="close" size="18px" />
           </button>
         </div>
@@ -635,7 +533,11 @@
           </p>
         </div>
         <div class="custom-dialog-footer">
-          <button type="button" class="dialog-btn dialog-btn--cancel" @click="deleteDialog = false">
+          <button
+            type="button"
+            class="dialog-btn dialog-btn--cancel"
+            @click="deleteWishDialog = false"
+          >
             ยกเลิก
           </button>
           <button type="button" class="dialog-btn dialog-btn--danger" @click="confirmDelete">
@@ -646,30 +548,6 @@
     </q-dialog>
 
     <!-- ===== DIALOG: ADD CARD ===== -->
-    <!-- <q-dialog v-model="showCardDialog" :maximized="$q.screen.lt.sm">
-      <div class="custom-dialog" :class="{ 'custom-dialog--mobile': $q.screen.lt.sm }">
-        <div class="custom-dialog-header">
-          <span>🃏 เพิ่มรูปการ์ด</span>
-          <button class="dialog-close" type="button" @click="showCardDialog = false">
-            <q-icon name="close" size="18px" />
-          </button>
-        </div>
-        <div class="custom-dialog-body">
-          <q-file
-            v-model="tempCardFile"
-            label="เลือกรูปภาพ"
-            outlined
-            accept="image/*"
-            class="custom-input"
-            @update:model-value="addCardToList"
-          >
-            <template v-slot:prepend>
-              <q-icon name="add_photo_alternate" color="teal-6" />
-            </template>
-          </q-file>
-        </div>
-      </div>
-    </q-dialog> -->
     <q-dialog v-model="showCardDialog" :maximized="$q.screen.lt.sm">
       <div class="custom-dialog" :class="{ 'custom-dialog--mobile': $q.screen.lt.sm }">
         <div class="custom-dialog-header">
@@ -697,7 +575,7 @@
       </div>
     </q-dialog>
 
-    <!-- ===== SUCCESS DIALOG (บันทึกสำเร็จ) ===== -->
+    <!-- ===== SUCCESS DIALOG ===== -->
     <q-dialog v-model="showSuccessDialog">
       <div class="result-dialog">
         <div class="result-dialog-header result-dialog-header--success">
@@ -720,7 +598,7 @@
       </div>
     </q-dialog>
 
-    <!-- ===== ERROR DIALOG (เกิดข้อผิดพลาด) ===== -->
+    <!-- ===== ERROR DIALOG ===== -->
     <q-dialog v-model="showErrorDialog">
       <div class="result-dialog">
         <div class="result-dialog-header result-dialog-header--error">
@@ -743,7 +621,7 @@
       </div>
     </q-dialog>
 
-    <!-- ===== VALIDATION DIALOG (ข้อมูลไม่ครบ) ===== -->
+    <!-- ===== VALIDATION DIALOG ===== -->
     <q-dialog v-model="showValidationDialog">
       <div class="result-dialog">
         <div class="result-dialog-header result-dialog-header--warning">
@@ -771,7 +649,7 @@
       </div>
     </q-dialog>
 
-    <!-- ===== FETCH ERROR DIALOG (โหลดข้อมูลไม่สำเร็จ) ===== -->
+    <!-- ===== FETCH ERROR DIALOG ===== -->
     <q-dialog v-model="showFetchErrorDialog">
       <div class="result-dialog">
         <div class="result-dialog-header result-dialog-header--error">
@@ -803,7 +681,7 @@
 
     <!-- ===== CLICK PARTICLES ===== -->
     <teleport to="body">
-      <div class="click-particles-root">
+      <div class="click-particles-root" aria-hidden="true">
         <span v-for="p in activeParticles" :key="p.id" class="click-particle" :style="p.style" />
       </div>
     </teleport>
@@ -811,18 +689,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, nextTick, computed } from 'vue';
-import { useQuasar } from 'quasar';
+import { ref, onMounted, onUnmounted, nextTick, computed } from 'vue';
+import { LocalStorage, useQuasar } from 'quasar';
 import { api } from 'src/boot/axios';
 import { useRouter, useRoute } from 'vue-router';
 import type { QFile } from 'quasar';
 
-const fileInput = ref<InstanceType<typeof QFile> | null>(null);
-const $q = useQuasar();
-const router = useRouter();
-const route = useRoute();
-
-/* ===== TYPES ===== */
+// ─── Types ────────────────────────────────────────────────────────────────────
 interface WishItem {
   wId?: number;
   wishWord: string;
@@ -849,38 +722,101 @@ interface FestivalData {
   image: string;
   logo: string;
   webName: string;
-  startDate?: string; // ← เพิ่ม
-  endDate?: string; // ← เพิ่ม
-  isEdit: boolean; // ← เพิ่ม
-  isEditEndDate: boolean; // ← เพิ่ม
+  startDate?: string;
+  endDate?: string;
+  isEdit: boolean;
+  isEditEndDate: boolean;
   wisher?: WisherApi[];
   card?: CardApi[];
-  createdBy:number;
+  createdBy: number;
 }
 
-/* ===== STATE ===== */
+interface Particle {
+  id: number;
+  style: Record<string, string>;
+}
+
+type ShapeType = 'circle' | 'square' | 'star' | 'triangle' | 'emoji';
+
+// ─── Quasar / Router ──────────────────────────────────────────────────────────
+const $q = useQuasar();
+const router = useRouter();
+const route = useRoute();
+
+// ─── Template Refs ────────────────────────────────────────────────────────────
+const fileInput = ref<InstanceType<typeof QFile> | null>(null);
+const logoInput = ref<InstanceType<typeof QFile> | null>(null);
+const coverRef = ref<HTMLElement | null>(null);
+const nameRef = ref<HTMLElement | null>(null);
+const logoRef = ref<HTMLElement | null>(null);
+const webNameRef = ref<HTMLElement | null>(null);
+const dateRef = ref<HTMLElement | null>(null);
+
+// ─── Festival State ───────────────────────────────────────────────────────────
 const festivalId = ref<string | null>(null);
 const festivalName = ref('');
 const imageFile = ref<File | null>(null);
 const logoFile = ref<File | null>(null);
-const logoInput = ref<InstanceType<typeof QFile> | null>(null);
 const webName = ref('');
-const existingImageUrl = ref<string>('');
-const existingImageName = ref<string>('');
+const existingImageUrl = ref('');
+const existingImageName = ref('');
 const loading = ref(false);
 const createdBy = ref<number>(0);
 
-/* ===== DATE STATE ===== */
-const startDate = ref(''); // format: YYYY/MM/DD (Quasar default)
+// ─── Date State ───────────────────────────────────────────────────────────────
+const startDate = ref('');
 const endDate = ref('');
-// ใต้ const loading = ref(false);  — เพิ่ม 2 state
-// ใต้ const loading = ref(false);  — เพิ่ม 2 state
-const isEdit = ref(true);
-const isEditEndDate = ref(true);
+// false เพื่อป้องกัน field แก้ได้ก่อน fetch เสร็จ — จะถูก update หลัง fetch
+const isEdit = ref(false);
+const isEditEndDate = ref(false);
 const dateError = ref(false);
 const dateErrorMsg = ref('');
 
-// Duration in days
+// ─── Error States ─────────────────────────────────────────────────────────────
+const imageError = ref(false);
+const nameError = ref(false);
+const logoError = ref(false);
+const webNameError = ref(false);
+
+// ─── Wish State ───────────────────────────────────────────────────────────────
+const wishWordList = ref<WishItem[]>([]);
+const tempWish = ref('');
+const addWishDialog = ref(false);
+const editWishDialog = ref(false);
+const deleteWishDialog = ref(false);
+const editingIndex = ref<number | null>(null);
+const deleteIndex = ref<number | null>(null);
+const itemToDelete = ref<string | null>(null);
+
+// ─── Card State ───────────────────────────────────────────────────────────────
+const cardFileList = ref<File[]>([]);
+const existingCards = ref<ExistingCard[]>([]);
+const tempCardFile = ref<File | null>(null);
+const showCardDialog = ref(false);
+const cardErrorMsg = ref('');
+
+// ─── Dialog State ─────────────────────────────────────────────────────────────
+const showSuccessDialog = ref(false);
+const successMessage = ref('');
+const showErrorDialog = ref(false);
+const errorMessage = ref('');
+const showValidationDialog = ref(false);
+const validationMessage = ref('');
+const showFetchErrorDialog = ref(false);
+
+// ─── Particles ────────────────────────────────────────────────────────────────
+const activeParticles = ref<Particle[]>([]);
+let particleId = 0;
+
+// ─── Computed ─────────────────────────────────────────────────────────────────
+const isOwner = computed(() => createdBy.value === Number(LocalStorage.getItem('userId')));
+
+// canEdit: แก้ไขได้ถ้า isEdit (จาก API) หรือเป็นเจ้าของ
+const canEdit = computed(() => isEdit.value && isOwner.value);
+
+// canEditEndDate: แก้ไข endDate ได้ถ้า isEditEndDate หรือเป็นเจ้าของ
+const canEditEndDate = computed(() => isEditEndDate.value && isOwner.value);
+
 const durationDays = computed(() => {
   if (!startDate.value || !endDate.value) return -1;
   const s = new Date(startDate.value.replace(/\//g, '-'));
@@ -888,9 +824,15 @@ const durationDays = computed(() => {
   return Math.round((e.getTime() - s.getTime()) / (1000 * 60 * 60 * 24));
 });
 
-const isOwner = computed(() => createdBy.value === Number(localStorage.getItem('userId')));
+// ─── Date Helpers ─────────────────────────────────────────────────────────────
+const todayStr = (() => {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}/${m}/${day}`;
+})();
 
-// Format date to Thai display
 const formatDateThai = (dateStr: string): string => {
   if (!dateStr) return '';
   const d = new Date(dateStr.replace(/\//g, '-'));
@@ -911,49 +853,15 @@ const formatDateThai = (dateStr: string): string => {
   return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear() + 543}`;
 };
 
-// // startDate options: allow all dates (no restriction on start)
-// const startDateOptions = (dateStr: string): boolean => {
-//   if (!endDate.value) return true;
-//   return dateStr <= endDate.value;
-// };
-
-// // endDate options: must be >= startDate
-// const endDateOptions = (dateStr: string): boolean => {
-//   if (!startDate.value) return true;
-//   return dateStr >= startDate.value;
-// };
-// สร้าง todayStr ครั้งเดียวตอน mount (format YYYY/MM/DD ตาม Quasar)
-const todayStr = (() => {
-  const d = new Date();
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}/${m}/${day}`;
-})();
-
-// startDate — block วันในอดีต + block วันที่เกิน endDate
-// const startDateOptions = (dateStr: string): boolean => {
-//   if (dateStr < todayStr) return false;
-//   if (!endDate.value) return true;
-//   return dateStr <= endDate.value;
-// };
-
-// // endDate — block วันในอดีต + block วันก่อน startDate
-// const endDateOptions = (dateStr: string): boolean => {
-//   if (dateStr < todayStr) return false;
-//   if (!startDate.value) return true;
-//   return dateStr >= startDate.value;
-// };
-
 const startDateOptions = (dateStr: string): boolean => {
-  if (dateStr === startDate.value) return true; // ← เช็คก่อน
+  if (dateStr === startDate.value) return true;
   if (dateStr < todayStr) return false;
   if (!endDate.value) return true;
   return dateStr <= endDate.value;
 };
 
 const endDateOptions = (dateStr: string): boolean => {
-  if (dateStr === endDate.value) return true; // ← เช็คก่อน
+  if (dateStr === endDate.value) return true;
   if (dateStr < todayStr) return false;
   if (!startDate.value) return true;
   return dateStr >= startDate.value;
@@ -961,45 +869,14 @@ const endDateOptions = (dateStr: string): boolean => {
 
 const onStartDateChange = (val: string) => {
   dateError.value = false;
-  // if end is before new start, clear end
-  if (endDate.value && val > endDate.value) {
-    endDate.value = '';
-  }
+  if (endDate.value && val > endDate.value) endDate.value = '';
 };
 
 const onEndDateChange = () => {
   dateError.value = false;
 };
 
-// เพิ่ม template refs ที่ขาดหายไป
-const coverRef = ref<HTMLElement | null>(null);
-const nameRef = ref<HTMLElement | null>(null);
-const logoRef = ref<HTMLElement | null>(null);
-const webNameRef = ref<HTMLElement | null>(null);
-const dateRef = ref<HTMLElement | null>(null);
-
-// ===== Error states =====
-const imageError = ref(false);
-const nameError = ref(false);
-const logoError = ref(false);
-const webNameError = ref(false);
-
-// Dialog: บันทึกสำเร็จ
-const showSuccessDialog = ref(false);
-const successMessage = ref('');
-
-// Dialog: เกิดข้อผิดพลาด (submit)
-const showErrorDialog = ref(false);
-const errorMessage = ref('');
-
-// Dialog: ข้อมูลไม่ครบ (validation)
-const showValidationDialog = ref(false);
-const validationMessage = ref('');
-
-// Dialog: โหลดข้อมูลไม่สำเร็จ (fetch)
-const showFetchErrorDialog = ref(false);
-
-/* ===== DIALOG HELPERS ===== */
+// ─── Dialog Helpers ───────────────────────────────────────────────────────────
 const openSuccessDialog = (msg: string) => {
   successMessage.value = msg;
   showSuccessDialog.value = true;
@@ -1013,67 +890,98 @@ const openErrorDialog = (msg: string) => {
   }, 2500);
 };
 
-// const openValidationDialog = (msg: string) => {
-//   validationMessage.value = msg;
-//   showValidationDialog.value = true;
-// };
+// ─── Image Helpers ────────────────────────────────────────────────────────────
+const objectUrlCache = new WeakMap<File, string>();
 
-/* ===== WISH DIALOG STATE ===== */
-const AddWishDialog = ref(false);
-const EditWishDialog = ref(false);
-const editingIndex = ref<number | null>(null);
-const showCardDialog = ref(false);
-const deleteDialog = ref(false);
-const deleteIndex = ref<number | null>(null);
-const itemToDelete = ref<string | null>(null);
+const getFilePreview = (file: File): string => {
+  if (objectUrlCache.has(file)) return objectUrlCache.get(file)!;
+  const url = URL.createObjectURL(file);
+  objectUrlCache.set(file, url);
+  return url;
+};
 
-const tempWish = ref('');
-const wishWordList = ref<WishItem[]>([]);
-
-const tempCardFile = ref<File | null>(null);
-const cardFileList = ref<File[]>([]);
-const existingCards = ref<ExistingCard[]>([]);
-
-/* ===== API: ดึง image เป็น blob url ===== */
 const getImageUrl = async (imagePath: string): Promise<string> => {
+  if (!imagePath) return '';
   try {
     const response = await api(`/upload/${imagePath}`, { responseType: 'blob' });
     return URL.createObjectURL(response.data);
-  } catch (error) {
-    console.error('Error fetching image:', error);
+  } catch {
     return '';
   }
 };
 
-/* ===== API: ดึงข้อมูล festival ===== */
-const fetchFestivalId = async (id: string) => {
+// ─── Image Validation ─────────────────────────────────────────────────────────
+const onImageSelected = (file: File | null) => {
+  imageError.value = false;
+  if (!file) return;
+
+  if (file.size > 2 * 1024 * 1024) {
+    imageError.value = true;
+    imageFile.value = null;
+    existingImageUrl.value = '';
+    return;
+  }
+
+  const url = URL.createObjectURL(file);
+  const img = new Image();
+  img.onload = () => {
+    URL.revokeObjectURL(url);
+    if (img.width !== 1199 || img.height !== 581) {
+      imageError.value = true;
+      imageFile.value = null;
+      existingImageUrl.value = '';
+    }
+  };
+  img.src = url;
+};
+
+const onLogoSelected = (file: File | null) => {
+  logoError.value = false;
+  if (!file) return;
+
+  if (file.size > 2 * 1024 * 1024) {
+    logoError.value = true;
+    logoFile.value = null;
+    return;
+  }
+
+  const url = URL.createObjectURL(file);
+  const img = new Image();
+  img.onload = () => {
+    URL.revokeObjectURL(url);
+    if (img.width !== 100 || img.height !== 100) {
+      logoError.value = true;
+      logoFile.value = null;
+    }
+  };
+  img.src = url;
+};
+
+// ─── Festival Name Validation ─────────────────────────────────────────────────
+const onFestivalNameChange = (val: string | number | null) => {
+  nameError.value = false;
+  if (typeof val !== 'string') return;
+  const pattern = /^[^-].*[^-]-[^-]+-\d{4}$/;
+  if (val && !pattern.test(val)) nameError.value = true;
+};
+
+// ─── API: Fetch Festival ──────────────────────────────────────────────────────
+const fetchFestivalId = async (id: string): Promise<void> => {
   $q.loading.show();
-  festivalId.value = id; // ← เพิ่มบรรทัดนี้
+  festivalId.value = id;
   try {
     const response = await api.get(`/backoffice/festival/${Number(id)}`);
     const data: FestivalData = response.data.festival;
 
     festivalName.value = data.festivalName;
     webName.value = data.webName;
-    isEdit.value = data.isEdit; // ← เพิ่ม
-    isEditEndDate.value = data.isEditEndDate; // ← เพิ่ม
+    isEdit.value = data.isEdit;
+    isEditEndDate.value = data.isEditEndDate;
     createdBy.value = Number(data.createdBy);
-    // logoFile.value = data.logo ? await getImageUrl(data.logo) : null;
-    // ── เพิ่ม 2 บรรทัดนี้ ──
-    // if (data.startDate) startDate.value = data.startDate.replace(/-/g, '/');
-    // if (data.endDate) endDate.value = data.endDate.replace(/-/g, '/');
+
     if (data.startDate) startDate.value = data.startDate.substring(0, 10).replace(/-/g, '/');
     if (data.endDate) endDate.value = data.endDate.substring(0, 10).replace(/-/g, '/');
-    console.log(
-      'startDate:',
-      startDate.value,
-      '| todayStr:',
-      todayStr,
-      '| เท่ากัน?',
-      startDate.value === todayStr,
-      '| น้อยกว่า today?',
-      startDate.value < todayStr,
-    );
+
     if (data.image) {
       existingImageName.value = data.image;
       existingImageUrl.value = await getImageUrl(data.image);
@@ -1087,12 +995,7 @@ const fetchFestivalId = async (id: string) => {
     }
 
     wishWordList.value =
-      data.wisher?.map(
-        (w: WisherApi): WishItem => ({
-          wId: w.wId,
-          wishWord: w.wishWord,
-        }),
-      ) ?? [];
+      data.wisher?.map((w: WisherApi): WishItem => ({ wId: w.wId, wishWord: w.wishWord })) ?? [];
 
     if (data.card && data.card.length > 0) {
       const cardPromises = data.card.map(async (c: CardApi) => {
@@ -1102,26 +1005,26 @@ const fetchFestivalId = async (id: string) => {
       existingCards.value = await Promise.all(cardPromises);
     }
 
-    localStorage.setItem('festivalId', id);
+    LocalStorage.set('festivalId', id);
   } catch (error) {
     console.error(error);
-    showFetchErrorDialog.value = true; // เปลี่ยนจาก $q.notify
+    showFetchErrorDialog.value = true;
   } finally {
     $q.loading.hide();
   }
 };
 
-/* ===== WISH ===== */
+// ─── Wish Actions ─────────────────────────────────────────────────────────────
 const onAddWish = () => {
   tempWish.value = '';
-  AddWishDialog.value = true;
+  addWishDialog.value = true;
 };
 
 const addWishToList = () => {
   if (!tempWish.value.trim()) return;
   wishWordList.value.push({ wishWord: tempWish.value.trim() });
   tempWish.value = '';
-  AddWishDialog.value = false;
+  addWishDialog.value = false;
 };
 
 const editWish = (index: number) => {
@@ -1129,24 +1032,19 @@ const editWish = (index: number) => {
   if (!wish) return;
   tempWish.value = wish.wishWord;
   editingIndex.value = index;
-  EditWishDialog.value = true;
+  editWishDialog.value = true;
 };
 
 const updateWish = () => {
-  if (editingIndex.value === null) return;
-  if (!tempWish.value.trim()) return;
+  if (editingIndex.value === null || !tempWish.value.trim()) return;
   const existing = wishWordList.value[editingIndex.value];
-  // wishWordList.value[editingIndex.value] = {
-  //   wId: existing?.wId,
-  //   wishWord: tempWish.value.trim(),
-  // };
   wishWordList.value[editingIndex.value] = {
     ...(existing?.wId !== undefined ? { wId: existing.wId } : {}),
     wishWord: tempWish.value.trim(),
   };
   tempWish.value = '';
   editingIndex.value = null;
-  EditWishDialog.value = false;
+  editWishDialog.value = false;
 };
 
 const deleteWish = (i: number) => {
@@ -1154,7 +1052,7 @@ const deleteWish = (i: number) => {
   if (!item) return;
   deleteIndex.value = i;
   itemToDelete.value = item.wishWord;
-  deleteDialog.value = true;
+  deleteWishDialog.value = true;
 };
 
 const confirmDelete = () => {
@@ -1162,24 +1060,14 @@ const confirmDelete = () => {
   wishWordList.value.splice(deleteIndex.value, 1);
   deleteIndex.value = null;
   itemToDelete.value = null;
-  deleteDialog.value = false;
+  deleteWishDialog.value = false;
 };
 
-/* ===== CARD ===== */
+// ─── Card Actions ─────────────────────────────────────────────────────────────
 const onAddCard = () => {
   showCardDialog.value = true;
 };
 
-// const addCardToList = () => {
-//   if (!tempCardFile.value) return;
-//   cardFileList.value.push(tempCardFile.value);
-//   tempCardFile.value = null;
-//   showCardDialog.value = false;
-
-// };
-
-// const cardErrorMsg = ref('กรุณาอัปโหลดรูปการ์ด')
-const cardErrorMsg = ref();
 const addCardToList = () => {
   const file = tempCardFile.value;
   if (!file) return;
@@ -1201,7 +1089,6 @@ const addCardToList = () => {
 
   const url = URL.createObjectURL(file);
   const img = new Image();
-
   img.onload = () => {
     URL.revokeObjectURL(url);
     if (img.width !== 691 || img.height !== 691) {
@@ -1209,12 +1096,10 @@ const addCardToList = () => {
       tempCardFile.value = null;
       return;
     }
-
     cardFileList.value.push(file);
     tempCardFile.value = null;
     showCardDialog.value = false;
   };
-
   img.src = url;
 };
 
@@ -1225,104 +1110,23 @@ const removeExistingCard = (i: number) => {
   existingCards.value.splice(i, 1);
 };
 
-/* ===== UTIL ===== */
-const objectUrlCache = new WeakMap<File, string>();
-const getFilePreview = (file: File): string => {
-  if (objectUrlCache.has(file)) return objectUrlCache.get(file)!;
-  const url = URL.createObjectURL(file);
-  objectUrlCache.set(file, url);
-  return url;
-};
-
-const onFestivalNameChange = (val: string | number | null) => {
-  nameError.value = false;
-
-  if (typeof val !== 'string') return;
-
-  const pattern = /^[^-].*[^-]-[^-]+-\d{4}$/;
-
-  if (val && !pattern.test(val)) {
-    nameError.value = true;
-  }
-};
-
-const imageErrorMsg = ref('กรุณาอัปโหลดรูปหน้าปก');
-
-const onImageSelected = (file: File | null) => {
-  imageError.value = false;
-  imageErrorMsg.value = 'กรุณาอัปโหลดรูปหน้าปก';
-  if (!file) return;
-
-  // ตรวจ size ≤ 2MB
-  if (file.size > 2 * 1024 * 1024) {
-    imageError.value = true;
-    imageErrorMsg.value = 'ขนาดไฟล์ต้องไม่เกิน 2 MB';
-    imageFile.value = null;
-    existingImageUrl.value = ''; // ✅ clear รูปเก่า
-    return;
-  }
-
-  // ตรวจ dimensions 1199×581
-  const url = URL.createObjectURL(file);
-  const img = new Image();
-  img.onload = () => {
-    URL.revokeObjectURL(url);
-    if (img.width !== 1199 || img.height !== 581) {
-      imageError.value = true;
-      imageErrorMsg.value = `ขนาดรูปต้องเป็น 1199×581 px (พบ ${img.width}×${img.height})`;
-      imageFile.value = null;
-      existingImageUrl.value = ''; // ✅ clear รูปเก่า
-      return;
-    }
-  };
-  img.src = url;
-};
-
-const logoErrorMsg = ref('กรุณาอัปโหลดโลโก้');
-
-const onLogoSelected = (file: File | null) => {
-  logoError.value = false;
-  logoErrorMsg.value = 'กรุณาอัปโหลดโลโก้';
-  if (!file) return;
-
-  if (file.size > 2 * 1024 * 1024) {
-    logoError.value = true;
-    logoErrorMsg.value = 'ขนาดไฟล์ต้องไม่เกิน 2 MB';
-    logoFile.value = null;
-  }
-
-  // ตรวจ dimensions 1199×581
-  const url1 = URL.createObjectURL(file);
-  const img1 = new Image();
-  img1.onload = () => {
-    URL.revokeObjectURL(url1);
-    if (img1.width !== 100 || img1.height !== 100) {
-      logoError.value = true;
-      logoErrorMsg.value = `ขนาดรูปต้องเป็น 100×100 px (พบ ${img1.width}×${img1.height})`;
-      logoFile.value = null;
-    }
-  };
-  img1.src = url1;
-};
-// ลบ console.log ออก + เพิ่ม date validation + เพิ่ม dateRef ใน targets
+// ─── Validation ───────────────────────────────────────────────────────────────
 const validateAndScroll = async (): Promise<boolean> => {
   imageError.value = false;
   nameError.value = false;
   logoError.value = false;
   webNameError.value = false;
-  dateError.value = false; // ← reset date error
-  dateErrorMsg.value = ''; // ← reset date error msg
+  dateError.value = false;
+  dateErrorMsg.value = '';
 
-  // ถ้า isEdit = false → validate เฉพาะ endDate (ถ้า isEditEndDate = true)
-  if (!isEdit.value) {
-    if (isEditEndDate.value) {
-      if (startDate.value && !endDate.value) {
-        dateError.value = true;
-        dateErrorMsg.value = 'กรุณาเลือกวันสิ้นสุดด้วย';
-        await nextTick();
-        dateRef.value?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        return false;
-      }
+  // ถ้าแก้ไขได้เฉพาะ endDate (ไม่ใช่ owner และ isEdit = false)
+  if (!canEdit.value) {
+    if (canEditEndDate.value && startDate.value && !endDate.value) {
+      dateError.value = true;
+      dateErrorMsg.value = 'กรุณาเลือกวันสิ้นสุดด้วย';
+      await nextTick();
+      dateRef.value?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return false;
     }
     return true;
   }
@@ -1333,11 +1137,8 @@ const validateAndScroll = async (): Promise<boolean> => {
   const isLogoValid = !!logoFile.value;
   const isWebNameValid = typeof webName.value === 'string' && webName.value.trim().length > 0;
 
-  // ── Date validation (เหมือน create) ──
   let isDateValid = true;
-  if (!startDate.value && !endDate.value) {
-    // ทั้งคู่ว่าง → optional → ผ่าน
-  } else if (startDate.value && !endDate.value) {
+  if (startDate.value && !endDate.value) {
     isDateValid = false;
     dateErrorMsg.value = 'กรุณาเลือกวันสิ้นสุดด้วย';
     dateError.value = true;
@@ -1365,7 +1166,7 @@ const validateAndScroll = async (): Promise<boolean> => {
       { valid: isNameValid, el: nameRef.value },
       { valid: isLogoValid, el: logoRef.value },
       { valid: isWebNameValid, el: webNameRef.value },
-      { valid: isDateValid, el: dateRef.value }, // ← เพิ่มบรรทัดนี้
+      { valid: isDateValid, el: dateRef.value },
     ];
     targets.find((t) => !t.valid)?.el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
@@ -1373,7 +1174,7 @@ const validateAndScroll = async (): Promise<boolean> => {
   return !hasError;
 };
 
-/* ===== SUBMIT ===== */
+// ─── Submit ───────────────────────────────────────────────────────────────────
 const submitEdit = async () => {
   const isValid = await validateAndScroll();
   if (!isValid) return;
@@ -1381,12 +1182,11 @@ const submitEdit = async () => {
   loading.value = true;
   try {
     let festivalImageName = existingImageName.value;
-
     if (imageFile.value) {
       const fd = new FormData();
       fd.append('singleFile', imageFile.value);
       const res = await api.post('/upload', fd);
-      festivalImageName = res.data.image;
+      festivalImageName = res.data.image as string;
     }
 
     let festivalLogoName = '';
@@ -1394,25 +1194,25 @@ const submitEdit = async () => {
       const fd = new FormData();
       fd.append('singleFile', logoFile.value);
       const res = await api.post('/upload', fd);
-      festivalLogoName = res.data.image;
+      festivalLogoName = res.data.image as string;
     }
 
     let newCardImageNames: string[] = [];
     if (cardFileList.value.length > 0) {
-      const uploadPromises = cardFileList.value.map(async (file) => {
-        const formData = new FormData();
-        formData.append('singleFile', file);
-        const res = await api.post('/upload', formData);
-        return res.data.image as string;
-      });
-      newCardImageNames = await Promise.all(uploadPromises);
+      newCardImageNames = await Promise.all(
+        cardFileList.value.map(async (file) => {
+          const formData = new FormData();
+          formData.append('singleFile', file);
+          const res = await api.post('/upload', formData);
+          return res.data.image as string;
+        }),
+      );
     }
 
     const allCards = [
       ...existingCards.value.map((c) => ({ cId: c.cId, imageCard: c.imageName })),
       ...newCardImageNames.map((imgName) => ({ imageCard: imgName })),
     ];
-    console.log('start Date: ', startDate);
 
     const payload = {
       festivalName: festivalName.value,
@@ -1435,35 +1235,19 @@ const submitEdit = async () => {
       response = await api.post('/backoffice/festival', payload);
     }
 
-    // เปลี่ยนจาก $q.notify → success dialog แล้ว redirect หลัง 2 วิ
     openSuccessDialog(response.data.message || 'บันทึกเทศกาลสำเร็จแล้ว');
-    // setTimeout(async () => {
-    //   showSuccessDialog.value = false;
-    //   await router.push('/admin/festival');
-    // }, 2000);
     setTimeout(() => {
       showSuccessDialog.value = false;
       void router.push('/backoffice/festival');
     }, 2000);
   } catch {
-    openErrorDialog('เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง'); // เปลี่ยนจาก $q.notify
+    openErrorDialog('เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง');
   } finally {
     loading.value = false;
   }
 };
 
-// ============================================================
-// CLICK PARTICLES
-// ============================================================
-interface Particle {
-  id: number;
-  style: Record<string, string>;
-}
-type ShapeType = 'circle' | 'square' | 'star' | 'triangle' | 'emoji';
-
-const activeParticles = ref<Particle[]>([]);
-let particleId = 0;
-
+// ─── Particle Constants ───────────────────────────────────────────────────────
 const PARTICLE_COLORS = [
   '#e11d48',
   '#fbbf24',
@@ -1506,84 +1290,96 @@ const PARTICLE_EMOJIS = [
   '🏵️',
 ];
 
-const SHAPES: ShapeType[] = ['circle', 'square', 'star', 'triangle', 'emoji'];
-const WEIGHTS = [0.25, 0.2, 0.2, 0.15, 0.2];
+// const SHAPES: ShapeType[] = ['circle', 'square', 'star', 'triangle', 'emoji'];
+// const WEIGHTS = [0.25, 0.2, 0.2, 0.15, 0.2];
 
-function pickShape(): ShapeType {
-  const r = Math.random();
-  let c = 0;
-  for (let i = 0; i < SHAPES.length; i++) {
-    c += WEIGHTS[i] ?? 0;
-    if (r < c) return SHAPES[i] ?? 'circle';
-  }
-  return 'circle';
-}
+// const pickShape = (): ShapeType => {
+//   const r = Math.random();
+//   let cumulative = 0;
+//   for (let i = 0; i < SHAPES.length; i++) {
+//     cumulative += WEIGHTS[i] ?? 0;
+//     if (r < cumulative) return SHAPES[i] ?? 'circle';
+//   }
+//   return 'circle';
+// };
+
+// ─── Particle Spawn ───────────────────────────────────────────────────────────
+// const spawnParticles = (x: number, y: number) => {
+//   const count = 36 + Math.floor(Math.random() * 12);
+//   const W = window.innerWidth;
+//   const H = window.innerHeight;
+
+//   for (let i = 0; i < count; i++) {
+//     const id = ++particleId;
+//     const size = 7 + Math.random() * 11;
+//     const color = PARTICLE_COLORS[Math.floor(Math.random() * PARTICLE_COLORS.length)] ?? '#fbbf24';
+//     const dur = 1.2 + Math.random() * 1.2;
+//     const emoji = PARTICLE_EMOJIS[Math.floor(Math.random() * PARTICLE_EMOJIS.length)] ?? '🎉';
+//     const shape = pickShape();
+//     const isEmoji = shape === 'emoji';
+
+//     const zone = i % 8;
+//     let targetX: number;
+//     let targetY: number;
+
+//     switch (zone) {
+//       case 0: targetX = Math.random() * W * 0.35; targetY = Math.random() * H * 0.35; break;
+//       case 1: targetX = W * 0.25 + Math.random() * W * 0.5; targetY = Math.random() * H * 0.25; break;
+//       case 2: targetX = W * 0.65 + Math.random() * W * 0.35; targetY = Math.random() * H * 0.35; break;
+//       case 3: targetX = W * 0.65 + Math.random() * W * 0.35; targetY = H * 0.25 + Math.random() * H * 0.5; break;
+//       case 4: targetX = W * 0.65 + Math.random() * W * 0.35; targetY = H * 0.65 + Math.random() * H * 0.35; break;
+//       case 5: targetX = W * 0.25 + Math.random() * W * 0.5; targetY = H * 0.75 + Math.random() * H * 0.25; break;
+//       case 6: targetX = Math.random() * W * 0.35; targetY = H * 0.65 + Math.random() * H * 0.35; break;
+//       case 7: targetX = Math.random() * W * 0.25; targetY = H * 0.25 + Math.random() * H * 0.5; break;
+//       default: targetX = Math.random() * W; targetY = Math.random() * H;
+//     }
+
+//     const style: Record<string, string> = {
+//       '--x': `${x}px`, '--y': `${y}px`,
+//       '--dx': `${targetX - x}px`, '--dy': `${targetY - y}px`,
+//       '--dur': `${dur}s`,
+//       '--color': isEmoji ? 'transparent' : color,
+//       '--size': isEmoji ? '22px' : `${size}px`,
+//       '--shape': shape,
+//       '--emoji-content': isEmoji ? `"${emoji}"` : '""',
+//       '--rot': `${Math.random() * 720 - 360}deg`,
+//     };
+
+//     activeParticles.value.push({ id, style });
+//     setTimeout(() => {
+//       activeParticles.value = activeParticles.value.filter((p) => p.id !== id);
+//     }, dur * 1000 + 200);
+//   }
+// };
 
 const spawnParticles = (x: number, y: number) => {
-  const count = 36 + Math.floor(Math.random() * 12);
-  const W = window.innerWidth;
-  const H = window.innerHeight;
+  const count = 12 + Math.floor(Math.random() * 6);
 
   for (let i = 0; i < count; i++) {
     const id = ++particleId;
-    const size = 7 + Math.random() * 11;
-    const color = PARTICLE_COLORS[Math.floor(Math.random() * PARTICLE_COLORS.length)] ?? '#fbbf24';
-    const dur = 1.2 + Math.random() * 1.2;
-    const emoji = PARTICLE_EMOJIS[Math.floor(Math.random() * PARTICLE_EMOJIS.length)] ?? '🎉';
-    const shape = pickShape();
+    const size = 6 + Math.random() * 7;
+    const color = PARTICLE_COLORS[Math.floor(Math.random() * PARTICLE_COLORS.length)]!;
+    const dur = 0.7 + Math.random() * 0.5;
+    const emoji = PARTICLE_EMOJIS[Math.floor(Math.random() * PARTICLE_EMOJIS.length)]!;
+
+    const shapes: ShapeType[] = ['circle', 'circle', 'square', 'star', 'emoji'];
+    const shape = shapes[Math.floor(Math.random() * shapes.length)]!;
     const isEmoji = shape === 'emoji';
 
-    const zone = i % 8;
-    let targetX: number, targetY: number;
-    switch (zone) {
-      case 0:
-        targetX = Math.random() * W * 0.35;
-        targetY = Math.random() * H * 0.35;
-        break;
-      case 1:
-        targetX = W * 0.25 + Math.random() * W * 0.5;
-        targetY = Math.random() * H * 0.25;
-        break;
-      case 2:
-        targetX = W * 0.65 + Math.random() * W * 0.35;
-        targetY = Math.random() * H * 0.35;
-        break;
-      case 3:
-        targetX = W * 0.65 + Math.random() * W * 0.35;
-        targetY = H * 0.25 + Math.random() * H * 0.5;
-        break;
-      case 4:
-        targetX = W * 0.65 + Math.random() * W * 0.35;
-        targetY = H * 0.65 + Math.random() * H * 0.35;
-        break;
-      case 5:
-        targetX = W * 0.25 + Math.random() * W * 0.5;
-        targetY = H * 0.75 + Math.random() * H * 0.25;
-        break;
-      case 6:
-        targetX = Math.random() * W * 0.35;
-        targetY = H * 0.65 + Math.random() * H * 0.35;
-        break;
-      case 7:
-        targetX = Math.random() * W * 0.25;
-        targetY = H * 0.25 + Math.random() * H * 0.5;
-        break;
-      default:
-        targetX = Math.random() * W;
-        targetY = Math.random() * H;
-    }
+    const angle = (i / count) * Math.PI * 2 + (Math.random() - 0.5) * 0.8;
+    const dist = 80 + Math.random() * 80;
 
     const style: Record<string, string> = {
       '--x': `${x}px`,
       '--y': `${y}px`,
-      '--dx': `${targetX - x}px`,
-      '--dy': `${targetY - y}px`,
+      '--dx': `${Math.cos(angle) * dist}px`,
+      '--dy': `${Math.sin(angle) * dist}px`,
       '--dur': `${dur}s`,
       '--color': isEmoji ? 'transparent' : color,
-      '--size': isEmoji ? '22px' : `${size}px`,
+      '--size': isEmoji ? '18px' : `${size}px`,
       '--shape': shape,
       '--emoji-content': isEmoji ? `"${emoji}"` : '""',
-      '--rot': `${Math.random() * 720 - 360}deg`,
+      '--rot': `${Math.random() * 360 - 180}deg`,
     };
 
     activeParticles.value.push({ id, style });
@@ -1591,7 +1387,7 @@ const spawnParticles = (x: number, y: number) => {
       () => {
         activeParticles.value = activeParticles.value.filter((p) => p.id !== id);
       },
-      dur * 1000 + 200,
+      dur * 1000 + 100,
     );
   }
 };
@@ -1600,17 +1396,22 @@ const handleGlobalClick = (e: MouseEvent) => {
   spawnParticles(e.clientX, e.clientY);
 };
 
+// ─── Lifecycle ────────────────────────────────────────────────────────────────
 onMounted(async () => {
   const id = (route.params.id as string) || (route.query.id as string);
   if (id) await fetchFestivalId(id);
   window.addEventListener('click', handleGlobalClick);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('click', handleGlobalClick);
 });
 </script>
 
 <style lang="scss" scoped>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&family=Prompt:wght@400;500;600;700&display=swap');
 
-/* ===== TOKENS ===== */
+// ─── Design Tokens ────────────────────────────────────────────────────────────
 $indigo-deep: #1a1460;
 $indigo-mid: #2d2d8a;
 $indigo-glow: #5a3ea0;
@@ -1632,7 +1433,7 @@ $radius-card: 20px;
 $radius-btn: 12px;
 $error-red: #e53935;
 
-/* ===== PAGE ===== */
+// ─── Page ─────────────────────────────────────────────────────────────────────
 .edit-festival-page {
   font-family: 'Noto Sans Thai', 'Prompt', sans-serif;
   background: linear-gradient(160deg, #f0edff 0%, #fff8ee 50%, #e8f9f6 100%);
@@ -1640,7 +1441,7 @@ $error-red: #e53935;
   padding-bottom: 3rem;
 }
 
-/* ===== HERO ===== */
+// ─── Hero ─────────────────────────────────────────────────────────────────────
 .hero-header {
   position: relative;
   overflow: hidden;
@@ -1682,7 +1483,7 @@ $error-red: #e53935;
 @keyframes float {
   0%,
   100% {
-    transform: translateY(0px);
+    transform: translateY(0);
   }
   50% {
     transform: translateY(-16px);
@@ -1729,10 +1530,11 @@ $error-red: #e53935;
   margin: 0;
 }
 
-/* ===== FORM BODY ===== */
+// ─── Form ─────────────────────────────────────────────────────────────────────
 .form-body {
   margin-top: -2rem;
 }
+
 .form-container {
   max-width: 680px;
   margin: 0 auto;
@@ -1742,7 +1544,7 @@ $error-red: #e53935;
   gap: 1.25rem;
 }
 
-/* ===== CARDS ===== */
+// ─── Cards ────────────────────────────────────────────────────────────────────
 .fest-card {
   background: $surface;
   border-radius: $radius-card;
@@ -1764,6 +1566,7 @@ $error-red: #e53935;
   text-transform: uppercase;
   margin-bottom: 1.25rem;
 }
+
 .label-dot {
   width: 8px;
   height: 8px;
@@ -1782,65 +1585,7 @@ $error-red: #e53935;
   scroll-margin-top: 80px;
 }
 
-/* ===== LOGO UPLOAD ===== */
-.logo-upload-zone {
-  border-radius: 12px;
-  overflow: hidden;
-  cursor: pointer;
-  border: 2px dashed rgba(45, 45, 138, 0.25);
-  transition:
-    border-color 0.2s,
-    background 0.2s,
-    transform 0.2s;
-  background: $surface-2;
-  max-width: 140px;
-
-  &:hover {
-    border-color: $indigo-mid;
-    transform: translateY(-2px);
-  }
-}
-
-.logo-preview {
-  border-radius: 10px;
-}
-
-.logo-placeholder {
-  padding: 1.5rem 1rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  text-align: center;
-}
-
-.logo-placeholder-icon {
-  font-size: 2rem;
-}
-
-.upload-zone--error {
-  border-color: $error-red !important;
-  border-style: solid !important;
-  background: #fff5f5 !important;
-  animation: shake 0.35s cubic-bezier(0.36, 0.07, 0.19, 0.97);
-}
-.upload-zone--disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-  pointer-events: none;
-}
-.error-msg {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  color: $error-red;
-  font-size: 0.78rem;
-  font-weight: 500;
-  margin-top: 6px;
-  padding: 0 2px;
-}
-
-/* ===== COVER UPLOAD ===== */
+// ─── Upload Zones ─────────────────────────────────────────────────────────────
 .cover-upload-zone {
   border-radius: 14px;
   overflow: hidden;
@@ -1855,9 +1600,56 @@ $error-red: #e53935;
     transform: translateY(-2px);
   }
 }
+
+.logo-upload-zone {
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  border: 2px dashed rgba(45, 45, 138, 0.25);
+  transition:
+    border-color 0.2s,
+    background 0.2s,
+    transform 0.2s;
+  background: $surface-2;
+  max-width: 140px;
+  &:hover {
+    border-color: $indigo-mid;
+    transform: translateY(-2px);
+  }
+}
+
+.upload-zone--error {
+  border-color: $error-red !important;
+  border-style: solid !important;
+  background: #fff5f5 !important;
+  animation: shake 0.35s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+.upload-zone--disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-6px);
+  }
+  75% {
+    transform: translateX(6px);
+  }
+}
+
 .cover-img {
   border-radius: 12px;
 }
+.logo-preview {
+  border-radius: 10px;
+}
+
 .cover-overlay {
   position: absolute;
   inset: 0;
@@ -1872,19 +1664,28 @@ $error-red: #e53935;
   color: white;
   font-size: 0.85rem;
   font-weight: 500;
-  .cover-upload-zone:hover & {
+  .cover-upload-zone:hover &,
+  .logo-upload-zone:hover & {
     opacity: 1;
   }
 }
-.cover-placeholder {
+
+.cover-placeholder,
+.logo-placeholder {
   padding: 2.5rem 1rem;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 6px;
 }
+.logo-placeholder {
+  padding: 1.5rem 1rem;
+}
 .cover-placeholder-icon {
   font-size: 2.5rem;
+}
+.logo-placeholder-icon {
+  font-size: 2rem;
 }
 .cover-placeholder-text {
   font-size: 0.95rem;
@@ -1913,25 +1714,33 @@ $error-red: #e53935;
     background 0.2s,
     border-color 0.2s,
     transform 0.15s;
-
   &:hover {
     background: rgba(45, 45, 138, 0.14);
     border-color: rgba(45, 45, 138, 0.3);
     transform: translateY(-1px);
   }
-
   &:active {
     transform: translateY(0);
   }
 }
 
-/* ===== INPUT ===== */
+.error-msg {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: $error-red;
+  font-size: 0.78rem;
+  font-weight: 500;
+  margin-top: 6px;
+  padding: 0 2px;
+}
+
+// ─── Input ────────────────────────────────────────────────────────────────────
 .custom-input :deep(.q-field__control) {
   border-radius: 12px !important;
 }
-/* ─────────────────────────────────────────
-   DATE SECTION
-───────────────────────────────────────── */
+
+// ─── Date Section ─────────────────────────────────────────────────────────────
 .date-section-header {
   display: flex;
   align-items: center;
@@ -1942,6 +1751,7 @@ $error-red: #e53935;
   background: linear-gradient(135deg, $indigo-deep, $indigo-mid 55%, $indigo-glow);
   box-shadow: 0 6px 24px rgba(45, 45, 138, 0.28);
 }
+
 .date-section-icon {
   width: 40px;
   height: 40px;
@@ -1967,7 +1777,7 @@ $error-red: #e53935;
   margin-top: 2px;
 }
 
-/* Date summary chips */
+// ─── Date Chips ───────────────────────────────────────────────────────────────
 .date-summary-row {
   display: flex;
   align-items: center;
@@ -1979,6 +1789,7 @@ $error-red: #e53935;
     align-items: stretch;
   }
 }
+
 .date-chip {
   flex: 1;
   min-width: 130px;
@@ -2005,6 +1816,7 @@ $error-red: #e53935;
     background: #fff5f5 !important;
   }
 }
+
 .date-chip-icon {
   width: 30px;
   height: 30px;
@@ -2039,6 +1851,7 @@ $error-red: #e53935;
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
 .date-chip-clear {
   width: 22px;
   height: 22px;
@@ -2060,6 +1873,7 @@ $error-red: #e53935;
     transform: scale(1.1);
   }
 }
+
 .date-range-arrow {
   color: $text-muted;
   flex-shrink: 0;
@@ -2069,7 +1883,7 @@ $error-red: #e53935;
   }
 }
 
-/* Duration badge */
+// ─── Duration Badge ───────────────────────────────────────────────────────────
 .duration-badge {
   display: inline-flex;
   align-items: center;
@@ -2083,6 +1897,7 @@ $error-red: #e53935;
   font-weight: 700;
   margin-bottom: 0.75rem;
 }
+
 .duration-fade-enter-active,
 .duration-fade-leave-active {
   transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -2093,7 +1908,7 @@ $error-red: #e53935;
   transform: scale(0.85);
 }
 
-/* Calendars grid */
+// ─── Calendars ────────────────────────────────────────────────────────────────
 .calendars-wrap {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -2103,7 +1918,6 @@ $error-red: #e53935;
     grid-template-columns: 1fr;
   }
 }
-
 .calendar-block {
   display: flex;
   flex-direction: column;
@@ -2153,7 +1967,6 @@ $error-red: #e53935;
   }
 }
 
-/* Calendar wrapper with custom border glow */
 .cal-wrapper {
   border-radius: 18px;
   overflow: hidden;
@@ -2169,17 +1982,15 @@ $error-red: #e53935;
     border: 2px solid rgba(13, 148, 136, 0.18);
   }
 }
-
 .cal-readonly {
   pointer-events: none;
   opacity: 0.75;
 }
-/* q-date deep overrides */
+
 .fest-calendar {
   width: 100% !important;
   border-radius: 16px !important;
   font-family: 'Noto Sans Thai', 'Prompt', sans-serif !important;
-
   :deep(.q-date__header) {
     border-radius: 16px 16px 0 0 !important;
     padding: 0.85rem 1rem !important;
@@ -2211,7 +2022,7 @@ $error-red: #e53935;
   }
 }
 
-/* ===== CARD HEADER ROW ===== */
+// ─── Card Header Row ──────────────────────────────────────────────────────────
 .card-header-row {
   display: flex;
   align-items: center;
@@ -2241,12 +2052,13 @@ $error-red: #e53935;
   letter-spacing: 0 !important;
 }
 
-/* ===== WISH LIST ===== */
+// ─── Wish List ────────────────────────────────────────────────────────────────
 .wish-list-wrapper {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
+
 .wish-item {
   display: flex;
   align-items: center;
@@ -2263,6 +2075,7 @@ $error-red: #e53935;
     transform: translateX(2px);
   }
 }
+
 .wish-number {
   width: 26px;
   height: 26px;
@@ -2277,24 +2090,13 @@ $error-red: #e53935;
   flex-shrink: 0;
 }
 .wish-text {
-  // flex: 1;
-  // font-size: 0.92rem;
-  // color: $text-main;
-  // font-weight: 500;
-  // overflow: hidden;
-  // text-overflow: ellipsis;
-  // white-space: nowrap;
   flex: 1;
   font-size: 0.92rem;
   color: $text-main;
   font-weight: 500;
   line-height: 1.5;
 }
-.wish-actions {
-  display: flex;
-  gap: 6px;
-  flex-shrink: 0;
-}
+
 .wish-btn {
   width: 32px;
   height: 32px;
@@ -2339,7 +2141,7 @@ $error-red: #e53935;
   transform: translateX(16px) scale(0.95);
 }
 
-/* ===== CARD GRID ===== */
+// ─── Card Grid ────────────────────────────────────────────────────────────────
 .card-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -2348,6 +2150,7 @@ $error-red: #e53935;
     grid-template-columns: repeat(4, 1fr);
   }
 }
+
 .card-thumb {
   position: relative;
   border-radius: 12px;
@@ -2382,7 +2185,7 @@ $error-red: #e53935;
   }
 }
 
-/* ===== EMPTY STATE ===== */
+// ─── Empty State ──────────────────────────────────────────────────────────────
 .empty-state {
   text-align: center;
   padding: 1.5rem 1rem;
@@ -2402,7 +2205,7 @@ $error-red: #e53935;
   color: $text-muted;
 }
 
-/* ===== SUBMIT BUTTON ===== */
+// ─── Submit Button ────────────────────────────────────────────────────────────
 .submit-btn {
   width: 100%;
   padding: 1rem;
@@ -2433,6 +2236,7 @@ $error-red: #e53935;
     cursor: not-allowed;
   }
 }
+
 .submit-btn-inner {
   display: flex;
   align-items: center;
@@ -2440,7 +2244,7 @@ $error-red: #e53935;
   gap: 8px;
 }
 
-/* ===== WISH DIALOGS ===== */
+// ─── Dialogs ──────────────────────────────────────────────────────────────────
 .custom-dialog {
   background: $surface;
   border-radius: 20px;
@@ -2458,6 +2262,7 @@ $error-red: #e53935;
     right: 0;
   }
 }
+
 .custom-dialog-header {
   display: flex;
   align-items: center;
@@ -2547,7 +2352,7 @@ $error-red: #e53935;
   font-weight: 700;
 }
 
-/* ===== RESULT DIALOGS ===== */
+// ─── Result Dialogs ───────────────────────────────────────────────────────────
 .result-dialog {
   background: #fff;
   border-radius: 24px;
@@ -2572,7 +2377,6 @@ $error-red: #e53935;
     background: linear-gradient(135deg, $amber-dark, $amber);
   }
 }
-
 .result-dialog-icon {
   width: 44px;
   height: 44px;
@@ -2584,7 +2388,6 @@ $error-red: #e53935;
   justify-content: center;
   flex-shrink: 0;
 }
-
 .result-dialog-title {
   font-family: 'Prompt', sans-serif;
   font-size: 1rem;
@@ -2597,7 +2400,6 @@ $error-red: #e53935;
   color: rgba(255, 255, 255, 0.72);
   margin-top: 2px;
 }
-
 .result-dialog-body {
   padding: 1.5rem 1.5rem 0.75rem;
   text-align: center;
@@ -2642,7 +2444,6 @@ $error-red: #e53935;
     background: $amber-soft;
   }
 }
-
 .result-dialog-footer {
   display: flex;
   justify-content: flex-end;
@@ -2672,7 +2473,7 @@ $error-red: #e53935;
   }
 }
 
-/* ===== ANIMATIONS ===== */
+// ─── Animations ───────────────────────────────────────────────────────────────
 .animate-in {
   animation: slideUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
@@ -2688,7 +2489,17 @@ $error-red: #e53935;
   }
 }
 
-/* ===== RESPONSIVE ===== */
+.err-fade-enter-active,
+.err-fade-leave-active {
+  transition: all 0.25s ease;
+}
+.err-fade-enter-from,
+.err-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-4px);
+}
+
+// ─── Responsive ───────────────────────────────────────────────────────────────
 @media (max-width: 599px) {
   .fest-card {
     padding: 1.1rem;
@@ -2708,7 +2519,7 @@ $error-red: #e53935;
   }
 }
 
-/* ===== CLICK PARTICLES ===== */
+// ─── Click Particles ──────────────────────────────────────────────────────────
 .click-particles-root {
   position: fixed;
   inset: 0;

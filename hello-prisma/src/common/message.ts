@@ -6,8 +6,8 @@ export const MESSAGE = {
     UPDATE_SUCCESS: 'แก้ไขขื่อเทศกาลสำเร็จ',
     INVALID_FESTIVALID: 'ไม่มีเทศกาลนี้ในระบบ',
     DELETE_SUCCESS: 'ลบข้อมูลเทศกาลสำเร็จ',
-    FESTIVAL_NOT_EDIT: 'ไม่สามารถแก้ไขข้อมูลเทศกาลได้',
-    FESTIVAL_NOT_DELETE: 'ไม่สามารถลบข้อมูลเทศกาลได้',
+    NOT_EDIT_DELETE: 'ผู้สร้างหรือซุปเปอร์แอดมินสามารถลบหรือแก้ไขเทศกาลนี้ได้',
+    NOT_FOUND: 'ไม่มีเทศกาลนี้ในระบบ',
     // FESTIVAL_CONFLICT: 'มีข้อมูลเทศกาลแล้ว',
   },
   SENDER: {
@@ -59,5 +59,7 @@ export const MESSAGE = {
     GET_SUCCESS: 'แสดงรายการแอดมินสำเร็จ',
     DELETE_SUCCESS: 'ลบแอดมินสำเร็จ',
     NOT_FOUND: 'ไม่พบรายชื่อแอดมิน',
+    USERNAME_CONFLICT: 'ชื่อผู้ใช้นี้มีในระบบแล้ว',
+    EMAIL_CONFLICT: 'อีเมลล์นี้มีในระบบแล้ว',
   },
 };

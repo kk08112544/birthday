@@ -81,12 +81,14 @@ model Unpolite {
 model User {
   uId       Int    @id @default(autoincrement())
   firstName String
-  userName  String @unique
+  userName  String 
+  email     String
   password  String
+  phoneNumber String
   role      String @default("admin")
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
-   festivalsCreated Festival[] @relation("FestivalCreatedBy")
+  festivalsCreated Festival[] @relation("FestivalCreatedBy")
   festivalsDeleted Festival[] @relation("FestivalDeletedBy")
 }

@@ -73,8 +73,9 @@ export class AdminFestivalController {
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateFestivalDto: UpdateFestivalDto,
+    @CurrentUser() user: User,
   ) {
-    return this.adminfestivalService.update(id, updateFestivalDto);
+    return this.adminfestivalService.update(id, updateFestivalDto, user.uId);
   }
 
   @Delete(':id')

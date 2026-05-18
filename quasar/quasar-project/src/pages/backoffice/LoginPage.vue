@@ -190,6 +190,10 @@ const authDialog = ref(false);
 const authDialogSuccess = ref(false);
 const authDialogMessage = ref('');
 
+// Click particles
+const activeParticles = ref<Particle[]>([]);
+let particleId = 0;
+
 // ─── Auth Dialog ──────────────────────────────────────────────────────────────
 const openAuthDialog = (success: boolean, message: string) => {
   authDialogSuccess.value = success;
@@ -243,9 +247,7 @@ const onSubmit = async () => {
 };
 
 // ─── Click Particles ──────────────────────────────────────────────────────────
-const activeParticles = ref<Particle[]>([]);
-let particleId = 0;
-
+// ─── Click Particles ──────────────────────────────────────────────────────────
 const PARTICLE_COLORS = [
   '#e11d48',
   '#fbbf24',
@@ -288,87 +290,34 @@ const PARTICLE_EMOJIS = [
   '🏵️',
 ];
 
-const SHAPES: ShapeType[] = ['circle', 'square', 'star', 'triangle', 'emoji'];
-const SHAPE_WEIGHTS = [0.25, 0.2, 0.2, 0.15, 0.2];
-
-const pickShape = (): ShapeType => {
-  const r = Math.random();
-  let cumulative = 0;
-  for (let i = 0; i < SHAPES.length; i++) {
-    cumulative += SHAPE_WEIGHTS[i] ?? 0;
-    if (r < cumulative) return SHAPES[i] ?? 'circle';
-  }
-  return 'circle';
-};
-
 const spawnParticles = (x: number, y: number) => {
-  const count = 36 + Math.floor(Math.random() * 12);
-  const W = window.innerWidth;
-  const H = window.innerHeight;
+  const count = 12 + Math.floor(Math.random() * 6);
 
   for (let i = 0; i < count; i++) {
     const id = ++particleId;
-    const size = 7 + Math.random() * 11;
+    const size = 6 + Math.random() * 7;
     const color = PARTICLE_COLORS[Math.floor(Math.random() * PARTICLE_COLORS.length)]!;
-    const dur = 1.2 + Math.random() * 1.2;
+    const dur = 0.7 + Math.random() * 0.5;
     const emoji = PARTICLE_EMOJIS[Math.floor(Math.random() * PARTICLE_EMOJIS.length)]!;
-    const shape = pickShape();
+
+    const shapes: ShapeType[] = ['circle', 'circle', 'square', 'star', 'emoji'];
+    const shape = shapes[Math.floor(Math.random() * shapes.length)]!;
     const isEmoji = shape === 'emoji';
 
-    // Distribute particles across 8 screen zones
-    const zone = i % 8;
-    let targetX: number;
-    let targetY: number;
-
-    switch (zone) {
-      case 0:
-        targetX = Math.random() * W * 0.35;
-        targetY = Math.random() * H * 0.35;
-        break;
-      case 1:
-        targetX = W * 0.25 + Math.random() * W * 0.5;
-        targetY = Math.random() * H * 0.25;
-        break;
-      case 2:
-        targetX = W * 0.65 + Math.random() * W * 0.35;
-        targetY = Math.random() * H * 0.35;
-        break;
-      case 3:
-        targetX = W * 0.65 + Math.random() * W * 0.35;
-        targetY = H * 0.25 + Math.random() * H * 0.5;
-        break;
-      case 4:
-        targetX = W * 0.65 + Math.random() * W * 0.35;
-        targetY = H * 0.65 + Math.random() * H * 0.35;
-        break;
-      case 5:
-        targetX = W * 0.25 + Math.random() * W * 0.5;
-        targetY = H * 0.75 + Math.random() * H * 0.25;
-        break;
-      case 6:
-        targetX = Math.random() * W * 0.35;
-        targetY = H * 0.65 + Math.random() * H * 0.35;
-        break;
-      case 7:
-        targetX = Math.random() * W * 0.25;
-        targetY = H * 0.25 + Math.random() * H * 0.5;
-        break;
-      default:
-        targetX = Math.random() * W;
-        targetY = Math.random() * H;
-    }
+    const angle = (i / count) * Math.PI * 2 + (Math.random() - 0.5) * 0.8;
+    const dist = 80 + Math.random() * 80;
 
     const style: Record<string, string> = {
       '--x': `${x}px`,
       '--y': `${y}px`,
-      '--dx': `${targetX - x}px`,
-      '--dy': `${targetY - y}px`,
+      '--dx': `${Math.cos(angle) * dist}px`,
+      '--dy': `${Math.sin(angle) * dist}px`,
       '--dur': `${dur}s`,
       '--color': isEmoji ? 'transparent' : color,
-      '--size': isEmoji ? '22px' : `${size}px`,
+      '--size': isEmoji ? '18px' : `${size}px`,
       '--shape': shape,
       '--emoji-content': isEmoji ? `"${emoji}"` : '""',
-      '--rot': `${Math.random() * 720 - 360}deg`,
+      '--rot': `${Math.random() * 360 - 180}deg`,
     };
 
     activeParticles.value.push({ id, style });
@@ -376,7 +325,7 @@ const spawnParticles = (x: number, y: number) => {
       () => {
         activeParticles.value = activeParticles.value.filter((p) => p.id !== id);
       },
-      dur * 1000 + 200,
+      dur * 1000 + 100,
     );
   }
 };

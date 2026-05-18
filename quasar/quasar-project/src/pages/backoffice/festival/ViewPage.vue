@@ -1,224 +1,214 @@
 <template>
   <q-page class="view-festival-page">
-    <!-- ===== HERO HEADER ===== -->
-    <div class="hero-header">
-      <div class="hero-orb hero-orb-1" />
-      <div class="hero-orb hero-orb-2" />
-      <div class="hero-orb hero-orb-3" />
-      <div class="hero-content">
-        <div class="hero-icon">🎊</div>
-        <h1 class="hero-title">รายละเอียดเทศกาล</h1>
-        <p class="hero-sub">รายละเอียดเทศกาลสุดพิเศษที่ผู้คนได้อวยพรกัน</p>
+    <!-- ===== HERO ===== -->
+    <div class="page-hero">
+      <div class="hero-blob hero-blob-1" />
+      <div class="hero-blob hero-blob-2" />
+      <div class="hero-blob hero-blob-3" />
+      <div class="hero-inner">
+        <div class="hero-left">
+          <div class="hero-icon-wrap">
+            <q-icon name="visibility" size="1.8rem" color="white" />
+          </div>
+          <div>
+            <h1 class="hero-title">รายละเอียดเทศกาล</h1>
+            <p class="hero-sub">รายละเอียดเทศกาลสุดพิเศษที่ผู้คนได้อวยพรกัน</p>
+          </div>
+        </div>
+        <q-btn
+          unelevated
+          icon="arrow_back"
+          label="กลับรายการ"
+          to="/backoffice/festival"
+          class="hero-back-btn"
+          :class="$q.screen.xs ? 'full-width q-mt-sm' : ''"
+        />
       </div>
     </div>
 
-    <!-- ===== FORM ===== -->
-    <div class="form-body">
+    <!-- ===== CONTENT ===== -->
+    <div class="content-wrap">
       <div class="form-container">
-        <!-- ===== CARD: COVER IMAGE & NAME ===== -->
+        <!-- ===== CARD: ข้อมูลเทศกาล ===== -->
         <div class="fest-card animate-in" style="animation-delay: 0.05s">
           <div class="card-label">
             <span class="label-dot" />
             ข้อมูลเทศกาล
           </div>
-          <div ref="coverRef" class="field-group">
-            <div class="cover-upload-zone">
+
+          <!-- COVER IMAGE -->
+          <div class="field-group">
+            <div class="cover-view-zone">
               <q-img
-                v-if="imageFile || existingImageUrl"
-                :src="imageFile ? getFilePreview(imageFile) : existingImageUrl"
+                v-if="existingImageUrl"
+                :src="existingImageUrl"
                 class="cover-img"
                 fit="contain"
                 :ratio="16 / 9"
               />
+              <div v-else class="cover-placeholder">
+                <div class="cover-placeholder-icon">🖼️</div>
+                <div class="cover-placeholder-text">ไม่มีรูปหน้าปก</div>
+              </div>
             </div>
           </div>
 
-          <div ref="nameRef" class="q-mt-md field-group">
-            <q-input outlined v-model="festivalName" dense autofocus class="custom-input" readonly>
+          <!-- FESTIVAL NAME -->
+          <div class="q-mt-md field-group">
+            <q-input
+              outlined
+              v-model="festivalName"
+              label="ชื่อเทศกาล"
+              dense
+              readonly
+              class="custom-input"
+            >
               <template v-slot:prepend>
                 <q-icon name="festival" color="deep-orange-5" />
               </template>
             </q-input>
           </div>
 
-          <!-- LOGO UPLOAD -->
-          <div ref="logoRef" class="q-mt-md field-group">
-            <div class="logo-upload-zone">
-              <q-img
-                v-if="logoFile"
-                :src="getFilePreview(logoFile)"
-                class="logo-preview"
-                :ratio="1"
-                fit="contain"
-              />
+          <!-- LOGO -->
+          <div class="q-mt-md field-group">
+            <div class="logo-row">
+              <div class="logo-view-zone">
+                <q-img
+                  v-if="logoFile"
+                  :src="getFilePreview(logoFile)"
+                  class="logo-preview"
+                  :ratio="1"
+                  fit="contain"
+                />
+                <div v-else class="logo-placeholder">
+                  <div class="logo-placeholder-icon">🏷️</div>
+                  <div class="cover-placeholder-text">ไม่มี Logo</div>
+                </div>
+              </div>
+              <div class="logo-hint">
+                <div class="logo-hint-title">Logo เทศกาล</div>
+                <div class="logo-hint-sub">รูป Logo ที่ใช้แสดงในหน้าเทศกาล</div>
+              </div>
             </div>
           </div>
 
-          <div ref="webNameRef" class="q-mt-md field-group">
-            <q-input v-model="webName" outlined dense class="custom-input" readonly>
+          <!-- WEB NAME -->
+          <div class="q-mt-md field-group">
+            <q-input
+              v-model="webName"
+              label="ชื่อเว็บไซต์ (URL slug)"
+              outlined
+              dense
+              readonly
+              class="custom-input"
+            >
               <template v-slot:prepend>
                 <q-icon name="language" color="deep-orange-5" />
               </template>
             </q-input>
           </div>
+        </div>
 
-          <!-- ===== DATE RANGE SECTION ===== -->
-          <div ref="dateRef" class="q-mt-lg field-group">
-            <div class="date-section-header">
-              <div class="date-section-icon">
-                <q-icon name="date_range" size="18px" color="white" />
-              </div>
-              <div>
-                <div class="date-section-title">ช่วงเวลาของเทศกาล</div>
-                <div class="date-section-sub">กำหนดวันเริ่มต้นและวันสิ้นสุด</div>
-              </div>
-            </div>
+        <!-- ===== CARD: ช่วงเวลา ===== -->
+        <div class="fest-card animate-in field-group" style="animation-delay: 0.1s">
+          <div class="card-label">
+            <span class="label-dot label-dot--teal" />
+            ช่วงเวลาของเทศกาล
+          </div>
 
-            <!-- Date summary chips -->
-            <div class="date-summary-row">
-              <div
-                class="date-chip"
-                :class="{
-                  'date-chip--active': startDate,
-                  'date-chip--error': dateError && !startDate,
-                }"
-              >
-                <div class="date-chip-icon">
-                  <q-icon name="play_circle" size="14px" />
-                </div>
-                <div class="date-chip-body">
-                  <div class="date-chip-label">วันเริ่มต้น</div>
-                  <div class="date-chip-value">
-                    {{ startDate ? formatDateThai(startDate) : 'ยังไม่ได้เลือก' }}
-                  </div>
-                </div>
+          <!-- Date summary chips -->
+          <div class="date-summary-row">
+            <div class="date-chip" :class="{ 'date-chip--active': startDate }">
+              <div class="date-chip-icon">
+                <q-icon name="play_circle" size="14px" />
               </div>
-
-              <div class="date-range-arrow">
-                <q-icon name="arrow_forward" size="16px" />
-              </div>
-
-              <div
-                class="date-chip"
-                :class="{
-                  'date-chip--active': endDate,
-                  'date-chip--error': dateError && !endDate,
-                  'date-chip--end': true,
-                }"
-              >
-                <div class="date-chip-icon date-chip-icon--end">
-                  <q-icon name="stop_circle" size="14px" />
-                </div>
-                <div class="date-chip-body">
-                  <div class="date-chip-label">วันสิ้นสุด</div>
-                  <div class="date-chip-value">
-                    {{ endDate ? formatDateThai(endDate) : 'ยังไม่ได้เลือก' }}
-                  </div>
+              <div class="date-chip-body">
+                <div class="date-chip-label">วันเริ่มต้น</div>
+                <div class="date-chip-value">
+                  {{ startDate ? formatDateThai(startDate) : 'ไม่ได้กำหนด' }}
                 </div>
               </div>
             </div>
 
-            <!-- Duration badge -->
-            <transition name="duration-fade">
-              <div v-if="startDate && endDate && durationDays >= 0" class="duration-badge">
-                <q-icon name="schedule" size="14px" />
-                ระยะเวลา {{ durationDays + 1 }} วัน
-                <span v-if="durationDays === 0">· วันเดียว</span>
+            <div class="date-range-arrow">
+              <q-icon name="arrow_forward" size="16px" />
+            </div>
+
+            <div class="date-chip date-chip--end" :class="{ 'date-chip--active': endDate }">
+              <div class="date-chip-icon date-chip-icon--end">
+                <q-icon name="stop_circle" size="14px" />
               </div>
-            </transition>
-
-            <!-- Error -->
-            <transition name="err-fade">
-              <div v-if="dateError" class="error-msg q-mt-xs">
-                <q-icon name="error_outline" size="14px" />
-                {{ dateErrorMsg }}
-              </div>
-            </transition>
-
-            <!-- Calendar grid -->
-            <div class="calendars-wrap">
-              <!-- START DATE -->
-              <div class="calendar-block">
-                <div class="calendar-block-label calendar-block-label--start">
-                  <div class="cal-label-dot cal-label-dot--start" />
-                  <span>วันเริ่มต้น</span>
-                  <span v-if="startDate" class="cal-label-date">{{
-                    formatDateThai(startDate)
-                  }}</span>
-                </div>
-
-                <div class="cal-wrapper cal-wrapper--start cal-readonly">
-                  <q-date
-                    v-model="startDate"
-                    :options="startDateOptions"
-                    color="indigo-6"
-                    text-color="white"
-                    flat
-                    minimal
-                    class="fest-calendar"
-                  />
+              <div class="date-chip-body">
+                <div class="date-chip-label">วันสิ้นสุด</div>
+                <div class="date-chip-value">
+                  {{ endDate ? formatDateThai(endDate) : 'ไม่ได้กำหนด' }}
                 </div>
               </div>
+            </div>
+          </div>
 
-              <!-- END DATE -->
-              <div class="calendar-block">
-                <div class="calendar-block-label calendar-block-label--end">
-                  <div class="cal-label-dot cal-label-dot--end" />
-                  <span>วันสิ้นสุด</span>
-                  <span v-if="endDate" class="cal-label-date">{{ formatDateThai(endDate) }}</span>
-                </div>
-                <!-- <div class="cal-wrapper cal-wrapper--end">
-                  <q-date
-                    v-model="endDate"
-                    :options="endDateOptions"
-                    color="teal-6"
-                    text-color="white"
-                    flat
-                    minimal
-                    disable
-                    class="fest-calendar"
-                    @update:model-value="onEndDateChange"
-                  />
-                </div> -->
-                <!-- <div class="cal-wrapper cal-wrapper--end" >
-  <q-date
-    v-model="endDate"
-    :options="endDateOptions"
-    color="teal-6"
-    text-color="white"
-    flat
-    minimal
-    class="fest-calendar"
-    @update:model-value="onEndDateChange"
-  />
-</div> -->
-                <div class="cal-wrapper cal-wrapper--end cal-readonly">
-                  <q-date
-                    v-model="endDate"
-                    :options="endDateOptions"
-                    color="teal-6"
-                    text-color="white"
-                    flat
-                    minimal
-                    class="fest-calendar"
-                  />
-                </div>
+          <!-- Duration badge -->
+          <transition name="duration-fade">
+            <div v-if="startDate && endDate && durationDays >= 0" class="duration-badge">
+              <q-icon name="schedule" size="14px" />
+              ระยะเวลา {{ durationDays + 1 }} วัน
+              <span v-if="durationDays === 0">· วันเดียว</span>
+            </div>
+          </transition>
+
+          <!-- Calendars grid -->
+          <div class="calendars-wrap">
+            <div class="calendar-block">
+              <div class="calendar-block-label calendar-block-label--start">
+                <div class="cal-label-dot cal-label-dot--start" />
+                <span>วันเริ่มต้น</span>
+                <span v-if="startDate" class="cal-label-date">{{ formatDateThai(startDate) }}</span>
+              </div>
+              <div class="cal-wrapper cal-wrapper--start cal-readonly">
+                <q-date
+                  v-model="startDate"
+                  :options="startDateOptions"
+                  color="deep-orange-5"
+                  text-color="white"
+                  flat
+                  minimal
+                  class="fest-calendar"
+                />
+              </div>
+            </div>
+
+            <div class="calendar-block">
+              <div class="calendar-block-label calendar-block-label--end">
+                <div class="cal-label-dot cal-label-dot--end" />
+                <span>วันสิ้นสุด</span>
+                <span v-if="endDate" class="cal-label-date">{{ formatDateThai(endDate) }}</span>
+              </div>
+              <div class="cal-wrapper cal-wrapper--end cal-readonly">
+                <q-date
+                  v-model="endDate"
+                  :options="endDateOptions"
+                  color="teal-6"
+                  text-color="white"
+                  flat
+                  minimal
+                  class="fest-calendar"
+                />
               </div>
             </div>
           </div>
         </div>
 
-        <!-- ===== CARD: WISHES ===== -->
-        <div class="fest-card animate-in" style="animation-delay: 0.12s">
+        <!-- ===== CARD: คำอวยพร ===== -->
+        <div class="fest-card animate-in" style="animation-delay: 0.15s">
           <div class="card-label">
             <span class="label-dot label-dot--amber" />
             คำอวยพร
           </div>
-
           <div class="card-header-row">
-            <div class="card-header-info">
-              <span class="card-header-count">{{ wishWordList.length }}</span>
-              <span class="card-header-unit">รายการ</span>
+            <div class="stat-chip">
+              <q-icon name="format_quote" size="17px" color="deep-orange-5" />
+              <span class="stat-num">{{ wishWordList.length }}</span>
+              <span class="stat-label">รายการ</span>
             </div>
           </div>
 
@@ -232,117 +222,99 @@
               <div class="wish-text">{{ wish.wishWord }}</div>
               <div class="wish-actions">
                 <button class="wish-btn wish-btn--view" type="button" @click="viewWish(i)">
-                  <q-icon name="visibility" size="16px" />
+                  <q-icon name="visibility" size="15px" />
                 </button>
               </div>
             </div>
           </transition-group>
 
           <div v-if="wishWordList.length === 0" class="empty-state">
-            <div class="empty-state-icon">💬</div>
-            <div class="empty-state-text">ยังไม่มีคำอวยพร</div>
-            <div class="empty-state-sub">เพิ่มคำอวยพรเพื่อให้ผู้ใช้เลือกส่งให้กัน</div>
+            <div class="empty-icon">💬</div>
+            <div class="empty-title">ยังไม่มีคำอวยพร</div>
+            <div class="empty-sub">ยังไม่มีคำอวยพรในเทศกาลนี้</div>
           </div>
         </div>
 
-        <!-- ===== CARD: GREETING CARDS ===== -->
-        <div class="fest-card animate-in" style="animation-delay: 0.19s">
+        <!-- ===== CARD: การ์ดอวยพร ===== -->
+        <div class="fest-card animate-in" style="animation-delay: 0.2s">
           <div class="card-label">
             <span class="label-dot label-dot--teal" />
             การ์ดอวยพร
           </div>
-
           <div class="card-header-row">
-            <div class="card-header-info">
-              <span class="card-header-count">{{
-                existingCards.length + cardFileList.length
-              }}</span>
-              <span class="card-header-unit">รูป</span>
+            <div class="stat-chip">
+              <q-icon name="photo_library" size="17px" color="teal-6" />
+              <span class="stat-num">{{ existingCards.length }}</span>
+              <span class="stat-label">รูป</span>
             </div>
           </div>
 
-          <div v-if="existingCards.length > 0 || cardFileList.length > 0" class="card-grid">
+          <div v-if="existingCards.length > 0" class="card-grid">
             <div v-for="card in existingCards" :key="'existing-' + card.cId" class="card-thumb">
               <q-img :src="card.previewUrl" ratio="1" fit="contain" class="card-thumb-img" />
-            </div>
-            <div v-for="(file, i) in cardFileList" :key="'new-' + i" class="card-thumb">
-              <q-img :src="getFilePreview(file)" ratio="1" fit="contain" class="card-thumb-img" />
             </div>
           </div>
 
           <div v-else class="empty-state">
-            <div class="empty-state-icon">🃏</div>
-            <div class="empty-state-text">ยังไม่มีการ์ด</div>
-            <div class="empty-state-sub">อัปโหลดรูปสวยๆ เพื่อใช้เป็นการ์ดอวยพร</div>
+            <div class="empty-icon">🃏</div>
+            <div class="empty-title">ยังไม่มีการ์ด</div>
+            <div class="empty-sub">ยังไม่มีการ์ดอวยพรในเทศกาลนี้</div>
           </div>
         </div>
 
-        <!-- ===== SUBMIT ===== -->
+        <!-- ===== BACK BUTTON ===== -->
         <div class="animate-in" style="animation-delay: 0.25s">
-          <button
-            type="button"
-            class="submit-btn"
-            :class="{ loading }"
-            :disabled="loading"
-            @click="router.push('/backoffice/festival')"
-          >
-            <span v-if="!loading" class="submit-btn-inner">
-              <q-icon name="chevron_left" size="20px" />
+          <button type="button" class="submit-btn" @click="router.push('/backoffice/festival')">
+            <span class="submit-btn-inner">
+              <q-icon name="arrow_back" size="20px" />
               กลับไปหน้าเทศกาล
-            </span>
-            <span v-else class="submit-btn-inner">
-              <q-circular-progress indeterminate size="20px" color="white" />
-              กำลังบันทึก...
             </span>
           </button>
         </div>
       </div>
     </div>
 
-    <!-- ===== DIALOG: VIEW WISH ===== -->
-    <q-dialog v-model="ViewWishDialog" :maximized="$q.screen.lt.sm">
+    <!-- ===== DIALOG: ดูคำอวยพร ===== -->
+    <q-dialog v-model="viewWishDialog" :maximized="$q.screen.lt.sm">
       <div class="custom-dialog" :class="{ 'custom-dialog--mobile': $q.screen.lt.sm }">
-        <div class="custom-dialog-header">
-          <span>💬 คำอวยพร</span>
-          <button class="dialog-close" type="button" @click="ViewWishDialog = false">
+        <div class="dialog-header">
+          <div class="dialog-header-icon dialog-header-icon--orange">
+            <q-icon name="format_quote" color="white" size="18px" />
+          </div>
+          <span>คำอวยพร</span>
+          <q-space />
+          <button class="dialog-close-btn" type="button" @click="viewWishDialog = false">
             <q-icon name="close" size="18px" />
           </button>
         </div>
-        <div class="custom-dialog-body">
+        <div class="dialog-body">
           <div class="view-wish-number">รายการที่ {{ viewingIndex + 1 }}</div>
           <div class="view-wish-text">{{ viewingWishText }}</div>
         </div>
-        <div class="custom-dialog-footer">
-          <button
-            type="button"
-            class="dialog-btn dialog-btn--confirm"
-            @click="ViewWishDialog = false"
-          >
+        <div class="dialog-footer">
+          <button type="button" class="dlg-btn dlg-btn--confirm" @click="viewWishDialog = false">
             ปิด
           </button>
         </div>
       </div>
     </q-dialog>
+
     <!-- ===== CLICK PARTICLES ===== -->
     <teleport to="body">
-      <div class="click-particles-root">
-        <div v-for="p in activeParticles" :key="p.id" class="click-particle" :style="p.style" />
+      <div class="click-particles-root" aria-hidden="true">
+        <span v-for="p in activeParticles" :key="p.id" class="click-particle" :style="p.style" />
       </div>
     </teleport>
   </q-page>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useQuasar } from 'quasar';
 import { api } from 'src/boot/axios';
 import { useRouter, useRoute } from 'vue-router';
 
-const $q = useQuasar();
-const router = useRouter();
-const route = useRoute();
-
-/* ===== TYPES ===== */
+// ─── Types ────────────────────────────────────────────────────────────────────
 interface WishItem {
   wId?: number;
   wishWord: string;
@@ -375,21 +347,35 @@ interface FestivalData {
   card?: CardApi[];
 }
 
-/* ===== STATE ===== */
-const festivalId = ref<string | null>(null);
+interface Particle {
+  id: number;
+  style: Record<string, string>;
+}
+
+type ShapeType = 'circle' | 'square' | 'star' | 'triangle' | 'emoji';
+
+// ─── Quasar / Router ──────────────────────────────────────────────────────────
+const $q = useQuasar();
+const router = useRouter();
+const route = useRoute();
+
+// ─── Festival State ───────────────────────────────────────────────────────────
 const festivalName = ref('');
-const imageFile = ref<File | null>(null);
 const logoFile = ref<File | null>(null);
 const webName = ref('');
-const existingImageUrl = ref<string>('');
-const existingImageName = ref<string>('');
-const loading = ref(false);
+const existingImageUrl = ref('');
 
-/* ===== DATE STATE ===== */
+// ─── Date State ───────────────────────────────────────────────────────────────
 const startDate = ref('');
 const endDate = ref('');
-const dateError = ref(false);
-const dateErrorMsg = ref('');
+
+// const todayStr = (() => {
+//   const d = new Date();
+//   const y = d.getFullYear();
+//   const m = String(d.getMonth() + 1).padStart(2, '0');
+//   const day = String(d.getDate()).padStart(2, '0');
+//   return `${y}/${m}/${day}`;
+// })();
 
 const durationDays = computed(() => {
   if (!startDate.value || !endDate.value) return -1;
@@ -418,90 +404,65 @@ const formatDateThai = (dateStr: string): string => {
   return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear() + 543}`;
 };
 
-const todayStr = (() => {
-  const d = new Date();
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}/${m}/${day}`;
-})();
+// readonly — แสดงเฉพาะวันที่ถูกเลือก
+const startDateOptions = (dateStr: string): boolean => dateStr === startDate.value;
+const endDateOptions = (dateStr: string): boolean => dateStr === endDate.value;
 
-const startDateOptions = (dateStr: string): boolean => {
-  if (dateStr === startDate.value) return true; // ← เช็คก่อน
-  if (dateStr < todayStr) return false;
-  if (!endDate.value) return true;
-  return dateStr <= endDate.value;
-};
-
-const endDateOptions = (dateStr: string): boolean => {
-  if (dateStr === endDate.value) return true; // ← เช็คก่อน
-  if (dateStr < todayStr) return false;
-  if (!startDate.value) return true;
-  return dateStr >= startDate.value;
-};
-
-/* ===== DIALOG STATE ===== */
-const showFetchErrorDialog = ref(false);
-
-/* ===== WISH LIST ===== */
+// ─── Wish State ───────────────────────────────────────────────────────────────
 const wishWordList = ref<WishItem[]>([]);
+const viewWishDialog = ref(false);
+const viewingIndex = ref(0);
+const viewingWishText = ref('');
 
-/* ===== VIEW WISH DIALOG ===== */
-const ViewWishDialog = ref(false);
-const viewingIndex = ref<number>(0);
-const viewingWishText = ref<string>('');
-
-const viewWish = (index: number) => {
-  const wish = wishWordList.value[index];
+const viewWish = (i: number) => {
+  const wish = wishWordList.value[i];
   if (!wish) return;
-  viewingIndex.value = index;
+  viewingIndex.value = i;
   viewingWishText.value = wish.wishWord;
-  ViewWishDialog.value = true;
+  viewWishDialog.value = true;
 };
 
-/* ===== CARDS ===== */
-const cardFileList = ref<File[]>([]);
+// ─── Card State ───────────────────────────────────────────────────────────────
 const existingCards = ref<ExistingCard[]>([]);
 
-/* ===== API: ดึง image เป็น blob url ===== */
+// ─── Particles ────────────────────────────────────────────────────────────────
+const activeParticles = ref<Particle[]>([]);
+let particleId = 0;
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+const objectUrlCache = new WeakMap<File, string>();
+
+const getFilePreview = (file: File): string => {
+  if (objectUrlCache.has(file)) return objectUrlCache.get(file)!;
+  const url = URL.createObjectURL(file);
+  objectUrlCache.set(file, url);
+  return url;
+};
+
 const getImageUrl = async (imagePath: string): Promise<string> => {
+  if (!imagePath) return '';
   try {
     const response = await api(`/upload/${imagePath}`, { responseType: 'blob' });
     return URL.createObjectURL(response.data);
-  } catch (error) {
-    console.error('Error fetching image:', error);
+  } catch {
     return '';
   }
 };
 
-/* ===== API: ดึงข้อมูล festival ===== */
-const fetchFestivalId = async (id: string) => {
+// ─── Fetch Festival ───────────────────────────────────────────────────────────
+const fetchFestival = async (id: string): Promise<void> => {
   $q.loading.show();
-  festivalId.value = id;
   try {
     const response = await api.get(`/backoffice/festival/${Number(id)}`);
     const data: FestivalData = response.data.festival;
 
     festivalName.value = data.festivalName;
     webName.value = data.webName;
-    // if (data.startDate) startDate.value = data.startDate.replace(/-/g, '/');
-    // if (data.endDate) endDate.value = data.endDate.replace(/-/g, '/');
+
     if (data.startDate) startDate.value = data.startDate.substring(0, 10).replace(/-/g, '/');
     if (data.endDate) endDate.value = data.endDate.substring(0, 10).replace(/-/g, '/');
-    console.log(
-      'startDate:',
-      startDate.value,
-      '| todayStr:',
-      todayStr,
-      '| เท่ากัน?',
-      startDate.value === todayStr,
-      '| น้อยกว่า today?',
-      startDate.value < todayStr,
-    );
-    if (data.image) {
-      existingImageName.value = data.image;
-      existingImageUrl.value = await getImageUrl(data.image);
-    }
+
+    if (data.image) existingImageUrl.value = await getImageUrl(data.image);
 
     if (data.logo) {
       const logoUrl = await getImageUrl(data.logo);
@@ -511,49 +472,32 @@ const fetchFestivalId = async (id: string) => {
     }
 
     wishWordList.value =
-      data.wisher?.map(
-        (w: WisherApi): WishItem => ({
-          wId: w.wId,
-          wishWord: w.wishWord,
-        }),
-      ) ?? [];
+      data.wisher?.map((w): WishItem => ({ wId: w.wId, wishWord: w.wishWord })) ?? [];
 
-    if (data.card && data.card.length > 0) {
-      const cardPromises = data.card.map(async (c: CardApi) => {
-        const previewUrl = await getImageUrl(c.imageCard);
-        return { cId: c.cId, imageName: c.imageCard, previewUrl };
-      });
-      existingCards.value = await Promise.all(cardPromises);
+    if (data.card?.length) {
+      existingCards.value = await Promise.all(
+        data.card.map(
+          async (c): Promise<ExistingCard> => ({
+            cId: c.cId,
+            imageName: c.imageCard,
+            previewUrl: await getImageUrl(c.imageCard),
+          }),
+        ),
+      );
     }
-
-    localStorage.setItem('festivalId', id);
-  } catch (error) {
-    console.error(error);
-    showFetchErrorDialog.value = true;
+  } catch {
+    $q.notify({
+      color: 'negative',
+      message: 'ไม่สามารถโหลดข้อมูลได้',
+      icon: 'warning',
+      position: 'top',
+    });
   } finally {
     $q.loading.hide();
   }
 };
 
-/* ===== UTIL ===== */
-const objectUrlCache = new WeakMap<File, string>();
-const getFilePreview = (file: File): string => {
-  if (objectUrlCache.has(file)) return objectUrlCache.get(file)!;
-  const url = URL.createObjectURL(file);
-  objectUrlCache.set(file, url);
-  return url;
-};
-
-/* ===== CLICK PARTICLES ===== */
-interface Particle {
-  id: number;
-  style: Record<string, string>;
-}
-type ShapeType = 'circle' | 'square' | 'star' | 'triangle' | 'emoji';
-
-const activeParticles = ref<Particle[]>([]);
-let particleId = 0;
-
+// ─── Particle Constants ───────────────────────────────────────────────────────
 const PARTICLE_COLORS = [
   '#e11d48',
   '#fbbf24',
@@ -567,10 +511,6 @@ const PARTICLE_COLORS = [
   '#38bdf8',
   '#4ade80',
   '#facc15',
-  '#ff6b6b',
-  '#ffd93d',
-  '#6bcb77',
-  '#4d96ff',
 ];
 
 const PARTICLE_EMOJIS = [
@@ -596,84 +536,32 @@ const PARTICLE_EMOJIS = [
   '🏵️',
 ];
 
-const SHAPES: ShapeType[] = ['circle', 'square', 'star', 'triangle', 'emoji'];
-const WEIGHTS = [0.25, 0.2, 0.2, 0.15, 0.2];
-
-function pickShape(): ShapeType {
-  const r = Math.random();
-  let c = 0;
-  for (let i = 0; i < SHAPES.length; i++) {
-    c += WEIGHTS[i] ?? 0;
-    if (r < c) return SHAPES[i] ?? 'circle';
-  }
-  return 'circle';
-}
-
+// ─── Particle Spawn ───────────────────────────────────────────────────────────
 const spawnParticles = (x: number, y: number) => {
-  const count = 36 + Math.floor(Math.random() * 12);
-  const W = window.innerWidth;
-  const H = window.innerHeight;
-
+  const count = 12 + Math.floor(Math.random() * 6);
   for (let i = 0; i < count; i++) {
     const id = ++particleId;
-    const size = 7 + Math.random() * 11;
-    const color = PARTICLE_COLORS[Math.floor(Math.random() * PARTICLE_COLORS.length)] ?? '#fbbf24';
-    const dur = 1.2 + Math.random() * 1.2;
-    const emoji = PARTICLE_EMOJIS[Math.floor(Math.random() * PARTICLE_EMOJIS.length)] ?? '🎉';
-    const shape = pickShape();
+    const size = 6 + Math.random() * 7;
+    const color = PARTICLE_COLORS[Math.floor(Math.random() * PARTICLE_COLORS.length)]!;
+    const dur = 0.7 + Math.random() * 0.5;
+    const emoji = PARTICLE_EMOJIS[Math.floor(Math.random() * PARTICLE_EMOJIS.length)]!;
+    const shapes: ShapeType[] = ['circle', 'circle', 'square', 'star', 'emoji'];
+    const shape = shapes[Math.floor(Math.random() * shapes.length)]!;
     const isEmoji = shape === 'emoji';
-
-    const zone = i % 8;
-    let targetX: number, targetY: number;
-    switch (zone) {
-      case 0:
-        targetX = Math.random() * W * 0.35;
-        targetY = Math.random() * H * 0.35;
-        break;
-      case 1:
-        targetX = W * 0.25 + Math.random() * W * 0.5;
-        targetY = Math.random() * H * 0.25;
-        break;
-      case 2:
-        targetX = W * 0.65 + Math.random() * W * 0.35;
-        targetY = Math.random() * H * 0.35;
-        break;
-      case 3:
-        targetX = W * 0.65 + Math.random() * W * 0.35;
-        targetY = H * 0.25 + Math.random() * H * 0.5;
-        break;
-      case 4:
-        targetX = W * 0.65 + Math.random() * W * 0.35;
-        targetY = H * 0.65 + Math.random() * H * 0.35;
-        break;
-      case 5:
-        targetX = W * 0.25 + Math.random() * W * 0.5;
-        targetY = H * 0.75 + Math.random() * H * 0.25;
-        break;
-      case 6:
-        targetX = Math.random() * W * 0.35;
-        targetY = H * 0.65 + Math.random() * H * 0.35;
-        break;
-      case 7:
-        targetX = Math.random() * W * 0.25;
-        targetY = H * 0.25 + Math.random() * H * 0.5;
-        break;
-      default:
-        targetX = Math.random() * W;
-        targetY = Math.random() * H;
-    }
+    const angle = (i / count) * Math.PI * 2 + (Math.random() - 0.5) * 0.8;
+    const dist = 80 + Math.random() * 80;
 
     const style: Record<string, string> = {
       '--x': `${x}px`,
       '--y': `${y}px`,
-      '--dx': `${targetX - x}px`,
-      '--dy': `${targetY - y}px`,
+      '--dx': `${Math.cos(angle) * dist}px`,
+      '--dy': `${Math.sin(angle) * dist}px`,
       '--dur': `${dur}s`,
       '--color': isEmoji ? 'transparent' : color,
-      '--size': isEmoji ? '22px' : `${size}px`,
+      '--size': isEmoji ? '18px' : `${size}px`,
       '--shape': shape,
       '--emoji-content': isEmoji ? `"${emoji}"` : '""',
-      '--rot': `${Math.random() * 720 - 360}deg`,
+      '--rot': `${Math.random() * 360 - 180}deg`,
     };
 
     activeParticles.value.push({ id, style });
@@ -681,166 +569,190 @@ const spawnParticles = (x: number, y: number) => {
       () => {
         activeParticles.value = activeParticles.value.filter((p) => p.id !== id);
       },
-      dur * 1000 + 200,
+      dur * 1000 + 100,
     );
   }
 };
 
-const handleGlobalClick = (e: MouseEvent) => {
-  spawnParticles(e.clientX, e.clientY);
-};
+const handleGlobalClick = (e: MouseEvent) => spawnParticles(e.clientX, e.clientY);
 
+// ─── Lifecycle ────────────────────────────────────────────────────────────────
 onMounted(async () => {
   const id = (route.params.id as string) || (route.query.id as string);
-  if (id) await fetchFestivalId(id);
-  window.addEventListener('click', handleGlobalClick);
+  if (id) await fetchFestival(id);
+  document.addEventListener('click', handleGlobalClick);
+});
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleGlobalClick);
 });
 </script>
 
 <style lang="scss" scoped>
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&family=Prompt:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&family=Prompt:wght@500;600;700&display=swap');
 
-/* ===== TOKENS ===== */
-$indigo-deep: #1a1460;
-$indigo-mid: #2d2d8a;
-$indigo-glow: #5a3ea0;
-$gold: #f5a623;
-$gold-light: #ffd166;
-$coral: #ff6b6b;
+// ─── Design Tokens (เหมือน edit/create/list page) ────────────────────────────
+$orange: #ea580c;
+$orange-mid: #f97316;
+$orange-soft: #fff7ed;
+$gold: #f59e0b;
 $teal: #0d9488;
+$red: #dc2626;
+$red-soft: #fee2e2;
 $green: #16a34a;
 $green-dark: #14532d;
 $green-soft: #f0fdf4;
-$amber: #d97706;
-$amber-dark: #92400e;
-$amber-soft: #fffbeb;
 $surface: #ffffff;
-$surface-2: #f7f5ff;
-$text-main: #1a1460;
-$text-muted: #8b87b0;
-$radius-card: 20px;
-$radius-btn: 12px;
-$error-red: #e53935;
+$surface-2: #fff9f5;
+$text-main: #431407;
+$text-muted: #9ca3af;
+$radius: 18px;
 
-/* ===== PAGE ===== */
+// ─── Page ─────────────────────────────────────────────────────────────────────
 .view-festival-page {
   font-family: 'Noto Sans Thai', 'Prompt', sans-serif;
-  background: linear-gradient(160deg, #f0edff 0%, #fff8ee 50%, #e8f9f6 100%);
+  background: linear-gradient(155deg, #fff7ed 0%, #fdf4ff 45%, #f0fdfa 100%);
   min-height: 100vh;
-  padding-bottom: 3rem;
 }
 
-/* ===== HERO ===== */
-.hero-header {
+// ─── Hero ─────────────────────────────────────────────────────────────────────
+.page-hero {
   position: relative;
   overflow: hidden;
-  background: linear-gradient(135deg, $indigo-deep 0%, $indigo-mid 50%, #4a2080 100%);
-  padding: 3rem 1.5rem 4.5rem;
-  text-align: center;
+  background: linear-gradient(135deg, #7c2d12 0%, $orange 55%, $gold 100%);
+  padding: 2.25rem 1.5rem 4rem;
 }
 
-.hero-orb {
+.hero-blob {
   position: absolute;
   border-radius: 50%;
-  opacity: 0.15;
-}
-.hero-orb-1 {
-  width: 280px;
-  height: 280px;
-  background: $gold;
-  top: -80px;
-  right: -60px;
-  animation: float 6s ease-in-out infinite;
-}
-.hero-orb-2 {
-  width: 180px;
-  height: 180px;
-  background: $teal;
-  bottom: -40px;
-  left: -40px;
-  animation: float 8s ease-in-out infinite reverse;
-}
-.hero-orb-3 {
-  width: 120px;
-  height: 120px;
-  background: $gold-light;
-  top: 20px;
-  left: 30%;
-  animation: float 5s ease-in-out infinite 1s;
+  opacity: 0.14;
 }
 
-@keyframes float {
+.hero-blob-1 {
+  width: 350px;
+  height: 350px;
+  background: $gold;
+  top: -100px;
+  right: -80px;
+  animation: drift 7s ease-in-out infinite;
+}
+
+.hero-blob-2 {
+  width: 200px;
+  height: 200px;
+  background: $teal;
+  bottom: -70px;
+  left: -50px;
+  animation: drift 9s ease-in-out infinite reverse;
+}
+
+.hero-blob-3 {
+  width: 130px;
+  height: 130px;
+  background: #fff;
+  top: 15px;
+  left: 38%;
+  animation: drift 5s ease-in-out infinite 1s;
+}
+
+@keyframes drift {
   0%,
   100% {
-    transform: translateY(0px);
+    transform: translateY(0) scale(1);
   }
   50% {
-    transform: translateY(-16px);
+    transform: translateY(-16px) scale(1.06);
   }
 }
 
-.hero-content {
+.hero-inner {
   position: relative;
   z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+  max-width: 780px;
+  margin: 0 auto;
 }
 
-.hero-icon {
-  font-size: 3.5rem;
-  line-height: 1;
-  margin-bottom: 0.75rem;
-  animation: pop 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+.hero-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
 }
 
-@keyframes pop {
-  0% {
-    transform: scale(0.5);
-    opacity: 0;
-  }
-  80% {
-    transform: scale(1.1);
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
+.hero-icon-wrap {
+  width: 54px;
+  height: 54px;
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 .hero-title {
   font-family: 'Prompt', sans-serif;
-  font-size: clamp(1.6rem, 5vw, 2.4rem);
+  font-size: clamp(1.25rem, 4vw, 1.85rem);
   font-weight: 700;
   color: #fff;
-  margin: 0 0 0.4rem;
-  letter-spacing: -0.02em;
+  margin: 0 0 3px;
+  line-height: 1.15;
 }
+
 .hero-sub {
-  font-size: clamp(0.85rem, 3vw, 1rem);
-  color: rgba(255, 255, 255, 0.7);
+  font-size: clamp(0.75rem, 2.5vw, 0.88rem);
+  color: rgba(255, 255, 255, 0.68);
   margin: 0;
 }
 
-/* ===== FORM BODY ===== */
-.form-body {
-  margin-top: -2rem;
+.hero-back-btn {
+  background: rgba(255, 255, 255, 0.16) !important;
+  backdrop-filter: blur(8px);
+  color: white !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.32) !important;
+  border-radius: 13px !important;
+  font-family: 'Noto Sans Thai', sans-serif !important;
+  font-weight: 600 !important;
+  letter-spacing: 0 !important;
+  transition:
+    background 0.2s,
+    transform 0.15s !important;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.26) !important;
+    transform: translateY(-2px);
+  }
 }
+
+// ─── Content ──────────────────────────────────────────────────────────────────
+.content-wrap {
+  max-width: 780px;
+  margin: -2rem auto 0;
+  padding: 0 1rem 4rem;
+}
+
 .form-container {
-  max-width: 680px;
-  margin: 0 auto;
-  padding: 0 1rem 1rem;
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
 }
 
-/* ===== CARDS ===== */
+// ─── Festival Card ────────────────────────────────────────────────────────────
 .fest-card {
   background: $surface;
-  border-radius: $radius-card;
+  border-radius: $radius;
   padding: 1.5rem;
   box-shadow:
-    0 4px 24px rgba(26, 20, 96, 0.08),
-    0 1px 4px rgba(26, 20, 96, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.8);
+    0 3px 20px rgba(234, 88, 12, 0.08),
+    0 1px 4px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(249, 115, 22, 0.1);
 }
 
 .card-label {
@@ -854,12 +766,14 @@ $error-red: #e53935;
   text-transform: uppercase;
   margin-bottom: 1.25rem;
 }
+
 .label-dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: $indigo-mid;
+  background: $orange;
   flex-shrink: 0;
+
   &--amber {
     background: $gold;
   }
@@ -872,76 +786,51 @@ $error-red: #e53935;
   scroll-margin-top: 80px;
 }
 
-/* ===== LOGO UPLOAD ===== */
-.logo-upload-zone {
-  border-radius: 12px;
-  overflow: hidden;
-  cursor: pointer;
-  border: 2px dashed rgba(45, 45, 138, 0.25);
-  transition:
-    border-color 0.2s,
-    background 0.2s,
-    transform 0.2s;
+// ─── Stat Chip ────────────────────────────────────────────────────────────────
+.stat-chip {
+  display: flex;
+  align-items: center;
+  gap: 7px;
   background: $surface-2;
-  max-width: 140px;
-  &:hover {
-    border-color: $indigo-mid;
-    transform: translateY(-2px);
-  }
+  border-radius: 12px;
+  padding: 8px 15px;
+  box-shadow: 0 2px 12px rgba(234, 88, 12, 0.08);
+  border: 1px solid rgba(249, 115, 22, 0.12);
 }
 
-.logo-preview {
-  border-radius: 10px;
+.stat-num {
+  font-family: 'Prompt', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: $text-main;
+  line-height: 1;
 }
 
-.logo-placeholder {
-  padding: 1.5rem 1rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  text-align: center;
-}
-
-.logo-placeholder-icon {
-  font-size: 2rem;
-}
-
-.upload-zone--error {
-  border-color: $error-red !important;
-  border-style: solid !important;
-  background: #fff5f5 !important;
-}
-
-.error-msg {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  color: $error-red;
+.stat-label {
   font-size: 0.78rem;
-  font-weight: 500;
-  margin-top: 6px;
-  padding: 0 2px;
+  color: $text-muted;
 }
 
-/* ===== COVER UPLOAD ===== */
-.cover-upload-zone {
+// ─── Card Header Row ──────────────────────────────────────────────────────────
+.card-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+// ─── Cover View (readonly) ────────────────────────────────────────────────────
+.cover-view-zone {
   border-radius: 14px;
   overflow: hidden;
-  cursor: pointer;
-  border: 2px dashed rgba(45, 45, 138, 0.25);
-  transition:
-    border-color 0.2s,
-    transform 0.2s;
+  border: 2px solid rgba(234, 88, 12, 0.15);
   background: $surface-2;
-  &:hover {
-    border-color: $indigo-mid;
-    transform: translateY(-2px);
-  }
 }
+
 .cover-img {
-  border-radius: 12px;
+  display: block;
 }
+
 .cover-placeholder {
   padding: 2.5rem 1rem;
   display: flex;
@@ -949,6 +838,7 @@ $error-red: #e53935;
   align-items: center;
   gap: 6px;
 }
+
 .cover-placeholder-icon {
   font-size: 2.5rem;
 }
@@ -957,63 +847,73 @@ $error-red: #e53935;
   font-weight: 600;
   color: $text-main;
 }
-.cover-placeholder-sub {
-  font-size: 0.78rem;
-  color: $text-muted;
+
+// ─── Logo View (readonly) ─────────────────────────────────────────────────────
+.logo-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
-/* ===== INPUT ===== */
+.logo-view-zone {
+  border-radius: 12px;
+  overflow: hidden;
+  border: 2px solid rgba(234, 88, 12, 0.15);
+  background: $surface-2;
+  width: 130px;
+  flex-shrink: 0;
+}
+
+.logo-preview {
+  border-radius: 10px;
+}
+
+.logo-placeholder {
+  padding: 1.25rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  text-align: center;
+}
+
+.logo-placeholder-icon {
+  font-size: 1.8rem;
+}
+
+.logo-hint-title {
+  font-family: 'Prompt', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: $text-main;
+  margin-bottom: 4px;
+}
+
+.logo-hint-sub {
+  font-size: 0.76rem;
+  color: $text-muted;
+  line-height: 1.6;
+}
+
+// ─── Custom Input (readonly) ──────────────────────────────────────────────────
 .custom-input :deep(.q-field__control) {
   border-radius: 12px !important;
 }
 
-/* ===== DATE SECTION ===== */
-.date-section-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 1.1rem;
-  padding: 1rem 1.25rem;
-  border-radius: 16px;
-  background: linear-gradient(135deg, $indigo-deep, $indigo-mid 55%, $indigo-glow);
-  box-shadow: 0 6px 24px rgba(45, 45, 138, 0.28);
-}
-.date-section-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
-  flex-shrink: 0;
-  background: rgba(255, 255, 255, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-}
-.date-section-title {
-  font-family: 'Prompt', sans-serif;
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: #fff;
-  line-height: 1.2;
-}
-.date-section-sub {
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.65);
-  margin-top: 2px;
-}
-
+// ─── Date Section ─────────────────────────────────────────────────────────────
 .date-summary-row {
   display: flex;
   align-items: center;
   gap: 0.6rem;
   margin-bottom: 0.6rem;
   flex-wrap: wrap;
+
   @media (max-width: 480px) {
     flex-direction: column;
     align-items: stretch;
   }
 }
+
 .date-chip {
   flex: 1;
   min-width: 130px;
@@ -1022,43 +922,44 @@ $error-red: #e53935;
   gap: 9px;
   padding: 0.7rem 1rem;
   border-radius: 14px;
-  background: rgba(26, 20, 96, 0.04);
-  border: 1.5px dashed rgba(45, 45, 138, 0.2);
+  background: rgba(234, 88, 12, 0.03);
+  border: 1.5px dashed rgba(234, 88, 12, 0.2);
   transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+
   &--active {
-    background: rgba(45, 45, 138, 0.06);
+    background: rgba(234, 88, 12, 0.05);
     border-style: solid;
-    border-color: $indigo-mid;
-    box-shadow: 0 4px 16px rgba(45, 45, 138, 0.12);
+    border-color: $orange;
+    box-shadow: 0 4px 16px rgba(234, 88, 12, 0.12);
     .date-chip-value {
-      color: $indigo-deep;
+      color: $text-main;
       font-weight: 700;
     }
   }
-  &--error {
-    border-color: $error-red !important;
-    background: #fff5f5 !important;
-  }
 }
+
 .date-chip-icon {
   width: 30px;
   height: 30px;
   border-radius: 9px;
   flex-shrink: 0;
-  background: linear-gradient(135deg, $indigo-mid, $indigo-glow);
+  background: linear-gradient(135deg, #7c2d12, $orange);
   color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 3px 10px rgba(45, 45, 138, 0.28);
+  box-shadow: 0 3px 10px rgba(234, 88, 12, 0.28);
+
   &--end {
     background: linear-gradient(135deg, #065f46, $teal);
   }
 }
+
 .date-chip-body {
   flex: 1;
   min-width: 0;
 }
+
 .date-chip-label {
   font-size: 0.66rem;
   font-weight: 700;
@@ -1067,6 +968,7 @@ $error-red: #e53935;
   color: $text-muted;
   margin-bottom: 1px;
 }
+
 .date-chip-value {
   font-size: 0.82rem;
   color: $text-muted;
@@ -1074,6 +976,7 @@ $error-red: #e53935;
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
 .date-range-arrow {
   color: $text-muted;
   flex-shrink: 0;
@@ -1089,13 +992,14 @@ $error-red: #e53935;
   gap: 6px;
   padding: 5px 14px;
   border-radius: 100px;
-  background: linear-gradient(135deg, rgba(13, 148, 136, 0.1), rgba(13, 148, 136, 0.06));
+  background: rgba(13, 148, 136, 0.08);
   border: 1px solid rgba(13, 148, 136, 0.2);
   color: $teal;
   font-size: 0.78rem;
   font-weight: 700;
   margin-bottom: 0.75rem;
 }
+
 .duration-fade-enter-active,
 .duration-fade-leave-active {
   transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -1132,33 +1036,36 @@ $error-red: #e53935;
   text-transform: uppercase;
   padding: 0.4rem 0.75rem;
   border-radius: 8px;
+
   &--start {
-    color: $indigo-mid;
-    background: rgba(45, 45, 138, 0.07);
+    color: $orange;
+    background: rgba(234, 88, 12, 0.07);
   }
   &--end {
     color: $teal;
     background: rgba(13, 148, 136, 0.08);
   }
 }
+
 .cal-label-dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
   flex-shrink: 0;
   &--start {
-    background: $indigo-mid;
+    background: $orange;
   }
   &--end {
     background: $teal;
   }
 }
+
 .cal-label-date {
   margin-left: auto;
   font-weight: 600;
   font-size: 0.72rem;
   .calendar-block-label--start & {
-    color: $indigo-mid;
+    color: $orange;
   }
   .calendar-block-label--end & {
     color: $teal;
@@ -1168,13 +1075,9 @@ $error-red: #e53935;
 .cal-wrapper {
   border-radius: 18px;
   overflow: hidden;
-  box-shadow: 0 4px 20px rgba(26, 20, 96, 0.1);
-  transition: box-shadow 0.25s;
-  &:hover {
-    box-shadow: 0 8px 32px rgba(26, 20, 96, 0.16);
-  }
+  box-shadow: 0 4px 20px rgba(234, 88, 12, 0.1);
   &--start {
-    border: 2px solid rgba(45, 45, 138, 0.18);
+    border: 2px solid rgba(234, 88, 12, 0.18);
   }
   &--end {
     border: 2px solid rgba(13, 148, 136, 0.18);
@@ -1200,9 +1103,6 @@ $error-red: #e53935;
     font-weight: 700 !important;
     font-size: 1rem !important;
   }
-  :deep(.q-date__navigation) {
-    padding: 0.3rem 0.5rem !important;
-  }
   :deep(.q-date__calendar-weekdays > div) {
     font-size: 0.7rem !important;
     font-weight: 700 !important;
@@ -1212,52 +1112,15 @@ $error-red: #e53935;
   :deep(.q-date__calendar-item--out) {
     opacity: 0.3 !important;
   }
-  :deep(.q-btn.q-date__today .q-btn__content) {
-    font-weight: 800 !important;
-    text-decoration: underline !important;
-    text-underline-offset: 3px !important;
-  }
-  :deep(.q-date__calendar-item--selected .q-btn) {
-    font-weight: 700 !important;
-  }
 }
 
-/* ===== CARD HEADER ROW ===== */
-.card-header-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 1rem;
-}
-.card-header-info {
-  display: flex;
-  align-items: baseline;
-  gap: 5px;
-}
-.card-header-count {
-  font-family: 'Prompt', sans-serif;
-  font-size: 2rem;
-  font-weight: 700;
-  color: $indigo-mid;
-  line-height: 1;
-}
-.card-header-unit {
-  font-size: 0.85rem;
-  color: $text-muted;
-}
-.add-btn {
-  border-radius: $radius-btn !important;
-  font-weight: 600 !important;
-  font-family: 'Noto Sans Thai', sans-serif !important;
-  letter-spacing: 0 !important;
-}
-
-/* ===== WISH LIST ===== */
+// ─── Wish List ────────────────────────────────────────────────────────────────
 .wish-list-wrapper {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
+
 .wish-item {
   display: flex;
   align-items: center;
@@ -1265,20 +1128,22 @@ $error-red: #e53935;
   padding: 12px 14px;
   background: $surface-2;
   border-radius: 12px;
-  border: 1px solid rgba(45, 45, 138, 0.08);
+  border: 1px solid rgba(249, 115, 22, 0.08);
   transition:
     box-shadow 0.2s,
     transform 0.2s;
+
   &:hover {
-    box-shadow: 0 4px 16px rgba(45, 45, 138, 0.1);
+    box-shadow: 0 4px 16px rgba(234, 88, 12, 0.1);
     transform: translateX(2px);
   }
 }
+
 .wish-number {
   width: 26px;
   height: 26px;
   border-radius: 50%;
-  background: linear-gradient(135deg, $indigo-mid, #6b5ce7);
+  background: linear-gradient(135deg, #7c2d12, $orange);
   color: white;
   font-size: 0.72rem;
   font-weight: 700;
@@ -1287,6 +1152,7 @@ $error-red: #e53935;
   justify-content: center;
   flex-shrink: 0;
 }
+
 .wish-text {
   flex: 1;
   font-size: 0.92rem;
@@ -1299,6 +1165,7 @@ $error-red: #e53935;
   gap: 6px;
   flex-shrink: 0;
 }
+
 .wish-btn {
   width: 32px;
   height: 32px;
@@ -1311,28 +1178,16 @@ $error-red: #e53935;
   transition:
     background 0.15s,
     transform 0.1s;
+
   &:active {
     transform: scale(0.92);
   }
+
   &--view {
-    background: rgba(45, 45, 138, 0.08);
-    color: $indigo-mid;
+    background: rgba(234, 88, 12, 0.08);
+    color: $orange;
     &:hover {
-      background: rgba(45, 45, 138, 0.18);
-    }
-  }
-  &--edit {
-    background: rgba(245, 166, 35, 0.1);
-    color: #c47a00;
-    &:hover {
-      background: rgba(245, 166, 35, 0.2);
-    }
-  }
-  &--delete {
-    background: rgba(255, 107, 107, 0.1);
-    color: $coral;
-    &:hover {
-      background: rgba(255, 107, 107, 0.2);
+      background: rgba(234, 88, 12, 0.16);
     }
   }
 }
@@ -1350,7 +1205,223 @@ $error-red: #e53935;
   transform: translateX(16px) scale(0.95);
 }
 
-/* ===== VIEW WISH DIALOG CONTENT ===== */
+// ─── Card Grid ────────────────────────────────────────────────────────────────
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  @media (min-width: 480px) {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+.card-thumb {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(234, 88, 12, 0.1);
+  transition: transform 0.2s;
+  &:hover {
+    transform: scale(1.04);
+  }
+}
+
+.card-thumb-img {
+  display: block;
+  border-radius: 12px;
+}
+
+// ─── Empty State ──────────────────────────────────────────────────────────────
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem 1rem;
+}
+
+.empty-icon {
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+  animation: pop 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+.empty-title {
+  font-family: 'Prompt', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: $text-main;
+}
+.empty-sub {
+  font-size: 0.78rem;
+  color: $text-muted;
+  margin-top: 4px;
+  text-align: center;
+}
+
+@keyframes pop {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  80% {
+    transform: scale(1.12);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+// ─── Back Button ──────────────────────────────────────────────────────────────
+.submit-btn {
+  width: 100%;
+  padding: 1rem;
+  border-radius: 16px;
+  border: none;
+  background: linear-gradient(135deg, #7c2d12 0%, $orange 55%, $gold 100%);
+  color: white;
+  font-family: 'Noto Sans Thai', 'Prompt', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 6px 24px rgba(234, 88, 12, 0.35);
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 32px rgba(234, 88, 12, 0.4);
+  }
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+.submit-btn-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+// ─── Animate In ───────────────────────────────────────────────────────────────
+.animate-in {
+  animation: slideUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ─── Dialog ───────────────────────────────────────────────────────────────────
+.custom-dialog {
+  background: $surface;
+  border-radius: 20px;
+  overflow: hidden;
+  min-width: 320px;
+  max-width: 420px;
+  width: 100%;
+  box-shadow: 0 20px 60px rgba(234, 88, 12, 0.16);
+
+  &--mobile {
+    border-radius: 20px 20px 0 0;
+    max-width: 100%;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+  }
+}
+
+.dialog-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 1rem 1.25rem;
+  font-family: 'Prompt', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: $text-main;
+  border-bottom: 1px solid rgba(249, 115, 22, 0.08);
+  background: $surface-2;
+}
+
+.dialog-header-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  &--orange {
+    background: linear-gradient(135deg, #7c2d12, $orange);
+  }
+}
+
+.dialog-close-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: none;
+  background: rgba(234, 88, 12, 0.07);
+  color: $text-muted;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+  &:hover {
+    background: rgba(234, 88, 12, 0.14);
+  }
+}
+
+.dialog-body {
+  padding: 1.25rem;
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 0 1.25rem 1.25rem;
+}
+
+.dlg-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 9px 22px;
+  border-radius: 10px;
+  border: none;
+  font-family: 'Noto Sans Thai', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    transform 0.1s,
+    box-shadow 0.15s;
+
+  &:active {
+    transform: scale(0.96);
+  }
+  &--confirm {
+    background: linear-gradient(135deg, #7c2d12, $orange);
+    color: white;
+    box-shadow: 0 3px 12px rgba(234, 88, 12, 0.3);
+    &:hover {
+      box-shadow: 0 5px 18px rgba(234, 88, 12, 0.4);
+    }
+  }
+}
+
+// ─── View Wish Content ────────────────────────────────────────────────────────
 .view-wish-number {
   font-size: 0.72rem;
   font-weight: 700;
@@ -1368,223 +1439,37 @@ $error-red: #e53935;
   border-radius: 12px;
   padding: 14px 16px;
   line-height: 1.7;
-  border: 1px solid rgba(45, 45, 138, 0.08);
+  border: 1px solid rgba(234, 88, 12, 0.08);
 }
 
-/* ===== CARD GRID ===== */
-.card-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  @media (min-width: 480px) {
-    grid-template-columns: repeat(4, 1fr);
+// ─── Responsive ───────────────────────────────────────────────────────────────
+@media (max-width: 600px) {
+  .page-hero {
+    padding: 1.5rem 1rem 3.5rem;
   }
-}
-.card-thumb {
-  position: relative;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s;
-  &:hover {
-    transform: scale(1.03);
+  .content-wrap {
+    padding: 0 0.75rem 3rem;
   }
-}
-.card-thumb-img {
-  display: block;
-  border-radius: 12px;
-}
-
-/* ===== EMPTY STATE ===== */
-.empty-state {
-  text-align: center;
-  padding: 1.5rem 1rem;
-}
-.empty-state-icon {
-  font-size: 2rem;
-  margin-bottom: 6px;
-}
-.empty-state-text {
-  font-size: 0.92rem;
-  font-weight: 600;
-  color: $text-main;
-  margin-bottom: 4px;
-}
-.empty-state-sub {
-  font-size: 0.78rem;
-  color: $text-muted;
-}
-
-/* ===== SUBMIT BUTTON ===== */
-.submit-btn {
-  width: 100%;
-  padding: 1rem;
-  border-radius: 16px;
-  border: none;
-  background: linear-gradient(135deg, #b91c1c 0%, #dc2626 50%, #ef4444 100%);
-  color: white;
-  font-family: 'Noto Sans Thai', 'Prompt', sans-serif;
-  font-size: 1.05rem;
-  font-weight: 700;
-  cursor: pointer;
-  box-shadow: 0 6px 24px rgba(220, 38, 38, 0.35);
-  transition:
-    transform 0.2s,
-    box-shadow 0.2s,
-    opacity 0.2s;
-  letter-spacing: 0.01em;
-  &:hover:not(.loading):not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 32px rgba(220, 38, 38, 0.45);
-  }
-  &:active:not(.loading) {
-    transform: translateY(0);
-  }
-  &.loading,
-  &:disabled {
-    opacity: 0.75;
-    cursor: not-allowed;
-  }
-}
-.submit-btn-inner {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-
-/* ===== DIALOGS ===== */
-.custom-dialog {
-  background: $surface;
-  border-radius: 20px;
-  overflow: hidden;
-  min-width: 320px;
-  max-width: 420px;
-  width: 100%;
-  box-shadow: 0 20px 60px rgba(26, 20, 96, 0.2);
-  &--mobile {
-    border-radius: 20px 20px 0 0;
-    max-width: 100%;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-  }
-}
-.custom-dialog-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1.1rem 1.25rem 0.9rem;
-  font-family: 'Prompt', sans-serif;
-  font-size: 1rem;
-  font-weight: 600;
-  color: $text-main;
-  border-bottom: 1px solid rgba(45, 45, 138, 0.07);
-  background: $surface-2;
-  &--danger {
-    background: #fff1f1;
-  }
-}
-.dialog-close {
-  width: 30px;
-  height: 30px;
-  border-radius: 8px;
-  border: none;
-  background: rgba(45, 45, 138, 0.07);
-  color: $text-muted;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.15s;
-  &:hover {
-    background: rgba(45, 45, 138, 0.14);
-  }
-}
-.custom-dialog-body {
-  padding: 1.25rem;
-}
-.custom-dialog-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  padding: 0.75rem 1.25rem 1.25rem;
-}
-
-.dialog-btn {
-  padding: 9px 22px;
-  border-radius: 10px;
-  border: none;
-  font-family: 'Noto Sans Thai', sans-serif;
-  font-size: 0.88rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition:
-    transform 0.1s,
-    background 0.15s;
-  &:active {
-    transform: scale(0.96);
-  }
-  &--cancel {
-    background: rgba(45, 45, 138, 0.07);
-    color: $text-muted;
-    &:hover {
-      background: rgba(45, 45, 138, 0.12);
-    }
-  }
-  &--confirm {
-    background: linear-gradient(135deg, $indigo-mid, #6b5ce7);
-    color: white;
-    box-shadow: 0 3px 12px rgba(45, 45, 138, 0.3);
-    &:hover {
-      box-shadow: 0 5px 16px rgba(45, 45, 138, 0.4);
-    }
-  }
-  &--danger {
-    background: linear-gradient(135deg, #e53935, #c62828);
-    color: white;
-    box-shadow: 0 3px 12px rgba(229, 57, 53, 0.3);
-  }
-}
-
-/* ===== ANIMATIONS ===== */
-.animate-in {
-  animation: slideUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(24px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* ===== RESPONSIVE ===== */
-@media (max-width: 599px) {
   .fest-card {
     padding: 1.1rem;
   }
-  .hero-header {
-    padding: 2.25rem 1rem 3.5rem;
+  .hero-left {
+    gap: 10px;
   }
-  .form-container {
-    padding: 0 0.75rem 1rem;
-    gap: 1rem;
+  .hero-icon-wrap {
+    width: 46px;
+    height: 46px;
   }
-  .card-header-count {
-    font-size: 1.6rem;
+  .logo-row {
+    flex-direction: column;
+    align-items: flex-start;
   }
-  .wish-text {
-    max-width: 160px;
+  .logo-view-zone {
+    width: 110px;
   }
 }
 
-/* ===== CLICK PARTICLES ===== */
+// ─── Click Particles ──────────────────────────────────────────────────────────
 .click-particles-root {
   position: fixed;
   inset: 0;

@@ -280,7 +280,6 @@ export class AdminFestivalRepositories {
       webName,
       startDate,
       endDate,
-      isEditEndDate,
     } = updateFestivalDto;
 
     return await this.prisma.$transaction(async (tx) => {
@@ -364,7 +363,7 @@ export class AdminFestivalRepositories {
           image,
           logo,
           webName,
-          isEditEndDate: Boolean(isEditEndDate),
+
           ...(startDate && {
             startDate: new Date(startDate),
           }),
@@ -452,21 +451,6 @@ export class AdminFestivalRepositories {
     return data;
   }
 
-  async findEndDate(id: number): Promise<Date | null> {
-    const data = await this.prisma.festival.findFirst({
-      where: {
-        fId: Number(id),
-        deletedAt: null,
-        isEditEndDate: true,
-      },
-      select: {
-        endDate: true,
-      },
-    });
-
-    return data?.endDate ?? null;
-  }
-
   async findDeleteExits(id: number): Promise<boolean> {
     const data = await this.prisma.festival.findFirst({
       where: {
@@ -488,5 +472,36 @@ export class AdminFestivalRepositories {
       },
     });
     return !!data;
+  }
+
+  async findByCreatorId(
+    id: number,
+    createdBy: number,
+  ): Promise<ResponseFestivalDto | null> {
+    const data = await this.prisma.festival.findFirst({
+      where: {
+        fId: Number(id),
+        createdBy: Number(createdBy),
+        deletedAt: null,
+      },
+      include: {
+        wisher: {
+          where: {
+            deletedAt: null,
+          },
+        },
+        card: {
+          where: {
+            deletedAt: null,
+          },
+        },
+
+        // ✅ เพิ่มตรงนี้
+        createdByUser: true,
+        deletedByUser: true,
+      },
+    });
+
+    return data;
   }
 }

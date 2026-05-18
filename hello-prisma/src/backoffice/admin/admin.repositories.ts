@@ -18,6 +18,17 @@ export class AdminRepositories {
       data: {
         ...createAdminDto,
       },
+      select: {
+        uId: true,
+        firstName: true,
+        userName: true,
+        role: true,
+        phoneNumber: true,
+        email: true,
+        createdAt: true,
+        updatedAt: true,
+        deletedAt: true,
+      },
     });
     return data;
   }
@@ -26,6 +37,17 @@ export class AdminRepositories {
     const data = await this.prisma.user.findMany({
       where: {
         deletedAt: null,
+      },
+      select: {
+        uId: true,
+        firstName: true,
+        userName: true,
+        role: true,
+        phoneNumber: true,
+        email: true,
+        createdAt: true,
+        updatedAt: true,
+        deletedAt: true,
       },
     });
     return data;
@@ -36,6 +58,17 @@ export class AdminRepositories {
       where: {
         uId: Number(id),
         deletedAt: null,
+      },
+      select: {
+        uId: true,
+        firstName: true,
+        userName: true,
+        role: true,
+        phoneNumber: true,
+        email: true,
+        createdAt: true,
+        updatedAt: true,
+        deletedAt: true,
       },
     });
     return data;
@@ -69,6 +102,8 @@ export class AdminRepositories {
           firstName: true,
           userName: true,
           role: true,
+          phoneNumber: true,
+          email: true,
           createdAt: true,
           updatedAt: true,
           deletedAt: true,
@@ -96,6 +131,17 @@ export class AdminRepositories {
       data: {
         ...updateAdminDto,
       },
+      select: {
+        uId: true,
+        firstName: true,
+        userName: true,
+        role: true,
+        phoneNumber: true,
+        email: true,
+        createdAt: true,
+        updatedAt: true,
+        deletedAt: true,
+      },
     });
     return data;
   }
@@ -109,6 +155,17 @@ export class AdminRepositories {
       data: {
         deletedAt: new Date(),
       },
+      select: {
+        uId: true,
+        firstName: true,
+        userName: true,
+        role: true,
+        phoneNumber: true,
+        email: true,
+        createdAt: true,
+        updatedAt: true,
+        deletedAt: true,
+      },
     });
     return data;
   }
@@ -121,5 +178,25 @@ export class AdminRepositories {
     });
 
     return data._max.uId;
+  }
+
+  async checkUsername(userName: string): Promise<boolean> {
+    const data = await this.prisma.user.findFirst({
+      where: {
+        userName: userName,
+        deletedAt: null,
+      },
+    });
+    return !!data;
+  }
+
+  async checkEmail(email: string): Promise<boolean> {
+    const data = await this.prisma.user.findFirst({
+      where: {
+        email: email,
+        deletedAt: null,
+      },
+    });
+    return !!data;
   }
 }

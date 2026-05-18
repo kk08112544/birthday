@@ -81,22 +81,27 @@ export class AdminFestivalService {
     };
   }
 
-  async update(id: number, updateFestivalDto: UpdateFestivalDto) {
-    const checkEndDate = await this.adminFestivalRepositories.findEndDate(id);
+  async update(
+    id: number,
+    updateFestivalDto: UpdateFestivalDto,
+    updatedBy: number,
+  ) {
+    const checkId = await this.adminFestivalRepositories.findById(id);
 
-    const oldEndDate = checkEndDate ? new Date(checkEndDate) : null;
+    if (!checkId) {
+      this.exceptionService.throwFestivalNotFound();
+    }
 
-    const newEndDate = updateFestivalDto.endDate
-      ? new Date(updateFestivalDto.endDate)
-      : null;
-
-    updateFestivalDto.isEditEndDate = !(
-      oldEndDate &&
-      newEndDate &&
-      oldEndDate < new Date() &&
-      oldEndDate.getTime() !== newEndDate.getTime()
+    const checkCreator = await this.adminFestivalRepositories.findByCreatorId(
+      id,
+      updatedBy,
     );
 
+    if (Number(checkCreator?.createdBy) !== Number(updatedBy)) {
+      if (checkCreator?.createdByUser?.role !== 'superAdmin') {
+        this.exceptionService.throwFestivalEditDeleteForbidden();
+      }
+    }
     const data = await this.adminFestivalRepositories.update(
       id,
       updateFestivalDto,
@@ -110,9 +115,21 @@ export class AdminFestivalService {
   }
 
   async delete(id: number, deletedBy: number) {
-    const check = await this.adminFestivalRepositories.findDeleteExits(id);
-    if (!check) {
-      this.exceptionService.throwFestivalDELETEForbidden();
+    const checkId = await this.adminFestivalRepositories.findById(id);
+
+    if (!checkId) {
+      this.exceptionService.throwFestivalNotFound();
+    }
+
+    const checkCreator = await this.adminFestivalRepositories.findByCreatorId(
+      id,
+      deletedBy,
+    );
+
+    if (Number(checkCreator?.createdBy) !== Number(deletedBy)) {
+      if (checkCreator?.createdByUser?.role !== 'superAdmin') {
+        this.exceptionService.throwFestivalEditDeleteForbidden();
+      }
     }
     const data = await this.adminFestivalRepositories.delete(id, deletedBy);
     return {

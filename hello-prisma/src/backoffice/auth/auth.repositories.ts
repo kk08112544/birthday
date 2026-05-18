@@ -6,7 +6,7 @@ import { ResponseAuthDto } from './dto/response-auth.dto';
 export class AuthRepositories {
   constructor(private prisma: PrismaService) {}
   async findByUserName(userName: string): Promise<ResponseAuthDto | null> {
-    const user = await this.prisma.user.findUnique({
+    const user = await this.prisma.user.findFirst({
       where: {
         userName: String(userName),
       },

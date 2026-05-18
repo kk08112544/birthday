@@ -21,6 +21,7 @@
           class="hero-add-btn"
           :class="$q.screen.xs ? 'full-width q-mt-sm' : ''"
           @click="onAdd"
+          v-if="isSuperAdmin"
         />
       </div>
     </div>
@@ -104,6 +105,18 @@
           <template v-slot:body-cell-actions="props">
             <q-td :props="props">
               <div class="actions-wrap">
+                 <q-btn
+                  unelevated
+                  round
+                  dense
+                  color="indigo-1"
+                  icon="visibility"
+                  size="sm"
+                  class="action-btn action-btn--view"
+                  @click="onView(props.row)"
+                >
+                  <q-tooltip class="bg-indigo-8">ดูรายละเอียด</q-tooltip>
+                </q-btn>
                 <q-btn
                   v-if="props.row.actions.update"
                   unelevated
@@ -203,6 +216,42 @@
       </div>
     </q-dialog>
 
+     <!-- ===== VIEW DIALOG ===== -->
+<!-- ===== VIEW DIALOG ===== -->
+<q-dialog v-model="viewDialog" :maximized="$q.screen.xs">
+  <div class="custom-dialog" :class="{ 'custom-dialog--mobile': $q.screen.xs }">
+    <!-- drag handle (mobile only) -->
+    <div v-if="$q.screen.xs" class="dialog-drag-handle" />
+
+    <div class="dialog-header dialog-header--indigo">
+      <div class="dialog-header-icon dialog-header-icon--indigo">
+        <q-icon name="visibility" color="white" size="18px" />
+      </div>
+      <span>รายละเอียดคำ</span>
+      <q-space />
+      <button class="dialog-close-btn" type="button" @click="viewDialog = false">
+        <q-icon name="close" size="18px" />
+      </button>
+    </div>
+
+    <div class="dialog-body">
+      <!-- คำหลัก -->
+      <div class="view-field-label">คำไม่พึงประสงค์</div>
+      <div class="view-word-chip">
+        <q-icon name="label_off" size="18px" color="negative" class="q-mr-sm" />
+        {{ viewForm?.word }}
+      </div>
+    </div>
+
+    <!-- footer: mobile = full-width grid, desktop = flex end -->
+    <div class="dialog-footer" :class="{ 'dialog-footer--mobile': $q.screen.xs }">
+      <button type="button" class="dlg-btn dlg-btn--cancel" @click="viewDialog = false">
+        ปิด
+      </button>
+    </div>
+  </div>
+</q-dialog>
+
     <!-- ===== EDIT DIALOG ===== -->
     <q-dialog v-model="editDialog" persistent :maximized="$q.screen.xs">
       <div class="custom-dialog" :class="{ 'custom-dialog--mobile': $q.screen.xs }">
@@ -216,17 +265,21 @@
             <q-icon name="close" size="18px" />
           </button>
         </div>
+         <!-- dense
+              autofocus -->
         <q-form @submit="submitEdit">
           <div class="dialog-body">
-            <q-input
-              v-model="editForm.word"
-              label="คำไม่พึงประสงค์"
-              outlined
-              dense
-              autofocus
-              class="styled-input"
-              :rules="[(val) => !!val?.trim() || 'กรุณากรอกข้อมูล']"
-            >
+           <q-input
+  v-model="editForm.word"
+  label="คำไม่พึงประสงค์"
+  outlined
+  dense
+  autofocus
+  autogrow
+  class="styled-input "
+  :rules="[(val) => !!val?.trim() || 'กรุณากรอกข้อมูล']"
+>
+
               <template v-slot:prepend>
                 <q-icon name="edit" color="amber-8" />
               </template>
@@ -267,7 +320,7 @@
         <div class="dialog-body">
           <div class="delete-confirm-body">
             <p class="delete-text">คุณต้องการลบคำว่า</p>
-            <div class="delete-word-chip">
+            <div class="delete-word-chip styled-input">
               <q-icon name="label_off" size="16px" color="negative" class="q-mr-xs" />
               {{ itemToDelete?.word }}
             </div>
@@ -320,7 +373,10 @@
         </div>
         <div class="notify-body">
           <div class="notify-emoji">{{ notifySuccess ? '✅' : '⚠️' }}</div>
-          <p class="notify-msg" :class="notifySuccess ? 'notify-msg--success' : 'notify-msg--error'">
+          <p
+            class="notify-msg"
+            :class="notifySuccess ? 'notify-msg--success' : 'notify-msg--error'"
+          >
             {{ notifyMessage }}
           </p>
         </div>
@@ -344,43 +400,43 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch } from 'vue'
-import { api } from 'src/boot/axios'
-import { useQuasar } from 'quasar'
-import type { QTableProps, QTableColumn } from 'quasar'
-import type { AxiosError } from 'axios'
+import { ref, onMounted, onUnmounted, watch } from 'vue';
+import { api } from 'src/boot/axios';
+import { useQuasar } from 'quasar';
+import type { QTableProps, QTableColumn } from 'quasar';
+import type { AxiosError } from 'axios';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
-const NOTIFY_DURATION = 2000
+const NOTIFY_DURATION = 2000;
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface UnpoliteItem {
-  upId: number | string
-  word: string
+  upId: number | string;
+  word: string;
 }
 
 interface TableRow {
-  displayIndex: number
-  upId: number | string
-  word: string
-  actions: { create: boolean; update: boolean; delete: boolean }
+  displayIndex: number;
+  upId: number | string;
+  word: string;
+  actions: { create: boolean; update: boolean; delete: boolean };
 }
 
 interface Particle {
-  id: number
-  style: Record<string, string>
+  id: number;
+  style: Record<string, string>;
 }
 
-type ShapeType = 'circle' | 'square' | 'star' | 'triangle' | 'emoji'
+type ShapeType = 'circle' | 'square' | 'star' | 'triangle' | 'emoji';
 
 // ─── Props & Quasar ───────────────────────────────────────────────────────────
-const props = defineProps<{ id: string }>()
-const $q = useQuasar()
+const props = defineProps<{ id: string }>();
+const $q = useQuasar();
 
 // ─── Table State ──────────────────────────────────────────────────────────────
-const rows = ref<TableRow[]>([])
-const loading = ref(false)
-const search = ref('')
+const rows = ref<TableRow[]>([]);
+const loading = ref(false);
+const search = ref('');
 
 const pagination = ref({
   page: 1,
@@ -388,7 +444,7 @@ const pagination = ref({
   rowsNumber: 0,
   sortBy: '',
   descending: false,
-})
+});
 
 const columns: QTableColumn[] = [
   {
@@ -412,262 +468,302 @@ const columns: QTableColumn[] = [
     align: 'center',
     style: 'width: 110px',
   },
-]
+];
 
 // ─── Dialog State ─────────────────────────────────────────────────────────────
-const addDialog = ref(false)
-const editDialog = ref(false)
-const deleteDialog = ref(false)
-const isSubmitting = ref(false)
+const viewDialog   = ref(false);
+const addDialog = ref(false);
+const editDialog = ref(false);
+const deleteDialog = ref(false);
+const isSubmitting = ref(false);
 
-const addForm = ref({ word: '' })
-const editForm = ref<{ upId: number | string; word: string }>({ upId: '', word: '' })
-const itemToDelete = ref<TableRow | null>(null)
+const viewForm    = ref<TableRow | null>(null);
+const addForm = ref({ word: '' });
+const editForm = ref<{ upId: number | string; word: string }>({ upId: '', word: '' });
+const itemToDelete = ref<TableRow | null>(null);
 
 // ─── Notify State ─────────────────────────────────────────────────────────────
-const showNotifyDialog = ref(false)
-const notifySuccess = ref(true)
-const notifyMessage = ref('')
+const showNotifyDialog = ref(false);
+const notifySuccess = ref(true);
+const notifyMessage = ref('');
 // Incremented on every notification to force progress animation restart
-const notifyKey = ref(0)
-let notifyTimer: ReturnType<typeof setTimeout> | null = null
+const notifyKey = ref(0);
+let notifyTimer: ReturnType<typeof setTimeout> | null = null;
 
 // ─── Particles ────────────────────────────────────────────────────────────────
-const activeParticles = ref<Particle[]>([])
-let particleId = 0
+const activeParticles = ref<Particle[]>([]);
+let particleId = 0;
+
+
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 const openNotify = (success: boolean, message: string) => {
-  if (notifyTimer) clearTimeout(notifyTimer)
-  notifySuccess.value = success
-  notifyMessage.value = message
-  notifyKey.value++
-  showNotifyDialog.value = true
+  if (notifyTimer) clearTimeout(notifyTimer);
+  notifySuccess.value = success;
+  notifyMessage.value = message;
+  notifyKey.value++;
+  showNotifyDialog.value = true;
   notifyTimer = setTimeout(() => {
-    showNotifyDialog.value = false
-  }, NOTIFY_DURATION)
-}
+    showNotifyDialog.value = false;
+  }, NOTIFY_DURATION);
+};
 
 const clearSearch = () => {
-  search.value = ''
-  onSearch()
-}
+  search.value = '';
+  onSearch();
+};
 
 // ─── Data Fetching ────────────────────────────────────────────────────────────
 const fetchUnpolite = async (): Promise<void> => {
-  loading.value = true
+  loading.value = true;
   try {
-    const response = await api.get('/admin/unpolite', {
+    const response = await api.get('/backoffice/unpolite', {
       params: {
         page: pagination.value.page,
         limit: pagination.value.rowsPerPage,
         search: search.value.trim() || undefined,
       },
-    })
+    });
 
-    const res = response.data
-    const list: UnpoliteItem[] = res.unpolite?.data ?? []
-    const startIndex = (pagination.value.page - 1) * pagination.value.rowsPerPage
+    const res = response.data;
+    const list: UnpoliteItem[] = res.unpolite?.data ?? [];
+    const startIndex = (pagination.value.page - 1) * pagination.value.rowsPerPage;
 
     rows.value = list.map((item, index) => ({
       displayIndex: startIndex + index + 1,
       upId: item.upId,
       word: item.word || '-',
       actions: { create: false, update: true, delete: true },
-    }))
+    }));
 
-    pagination.value.rowsNumber = res.unpolite?.total ?? 0
+    pagination.value.rowsNumber = res.unpolite?.total ?? 0;
   } catch {
-    rows.value = []
+    rows.value = [];
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
+
+// ─── View Action ──────────────────────────────────────────────────────────────
+const onView = (row: TableRow) => {
+  viewForm.value = row;
+  viewDialog.value = true;
+};
+ 
+// Switch from view → edit without closing first
+const switchToEdit = () => {
+  if (!viewForm.value) return;
+  viewDialog.value = false;
+  editForm.value = { upId: viewForm.value.upId, word: viewForm.value.word };
+  editDialog.value = true;
+};
+
+// ─── Role State ─────────────────────────────────────────────────────────────
+const isSuperAdmin = localStorage.getItem('role') === 'superAdmin';
 
 // ─── CRUD Actions ─────────────────────────────────────────────────────────────
 const onAdd = () => {
-  addForm.value.word = ''
-  addDialog.value = true
-}
+  addForm.value.word = '';
+  addDialog.value = true;
+};
 
 const submitAdd = async () => {
-  if (isSubmitting.value) return
-  isSubmitting.value = true
+  if (isSubmitting.value) return;
+  isSubmitting.value = true;
   try {
-    const response = await api.post('/admin/unpolite', {
+    const response = await api.post('/backoffice/unpolite', {
       word: addForm.value.word.trim(),
-    })
-    addDialog.value = false
-    openNotify(true, response.data.message || 'เพิ่มคำสำเร็จ')
-    void fetchUnpolite()
+    });
+    addDialog.value = false;
+    openNotify(true, response.data.message || 'เพิ่มคำสำเร็จ');
+    void fetchUnpolite();
   } catch (err: unknown) {
-    const error = err as AxiosError<{ message: string }>
-    openNotify(false, error.response?.data?.message ?? 'เกิดข้อผิดพลาด กรุณาลองใหม่')
+    const error = err as AxiosError<{ message: string }>;
+    openNotify(false, error.response?.data?.message ?? 'เกิดข้อผิดพลาด กรุณาลองใหม่');
   } finally {
-    isSubmitting.value = false
+    isSubmitting.value = false;
   }
-}
+};
 
 const onEdit = (row: TableRow) => {
-  editForm.value = { upId: row.upId, word: row.word }
-  editDialog.value = true
-}
+  editForm.value = { upId: row.upId, word: row.word };
+  editDialog.value = true;
+};
 
 const submitEdit = async () => {
-  if (isSubmitting.value) return
-  isSubmitting.value = true
+  if (isSubmitting.value) return;
+  isSubmitting.value = true;
   try {
-    const response = await api.patch(`/admin/unpolite/${editForm.value.upId}`, {
+    const response = await api.patch(`/backoffice/unpolite/${editForm.value.upId}`, {
       word: editForm.value.word.trim(),
-    })
-    editDialog.value = false
-    openNotify(true, response.data.message || 'แก้ไขคำสำเร็จ')
-    void fetchUnpolite()
+    });
+    editDialog.value = false;
+    openNotify(true, response.data.message || 'แก้ไขคำสำเร็จ');
+    void fetchUnpolite();
   } catch (err: unknown) {
-    const error = err as AxiosError<{ message: string }>
-    openNotify(false, error.response?.data?.message ?? 'เกิดข้อผิดพลาด')
+    const error = err as AxiosError<{ message: string }>;
+    openNotify(false, error.response?.data?.message ?? 'เกิดข้อผิดพลาด');
   } finally {
-    isSubmitting.value = false
+    isSubmitting.value = false;
   }
-}
+};
 
 const onDelete = (row: TableRow) => {
-  itemToDelete.value = row
-  deleteDialog.value = true
-}
+  itemToDelete.value = row;
+  deleteDialog.value = true;
+};
 
 const confirmDelete = async () => {
-  if (!itemToDelete.value || isSubmitting.value) return
-  isSubmitting.value = true
+  if (!itemToDelete.value || isSubmitting.value) return;
+  isSubmitting.value = true;
   try {
-    const response = await api.delete(`/admin/unpolite/${itemToDelete.value.upId}`)
-    deleteDialog.value = false
-    openNotify(true, response.data.message || 'ลบคำสำเร็จ')
-    void fetchUnpolite()
+    const response = await api.delete(`/backoffice/unpolite/${itemToDelete.value.upId}`);
+    deleteDialog.value = false;
+    openNotify(true, response.data.message || 'ลบคำสำเร็จ');
+    void fetchUnpolite();
   } catch (err: unknown) {
-    const error = err as AxiosError<{ message: string }>
-    openNotify(false, error.response?.data?.message ?? 'เกิดข้อผิดพลาด')
+    const error = err as AxiosError<{ message: string }>;
+    openNotify(false, error.response?.data?.message ?? 'เกิดข้อผิดพลาด');
   } finally {
-    isSubmitting.value = false
-    itemToDelete.value = null
+    isSubmitting.value = false;
+    itemToDelete.value = null;
   }
-}
+};
 
 // ─── Table Events ─────────────────────────────────────────────────────────────
 const onRequest: QTableProps['onRequest'] = (reqProps) => {
   // Reset to page 1 when filter changes
-  pagination.value.page =
-    search.value !== reqProps.filter ? 1 : reqProps.pagination.page
-  pagination.value.rowsPerPage = reqProps.pagination.rowsPerPage
-  pagination.value.sortBy = reqProps.pagination.sortBy
-  pagination.value.descending = reqProps.pagination.descending
-  search.value = reqProps.filter as string
-  void fetchUnpolite()
-}
+  pagination.value.page = search.value !== reqProps.filter ? 1 : reqProps.pagination.page;
+  pagination.value.rowsPerPage = reqProps.pagination.rowsPerPage;
+  pagination.value.sortBy = reqProps.pagination.sortBy;
+  pagination.value.descending = reqProps.pagination.descending;
+  search.value = reqProps.filter as string;
+  void fetchUnpolite();
+};
 
 const onSearch = () => {
-  pagination.value.page = 1
-  void fetchUnpolite()
-}
+  pagination.value.page = 1;
+  void fetchUnpolite();
+};
 
 // ─── Particle Constants ───────────────────────────────────────────────────────
+
 const PARTICLE_COLORS = [
-  '#e11d48', '#fbbf24', '#6366f1', '#22c55e',
-  '#fb7185', '#f59e0b', '#a78bfa', '#34d399',
-  '#f472b6', '#38bdf8', '#4ade80', '#facc15',
-  '#ff6b6b', '#ffd93d', '#6bcb77', '#4d96ff',
-]
+  '#e11d48',
+  '#fbbf24',
+  '#6366f1',
+  '#22c55e',
+  '#fb7185',
+  '#f59e0b',
+  '#a78bfa',
+  '#34d399',
+  '#f472b6',
+  '#38bdf8',
+  '#4ade80',
+  '#facc15',
+];
 
 const PARTICLE_EMOJIS = [
-  '🎉', '✨', '🎊', '⭐', '💫', '🌟', '🎈', '🌸',
-  '🌺', '🌼', '🎀', '💥', '🎆', '🎇', '🦋', '🍀', '❄️', '🎵', '💎', '🏵️',
-]
+  '🎉',
+  '✨',
+  '🎊',
+  '⭐',
+  '💫',
+  '🌟',
+  '🎈',
+  '🌸',
+  '🌺',
+  '🌼',
+  '🎀',
+  '💥',
+  '🎆',
+  '🎇',
+  '🦋',
+  '🍀',
+  '❄️',
+  '🎵',
+  '💎',
+  '🏵️',
+];
 
-const SHAPES: ShapeType[] = ['circle', 'square', 'star', 'triangle', 'emoji']
-const WEIGHTS = [0.25, 0.2, 0.2, 0.15, 0.2]
+// const SHAPES: ShapeType[] = ['circle', 'square', 'star', 'triangle', 'emoji']
+// const WEIGHTS = [0.25, 0.2, 0.2, 0.15, 0.2]
 
-const pickShape = (): ShapeType => {
-  const r = Math.random()
-  let cumulative = 0
-  for (let i = 0; i < SHAPES.length; i++) {
-    cumulative += WEIGHTS[i] ?? 0
-    if (r < cumulative) return SHAPES[i] ?? 'circle'
-  }
-  return 'circle'
-}
+// const pickShape = (): ShapeType => {
+//   const r = Math.random()
+//   let cumulative = 0
+//   for (let i = 0; i < SHAPES.length; i++) {
+//     cumulative += WEIGHTS[i] ?? 0
+//     if (r < cumulative) return SHAPES[i] ?? 'circle'
+//   }
+//   return 'circle'
+// }
 
 // ─── Particle Spawn ───────────────────────────────────────────────────────────
 const spawnParticles = (x: number, y: number) => {
-  const count = 36 + Math.floor(Math.random() * 12)
-  const W = window.innerWidth
-  const H = window.innerHeight
-
-  const zones: Array<() => [number, number]> = [
-    () => [Math.random() * W * 0.35, Math.random() * H * 0.35],
-    () => [W * 0.25 + Math.random() * W * 0.5, Math.random() * H * 0.25],
-    () => [W * 0.65 + Math.random() * W * 0.35, Math.random() * H * 0.35],
-    () => [W * 0.65 + Math.random() * W * 0.35, H * 0.25 + Math.random() * H * 0.5],
-    () => [W * 0.65 + Math.random() * W * 0.35, H * 0.65 + Math.random() * H * 0.35],
-    () => [W * 0.25 + Math.random() * W * 0.5, H * 0.75 + Math.random() * H * 0.25],
-    () => [Math.random() * W * 0.35, H * 0.65 + Math.random() * H * 0.35],
-    () => [Math.random() * W * 0.25, H * 0.25 + Math.random() * H * 0.5],
-  ]
+  const count = 12 + Math.floor(Math.random() * 6);
 
   for (let i = 0; i < count; i++) {
-    const id = ++particleId
-    const size = 7 + Math.random() * 11
-    const color = PARTICLE_COLORS[Math.floor(Math.random() * PARTICLE_COLORS.length)]!
-    const dur = 1.2 + Math.random() * 1.2
-    const emoji = PARTICLE_EMOJIS[Math.floor(Math.random() * PARTICLE_EMOJIS.length)]!
-    const shape = pickShape()
-    const isEmoji = shape === 'emoji'
+    const id = ++particleId;
+    const size = 6 + Math.random() * 7;
+    const color = PARTICLE_COLORS[Math.floor(Math.random() * PARTICLE_COLORS.length)]!;
+    const dur = 0.7 + Math.random() * 0.5;
+    const emoji = PARTICLE_EMOJIS[Math.floor(Math.random() * PARTICLE_EMOJIS.length)]!;
 
-    const [targetX, targetY] = zones[i % zones.length]!()
+    const shapes: ShapeType[] = ['circle', 'circle', 'square', 'star', 'emoji'];
+    const shape = shapes[Math.floor(Math.random() * shapes.length)]!;
+    const isEmoji = shape === 'emoji';
+
+    const angle = (i / count) * Math.PI * 2 + (Math.random() - 0.5) * 0.8;
+    const dist = 80 + Math.random() * 80;
 
     const style: Record<string, string> = {
       '--x': `${x}px`,
       '--y': `${y}px`,
-      '--dx': `${targetX - x}px`,
-      '--dy': `${targetY - y}px`,
+      '--dx': `${Math.cos(angle) * dist}px`,
+      '--dy': `${Math.sin(angle) * dist}px`,
       '--dur': `${dur}s`,
       '--color': isEmoji ? 'transparent' : color,
-      '--size': isEmoji ? '22px' : `${size}px`,
+      '--size': isEmoji ? '18px' : `${size}px`,
       '--shape': shape,
       '--emoji-content': isEmoji ? `"${emoji}"` : '""',
-      '--rot': `${Math.random() * 720 - 360}deg`,
-    }
+      '--rot': `${Math.random() * 360 - 180}deg`,
+    };
 
-    activeParticles.value.push({ id, style })
-    setTimeout(() => {
-      activeParticles.value = activeParticles.value.filter((p) => p.id !== id)
-    }, dur * 1000 + 200)
+    activeParticles.value.push({ id, style });
+    setTimeout(
+      () => {
+        activeParticles.value = activeParticles.value.filter((p) => p.id !== id);
+      },
+      dur * 1000 + 100,
+    );
   }
-}
+};
 
 const handleGlobalClick = (e: MouseEvent) => {
-  spawnParticles(e.clientX, e.clientY)
-}
+  spawnParticles(e.clientX, e.clientY);
+};
 
 // ─── Lifecycle ────────────────────────────────────────────────────────────────
 onMounted(() => {
-  void fetchUnpolite()
-  document.addEventListener('click', handleGlobalClick)
-})
+  void fetchUnpolite();
+  document.addEventListener('click', handleGlobalClick);
+});
 
 onUnmounted(() => {
-  document.removeEventListener('click', handleGlobalClick)
-  if (notifyTimer) clearTimeout(notifyTimer)
-})
+  document.removeEventListener('click', handleGlobalClick);
+  if (notifyTimer) clearTimeout(notifyTimer);
+});
 
 watch(
   () => props.id,
   (newId, oldId) => {
     if (newId && newId !== oldId) {
-      pagination.value.page = 1
-      void fetchUnpolite()
+      pagination.value.page = 1;
+      void fetchUnpolite();
     }
-  }
-)
+  },
+);
 </script>
 
 <style lang="scss" scoped>
@@ -737,8 +833,13 @@ $radius: 16px;
 }
 
 @keyframes drift {
-  0%, 100% { transform: translateY(0) scale(1); }
-  50% { transform: translateY(-14px) scale(1.05); }
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-14px) scale(1.05);
+  }
 }
 
 .hero-inner {
@@ -789,7 +890,9 @@ $radius: 16px;
   font-family: 'Noto Sans Thai', sans-serif !important;
   font-weight: 600 !important;
   letter-spacing: 0 !important;
-  transition: background 0.2s, transform 0.15s !important;
+  transition:
+    background 0.2s,
+    transform 0.15s !important;
 
   &:hover {
     background: rgba(255, 255, 255, 0.25) !important;
@@ -855,7 +958,9 @@ $radius: 16px;
     box-shadow: 0 2px 12px rgba(91, 33, 182, 0.08);
   }
 
-  @media (max-width: 600px) { max-width: 100%; }
+  @media (max-width: 600px) {
+    max-width: 100%;
+  }
 }
 
 // ─── Table Card ───────────────────────────────────────────────────────────────
@@ -881,7 +986,9 @@ $radius: 16px;
 
   :deep(tbody tr) {
     transition: background 0.15s;
-    &:hover { background: rgba(124, 58, 237, 0.03) !important; }
+    &:hover {
+      background: rgba(124, 58, 237, 0.03) !important;
+    }
   }
 
   :deep(tbody tr td) {
@@ -918,7 +1025,9 @@ $radius: 16px;
   overflow: hidden;
   text-overflow: ellipsis;
 
-  @media (max-width: 600px) { max-width: 130px; }
+  @media (max-width: 600px) {
+    max-width: 130px;
+  }
 }
 
 .actions-wrap {
@@ -930,16 +1039,22 @@ $radius: 16px;
 .action-btn {
   transition: transform 0.15s !important;
 
-  &:hover { transform: scale(1.15); }
+  &:hover {
+    transform: scale(1.15);
+  }
 
   &--edit {
     color: $amber !important;
-    :deep(.q-icon) { color: $amber !important; }
+    :deep(.q-icon) {
+      color: $amber !important;
+    }
   }
 
   &--delete {
     color: $red !important;
-    :deep(.q-icon) { color: $red !important; }
+    :deep(.q-icon) {
+      color: $red !important;
+    }
   }
 }
 
@@ -1003,9 +1118,15 @@ $radius: 16px;
   color: $text-main;
   border-bottom: 1px solid rgba(124, 58, 237, 0.07);
 
-  &--purple { background: linear-gradient(135deg, #ede9fe, #f5f3ff); }
-  &--amber { background: linear-gradient(135deg, #fef3c7, #fffbeb); }
-  &--danger { background: linear-gradient(135deg, #fee2e2, #fff1f2); }
+  &--purple {
+    background: linear-gradient(135deg, #ede9fe, #f5f3ff);
+  }
+  &--amber {
+    background: linear-gradient(135deg, #fef3c7, #fffbeb);
+  }
+  &--danger {
+    background: linear-gradient(135deg, #fee2e2, #fff1f2);
+  }
 }
 
 .dialog-header-icon {
@@ -1018,8 +1139,12 @@ $radius: 16px;
   justify-content: center;
   flex-shrink: 0;
 
-  &--amber { background: linear-gradient(135deg, #f59e0b, $amber); }
-  &--danger { background: linear-gradient(135deg, #ef4444, $red); }
+  &--amber {
+    background: linear-gradient(135deg, #f59e0b, $amber);
+  }
+  &--danger {
+    background: linear-gradient(135deg, #ef4444, $red);
+  }
 }
 
 .dialog-close-btn {
@@ -1035,7 +1160,9 @@ $radius: 16px;
   justify-content: center;
   transition: background 0.15s;
 
-  &:hover { background: rgba(91, 33, 182, 0.14); }
+  &:hover {
+    background: rgba(91, 33, 182, 0.14);
+  }
 }
 
 .dialog-body {
@@ -1053,6 +1180,92 @@ $radius: 16px;
   padding: 0 1.25rem 1.25rem;
 }
 
+// ─── Indigo dialog header (view) ──────────────────────────────────────────────
+.dialog-header--indigo {
+  background: linear-gradient(135deg, #eef2ff, #e0e7ff);
+}
+
+.dialog-header-icon--indigo {
+  background: linear-gradient(135deg, #4f46e5, #3730a3);
+}
+
+.action-btn--view {
+  color: #4f46e5 !important;
+  :deep(.q-icon) { color: #4f46e5 !important; }
+}
+
+// ─── View dialog content ──────────────────────────────────────────────────────
+.view-field-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: $text-muted;
+  margin-bottom: 8px;
+}
+
+.view-field-value {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: $text-main;
+}
+
+.view-word-chip {
+  display: inline-flex;
+  align-items: center;
+  background: $red-soft;
+  color: $red;
+  border: 1px solid rgba(220, 38, 38, 0.2);
+  border-radius: 12px;
+  padding: 10px 18px;
+  font-size: 1rem;
+  font-weight: 700;
+  width: 100%;
+  box-sizing: border-box;
+  word-break: break-all;
+}
+
+.view-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+}
+
+.view-meta-item {
+  background: $surface-2;
+  border-radius: 10px;
+  padding: 10px 12px;
+  border: 1px solid rgba(124, 58, 237, 0.08);
+}
+
+// ─── Mobile footer (full-width buttons) ───────────────────────────────────────
+.dialog-footer--mobile {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr;
+  
+  .dlg-btn {
+    justify-content: center;
+    width: 100%;
+  }
+}
+
+// ─── Drag handle (mobile bottom sheet) ────────────────────────────────────────
+.dialog-drag-handle {
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: $surface;
+
+  &::before {
+    content: '';
+    width: 36px;
+    height: 3px;
+    border-radius: 2px;
+    background: rgba(124, 58, 237, 0.2);
+  }
+}
+
 // ─── Dialog Buttons ───────────────────────────────────────────────────────────
 .dlg-btn {
   display: inline-flex;
@@ -1064,9 +1277,14 @@ $radius: 16px;
   font-size: 0.88rem;
   font-weight: 600;
   cursor: pointer;
-  transition: transform 0.1s, box-shadow 0.15s, opacity 0.15s;
+  transition:
+    transform 0.1s,
+    box-shadow 0.15s,
+    opacity 0.15s;
 
-  &:active { transform: scale(0.96); }
+  &:active {
+    transform: scale(0.96);
+  }
 
   &:disabled {
     opacity: 0.65;
@@ -1076,28 +1294,36 @@ $radius: 16px;
   &--cancel {
     background: rgba(91, 33, 182, 0.07);
     color: $text-muted;
-    &:hover { background: rgba(91, 33, 182, 0.13); }
+    &:hover {
+      background: rgba(91, 33, 182, 0.13);
+    }
   }
 
   &--confirm {
     background: linear-gradient(135deg, $purple-mid, $purple);
     color: white;
     box-shadow: 0 3px 12px rgba(91, 33, 182, 0.3);
-    &:hover { box-shadow: 0 5px 18px rgba(91, 33, 182, 0.4); }
+    &:hover {
+      box-shadow: 0 5px 18px rgba(91, 33, 182, 0.4);
+    }
   }
 
   &--amber {
     background: linear-gradient(135deg, #f59e0b, $amber);
     color: white;
     box-shadow: 0 3px 12px rgba(217, 119, 6, 0.3);
-    &:hover { box-shadow: 0 5px 18px rgba(217, 119, 6, 0.4); }
+    &:hover {
+      box-shadow: 0 5px 18px rgba(217, 119, 6, 0.4);
+    }
   }
 
   &--danger {
     background: linear-gradient(135deg, #ef4444, $red);
     color: white;
     box-shadow: 0 3px 12px rgba(220, 38, 38, 0.3);
-    &:hover { box-shadow: 0 5px 18px rgba(220, 38, 38, 0.4); }
+    &:hover {
+      box-shadow: 0 5px 18px rgba(220, 38, 38, 0.4);
+    }
   }
 }
 
@@ -1113,9 +1339,21 @@ $radius: 16px;
   margin: 0 0 10px;
 }
 
+// .delete-word-chip {
+//   display: inline-flex;
+//   align-items: center;
+//   background: $red-soft;
+//   color: $red;
+//   border-radius: 10px;
+//   padding: 7px 16px;
+//   font-weight: 700;
+//   font-size: 0.95rem;
+//   margin-bottom: 10px;
+// }
+
 .delete-word-chip {
   display: inline-flex;
-  align-items: center;
+  align-items: flex-start;        // ← เปลี่ยนจาก center เพื่อรองรับหลายบรรทัด
   background: $red-soft;
   color: $red;
   border-radius: 10px;
@@ -1123,6 +1361,11 @@ $radius: 16px;
   font-weight: 700;
   font-size: 0.95rem;
   margin-bottom: 10px;
+  width: 100%;                    // ← เพิ่ม
+  box-sizing: border-box;         // ← เพิ่ม
+  word-break: break-all;          // ← เพิ่ม
+  white-space: normal;            // ← เพิ่ม
+  line-height: 1.5;               // ← เพิ่ม
 }
 
 .delete-warn {
@@ -1147,8 +1390,12 @@ $radius: 16px;
   gap: 12px;
   padding: 1.25rem 1.5rem;
 
-  &--success { background: linear-gradient(135deg, #14532d, #16a34a); }
-  &--error { background: linear-gradient(135deg, #7f1d1d, #dc2626); }
+  &--success {
+    background: linear-gradient(135deg, #14532d, #16a34a);
+  }
+  &--error {
+    background: linear-gradient(135deg, #7f1d1d, #dc2626);
+  }
 }
 
 .notify-header-icon {
@@ -1190,9 +1437,17 @@ $radius: 16px;
 }
 
 @keyframes notifyPop {
-  0% { transform: scale(0.5); opacity: 0; }
-  80% { transform: scale(1.15); }
-  100% { transform: scale(1); opacity: 1; }
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  80% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 .notify-msg {
@@ -1204,8 +1459,12 @@ $radius: 16px;
   margin: 0 0 1rem;
   line-height: 1.6;
 
-  &--success { background: #f0fdf4; }
-  &--error { background: #fef2f2; }
+  &--success {
+    background: #f0fdf4;
+  }
+  &--error {
+    background: #fef2f2;
+  }
 }
 
 // Auto-close progress bar
@@ -1214,21 +1473,39 @@ $radius: 16px;
   width: 100%;
   animation: progressShrink linear forwards;
 
-  &--success { background: linear-gradient(90deg, #14532d, #16a34a); }
-  &--error { background: linear-gradient(90deg, #7f1d1d, #dc2626); }
+  &--success {
+    background: linear-gradient(90deg, #14532d, #16a34a);
+  }
+  &--error {
+    background: linear-gradient(90deg, #7f1d1d, #dc2626);
+  }
 }
 
 @keyframes progressShrink {
-  from { width: 100%; }
-  to { width: 0%; }
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
 }
 
 // ─── Responsive ───────────────────────────────────────────────────────────────
 @media (max-width: 600px) {
-  .page-hero { padding: 1.5rem 1rem 3rem; }
-  .content-wrap { padding: 0 0.75rem 2rem; gap: 0.85rem; }
-  .hero-inner { gap: 10px; }
-  .hero-icon-wrap { width: 44px; height: 44px; }
+  .page-hero {
+    padding: 1.5rem 1rem 3rem;
+  }
+  .content-wrap {
+    padding: 0 0.75rem 2rem;
+    gap: 0.85rem;
+  }
+  .hero-inner {
+    gap: 10px;
+  }
+  .hero-icon-wrap {
+    width: 44px;
+    height: 44px;
+  }
 }
 
 // ─── Click Particles ──────────────────────────────────────────────────────────
@@ -1251,14 +1528,23 @@ $radius: 16px;
   animation: clickFall var(--dur) cubic-bezier(0.2, 0.9, 0.4, 1) forwards;
   border-radius: 50%;
 
-  &[style*='--shape: square'] { border-radius: 3px; }
+  &[style*='--shape: square'] {
+    border-radius: 3px;
+  }
 
   &[style*='--shape: star'] {
     border-radius: 0;
     clip-path: polygon(
-      50% 0%, 61% 35%, 98% 35%, 68% 57%,
-      79% 91%, 50% 70%, 21% 91%, 32% 57%,
-      2% 35%, 39% 35%
+      50% 0%,
+      61% 35%,
+      98% 35%,
+      68% 57%,
+      79% 91%,
+      50% 70%,
+      21% 91%,
+      32% 57%,
+      2% 35%,
+      39% 35%
     );
   }
 
@@ -1294,17 +1580,12 @@ $radius: 16px;
   }
   12% {
     opacity: 1;
-    transform: translate(-50%, -50%)
-      translate(calc(var(--dx) * 0.15), calc(var(--dy) * 0.15))
-      rotate(calc(var(--rot) * 0.1))
-      scale(1.2);
+    transform: translate(-50%, -50%) translate(calc(var(--dx) * 0.15), calc(var(--dy) * 0.15))
+      rotate(calc(var(--rot) * 0.1)) scale(1.2);
   }
   100% {
     opacity: 0;
-    transform: translate(-50%, -50%)
-      translate(var(--dx), var(--dy))
-      rotate(var(--rot))
-      scale(0.1);
+    transform: translate(-50%, -50%) translate(var(--dx), var(--dy)) rotate(var(--rot)) scale(0.1);
   }
 }
 </style>

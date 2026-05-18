@@ -19,9 +19,20 @@ export class AdminService {
     const hashedPassword = await hashPassword(createAdminDto.password);
     const nextId = (findMax ?? 0) + 1;
     const userName = `admin${nextId}`;
+    const checkUsername = await this.adminRepositories.checkUsername(userName);
+    if (!checkUsername) {
+      this.exceptionService.throwUserNameAlreadyExits();
+    }
     createAdminDto.userName = userName;
     // replace password
     createAdminDto.password = hashedPassword;
+
+    const checkEmail = await this.adminRepositories.checkEmail(
+      createAdminDto.email,
+    );
+    if (!checkEmail) {
+      this.exceptionService.throwEmailAlreadyExits();
+    }
     const data = await this.adminRepositories.create(createAdminDto);
     return {
       admin: data,

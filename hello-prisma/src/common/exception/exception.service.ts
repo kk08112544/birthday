@@ -5,6 +5,7 @@ import {
   BadRequestException,
   NotFoundException,
   ForbiddenException,
+  ConflictException,
 } from '@nestjs/common';
 // import { I18nService } from "nestjs-i18n";
 import { MESSAGE } from 'src/common/message';
@@ -46,16 +47,8 @@ export class ExceptionsService {
     throw new NotFoundException(MESSAGE.CARD.NOT_FOUND);
   }
 
-  throwFestivalEditForbidden(): never {
-    throw new ForbiddenException(MESSAGE.FESTIVAL.FESTIVAL_NOT_EDIT);
-  }
-
-  throwFestivalDELETEForbidden(): never {
-    throw new ForbiddenException(MESSAGE.FESTIVAL.FESTIVAL_NOT_DELETE);
-  }
-
-  throwFestivalEndDateForbidden(): never {
-    throw new ForbiddenException(MESSAGE.FESTIVAL.FESTIVAL_NOT_EDIT);
+  throwFestivalNotFound(): never {
+    throw new NotFoundException(MESSAGE.FESTIVAL.NOT_FOUND);
   }
 
   throwDateNotService(): never {
@@ -68,5 +61,17 @@ export class ExceptionsService {
 
   throwAdminNotFound(): never {
     throw new NotFoundException(MESSAGE.ADMIN.NOT_FOUND);
+  }
+
+  throwFestivalEditDeleteForbidden(): never {
+    throw new ForbiddenException(MESSAGE.FESTIVAL.NOT_EDIT_DELETE);
+  }
+
+  throwUserNameAlreadyExits(): never {
+    throw new ConflictException(MESSAGE.ADMIN.USERNAME_CONFLICT);
+  }
+
+  throwEmailAlreadyExits(): never {
+    throw new ConflictException(MESSAGE.ADMIN.USERNAME_CONFLICT);
   }
 }

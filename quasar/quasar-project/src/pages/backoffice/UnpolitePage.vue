@@ -15,6 +15,7 @@
         </div>
         <q-space />
         <q-btn
+          v-if="isSuperAdmin"
           unelevated
           icon="add_circle"
           label="เพิ่มคำ"
@@ -27,7 +28,6 @@
 
     <!-- ===== CONTENT ===== -->
     <div class="content-wrap">
-      <!-- Top bar: stats + search -->
       <div class="top-bar">
         <div class="stats-row">
           <div class="stat-chip">
@@ -55,9 +55,7 @@
           bg-color="white"
           @update:model-value="onSearch"
         >
-          <template v-slot:prepend>
-            <q-icon name="search" color="grey-5" />
-          </template>
+          <template v-slot:prepend><q-icon name="search" color="grey-5" /></template>
           <template v-slot:append>
             <q-icon
               v-if="search"
@@ -90,7 +88,6 @@
             <q-inner-loading showing color="deep-purple-5" />
           </template>
 
-          <!-- Word column -->
           <template v-slot:body-cell-word="props">
             <q-td :props="props">
               <div class="word-badge">
@@ -100,12 +97,23 @@
             </q-td>
           </template>
 
-          <!-- Actions column -->
           <template v-slot:body-cell-actions="props">
             <q-td :props="props">
               <div class="actions-wrap">
                 <q-btn
-                  v-if="props.row.actions.update"
+                  unelevated
+                  round
+                  dense
+                  color="indigo-1"
+                  icon="visibility"
+                  size="sm"
+                  class="action-btn action-btn--view"
+                  @click="onView(props.row)"
+                >
+                  <q-tooltip class="bg-indigo-8">ดูรายละเอียด</q-tooltip>
+                </q-btn>
+                <q-btn
+                  v-if="props.row.actions.update && isSuperAdmin"
                   unelevated
                   round
                   dense
@@ -118,7 +126,7 @@
                   <q-tooltip class="bg-amber-8">แก้ไข</q-tooltip>
                 </q-btn>
                 <q-btn
-                  v-if="props.row.actions.delete"
+                  v-if="props.row.actions.delete && isSuperAdmin"
                   unelevated
                   round
                   dense
@@ -134,13 +142,13 @@
             </q-td>
           </template>
 
-          <!-- Empty state -->
           <template v-slot:no-data>
             <div class="empty-state">
               <div class="empty-icon">🔍</div>
               <div class="empty-title">ไม่พบข้อมูล</div>
               <div class="empty-sub">ลองค้นหาด้วยคำอื่น หรือเพิ่มคำใหม่</div>
               <q-btn
+                v-if="isSuperAdmin"
                 unelevated
                 color="deep-purple-5"
                 icon="add"
@@ -155,16 +163,51 @@
       </div>
     </div>
 
+    <!-- ===== VIEW DIALOG ===== -->
+    <q-dialog v-model="viewDialog" :maximized="$q.screen.xs">
+      <div class="custom-dialog" :class="{ 'custom-dialog--mobile': $q.screen.xs }">
+        <div v-if="$q.screen.xs" class="dialog-drag-handle" />
+        <div class="dialog-header dialog-header--indigo">
+          <div class="dialog-header-icon dialog-header-icon--indigo">
+            <q-icon name="visibility" color="white" size="18px" />
+          </div>
+          <span>รายละเอียดคำ</span>
+          <q-space />
+          <button class="dialog-close-btn" type="button" @click="viewDialog = false">
+            <q-icon name="close" size="18px" />
+          </button>
+        </div>
+        <div class="dialog-body">
+          <div class="view-field-label">คำไม่พึงประสงค์</div>
+          <div class="word-chip">
+            <q-icon
+              name="label_off"
+              size="18px"
+              color="negative"
+              class="q-mr-sm"
+              style="flex-shrink: 0"
+            />
+            {{ viewForm?.word }}
+          </div>
+        </div>
+        <div class="dialog-footer" :class="{ 'dialog-footer--mobile': $q.screen.xs }">
+          <button type="button" class="dlg-btn dlg-btn--cancel" @click="viewDialog = false">
+            ปิด
+          </button>
+        </div>
+      </div>
+    </q-dialog>
+
     <!-- ===== ADD DIALOG ===== -->
     <q-dialog v-model="addDialog" persistent :maximized="$q.screen.xs">
       <div class="custom-dialog" :class="{ 'custom-dialog--mobile': $q.screen.xs }">
         <div class="dialog-header dialog-header--purple">
           <div class="dialog-header-icon">
-            <q-icon name="add_circle" color="white" size="20px" />
+            <q-icon name="add_circle" color="white" size="18px" />
           </div>
           <span>เพิ่มคำไม่พึงประสงค์</span>
           <q-space />
-          <button class="dialog-close-btn" @click="addDialog = false">
+          <button class="dialog-close-btn" type="button" @click="addDialog = false">
             <q-icon name="close" size="18px" />
           </button>
         </div>
@@ -208,29 +251,26 @@
       <div class="custom-dialog" :class="{ 'custom-dialog--mobile': $q.screen.xs }">
         <div class="dialog-header dialog-header--amber">
           <div class="dialog-header-icon dialog-header-icon--amber">
-            <q-icon name="edit" color="white" size="20px" />
+            <q-icon name="edit" color="white" size="18px" />
           </div>
           <span>แก้ไขคำไม่พึงประสงค์</span>
           <q-space />
-          <button class="dialog-close-btn" @click="editDialog = false">
+          <button class="dialog-close-btn" type="button" @click="editDialog = false">
             <q-icon name="close" size="18px" />
           </button>
         </div>
         <q-form @submit="submitEdit">
           <div class="dialog-body">
+            <div class="view-field-label">คำไม่พึงประสงค์</div>
             <q-input
               v-model="editForm.word"
-              label="คำไม่พึงประสงค์"
               outlined
               dense
               autofocus
+              autogrow
               class="styled-input"
               :rules="[(val) => !!val?.trim() || 'กรุณากรอกข้อมูล']"
-            >
-              <template v-slot:prepend>
-                <q-icon name="edit" color="amber-8" />
-              </template>
-            </q-input>
+            />
           </div>
           <div class="dialog-footer">
             <button type="button" class="dlg-btn dlg-btn--cancel" @click="editDialog = false">
@@ -256,22 +296,31 @@
       <div class="custom-dialog delete-dialog">
         <div class="dialog-header dialog-header--danger">
           <div class="dialog-header-icon dialog-header-icon--danger">
-            <q-icon name="warning_amber" color="white" size="20px" />
+            <q-icon name="warning_amber" color="white" size="18px" />
           </div>
           <span>ยืนยันการลบ</span>
           <q-space />
-          <button class="dialog-close-btn" @click="deleteDialog = false">
+          <button class="dialog-close-btn" type="button" @click="deleteDialog = false">
             <q-icon name="close" size="18px" />
           </button>
         </div>
         <div class="dialog-body">
           <div class="delete-confirm-body">
             <p class="delete-text">คุณต้องการลบคำว่า</p>
-            <div class="delete-word-chip">
-              <q-icon name="label_off" size="16px" color="negative" class="q-mr-xs" />
+            <div class="word-chip word-chip--delete">
+              <q-icon
+                name="label_off"
+                size="16px"
+                color="negative"
+                class="q-mr-xs"
+                style="flex-shrink: 0"
+              />
               {{ itemToDelete?.word }}
             </div>
-            <p class="delete-warn">การดำเนินการนี้ไม่สามารถย้อนกลับได้</p>
+            <p class="delete-warn">
+              <q-icon name="info_outline" size="14px" class="q-mr-xs" />
+              การดำเนินการนี้ไม่สามารถย้อนกลับได้
+            </p>
           </div>
         </div>
         <div class="dialog-footer">
@@ -327,7 +376,6 @@
             {{ notifyMessage }}
           </p>
         </div>
-        <!-- :key forces progress animation to restart on every new notification -->
         <div
           :key="notifyKey"
           class="notify-progress"
@@ -380,6 +428,9 @@ type ShapeType = 'circle' | 'square' | 'star' | 'triangle' | 'emoji';
 const props = defineProps<{ id: string }>();
 const $q = useQuasar();
 
+// ─── Role ─────────────────────────────────────────────────────────────────────
+const isSuperAdmin = localStorage.getItem('role') === 'superAdmin';
+
 // ─── Table State ──────────────────────────────────────────────────────────────
 const rows = ref<TableRow[]>([]);
 const loading = ref(false);
@@ -394,13 +445,7 @@ const pagination = ref({
 });
 
 const columns: QTableColumn[] = [
-  {
-    name: 'no',
-    label: 'ลำดับ',
-    field: 'displayIndex',
-    align: 'center',
-    style: 'width: 64px',
-  },
+  { name: 'no', label: 'ลำดับ', field: 'displayIndex', align: 'center', style: 'width: 64px' },
   {
     name: 'word',
     label: 'คำไม่พึงประสงค์',
@@ -408,21 +453,17 @@ const columns: QTableColumn[] = [
     align: 'left',
     style: 'white-space: normal; word-break: break-word;',
   },
-  {
-    name: 'actions',
-    label: 'จัดการ',
-    field: 'actions',
-    align: 'center',
-    style: 'width: 110px',
-  },
+  { name: 'actions', label: 'จัดการ', field: 'actions', align: 'center', style: 'width: 130px' },
 ];
 
 // ─── Dialog State ─────────────────────────────────────────────────────────────
+const viewDialog = ref(false);
 const addDialog = ref(false);
 const editDialog = ref(false);
 const deleteDialog = ref(false);
 const isSubmitting = ref(false);
 
+const viewForm = ref<TableRow | null>(null);
 const addForm = ref({ word: '' });
 const editForm = ref<{ upId: number | string; word: string }>({ upId: '', word: '' });
 const itemToDelete = ref<TableRow | null>(null);
@@ -431,7 +472,6 @@ const itemToDelete = ref<TableRow | null>(null);
 const showNotifyDialog = ref(false);
 const notifySuccess = ref(true);
 const notifyMessage = ref('');
-// Incremented on every notification to force progress animation restart
 const notifyKey = ref(0);
 let notifyTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -476,7 +516,7 @@ const fetchUnpolite = async (): Promise<void> => {
       displayIndex: startIndex + index + 1,
       upId: item.upId,
       word: item.word || '-',
-      actions: { create: false, update: true, delete: true },
+      actions: { create: false, update: isSuperAdmin, delete: isSuperAdmin },
     }));
 
     pagination.value.rowsNumber = res.unpolite?.total ?? 0;
@@ -487,7 +527,13 @@ const fetchUnpolite = async (): Promise<void> => {
   }
 };
 
-// ─── CRUD Actions ─────────────────────────────────────────────────────────────
+// ─── View Action ──────────────────────────────────────────────────────────────
+const onView = (row: TableRow) => {
+  viewForm.value = row;
+  viewDialog.value = true;
+};
+
+// ─── Add Action ───────────────────────────────────────────────────────────────
 const onAdd = () => {
   addForm.value.word = '';
   addDialog.value = true;
@@ -497,9 +543,7 @@ const submitAdd = async () => {
   if (isSubmitting.value) return;
   isSubmitting.value = true;
   try {
-    const response = await api.post('/backoffice/unpolite', {
-      word: addForm.value.word.trim(),
-    });
+    const response = await api.post('/backoffice/unpolite', { word: addForm.value.word.trim() });
     addDialog.value = false;
     openNotify(true, response.data.message || 'เพิ่มคำสำเร็จ');
     void fetchUnpolite();
@@ -511,6 +555,7 @@ const submitAdd = async () => {
   }
 };
 
+// ─── Edit Action ──────────────────────────────────────────────────────────────
 const onEdit = (row: TableRow) => {
   editForm.value = { upId: row.upId, word: row.word };
   editDialog.value = true;
@@ -534,6 +579,7 @@ const submitEdit = async () => {
   }
 };
 
+// ─── Delete Action ────────────────────────────────────────────────────────────
 const onDelete = (row: TableRow) => {
   itemToDelete.value = row;
   deleteDialog.value = true;
@@ -558,7 +604,6 @@ const confirmDelete = async () => {
 
 // ─── Table Events ─────────────────────────────────────────────────────────────
 const onRequest: QTableProps['onRequest'] = (reqProps) => {
-  // Reset to page 1 when filter changes
   pagination.value.page = search.value !== reqProps.filter ? 1 : reqProps.pagination.page;
   pagination.value.rowsPerPage = reqProps.pagination.rowsPerPage;
   pagination.value.sortBy = reqProps.pagination.sortBy;
@@ -573,7 +618,6 @@ const onSearch = () => {
 };
 
 // ─── Particle Constants ───────────────────────────────────────────────────────
-
 const PARTICLE_COLORS = [
   '#e11d48',
   '#fbbf24',
@@ -612,34 +656,18 @@ const PARTICLE_EMOJIS = [
   '🏵️',
 ];
 
-// const SHAPES: ShapeType[] = ['circle', 'square', 'star', 'triangle', 'emoji']
-// const WEIGHTS = [0.25, 0.2, 0.2, 0.15, 0.2]
-
-// const pickShape = (): ShapeType => {
-//   const r = Math.random()
-//   let cumulative = 0
-//   for (let i = 0; i < SHAPES.length; i++) {
-//     cumulative += WEIGHTS[i] ?? 0
-//     if (r < cumulative) return SHAPES[i] ?? 'circle'
-//   }
-//   return 'circle'
-// }
-
 // ─── Particle Spawn ───────────────────────────────────────────────────────────
 const spawnParticles = (x: number, y: number) => {
   const count = 12 + Math.floor(Math.random() * 6);
-
   for (let i = 0; i < count; i++) {
     const id = ++particleId;
     const size = 6 + Math.random() * 7;
     const color = PARTICLE_COLORS[Math.floor(Math.random() * PARTICLE_COLORS.length)]!;
     const dur = 0.7 + Math.random() * 0.5;
     const emoji = PARTICLE_EMOJIS[Math.floor(Math.random() * PARTICLE_EMOJIS.length)]!;
-
     const shapes: ShapeType[] = ['circle', 'circle', 'square', 'star', 'emoji'];
     const shape = shapes[Math.floor(Math.random() * shapes.length)]!;
     const isEmoji = shape === 'emoji';
-
     const angle = (i / count) * Math.PI * 2 + (Math.random() - 0.5) * 0.8;
     const dist = 80 + Math.random() * 80;
 
@@ -666,9 +694,7 @@ const spawnParticles = (x: number, y: number) => {
   }
 };
 
-const handleGlobalClick = (e: MouseEvent) => {
-  spawnParticles(e.clientX, e.clientY);
-};
+const handleGlobalClick = (e: MouseEvent) => spawnParticles(e.clientX, e.clientY);
 
 // ─── Lifecycle ────────────────────────────────────────────────────────────────
 onMounted(() => {
@@ -698,12 +724,16 @@ watch(
 // ─── Design Tokens ────────────────────────────────────────────────────────────
 $purple: #5b21b6;
 $purple-mid: #7c3aed;
-$purple-soft: #ede9fe;
+$indigo: #3730a3;
+$indigo-mid: #4f46e5;
+$indigo-soft: #eef2ff;
 $amber: #d97706;
 $amber-soft: #fef3c7;
 $red: #dc2626;
 $red-soft: #fee2e2;
-$teal: #0d9488;
+$green: #16a34a;
+$green-dark: #14532d;
+$green-soft: #f0fdf4;
 $surface: #ffffff;
 $surface-2: #f8f7ff;
 $text-main: #1e1b4b;
@@ -730,7 +760,6 @@ $radius: 16px;
   border-radius: 50%;
   opacity: 0.12;
 }
-
 .hero-blob-1 {
   width: 300px;
   height: 300px;
@@ -739,7 +768,6 @@ $radius: 16px;
   right: -80px;
   animation: drift 7s ease-in-out infinite;
 }
-
 .hero-blob-2 {
   width: 200px;
   height: 200px;
@@ -748,7 +776,6 @@ $radius: 16px;
   left: -50px;
   animation: drift 9s ease-in-out infinite reverse;
 }
-
 .hero-blob-3 {
   width: 120px;
   height: 120px;
@@ -800,7 +827,6 @@ $radius: 16px;
   margin: 0 0 2px;
   line-height: 1.2;
 }
-
 .hero-sub {
   font-size: clamp(0.75rem, 2.5vw, 0.9rem);
   color: rgba(255, 255, 255, 0.65);
@@ -819,7 +845,6 @@ $radius: 16px;
   transition:
     background 0.2s,
     transform 0.15s !important;
-
   &:hover {
     background: rgba(255, 255, 255, 0.25) !important;
     transform: translateY(-2px);
@@ -844,7 +869,6 @@ $radius: 16px;
   flex-wrap: wrap;
   gap: 10px;
 }
-
 .stats-row {
   display: flex;
   gap: 10px;
@@ -869,7 +893,6 @@ $radius: 16px;
   color: $text-main;
   line-height: 1;
 }
-
 .stat-label {
   font-size: 0.78rem;
   color: $text-muted;
@@ -878,12 +901,10 @@ $radius: 16px;
 .search-bar {
   width: 100%;
   max-width: 320px;
-
   :deep(.q-field__control) {
     border-radius: 14px !important;
     box-shadow: 0 2px 12px rgba(91, 33, 182, 0.08);
   }
-
   @media (max-width: 600px) {
     max-width: 100%;
   }
@@ -909,27 +930,23 @@ $radius: 16px;
     border-bottom: 2px solid rgba(124, 58, 237, 0.12);
     white-space: nowrap;
   }
-
   :deep(tbody tr) {
     transition: background 0.15s;
     &:hover {
       background: rgba(124, 58, 237, 0.03) !important;
     }
   }
-
   :deep(tbody tr td) {
     font-size: clamp(0.78rem, 2vw, 0.875rem);
     color: $text-main;
     border-bottom: 1px solid rgba(124, 58, 237, 0.06);
     vertical-align: middle;
   }
-
   :deep(tbody tr td:first-child) {
     color: $text-muted;
     font-size: 0.75rem;
     text-align: center;
   }
-
   :deep(.q-table__bottom) {
     border-top: 1px solid rgba(124, 58, 237, 0.08);
     background: $surface-2;
@@ -950,7 +967,6 @@ $radius: 16px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-
   @media (max-width: 600px) {
     max-width: 130px;
   }
@@ -964,18 +980,21 @@ $radius: 16px;
 
 .action-btn {
   transition: transform 0.15s !important;
-
   &:hover {
     transform: scale(1.15);
   }
-
+  &--view {
+    color: $indigo-mid !important;
+    :deep(.q-icon) {
+      color: $indigo-mid !important;
+    }
+  }
   &--edit {
     color: $amber !important;
     :deep(.q-icon) {
       color: $amber !important;
     }
   }
-
   &--delete {
     color: $red !important;
     :deep(.q-icon) {
@@ -990,19 +1009,16 @@ $radius: 16px;
   align-items: center;
   padding: 3rem 1rem;
 }
-
 .empty-icon {
   font-size: 3rem;
   margin-bottom: 12px;
 }
-
 .empty-title {
   font-family: 'Prompt', sans-serif;
   font-size: 1.05rem;
   font-weight: 600;
   color: $text-main;
 }
-
 .empty-sub {
   font-size: 0.82rem;
   color: $text-muted;
@@ -1017,7 +1033,6 @@ $radius: 16px;
   width: 420px;
   max-width: 95vw;
   box-shadow: 0 20px 60px rgba(91, 33, 182, 0.18);
-
   &--mobile {
     border-radius: 20px 20px 0 0;
     width: 100%;
@@ -1044,14 +1059,17 @@ $radius: 16px;
   color: $text-main;
   border-bottom: 1px solid rgba(124, 58, 237, 0.07);
 
+  &--indigo {
+    background: linear-gradient(135deg, $indigo-soft, #e0e7ff);
+  }
   &--purple {
     background: linear-gradient(135deg, #ede9fe, #f5f3ff);
   }
   &--amber {
-    background: linear-gradient(135deg, #fef3c7, #fffbeb);
+    background: linear-gradient(135deg, $amber-soft, #fffbeb);
   }
   &--danger {
-    background: linear-gradient(135deg, #fee2e2, #fff1f2);
+    background: linear-gradient(135deg, $red-soft, #fff1f2);
   }
 }
 
@@ -1065,6 +1083,9 @@ $radius: 16px;
   justify-content: center;
   flex-shrink: 0;
 
+  &--indigo {
+    background: linear-gradient(135deg, $indigo-mid, $indigo);
+  }
   &--amber {
     background: linear-gradient(135deg, #f59e0b, $amber);
   }
@@ -1085,7 +1106,6 @@ $radius: 16px;
   align-items: center;
   justify-content: center;
   transition: background 0.15s;
-
   &:hover {
     background: rgba(91, 33, 182, 0.14);
   }
@@ -1106,7 +1126,86 @@ $radius: 16px;
   padding: 0 1.25rem 1.25rem;
 }
 
-// ─── Dialog Buttons ───────────────────────────────────────────────────────────
+.dialog-footer--mobile {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr;
+  .dlg-btn {
+    justify-content: center;
+    width: 100%;
+  }
+}
+
+// ─── Drag handle ──────────────────────────────────────────────────────────────
+.dialog-drag-handle {
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: $surface;
+  &::before {
+    content: '';
+    width: 36px;
+    height: 3px;
+    border-radius: 2px;
+    background: rgba(124, 58, 237, 0.2);
+  }
+}
+
+// ─── Shared word chip (view + delete) ─────────────────────────────────────────
+.word-chip {
+  display: flex;
+  align-items: flex-start;
+  background: $red-soft;
+  color: $red;
+  border: 1px solid rgba(220, 38, 38, 0.2);
+  border-radius: 12px;
+  padding: 10px 18px;
+  font-size: 1rem;
+  font-weight: 700;
+  width: 100%;
+  box-sizing: border-box;
+  word-break: break-all;
+  white-space: normal;
+  line-height: 1.5;
+
+  &--delete {
+    border-radius: 10px;
+    font-size: 0.95rem;
+    padding: 10px 16px;
+    margin-bottom: 10px;
+  }
+}
+
+// ─── View label ───────────────────────────────────────────────────────────────
+.view-field-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: $text-muted;
+  margin-bottom: 8px;
+}
+
+// ─── Delete confirm body ──────────────────────────────────────────────────────
+.delete-confirm-body {
+  text-align: center;
+  padding: 0.5rem 0;
+}
+.delete-text {
+  font-size: 0.9rem;
+  color: $text-muted;
+  margin: 0 0 10px;
+}
+.delete-warn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.78rem;
+  color: $text-muted;
+  margin: 0;
+}
+
+// ─── Dialog buttons ───────────────────────────────────────────────────────────
 .dlg-btn {
   display: inline-flex;
   align-items: center;
@@ -1125,7 +1224,6 @@ $radius: 16px;
   &:active {
     transform: scale(0.96);
   }
-
   &:disabled {
     opacity: 0.65;
     cursor: not-allowed;
@@ -1138,7 +1236,6 @@ $radius: 16px;
       background: rgba(91, 33, 182, 0.13);
     }
   }
-
   &--confirm {
     background: linear-gradient(135deg, $purple-mid, $purple);
     color: white;
@@ -1147,7 +1244,6 @@ $radius: 16px;
       box-shadow: 0 5px 18px rgba(91, 33, 182, 0.4);
     }
   }
-
   &--amber {
     background: linear-gradient(135deg, #f59e0b, $amber);
     color: white;
@@ -1156,7 +1252,6 @@ $radius: 16px;
       box-shadow: 0 5px 18px rgba(217, 119, 6, 0.4);
     }
   }
-
   &--danger {
     background: linear-gradient(135deg, #ef4444, $red);
     color: white;
@@ -1165,36 +1260,6 @@ $radius: 16px;
       box-shadow: 0 5px 18px rgba(220, 38, 38, 0.4);
     }
   }
-}
-
-// ─── Delete Confirm Body ──────────────────────────────────────────────────────
-.delete-confirm-body {
-  text-align: center;
-  padding: 0.5rem 0;
-}
-
-.delete-text {
-  font-size: 0.9rem;
-  color: $text-muted;
-  margin: 0 0 10px;
-}
-
-.delete-word-chip {
-  display: inline-flex;
-  align-items: center;
-  background: $red-soft;
-  color: $red;
-  border-radius: 10px;
-  padding: 7px 16px;
-  font-weight: 700;
-  font-size: 0.95rem;
-  margin-bottom: 10px;
-}
-
-.delete-warn {
-  font-size: 0.78rem;
-  color: $text-muted;
-  margin: 0;
 }
 
 // ─── Notify Dialog ────────────────────────────────────────────────────────────
@@ -1212,12 +1277,11 @@ $radius: 16px;
   align-items: center;
   gap: 12px;
   padding: 1.25rem 1.5rem;
-
   &--success {
-    background: linear-gradient(135deg, #14532d, #16a34a);
+    background: linear-gradient(135deg, $green-dark, $green);
   }
   &--error {
-    background: linear-gradient(135deg, #7f1d1d, #dc2626);
+    background: linear-gradient(135deg, #7f1d1d, $red);
   }
 }
 
@@ -1240,13 +1304,11 @@ $radius: 16px;
   color: #fff;
   line-height: 1.2;
 }
-
 .notify-sub {
   font-size: 0.75rem;
   color: rgba(255, 255, 255, 0.72);
   margin-top: 2px;
 }
-
 .notify-body {
   padding: 1.5rem 1.5rem 0.75rem;
   text-align: center;
@@ -1281,26 +1343,23 @@ $radius: 16px;
   padding: 10px 14px;
   margin: 0 0 1rem;
   line-height: 1.6;
-
   &--success {
-    background: #f0fdf4;
+    background: $green-soft;
   }
   &--error {
-    background: #fef2f2;
+    background: $red-soft;
   }
 }
 
-// Auto-close progress bar
 .notify-progress {
   height: 4px;
   width: 100%;
   animation: progressShrink linear forwards;
-
   &--success {
-    background: linear-gradient(90deg, #14532d, #16a34a);
+    background: linear-gradient(90deg, $green-dark, $green);
   }
   &--error {
-    background: linear-gradient(90deg, #7f1d1d, #dc2626);
+    background: linear-gradient(90deg, #7f1d1d, $red);
   }
 }
 
@@ -1354,7 +1413,6 @@ $radius: 16px;
   &[style*='--shape: square'] {
     border-radius: 3px;
   }
-
   &[style*='--shape: star'] {
     border-radius: 0;
     clip-path: polygon(
@@ -1370,7 +1428,6 @@ $radius: 16px;
       39% 35%
     );
   }
-
   &[style*='--shape: triangle'] {
     background: transparent !important;
     border-left: calc(var(--size) * 0.5) solid transparent;
@@ -1380,14 +1437,12 @@ $radius: 16px;
     width: 0 !important;
     height: 0 !important;
   }
-
   &[style*='--shape: emoji'] {
     background: transparent;
     border-radius: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-
     &::after {
       content: var(--emoji-content);
       font-size: var(--size);
