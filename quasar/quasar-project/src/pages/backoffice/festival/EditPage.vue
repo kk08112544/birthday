@@ -932,7 +932,8 @@ const onLogoSelected = (file: File | null) => {
 const onFestivalNameChange = (val: string | number | null) => {
   nameError.value = false;
   if (typeof val !== 'string') return;
-  const pattern = /^[^-].*[^-]-[^-]+-\d{4}$/;
+  // const pattern = /^[^-].*[^-]-[^-]+-\d{4}$/;
+    const pattern = /^[^-].*-[^-]{2,3}-\d{4}$/;
   if (val && !pattern.test(val.trim())) nameError.value = true;
 };
 
