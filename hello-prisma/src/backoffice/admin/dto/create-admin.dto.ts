@@ -39,6 +39,6 @@ export class CreateAdminDto {
   email!: string;
 
   @IsNotEmpty()
-  @IsPhoneNumber()
+  @IsString()
   phoneNumber!: string;
 }

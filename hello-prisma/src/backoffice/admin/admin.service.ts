@@ -14,32 +14,33 @@ export class AdminService {
     private adminRepositories: AdminRepositories,
     private exceptionService: ExceptionsService,
   ) {}
-  async create(createAdminDto: CreateAdminDto) {
-    const findMax = await this.adminRepositories.findMax();
-    const hashedPassword = await hashPassword(createAdminDto.password);
-    const nextId = (findMax ?? 0) + 1;
-    const userName = `admin${nextId}`;
-    const checkUsername = await this.adminRepositories.checkUsername(userName);
-    if (!checkUsername) {
-      this.exceptionService.throwUserNameAlreadyExits();
-    }
-    createAdminDto.userName = userName;
-    // replace password
-    createAdminDto.password = hashedPassword;
 
-    const checkEmail = await this.adminRepositories.checkEmail(
-      createAdminDto.email,
-    );
-    if (!checkEmail) {
-      this.exceptionService.throwEmailAlreadyExits();
-    }
-    const data = await this.adminRepositories.create(createAdminDto);
-    return {
-      admin: data,
-      action: STATUS.SUCCESS, // ใช้ตัวแปร STATUS
-      message: MESSAGE.ADMIN.CREATE_SUCCESS, // ใช้ตัวแปร MESSAGE
-    };
+  async create(createAdminDto: CreateAdminDto) {
+  const findMax = await this.adminRepositories.findMax();
+  const hashedPassword = await hashPassword(createAdminDto.password);
+  const nextId = (findMax ?? 0) + 1;
+  const userName = `admin${nextId}`;
+
+  const checkUsername = await this.adminRepositories.checkUsername(userName);
+  if (checkUsername) {                                    // ✅ มีอยู่แล้ว → throw
+    this.exceptionService.throwUserNameAlreadyExits();
   }
+
+  createAdminDto.userName = userName;
+  createAdminDto.password = hashedPassword;
+
+  const checkEmail = await this.adminRepositories.checkEmail(createAdminDto.email);
+  if (checkEmail) {                                       // ✅ มีอยู่แล้ว → throw
+    this.exceptionService.throwEmailAlreadyExits();
+  }
+
+  const data = await this.adminRepositories.create(createAdminDto);
+  return {
+    admin: data,
+    action: STATUS.SUCCESS,
+    message: MESSAGE.ADMIN.CREATE_SUCCESS,
+  };
+}
 
   async findAll() {
     const data = await this.adminRepositories.findAll();

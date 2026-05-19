@@ -180,14 +180,14 @@ export class AdminRepositories {
     return data._max.uId;
   }
 
-  async checkUsername(userName: string): Promise<boolean> {
+  async checkUsername(userName: string): Promise<ResponseAdminDto | null> {
     const data = await this.prisma.user.findFirst({
       where: {
         userName: userName,
         deletedAt: null,
       },
     });
-    return !!data;
+    return data;
   }
 
   async checkEmail(email: string): Promise<boolean> {

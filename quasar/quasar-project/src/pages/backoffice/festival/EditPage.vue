@@ -110,8 +110,8 @@
               v-model="festivalName"
               :disable="!canEdit"
               label="ชื่อเทศกาล"
-              placeholder="เช่น สงกรานต์-IT-2568"
-              hint="รูปแบบ: เทศกาล-หน่วยงาน-ปี"
+              placeholder="เช่น สงกรานต์-กกจ-2568"
+              hint="รูปแบบ: เทศกาล-ตัวย่อหน่วยงาน (2-3)-ปี"
               dense
               :error="nameError"
               :error-message="
@@ -933,7 +933,7 @@ const onFestivalNameChange = (val: string | number | null) => {
   nameError.value = false;
   if (typeof val !== 'string') return;
   // const pattern = /^[^-].*[^-]-[^-]+-\d{4}$/;
-    const pattern = /^[^-].*-[^-]{2,3}-\d{4}$/;
+  const pattern = /^[^-].*-[^-]{2,3}-\d{4}$/;
   if (val && !pattern.test(val.trim())) nameError.value = true;
 };
 
@@ -1103,7 +1103,8 @@ const validateAndScroll = async (): Promise<boolean> => {
 
   const isImageValid = !!imageFile.value || !!existingImageUrl.value;
   const isNameValid =
-    typeof festivalName.value === 'string' && /^[^-]+-[^-]+-\d{4}$/.test(festivalName.value.trim());
+    typeof festivalName.value === 'string' &&
+    /^[^-].*-[^-]{2,3}-\d{4}$/.test(festivalName.value.trim());
   const isLogoValid = !!logoFile.value;
   const isWebNameValid = typeof webName.value === 'string' && webName.value.trim().length > 0;
 

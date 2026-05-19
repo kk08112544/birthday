@@ -80,7 +80,10 @@ const routes: RouteRecordRaw[] = [
     path: '/backoffice/admin',
     component: () => import('src/layouts/BackofficeLayout.vue'),
     meta: { requiresAuth: true },
-    children: [{ path: '', component: () => import('pages/backoffice/admin/AdminPage.vue') }],
+    children: [
+      { path: '', component: () => import('pages/backoffice/admin/AdminPage.vue') },
+      { path: 'create', component: () => import('pages/backoffice/admin/CreatePage.vue') },
+    ],
   },
   {
     path: '/backoffice',
