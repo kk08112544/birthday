@@ -46,7 +46,7 @@
               }"
               @click="canEdit && fileInput?.pickFiles()"
             >
-              <q-img
+              <!-- <q-img
                 v-if="imageFile || existingImageUrl"
                 :src="imageFile ? getFilePreview(imageFile) : existingImageUrl"
                 class="cover-img"
@@ -57,11 +57,24 @@
                   <q-icon name="photo_camera" size="28px" color="white" />
                   <span>เปลี่ยนรูป</span>
                 </div>
-              </q-img>
+              </q-img> -->
+              <div
+                v-if="imageFile || existingImageUrl"
+                class="cover-img"
+                :style="{
+                  backgroundImage: `url(${imageFile ? getFilePreview(imageFile) : existingImageUrl})`,
+                }"
+              >
+                <div v-if="canEdit" class="cover-overlay">
+                  <q-icon name="photo_camera" size="28px" color="white" />
+                  <span>เปลี่ยนรูป</span>
+                </div>
+              </div>
+
               <div v-else class="cover-placeholder">
                 <div class="cover-placeholder-icon">🖼️</div>
                 <div class="cover-placeholder-text">คลิกเพื่ออัปโหลดรูปหน้าปก</div>
-                <div class="cover-placeholder-sub">PNG, JPG ขนาดไม่เกิน 2MB — 1199 × 581 px</div>
+                <div class="cover-placeholder-sub">PNG, JPG ขนาดไม่เกิน 2MB — 2188 × 417 px</div>
                 <a
                   href="https://www.iloveimg.com/resize-image"
                   target="_blank"
@@ -77,7 +90,7 @@
             <transition name="err-fade">
               <div v-if="imageError" class="error-msg">
                 <q-icon name="error_outline" size="14px" />
-                กรุณาอัปโหลดรูปหน้าปก PNG/JPG ขนาด 1199 × 581 px ไม่เกิน 2 MB
+                กรุณาอัปโหลดรูปหน้าปก PNG/JPG ขนาด 2188 × 417 px ไม่เกิน 2 MB
               </div>
             </transition>
           </div>
@@ -887,7 +900,7 @@ const onImageSelected = (file: File | null) => {
   const img = new Image();
   img.onload = () => {
     URL.revokeObjectURL(url);
-    if (img.width !== 1199 || img.height !== 581) {
+    if (img.width !== 2188 || img.height !== 417) {
       imageError.value = true;
       imageFile.value = null;
       existingImageUrl.value = '';
@@ -1585,8 +1598,17 @@ $error-red: #dc2626;
   }
 }
 
+// .cover-img {
+//   display: block;
+// }
 .cover-img {
-  display: block;
+  width: 100%;
+  aspect-ratio: 2188 / 417; // ← สัดส่วนถูกต้อง ไม่ตายตัว
+  background-size: contain;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-color: $surface-2;
+  position: relative;
 }
 
 .cover-overlay {

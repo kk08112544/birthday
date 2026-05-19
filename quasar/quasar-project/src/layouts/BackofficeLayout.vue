@@ -50,7 +50,9 @@
       <!-- BANNER -->
       <div class="banner-section">
         <div class="banner-wrap">
-          <q-img src="/ldd_banner.jpg" class="banner-img" fit="cover" :ratio="18 / 9">
+          <!-- :ratio="18 / 9" -->
+          <!-- <q-img src="/ldd_banner.jpg" class="banner-img" fit="cover" :ratio="18 / 9"> -->
+          <q-img src="/logo_v2.png" class="banner-img" fit="cover" :ratio="2188 / 417">
             <template v-slot:loading>
               <div class="banner-loading">
                 <div class="banner-loading-inner">
@@ -232,7 +234,6 @@ import { ref, reactive, computed, onMounted, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
-type AlertType = 'error' | 'success' | 'warning' | 'info';
 
 interface AlertDialog {
   show: boolean;
@@ -242,6 +243,8 @@ interface AlertDialog {
   message: string;
   btnLabel: string;
 }
+
+type AlertType = 'error' | 'success' | 'warning' | 'info';
 
 // ─── Router ───────────────────────────────────────────────────────────────────
 const route = useRoute();

@@ -129,9 +129,20 @@ export class AdminUnpoliteRepositories {
     return data;
   }
 
-  async exits(word: string): Promise<boolean> {
+  async exits(word: string): Promise<ResponseUnpoliteDto | null> {
     const data = await this.prisma.unpolite.findFirst({
       where: {
+        word: word,
+        deletedAt: null,
+      },
+    });
+    return data;
+  }
+
+  async findupdateExits(id:number, word:string): Promise<boolean> {
+    const data = await this.prisma.unpolite.findFirst({
+      where: {
+        upId:Number(id),
         word: word,
         deletedAt: null,
       },

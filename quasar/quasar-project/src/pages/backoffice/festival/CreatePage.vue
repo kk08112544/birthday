@@ -47,8 +47,9 @@
                 v-if="imageFile"
                 :src="getFilePreview(imageFile)"
                 class="cover-img"
-                :ratio="16 / 9"
+                :ratio="2188 / 417"
               >
+                <!-- :ratio="16 / 9" -->
                 <div class="cover-overlay">
                   <q-icon name="photo_camera" size="28px" color="white" />
                   <span>เปลี่ยนรูป</span>
@@ -57,7 +58,7 @@
               <div v-else class="cover-placeholder">
                 <div class="cover-placeholder-icon">🖼️</div>
                 <div class="cover-placeholder-text">คลิกเพื่ออัปโหลดรูปหน้าปก</div>
-                <div class="cover-placeholder-sub">PNG, JPG ขนาดไม่เกิน 2MB — 1199 × 581 px</div>
+                <div class="cover-placeholder-sub">PNG, JPG ขนาดไม่เกิน 2MB — 2188 × 417 px</div>
                 <a
                   href="https://www.iloveimg.com/resize-image"
                   target="_blank"
@@ -73,7 +74,7 @@
             <transition name="err-fade">
               <div v-if="imageError" class="error-msg">
                 <q-icon name="error_outline" size="14px" />
-                กรุณาอัปโหลดรูปหน้าปก PNG/JPG ขนาด 1199 × 581 px ไม่เกิน 2 MB
+                กรุณาอัปโหลดรูปหน้าปก PNG/JPG ขนาด 2188 × 417 px ไม่เกิน 2 MB
               </div>
             </transition>
           </div>
@@ -754,7 +755,7 @@ const onImageSelected = (file: File | null) => {
   const img = new Image();
   img.onload = () => {
     URL.revokeObjectURL(url);
-    if (img.width !== 1199 || img.height !== 581) {
+    if (img.width !== 2188 || img.height !== 417) {
       imageError.value = true;
       imageFile.value = null;
     }
@@ -1348,6 +1349,37 @@ $error-red: #dc2626;
 }
 
 // ─── Cover Upload ─────────────────────────────────────────────────────────────
+// .cover-upload-zone {
+//   border-radius: 14px;
+//   overflow: hidden;
+//   cursor: pointer;
+//   border: 2px dashed rgba(234, 88, 12, 0.25);
+//   transition:
+//     border-color 0.2s,
+//     background 0.2s,
+//     transform 0.2s;
+//   background: $surface-2;
+
+//   &:hover {
+//     border-color: $orange;
+//     transform: translateY(-2px);
+//   }
+// }
+// .cover-upload-zone {
+//   border-radius: 14px;
+//   overflow: hidden;
+//   cursor: pointer;
+//   border: 2px dashed rgba(234, 88, 12, 0.25);
+//   transition: border-color 0.2s, background 0.2s, transform 0.2s;
+//   background: $surface-2;
+//   aspect-ratio: 2188 / 417; // ← เพิ่ม เพื่อให้กรอบมีสัดส่วนถูกต้องตั้งแต่ก่อนอัปโหลด
+
+//   &:hover {
+//     border-color: $orange;
+//     transform: translateY(-2px);
+//   }
+// }
+
 .cover-upload-zone {
   border-radius: 14px;
   overflow: hidden;
@@ -1358,6 +1390,7 @@ $error-red: #dc2626;
     background 0.2s,
     transform 0.2s;
   background: $surface-2;
+  // ลบ aspect-ratio ออก — ให้ความสูงถูกกำหนดโดย content แทน
 
   &:hover {
     border-color: $orange;
@@ -1396,7 +1429,16 @@ $error-red: #dc2626;
   flex-direction: column;
   align-items: center;
   gap: 6px;
+  min-height: 160px; // ← เพิ่ม เพื่อให้มีพื้นที่แสดงข้อความเสมอ
+  justify-content: center;
 }
+// .cover-placeholder {
+//   padding: 2.5rem 1rem;
+//   display: flex;
+//   flex-direction: column;
+//   align-items: center;
+//   gap: 6px;
+// }
 
 .cover-placeholder-icon {
   font-size: 2.5rem;

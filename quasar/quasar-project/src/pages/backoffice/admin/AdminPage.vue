@@ -14,6 +14,16 @@
           <p class="hero-sub">ข้อมูลและสิทธิ์การเข้าถึงของ Admin ทั้งหมด</p>
         </div>
         <q-space />
+        <!-- ใน .top-bar ต่อจาก stats-row -->
+        <q-btn
+          unelevated
+          rounded
+          color="indigo-6"
+          icon="person_add"
+          label="สร้าง Admin"
+          class="create-btn"
+          @click="openCreateDialog"
+        />
       </div>
     </div>
 
@@ -150,7 +160,126 @@
         </q-table>
       </div>
     </div>
+    <!-- ===== CREATE DIALOG ===== -->
+    <q-dialog v-model="createDialog" :maximized="$q.screen.xs">
+      <div class="custom-dialog" :class="{ 'custom-dialog--mobile': $q.screen.xs }">
+        <div v-if="$q.screen.xs" class="dialog-drag-handle" />
+        <div class="dialog-header dialog-header--indigo">
+          <div class="dialog-header-icon dialog-header-icon--indigo">
+            <q-icon name="person_add" color="white" size="18px" />
+          </div>
+          <span>สร้าง Admin ใหม่</span>
+          <q-space />
+          <button class="dialog-close-btn" type="button" @click="createDialog = false">
+            <q-icon name="close" size="18px" />
+          </button>
+        </div>
 
+        <div class="dialog-body">
+          <div class="create-grid">
+            <!-- firstName -->
+            <div class="form-field form-field--full">
+              <label class="form-label">ชื่อ <span class="form-required">*</span></label>
+              <q-input
+                v-model="createForm.firstName"
+                outlined
+                dense
+                placeholder="กรอกชื่อ"
+                :error="!!createErrors.firstName"
+                :error-message="createErrors.firstName"
+                bg-color="white"
+                class="form-input"
+              />
+            </div>
+
+            <!-- email -->
+            <div class="form-field form-field--full">
+              <label class="form-label">อีเมล <span class="form-required">*</span></label>
+              <q-input
+                v-model="createForm.email"
+                outlined
+                dense
+                type="email"
+                placeholder="example@email.com"
+                :error="!!createErrors.email"
+                :error-message="createErrors.email"
+                bg-color="white"
+                class="form-input"
+              >
+                <template v-slot:prepend>
+                  <q-icon name="email" color="indigo-4" size="18px" />
+                </template>
+              </q-input>
+            </div>
+
+            <!-- phoneNumber -->
+            <div class="form-field">
+              <label class="form-label">เบอร์โทร</label>
+              <q-input
+                v-model="createForm.phoneNumber"
+                outlined
+                dense
+                placeholder="0XX-XXX-XXXX"
+                :error="!!createErrors.phoneNumber"
+                :error-message="createErrors.phoneNumber"
+                bg-color="white"
+                class="form-input"
+              >
+                <template v-slot:prepend>
+                  <q-icon name="phone" color="indigo-4" size="18px" />
+                </template>
+              </q-input>
+            </div>
+
+            <!-- dateOfBirth -->
+            <div class="form-field">
+              <label class="form-label">วันเกิด</label>
+              <q-input
+                v-model="createForm.dateOfBirth"
+                outlined
+                dense
+                placeholder="YYYY-MM-DD"
+                :error="!!createErrors.dateOfBirth"
+                :error-message="createErrors.dateOfBirth"
+                bg-color="white"
+                class="form-input"
+              >
+                <template v-slot:prepend>
+                  <q-icon name="cake" color="indigo-4" size="18px" />
+                </template>
+                <template v-slot:append>
+                  <q-icon name="event" color="indigo-4" size="18px" class="cursor-pointer">
+                    <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+                      <q-date v-model="createForm.dateOfBirth" mask="YYYY-MM-DD">
+                        <div class="row items-center justify-end">
+                          <q-btn v-close-popup label="ตกลง" color="indigo-6" flat />
+                        </div>
+                      </q-date>
+                    </q-popup-proxy>
+                  </q-icon>
+                </template>
+              </q-input>
+            </div>
+          </div>
+        </div>
+
+        <div class="dialog-footer" :class="{ 'dialog-footer--mobile': $q.screen.xs }">
+          <button type="button" class="dlg-btn dlg-btn--cancel" @click="createDialog = false">
+            ยกเลิก
+          </button>
+          <button
+            type="button"
+            class="dlg-btn dlg-btn--submit"
+            :disabled="createLoading"
+            @click="submitCreate"
+          >
+            <q-spinner v-if="createLoading" size="14px" color="white" class="q-mr-xs" />
+            <q-icon v-else name="check" size="16px" class="q-mr-xs" />
+            บันทึก
+          </button>
+        </div>
+      </div>
+    </q-dialog>
     <!-- ===== VIEW DIALOG ===== -->
     <q-dialog v-model="viewDialog" :maximized="$q.screen.xs">
       <div class="custom-dialog" :class="{ 'custom-dialog--mobile': $q.screen.xs }">
@@ -359,6 +488,20 @@ const columns: QTableColumn[] = [
   { name: 'actions', label: 'จัดการ', field: 'uId', align: 'center', style: 'width: 80px' },
 ];
 
+// ─── Create Dialog State ──────────────────────────────────────────────────────
+const createDialog = ref(false);
+const createLoading = ref(false);
+
+const defaultCreateForm = () => ({
+  firstName: '',
+  email: '',
+  phoneNumber: '',
+  dateOfBirth: '',
+});
+
+const createForm = ref(defaultCreateForm());
+const createErrors = ref<Record<string, string>>({});
+
 // ─── Dialog State ─────────────────────────────────────────────────────────────
 const viewDialog = ref(false);
 const viewForm = ref<TableRow | null>(null);
@@ -420,6 +563,56 @@ const formatDate = (date: Date | string | null): string => {
 const clearSearch = () => {
   search.value = '';
   onSearch();
+};
+
+// const createForm = ref(defaultCreateForm());
+// const createErrors = ref<Record<string, string>>({});
+
+// ─── Validate ─────────────────────────────────────────────────────────────────
+const validateCreate = (): boolean => {
+  const errs: Record<string, string> = {};
+  if (!createForm.value.firstName.trim()) errs.firstName = 'กรุณากรอกชื่อ';
+  if (!createForm.value.email.trim()) {
+    errs.email = 'กรุณากรอกอีเมล';
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(createForm.value.email)) {
+    errs.email = 'รูปแบบอีเมลไม่ถูกต้อง';
+  }
+  if (createForm.value.phoneNumber && !/^[0-9\-+\s()]{8,15}$/.test(createForm.value.phoneNumber)) {
+    errs.phoneNumber = 'รูปแบบเบอร์โทรไม่ถูกต้อง';
+  }
+  createErrors.value = errs;
+  return Object.keys(errs).length === 0;
+};
+
+// ─── Open / Submit ─────────────────────────────────────────────────────────────
+const openCreateDialog = () => {
+  createForm.value = defaultCreateForm();
+  createErrors.value = {};
+  createDialog.value = true;
+};
+
+const submitCreate = async () => {
+  if (!validateCreate()) return;
+  createLoading.value = true;
+  try {
+    const payload: Record<string, string> = {
+      firstName: createForm.value.firstName.trim(),
+      email: createForm.value.email.trim(),
+    };
+    if (createForm.value.phoneNumber) payload.phoneNumber = createForm.value.phoneNumber.trim();
+    if (createForm.value.dateOfBirth) payload.dateOfBirth = createForm.value.dateOfBirth;
+
+    await api.post('/backoffice/admin', payload);
+    createDialog.value = false;
+    openNotify(true, `สร้าง Admin "${createForm.value.firstName}" สำเร็จ!`);
+    pagination.value.page = 1;
+    void fetchAdmins();
+  } catch (err: unknown) {
+    const error = err as AxiosError<{ message: string }>;
+    openNotify(false, error.response?.data?.message ?? 'สร้าง Admin ไม่สำเร็จ กรุณาลองใหม่');
+  } finally {
+    createLoading.value = false;
+  }
 };
 
 // ─── Data Fetching ────────────────────────────────────────────────────────────
@@ -685,6 +878,69 @@ $radius: 16px;
   margin: 0;
 }
 
+// ─── Create Button ────────────────────────────────────────────────────────────
+.create-btn {
+  font-family: 'Noto Sans Thai', sans-serif;
+  font-weight: 600;
+  font-size: 0.88rem;
+  padding: 8px 20px;
+  box-shadow: 0 4px 16px rgba(79, 70, 229, 0.3);
+  transition:
+    transform 0.15s,
+    box-shadow 0.15s;
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
+  }
+}
+
+// ─── Create Form ──────────────────────────────────────────────────────────────
+.create-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 16px;
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  &--full {
+    grid-column: 1 / -1;
+  }
+}
+
+.form-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: $text-muted;
+  margin-bottom: 4px;
+}
+
+.form-required {
+  color: $red;
+}
+
+.form-input {
+  :deep(.q-field__control) {
+    border-radius: 10px !important;
+  }
+}
+
+// ─── Submit Button ────────────────────────────────────────────────────────────
+.dlg-btn--submit {
+  background: linear-gradient(135deg, $indigo-mid, $indigo);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(55, 48, 163, 0.3);
+  &:hover:not(:disabled) {
+    box-shadow: 0 6px 18px rgba(55, 48, 163, 0.4);
+    transform: translateY(-1px);
+  }
+}
 // ─── Content ──────────────────────────────────────────────────────────────────
 .content-wrap {
   max-width: 960px;

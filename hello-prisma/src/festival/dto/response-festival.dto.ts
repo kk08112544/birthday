@@ -8,6 +8,9 @@ export class ResponseFestivalDto {
   isEdit?: boolean;
   isDelete?: boolean;
   isEditEndDate?: boolean;
+  createdAt?:Date;
+  updatedAt?:Date;
+  deletedAt?:Date | null;
   // ใน Schema คือ Wisher[] ดังนั้นต้องเป็น Array ของ Object
   wisher!: {
     wId: number;

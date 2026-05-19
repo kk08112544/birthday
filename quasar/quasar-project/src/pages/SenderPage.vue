@@ -8,7 +8,7 @@
       <div class="hero-content">
         <div class="hero-emoji">🎴</div>
         <h1 class="hero-title">ส่งคำอวยพร</h1>
-        <p class="hero-sub">เลือกการ์ด เขียนชื่อ และส่งความสุขให้กัน</p>
+        <p class="hero-sub">เลือกบัตรอวยพร เขียนชื่อ และส่งความสุขให้กัน</p>
       </div>
     </div>
 
@@ -343,12 +343,19 @@
           <div class="success-title">อวยพรสำเร็จแล้ว! 🎉</div>
           <div class="success-msg">ขอให้ท่านประสบความสำเร็จ<br />ในหน้าที่การทำงาน</div>
 
-          <div v-if="successImage" class="success-card-preview">
+          <!-- <div v-if="successImage" class="success-card-preview">
             <q-img :src="successImage" :ratio="4 / 3" fit="contain" class="success-preview-img" />
             <div class="success-wish-chip" v-if="successWishText">
               <q-icon name="format_quote" size="13px" class="q-mr-xs" />
               {{ successWishText }}
             </div>
+          </div> -->
+          <div v-if="successImage" class="success-card-preview">
+            <q-img :src="successImage" :ratio="4 / 3" fit="contain" class="success-preview-img" />
+          </div>
+          <div class="success-wish-chip" v-if="successWishText">
+            <q-icon name="format_quote" size="13px" class="q-mr-xs" />
+            {{ successWishText }}
           </div>
 
           <div class="success-sender-info" v-if="successName">
@@ -1959,26 +1966,66 @@ $muted: #8b87b0;
   display: block;
 }
 
+// .success-wish-chip {
+//   position: absolute;
+//   bottom: 8px;
+//   left: 50%;
+//   transform: translateX(-50%);
+//   background: rgba(26, 20, 96, 0.75);
+//   backdrop-filter: blur(4px);
+//   color: white;
+//   font-size: 0.72rem;
+//   font-style: italic;
+//   font-weight: 500;
+//   padding: 4px 12px;
+//   border-radius: 20px;
+//   display: flex;
+//   align-items: center;
+//   white-space: nowrap;
+//   max-width: 90%;
+//   overflow: hidden;
+//   text-overflow: ellipsis;
+// }
 .success-wish-chip {
-  position: absolute;
-  bottom: 8px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(26, 20, 96, 0.75);
-  backdrop-filter: blur(4px);
-  color: white;
-  font-size: 0.72rem;
+  // ลบ position: absolute, bottom, left, transform ออกทั้งหมด
+  background: rgba(26, 20, 96, 0.08);
+  color: #3730a3;
+  font-size: 0.82rem;
   font-style: italic;
   font-weight: 500;
-  padding: 4px 12px;
-  border-radius: 20px;
+  padding: 8px 14px;
+  border-radius: 12px;
   display: flex;
-  align-items: center;
-  white-space: nowrap;
-  max-width: 90%;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  align-items: flex-start;
+  gap: 4px;
+  white-space: normal;
+  text-align: left;
+  line-height: 1.6;
+  margin-bottom: 1rem;
+  border: 1px solid rgba(26, 20, 96, 0.1);
 }
+// .success-wish-chip {
+//   position: absolute;
+//   bottom: 8px;
+//   left: 50%;
+//   transform: translateX(-50%);
+//   background: rgba(26, 20, 96, 0.75);
+//   backdrop-filter: blur(4px);
+//   color: white;
+//   font-size: 0.72rem;
+//   font-style: italic;
+//   font-weight: 500;
+//   padding: 4px 12px;
+//   border-radius: 20px;
+//   display: flex;
+//   align-items: center;
+//   white-space: normal;        // ← เปลี่ยนจาก nowrap
+//   max-width: 90%;
+//   overflow: visible;          // ← เปลี่ยนจาก hidden
+//   text-overflow: unset;       // ← ลบ ellipsis
+//   text-align: center;         // ← จัดกึ่งกลาง
+//   line-height: 1.5;           // ← ให้อ่านง่ายเวลาขึ้นหลายบรรทัด
+// }
 
 .success-sender-info {
   display: flex;

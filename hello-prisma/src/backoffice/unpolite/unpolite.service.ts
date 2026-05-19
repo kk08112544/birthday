@@ -17,7 +17,7 @@ export class AdminUnpoliteService {
     const check = await this.adminunpoliteRepositories.exits(
       createUnpoliteDto.word,
     );
-    if (!check) {
+    if (check) {
       this.exceptionsService.throwBadWordAlreadyExits();
     }
     const data = await this.adminunpoliteRepositories.create(createUnpoliteDto);
@@ -74,8 +74,11 @@ export class AdminUnpoliteService {
     if (!check) {
       this.exceptionsService.throwBadWordNotFound();
     }
-    if (!exits) {
-      this.exceptionsService.throwBadWordAlreadyExits();
+    if (exits) {
+      // this.exceptionsService.throwBadWordAlreadyExits();
+      if(Number(exits.upId) !== Number(id)){
+ this.exceptionsService.throwBadWordAlreadyExits();
+      }
     }
     const data = await this.adminunpoliteRepositories.update(
       id,

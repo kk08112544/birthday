@@ -87,15 +87,30 @@
         <div v-for="row in rows" :key="row.fId" class="festival-card">
           <!-- Cover image -->
           <div class="card-cover">
-            <q-img
+            <!-- <q-img
               v-if="row.image"
               :src="row.image"
               :ratio="16 / 9"
               fit="contain"
               class="card-cover-img"
+            > -->
+            <!-- <q-img
+  v-if="row.image"
+  :src="row.image"
+  :ratio="2188 / 417"
+  fit="cover"
+  class="card-cover-img"
+>
+              <div class="card-cover-overlay" />
+            </q-img> -->
+            <!-- แทนที่ q-img เดิม -->
+            <div
+              v-if="row.image"
+              class="card-cover-img"
+              :style="{ backgroundImage: `url(${row.image})` }"
             >
               <div class="card-cover-overlay" />
-            </q-img>
+            </div>
             <div v-else class="card-cover-placeholder">
               <q-icon name="celebration" size="2.5rem" color="deep-orange-3" />
             </div>
@@ -866,13 +881,53 @@ $radius: 18px;
 }
 
 // ─── Card Cover ───────────────────────────────────────────────────────────────
+// .card-cover {
+//   position: relative;
+//   background: linear-gradient(135deg, #fff7ed, #fef3c7);
+// }
+
+// .card-cover-img {
+//   display: block;
+// }
+
 .card-cover {
   position: relative;
   background: linear-gradient(135deg, #fff7ed, #fef3c7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
 }
 
+// .card-cover-img {
+//   display: block;
+//   width: 100%;
+// }
+
+// .card-cover-img {
+//   display: block;
+//   width: 100%;
+//   height: 120px;
+
+//   :deep(.q-img__image) {
+//     object-fit: contain;
+//     object-position: center 60%; // ← เลื่อนลงจากกึ่งกลาง
+//     background: linear-gradient(135deg, #fff7ed, #fef3c7);
+//   }
+
+//   :deep(.q-img__container) {
+//     height: 120px;
+//   }
+// }
+
 .card-cover-img {
-  display: block;
+  width: 100%;
+  height: 120px;
+  background-size: contain; // ← เห็นภาพเต็ม ไม่ตัด
+  background-position: center center; // ← กึ่งกลางทั้งแนวตั้งและแนวนอน
+  background-repeat: no-repeat;
+  background-color: #fff7ed; // ← พื้นหลังส่วนว่าง
+  position: relative;
 }
 
 .card-cover-overlay {
@@ -882,15 +937,29 @@ $radius: 18px;
   pointer-events: none;
 }
 
+// .card-cover-placeholder {
+//   height: 140px;
+//   display: flex;
+//   align-items: center;
+//   justify-content: center;
+//   background: linear-gradient(135deg, #fff7ed, #fef3c7);
+
+//   @media (max-width: 480px) {
+//     height: 110px;
+//   }
+// }
 .card-cover-placeholder {
-  height: 140px;
+  // เปลี่ยนจาก height: 140px เป็น aspect-ratio
+  aspect-ratio: 2188 / 417;
+  height: auto;
   display: flex;
   align-items: center;
   justify-content: center;
   background: linear-gradient(135deg, #fff7ed, #fef3c7);
 
   @media (max-width: 480px) {
-    height: 110px;
+    aspect-ratio: 2188 / 417;
+    height: auto;
   }
 }
 

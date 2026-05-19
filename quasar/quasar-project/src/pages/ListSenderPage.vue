@@ -249,6 +249,25 @@
           :style="{ animationDelay: `${Math.min(idx, 11) * 0.04}s` }"
           @click="openDetail(row.sId)"
         >
+          <!-- <div v-if="row.wishWord" class="card-wish-badge">
+              <q-icon name="format_quote" size="11px" />
+              {{ row.wishWord.slice(0, 20) }}{{ row.wishWord.length > 20 ? '…' : '' }}
+            </div> -->
+          <!-- <div class="card-img-wrap">
+            <q-img v-if="row.url" :src="row.url" :ratio="1" class="card-img" fit="cover">
+              <div class="card-img-overlay" />
+            </q-img>
+            <div v-else class="card-img-placeholder">
+              <div class="card-avatar-fallback">
+                <q-icon name="person" size="2.2rem" color="indigo-2" />
+              </div>
+            </div>
+           
+            <div v-if="row.wishWord" class="card-wish-badge">
+  <q-icon name="format_quote" size="11px" class="card-wish-quote-icon" />
+  {{ row.wishWord }}
+</div>
+          </div> -->
           <div class="card-img-wrap">
             <q-img v-if="row.url" :src="row.url" :ratio="1" class="card-img" fit="cover">
               <div class="card-img-overlay" />
@@ -258,11 +277,9 @@
                 <q-icon name="person" size="2.2rem" color="indigo-2" />
               </div>
             </div>
-            <div v-if="row.wishWord" class="card-wish-badge">
-              <q-icon name="format_quote" size="11px" />
-              {{ row.wishWord.slice(0, 20) }}{{ row.wishWord.length > 20 ? '…' : '' }}
-            </div>
+            <!-- ลบ card-wish-badge ออกจากตรงนี้ -->
           </div>
+
           <div class="card-body">
             <div class="card-name">{{ row.fullname }}</div>
             <div class="card-position">{{ row.position }}</div>
@@ -270,7 +287,20 @@
               <q-icon name="domain" size="11px" />
               {{ row.department }}
             </div>
+            <!-- ย้ายมาไว้ที่นี่ -->
+            <div v-if="row.wishWord" class="card-wish-text">
+              <q-icon name="format_quote" size="11px" class="q-mr-xs" />
+              {{ row.wishWord }}
+            </div>
           </div>
+          <!-- <div class="card-body">
+            <div class="card-name">{{ row.fullname }}</div>
+            <div class="card-position">{{ row.position }}</div>
+            <div class="card-dept">
+              <q-icon name="domain" size="11px" />
+              {{ row.department }}
+            </div>
+          </div> -->
           <div class="card-cta">
             <q-icon name="visibility" size="13px" />
             ดูคำอวยพร
@@ -459,6 +489,16 @@ interface TableRow {
   wishWord: string;
 }
 
+interface FestivalPeriod {
+  startDate: string;
+  endDate: string;
+}
+
+interface SelectOption<T> {
+  label: string;
+  value: T;
+}
+
 interface Particle {
   id: number;
   style: Record<string, string>;
@@ -466,9 +506,87 @@ interface Particle {
 
 type ShapeType = 'circle' | 'square' | 'star' | 'emoji';
 
+// ─── Constants ────────────────────────────────────────────────────────────────
+const THAI_MONTHS = [
+  'มกราคม',
+  'กุมภาพันธ์',
+  'มีนาคม',
+  'เมษายน',
+  'พฤษภาคม',
+  'มิถุนายน',
+  'กรกฎาคม',
+  'สิงหาคม',
+  'กันยายน',
+  'ตุลาคม',
+  'พฤศจิกายน',
+  'ธันวาคม',
+] as const;
+
 // ─── Props ────────────────────────────────────────────────────────────────────
 const props = defineProps<{ id: string }>();
 const $q = useQuasar();
+
+// ─── Festival Period State ─────────────────────────────────────────────────────
+const festivalPeriod = ref<FestivalPeriod | null>(null);
+
+// ─── Computed: month & year options จาก festival period ───────────────────────
+/**
+ * สร้าง list เดือนที่ไม่ซ้ำกัน iterate จาก startDate → endDate ทีละเดือน
+ * รองรับ period ที่ข้ามปี เช่น ธ.ค. 2568 → ม.ค. 2569
+ */
+const monthOptions = computed((): SelectOption<number>[] => {
+  if (!festivalPeriod.value) return [];
+
+  const start = new Date(festivalPeriod.value.startDate);
+  const end = new Date(festivalPeriod.value.endDate);
+
+  // normalize to first day of month เพื่อ compare ได้ถูกต้อง
+  const cursor = new Date(start.getFullYear(), start.getMonth(), 1);
+  const endMonth = new Date(end.getFullYear(), end.getMonth(), 1);
+
+  const seen = new Set<number>();
+  const options: SelectOption<number>[] = [];
+
+  while (cursor <= endMonth) {
+    const month = cursor.getMonth() + 1; // 1-12
+    if (!seen.has(month)) {
+      seen.add(month);
+      options.push({ label: THAI_MONTHS[month - 1]!, value: month });
+    }
+    cursor.setMonth(cursor.getMonth() + 1);
+  }
+
+  return options;
+});
+
+/**
+ * สร้าง list ปี ค.ศ. จาก startYear → endYear
+ * แสดงเป็น พ.ศ. ใน label (+543)
+ */
+const yearOptions = computed((): SelectOption<number>[] => {
+  if (!festivalPeriod.value) return [];
+
+  const startYear = new Date(festivalPeriod.value.startDate).getFullYear();
+  const endYear = new Date(festivalPeriod.value.endDate).getFullYear();
+
+  const options: SelectOption<number>[] = [];
+  for (let y = startYear; y <= endYear; y++) {
+    options.push({ label: `${y + 543}`, value: y });
+  }
+  return options;
+});
+
+// filterYearOptions — ref สำหรับ use-input filtering ของ q-select
+const filterYearOptions = ref<SelectOption<number>[]>([]);
+
+// sync กับ yearOptions computed เมื่อ festivalPeriod โหลดสำเร็จ
+watch(
+  yearOptions,
+  (val) => {
+    filterYearOptions.value = val;
+  },
+  { immediate: true },
+);
 
 // ─── Filter State ─────────────────────────────────────────────────────────────
 const selectedMonth = ref<number | null>(null);
@@ -476,42 +594,6 @@ const selectedYear = ref<number | null>(null);
 const fullname = ref<string>('');
 const position = ref<string>('');
 const department = ref<string>('');
-
-const monthOptions = [
-  { label: 'มกราคม', value: 1 },
-  { label: 'กุมภาพันธ์', value: 2 },
-  { label: 'มีนาคม', value: 3 },
-  { label: 'เมษายน', value: 4 },
-  { label: 'พฤษภาคม', value: 5 },
-  { label: 'มิถุนายน', value: 6 },
-  { label: 'กรกฎาคม', value: 7 },
-  { label: 'สิงหาคม', value: 8 },
-  { label: 'กันยายน', value: 9 },
-  { label: 'ตุลาคม', value: 10 },
-  { label: 'พฤศจิกายน', value: 11 },
-  { label: 'ธันวาคม', value: 12 },
-] as const;
-
-const yearOptions = ref<{ label: string; value: number }[]>([]);
-const filterYearOptions = ref<{ label: string; value: number }[]>([]);
-
-const generateThaiYearOptions = () => {
-  const currentYear = new Date().getFullYear();
-  const options = [];
-  for (let y = currentYear; y >= 2016; y--) {
-    options.push({ label: `${y + 543}`, value: y });
-  }
-  yearOptions.value = options;
-  filterYearOptions.value = options;
-};
-
-const filterYearFn = (val: string, update: (fn: () => void) => void) => {
-  update(() => {
-    filterYearOptions.value = val
-      ? yearOptions.value.filter((v) => v.label.includes(val))
-      : yearOptions.value;
-  });
-};
 
 const hasActiveFilter = computed(
   () =>
@@ -533,7 +615,15 @@ const activeFilterCount = computed(
     ].filter((v) => !!v && (typeof v !== 'string' || v.trim().length > 0)).length,
 );
 
-const clearFilter = () => {
+const filterYearFn = (val: string, update: (fn: () => void) => void): void => {
+  update(() => {
+    filterYearOptions.value = val.trim()
+      ? yearOptions.value.filter((opt) => opt.label.includes(val.trim()))
+      : yearOptions.value;
+  });
+};
+
+const clearFilter = (): void => {
   selectedMonth.value = null;
   selectedYear.value = null;
   fullname.value = '';
@@ -558,60 +648,22 @@ const loadingPercent = ref(0);
 const loadingSteps = [
   { label: 'โหลดข้อมูลผู้ส่งอวยพร', pct: 80 },
   { label: 'แสดงรายการผู้ส่งอวยพร', pct: 100 },
-];
+] as const;
 
 let pctTimer: ReturnType<typeof setInterval> | null = null;
 
-// Blob URL tracking for cleanup
+// ─── Blob URL tracking for cleanup ────────────────────────────────────────────
 const blobUrls: string[] = [];
 
-// Abort controller for cancelling in-flight requests
+// ─── Abort controller for cancelling in-flight requests ───────────────────────
 let fetchAbortController: AbortController | null = null;
 
 // ─── Particles ────────────────────────────────────────────────────────────────
 const activeParticles = ref<Particle[]>([]);
 let particleId = 0;
 
-const PARTICLE_COLORS = [
-  '#e11d48',
-  '#fbbf24',
-  '#6366f1',
-  '#22c55e',
-  '#fb7185',
-  '#f59e0b',
-  '#a78bfa',
-  '#34d399',
-  '#f472b6',
-  '#38bdf8',
-  '#4ade80',
-  '#facc15',
-];
-
-const PARTICLE_EMOJIS = [
-  '🎉',
-  '✨',
-  '🎊',
-  '⭐',
-  '💫',
-  '🌟',
-  '🎈',
-  '🌸',
-  '🌺',
-  '🌼',
-  '🎀',
-  '💥',
-  '🎆',
-  '🎇',
-  '🦋',
-  '🍀',
-  '❄️',
-  '🎵',
-  '💎',
-  '🏵️',
-];
-
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-const animatePct = (target: number) => {
+const animatePct = (target: number): void => {
   if (pctTimer) clearInterval(pctTimer);
   const start = loadingPercent.value;
   const t0 = Date.now();
@@ -625,14 +677,14 @@ const animatePct = (target: number) => {
   }, 16);
 };
 
-const startLoading = () => {
+const startLoading = (): void => {
   showLoading.value = true;
   loadingStep.value = 0;
   loadingPercent.value = 0;
   animatePct(5);
 };
 
-const stopLoading = () => {
+const stopLoading = (): void => {
   loadingStep.value = loadingSteps.length;
   animatePct(100);
   setTimeout(() => {
@@ -653,7 +705,18 @@ const getImageUrl = async (path: string): Promise<string> => {
 };
 
 // ─── Data Fetching ────────────────────────────────────────────────────────────
-const fetchSender = async (id: string) => {
+/** โหลด startDate / endDate เพื่อสร้าง month & year options */
+const fetchFestivalPeriod = async (id: string): Promise<void> => {
+  try {
+    const res = await api.get<{ festival: FestivalPeriod }>(`/festival/${Number(id)}`);
+    const { startDate, endDate } = res.data.festival;
+    festivalPeriod.value = { startDate, endDate };
+  } catch (err) {
+    console.error('fetchFestivalPeriod error:', err);
+  }
+};
+
+const fetchSender = async (id: string): Promise<void> => {
   // Cancel any pending request before starting a new one
   fetchAbortController?.abort();
   fetchAbortController = new AbortController();
@@ -663,7 +726,7 @@ const fetchSender = async (id: string) => {
 
   try {
     loadingStep.value = 0;
-    animatePct(loadingSteps[0]?.pct ?? 80);
+    animatePct(loadingSteps[0].pct);
 
     const res = await api.get(`/sender/paginate/${Number(id)}`, {
       signal: fetchAbortController.signal,
@@ -682,7 +745,7 @@ const fetchSender = async (id: string) => {
     pagination.value.rowsNumber = res.data.sender?.total ?? 0;
 
     loadingStep.value = 1;
-    animatePct(loadingSteps[1]?.pct ?? 100);
+    animatePct(loadingSteps[1].pct);
 
     rows.value = await Promise.all(
       list.map(
@@ -707,7 +770,7 @@ const fetchSender = async (id: string) => {
   }
 };
 
-const openDetail = async (id: number | string) => {
+const openDetail = async (id: number | string): Promise<void> => {
   try {
     const res = await api.get(`/sender/${id}`);
     const data = res.data.sender;
@@ -726,22 +789,61 @@ const openDetail = async (id: number | string) => {
 };
 
 // ─── Pagination Events ────────────────────────────────────────────────────────
-const onSearch = () => {
+const onSearch = (): void => {
   pagination.value.page = 1;
   void fetchSender(props.id);
 };
 
-const onPageChange = () => {
+const onPageChange = (): void => {
   void fetchSender(props.id);
 };
 
-const onRppChange = () => {
+const onRppChange = (): void => {
   pagination.value.page = 1;
   void fetchSender(props.id);
 };
 
 // ─── Click Particles ──────────────────────────────────────────────────────────
-const spawnParticles = (x: number, y: number) => {
+
+const PARTICLE_COLORS: readonly string[] = [
+  '#e11d48',
+  '#fbbf24',
+  '#6366f1',
+  '#22c55e',
+  '#fb7185',
+  '#f59e0b',
+  '#a78bfa',
+  '#34d399',
+  '#f472b6',
+  '#38bdf8',
+  '#4ade80',
+  '#facc15',
+];
+
+const PARTICLE_EMOJIS: readonly string[] = [
+  '🎉',
+  '✨',
+  '🎊',
+  '⭐',
+  '💫',
+  '🌟',
+  '🎈',
+  '🌸',
+  '🌺',
+  '🌼',
+  '🎀',
+  '💥',
+  '🎆',
+  '🎇',
+  '🦋',
+  '🍀',
+  '❄️',
+  '🎵',
+  '💎',
+  '🏵️',
+];
+
+const spawnParticles = (x: number, y: number): void => {
   const count = 12 + Math.floor(Math.random() * 6);
 
   for (let i = 0; i < count; i++) {
@@ -781,13 +883,13 @@ const spawnParticles = (x: number, y: number) => {
   }
 };
 
-const handleGlobalClick = (e: MouseEvent) => {
+const handleGlobalClick = (e: MouseEvent): void => {
   spawnParticles(e.clientX, e.clientY);
 };
 
 // ─── Lifecycle ────────────────────────────────────────────────────────────────
 onMounted(() => {
-  generateThaiYearOptions();
+  void fetchFestivalPeriod(props.id); // โหลด period ก่อน แล้ว computed options จะ reactive เอง
   void fetchSender(props.id);
   document.addEventListener('click', handleGlobalClick);
 });
@@ -796,7 +898,6 @@ onUnmounted(() => {
   document.removeEventListener('click', handleGlobalClick);
   if (pctTimer) clearInterval(pctTimer);
   fetchAbortController?.abort();
-  // Revoke all blob URLs to prevent memory leaks
   blobUrls.forEach((url) => URL.revokeObjectURL(url));
 });
 
@@ -804,6 +905,7 @@ watch(
   () => props.id,
   (newId, oldId) => {
     if (newId && newId !== oldId) {
+      void fetchFestivalPeriod(newId);
       pagination.value.page = 1;
       void fetchSender(newId);
     }
@@ -836,7 +938,7 @@ $r-card: 16px;
   position: relative;
 }
 
-// ─── BG Decoration ───────────────────────────────────────────────────────────
+// ─── BG Decoration ────────────────────────────────────────────────────────────
 .bg-deco {
   position: fixed;
   inset: 0;
@@ -1065,7 +1167,6 @@ $r-card: 16px;
       box-shadow 0.2s,
       border-color 0.2s !important;
   }
-
   :deep(.q-field__control:hover) {
     box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12) !important;
   }
@@ -1153,7 +1254,6 @@ $r-card: 16px;
   font-weight: 700 !important;
   color: $text-main !important;
 }
-
 .year-option-caption {
   font-size: 0.72rem !important;
   color: #9ca3af !important;
@@ -1217,11 +1317,9 @@ $r-card: 16px;
     background: rgba(255, 255, 255, 0.2);
     transform: translateY(-1px);
   }
-
   &:active:not(:disabled) {
     transform: translateY(0);
   }
-
   &:disabled {
     opacity: 0.45;
     cursor: not-allowed;
@@ -1284,7 +1382,6 @@ $r-card: 16px;
     box-shadow:
       0 8px 32px rgba(0, 0, 0, 0.22),
       0 4px 12px rgba(0, 0, 0, 0.12);
-
     &::before {
       opacity: 1;
     }
@@ -1293,7 +1390,6 @@ $r-card: 16px;
   &:active:not(.btn-search--loading) {
     transform: translateY(-1px);
   }
-
   &.btn-search--loading,
   &:disabled {
     opacity: 0.75;
@@ -1341,25 +1437,21 @@ $r-card: 16px;
   align-items: baseline;
   gap: 6px;
 }
-
 .result-num {
   font-family: 'Prompt', sans-serif;
   font-size: 1.4rem;
   font-weight: 800;
   color: $indigo;
 }
-
 .result-unit {
   font-size: 0.82rem;
   color: $text-muted;
 }
-
 .result-filter-note {
   font-size: 0.78rem;
   color: $teal;
   font-weight: 600;
 }
-
 .result-page-info {
   font-size: 0.78rem;
   color: $text-muted;
@@ -1406,12 +1498,10 @@ $r-card: 16px;
   &:hover {
     transform: translateY(-6px) scale(1.01);
     box-shadow: 0 14px 40px rgba(67, 56, 202, 0.16);
-
     .card-cta {
       opacity: 1;
       transform: translateY(0);
     }
-
     .card-img-overlay {
       opacity: 1;
     }
@@ -1433,11 +1523,15 @@ $r-card: 16px;
   }
 }
 
+// .card-img-wrap { position: relative; background: $indigo-soft; }
 .card-img-wrap {
   position: relative;
   background: $indigo-soft;
+  // เพิ่ม
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
 }
-
 .card-img {
   display: block;
 }
@@ -1472,20 +1566,58 @@ $r-card: 16px;
   justify-content: center;
 }
 
-.card-wish-badge {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: linear-gradient(to top, rgba(49, 46, 129, 0.82), transparent);
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 0.67rem;
-  font-style: italic;
-  padding: 18px 10px 7px;
+// .card-wish-badge {
+//   position: absolute;
+//   bottom: 0; left: 0; right: 0;
+//   background: linear-gradient(to top, rgba(49,46,129,0.82), transparent);
+//   color: rgba(255, 255, 255, 0.9);
+//   font-size: 0.67rem;
+//   font-style: italic;
+//   padding: 18px 10px 7px;
+//   display: flex;
+//   align-items: flex-end;
+//   gap: 3px;
+//   line-height: 1.4;
+// }
+
+// .card-wish-badge {
+//   position: absolute;
+//   bottom: 0;
+//   left: 0;
+//   right: 0;
+//   background: linear-gradient(to top, rgba(49, 46, 129, 0.92), rgba(49, 46, 129, 0.6) 60%, transparent);
+//   color: rgba(255, 255, 255, 0.95);
+//   font-size: 0.67rem;
+//   font-style: italic;
+//   padding: 28px 10px 8px;   // ← เพิ่ม padding-top ให้ gradient fade สวย
+//   display: flex;
+//   align-items: flex-start;  // ← เปลี่ยนจาก flex-end
+//   gap: 4px;
+//   line-height: 1.5;
+//   white-space: normal;      // ← อนุญาตให้ขึ้นบรรทัดใหม่
+//   word-break: break-word;   // ← ตัดคำที่ยาวเกิน
+// }
+
+// เพิ่มใหม่
+.card-wish-text {
   display: flex;
-  align-items: flex-end;
-  gap: 3px;
-  line-height: 1.4;
+  align-items: flex-start;
+  gap: 4px;
+  margin-top: 6px;
+  font-size: 0.68rem;
+  font-style: italic;
+  color: $indigo-mid;
+  line-height: 1.55;
+  word-break: break-word;
+  white-space: normal;
+  background: $indigo-soft;
+  border-radius: 8px;
+  padding: 5px 8px;
+  border-left: 2px solid $indigo-mid;
+}
+.card-wish-quote-icon {
+  flex-shrink: 0; // ← ไม่ให้ icon ย่อ
+  margin-top: 1px;
 }
 
 .card-body {
@@ -1617,7 +1749,6 @@ $r-card: 16px;
   color: $text-main;
   margin-bottom: 4px;
 }
-
 .empty-sub {
   font-size: 0.83rem;
   color: $text-muted;
@@ -1662,20 +1793,18 @@ $r-card: 16px;
   align-items: center;
   gap: 8px;
 }
+.rpp-label {
+  font-size: 0.82rem;
+  color: $text-muted;
+}
 
 .rpp-select {
   width: 70px;
-
   :deep(.q-field__control) {
     border-radius: 10px !important;
     min-height: 36px !important;
     font-size: 0.82rem;
   }
-}
-
-.rpp-label {
-  font-size: 0.82rem;
-  color: $text-muted;
 }
 
 // ─── Detail Dialog ────────────────────────────────────────────────────────────
@@ -1760,7 +1889,6 @@ $r-card: 16px;
   color: $text-main;
   margin-bottom: 3px;
 }
-
 .detail-position {
   font-size: 0.88rem;
   color: $text-muted;
@@ -1896,7 +2024,6 @@ $r-card: 16px;
     transform: rotate(360deg);
   }
 }
-
 @keyframes ldOrbPulse {
   0%,
   100% {
@@ -1914,7 +2041,6 @@ $r-card: 16px;
   color: $indigo-deep;
   margin-bottom: 0.1rem;
 }
-
 .ld-pct-row {
   display: flex;
   align-items: baseline;
@@ -1922,7 +2048,6 @@ $r-card: 16px;
   gap: 3px;
   margin-bottom: 0.2rem;
 }
-
 .ld-pct-num {
   font-family: 'Prompt', sans-serif;
   font-size: 2.8rem;
@@ -1932,13 +2057,11 @@ $r-card: 16px;
   min-width: 3ch;
   text-align: right;
 }
-
 .ld-pct-sym {
   font-size: 1.1rem;
   font-weight: 700;
   color: #6b5ce7;
 }
-
 .ld-sub {
   font-size: 0.76rem;
   color: #8b87b0;
@@ -1972,6 +2095,9 @@ $r-card: 16px;
   }
   &--active {
     background: rgba(99, 102, 241, 0.07);
+  }
+  &--pending {
+    background: transparent;
   }
 }
 

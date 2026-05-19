@@ -23,7 +23,8 @@
     <div class="banner-section">
       <div class="banner-wrap">
         <br /><br /><br />
-        <q-img :src="image" class="banner-img" fit="cover" :ratio="18 / 9">
+        <!-- :ratio="18 / 9" -->
+        <q-img :src="image" class="banner-img" fit="cover" :ratio="2188 / 417">
           <template v-slot:loading>
             <div class="banner-loading">
               <div class="banner-loading-inner">
@@ -171,7 +172,6 @@ import { useRoute } from 'vue-router';
 import { api } from 'src/boot/axios';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
-type AlertType = 'error' | 'success' | 'warning' | 'info';
 
 interface AlertConfig {
   icon: string;
@@ -193,6 +193,8 @@ interface FestivalData {
   logo?: string;
   webName?: string;
 }
+
+type AlertType = 'error' | 'success' | 'warning' | 'info';
 
 // ─── Router / Quasar ─────────────────────────────────────────────────────────
 const route = useRoute();

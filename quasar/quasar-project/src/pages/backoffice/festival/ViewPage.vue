@@ -39,12 +39,17 @@
           <!-- COVER IMAGE -->
           <div class="field-group">
             <div class="cover-view-zone">
-              <q-img
+              <!-- <q-img
                 v-if="existingImageUrl"
                 :src="existingImageUrl"
                 class="cover-img"
                 fit="contain"
                 :ratio="16 / 9"
+              /> -->
+              <div
+                v-if="existingImageUrl"
+                class="cover-img"
+                :style="{ backgroundImage: `url(${existingImageUrl})` }"
               />
               <div v-else class="cover-placeholder">
                 <div class="cover-placeholder-icon">🖼️</div>
@@ -827,8 +832,17 @@ $radius: 18px;
   background: $surface-2;
 }
 
+// .cover-img {
+//   display: block;
+// }
 .cover-img {
-  display: block;
+  width: 100%;
+  aspect-ratio: 2188 / 417; // ← สัดส่วนถูกต้อง ไม่ตายตัว
+  background-size: contain;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-color: $surface-2;
+  position: relative;
 }
 
 .cover-placeholder {
