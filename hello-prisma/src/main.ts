@@ -8,7 +8,7 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  app.setGlobalPrefix('api/v1');
+  app.setGlobalPrefix('festival-api/api/v1');
 
   app.enableCors({
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',

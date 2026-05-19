@@ -15,7 +15,6 @@
         </div>
         <q-space />
         <q-btn
-          v-if="isSuperAdmin"
           unelevated
           icon="add_circle"
           label="เพิ่มคำ"
@@ -113,7 +112,7 @@
                   <q-tooltip class="bg-indigo-8">ดูรายละเอียด</q-tooltip>
                 </q-btn>
                 <q-btn
-                  v-if="props.row.actions.update && isSuperAdmin"
+                  v-if="props.row.actions.update"
                   unelevated
                   round
                   dense
@@ -126,7 +125,7 @@
                   <q-tooltip class="bg-amber-8">แก้ไข</q-tooltip>
                 </q-btn>
                 <q-btn
-                  v-if="props.row.actions.delete && isSuperAdmin"
+                  v-if="props.row.actions.delete"
                   unelevated
                   round
                   dense
@@ -148,7 +147,6 @@
               <div class="empty-title">ไม่พบข้อมูล</div>
               <div class="empty-sub">ลองค้นหาด้วยคำอื่น หรือเพิ่มคำใหม่</div>
               <q-btn
-                v-if="isSuperAdmin"
                 unelevated
                 color="deep-purple-5"
                 icon="add"
@@ -428,9 +426,6 @@ type ShapeType = 'circle' | 'square' | 'star' | 'triangle' | 'emoji';
 const props = defineProps<{ id: string }>();
 const $q = useQuasar();
 
-// ─── Role ─────────────────────────────────────────────────────────────────────
-const isSuperAdmin = localStorage.getItem('role') === 'superAdmin';
-
 // ─── Table State ──────────────────────────────────────────────────────────────
 const rows = ref<TableRow[]>([]);
 const loading = ref(false);
@@ -516,7 +511,7 @@ const fetchUnpolite = async (): Promise<void> => {
       displayIndex: startIndex + index + 1,
       upId: item.upId,
       word: item.word || '-',
-      actions: { create: false, update: isSuperAdmin, delete: isSuperAdmin },
+      actions: { create: false, update: true, delete: true },
     }));
 
     pagination.value.rowsNumber = res.unpolite?.total ?? 0;

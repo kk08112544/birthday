@@ -1,10 +1,10 @@
 /*
  Navicat Premium Dump SQL
 
- Source Server         : Localhost
+ Source Server         : birthfestival
  Source Server Type    : SQL Server
  Source Server Version : 17001000 (17.00.1000)
- Source Host           : DESKTOP-FJDU22M\SQLEXPRESS:1433
+ Source Host           : Localhost:1433
  Source Catalog        : birthfestival
  Source Schema         : dbo
 
@@ -12,7 +12,7 @@
  Target Server Version : 17001000 (17.00.1000)
  File Encoding         : 65001
 
- Date: 01/05/2026 16:48:59
+ Date: 19/05/2026 08:59:11
 */
 
 
@@ -42,46 +42,40 @@ GO
 SET IDENTITY_INSERT [dbo].[Unpolite] ON
 GO
 
-INSERT INTO [dbo].[Unpolite] ([upId], [word], [createdAt], [updatedAt], [deletedAt]) VALUES (N'1', N'你爸爸死', N'2026-04-21 07:21:57.5970000', N'2026-04-21 07:21:57.5970000', NULL)
+INSERT INTO [dbo].[Unpolite] ([upId], [word], [createdAt], [updatedAt], [deletedAt]) VALUES (N'1', N'เย็ดแม่', N'2026-05-10 15:08:38.8810000', N'2026-05-13 00:52:34.3950000', NULL)
 GO
 
-INSERT INTO [dbo].[Unpolite] ([upId], [word], [createdAt], [updatedAt], [deletedAt]) VALUES (N'2', N'草泥马', N'2026-04-21 09:47:43.1290000', N'2026-04-24 08:51:58.0670000', N'2026-04-24 08:51:58.0520000')
+INSERT INTO [dbo].[Unpolite] ([upId], [word], [createdAt], [updatedAt], [deletedAt]) VALUES (N'2', N'เชี่ย', N'2026-05-10 15:08:45.0710000', N'2026-05-13 00:49:00.0170000', NULL)
 GO
 
-INSERT INTO [dbo].[Unpolite] ([upId], [word], [createdAt], [updatedAt], [deletedAt]) VALUES (N'3', N'操你妈', N'2026-04-21 09:47:57.2990000', N'2026-04-30 01:24:32.9090000', NULL)
+INSERT INTO [dbo].[Unpolite] ([upId], [word], [createdAt], [updatedAt], [deletedAt]) VALUES (N'3', N'操你妈', N'2026-05-10 15:08:56.5530000', N'2026-05-15 01:42:52.0380000', NULL)
 GO
 
-INSERT INTO [dbo].[Unpolite] ([upId], [word], [createdAt], [updatedAt], [deletedAt]) VALUES (N'4', N'打飞机', N'2026-04-21 09:48:44.2770000', N'2026-04-21 09:48:44.2770000', NULL)
+INSERT INTO [dbo].[Unpolite] ([upId], [word], [createdAt], [updatedAt], [deletedAt]) VALUES (N'4', N'妈逼', N'2026-05-10 15:09:06.5110000', N'2026-05-13 01:02:32.2550000', NULL)
 GO
 
-INSERT INTO [dbo].[Unpolite] ([upId], [word], [createdAt], [updatedAt], [deletedAt]) VALUES (N'5', N'Fuck U', N'2026-04-21 09:48:53.3090000', N'2026-04-21 09:48:53.3090000', NULL)
+INSERT INTO [dbo].[Unpolite] ([upId], [word], [createdAt], [updatedAt], [deletedAt]) VALUES (N'5', N'畜生', N'2026-05-10 15:09:18.5960000', N'2026-05-18 04:01:25.0940000', NULL)
 GO
 
-INSERT INTO [dbo].[Unpolite] ([upId], [word], [createdAt], [updatedAt], [deletedAt]) VALUES (N'6', N'妈逼', N'2026-04-21 09:49:02.7800000', N'2026-04-21 09:49:02.7800000', NULL)
+INSERT INTO [dbo].[Unpolite] ([upId], [word], [createdAt], [updatedAt], [deletedAt]) VALUES (N'6', N'กู', N'2026-05-10 15:09:35.3550000', N'2026-05-18 02:37:58.9100000', NULL)
 GO
 
-INSERT INTO [dbo].[Unpolite] ([upId], [word], [createdAt], [updatedAt], [deletedAt]) VALUES (N'7', N'เปรต', N'2026-04-21 09:49:19.3460000', N'2026-04-30 01:34:00.4230000', NULL)
+INSERT INTO [dbo].[Unpolite] ([upId], [word], [createdAt], [updatedAt], [deletedAt]) VALUES (N'7', N'มึง', N'2026-05-10 15:09:41.7880000', N'2026-05-18 10:30:55.6830000', N'2026-05-18 10:30:55.6640000')
 GO
 
-INSERT INTO [dbo].[Unpolite] ([upId], [word], [createdAt], [updatedAt], [deletedAt]) VALUES (N'8', N'เย็ดแม่', N'2026-04-21 09:49:25.7410000', N'2026-04-21 09:49:25.7410000', NULL)
+INSERT INTO [dbo].[Unpolite] ([upId], [word], [createdAt], [updatedAt], [deletedAt]) VALUES (N'8', N'ควย', N'2026-05-10 15:20:24.2560000', N'2026-05-15 04:49:59.0490000', NULL)
 GO
 
-INSERT INTO [dbo].[Unpolite] ([upId], [word], [createdAt], [updatedAt], [deletedAt]) VALUES (N'9', N'ควย', N'2026-04-21 09:49:33.7860000', N'2026-04-21 09:49:33.7860000', NULL)
+INSERT INTO [dbo].[Unpolite] ([upId], [word], [createdAt], [updatedAt], [deletedAt]) VALUES (N'9', N'แม่ง', N'2026-05-10 15:20:35.0390000', N'2026-05-13 00:48:47.9960000', NULL)
 GO
 
-INSERT INTO [dbo].[Unpolite] ([upId], [word], [createdAt], [updatedAt], [deletedAt]) VALUES (N'10', N'มึง', N'2026-04-30 01:12:20.2190000', N'2026-04-30 01:23:29.0870000', NULL)
+INSERT INTO [dbo].[Unpolite] ([upId], [word], [createdAt], [updatedAt], [deletedAt]) VALUES (N'10', N'Fuck You', N'2026-05-10 15:20:48.7910000', N'2026-05-15 01:44:23.9060000', NULL)
 GO
 
-INSERT INTO [dbo].[Unpolite] ([upId], [word], [createdAt], [updatedAt], [deletedAt]) VALUES (N'11', N'กู', N'2026-04-30 01:22:23.8890000', N'2026-04-30 08:14:19.3350000', NULL)
+INSERT INTO [dbo].[Unpolite] ([upId], [word], [createdAt], [updatedAt], [deletedAt]) VALUES (N'11', N'มึง', N'2026-05-15 02:33:32.7060000', N'2026-05-18 03:59:40.1520000', NULL)
 GO
 
-INSERT INTO [dbo].[Unpolite] ([upId], [word], [createdAt], [updatedAt], [deletedAt]) VALUES (N'12', N'bro', N'2026-04-30 01:24:12.2370000', N'2026-04-30 01:30:29.9210000', NULL)
-GO
-
-INSERT INTO [dbo].[Unpolite] ([upId], [word], [createdAt], [updatedAt], [deletedAt]) VALUES (N'13', N'ก', N'2026-04-30 01:34:04.5770000', N'2026-04-30 01:34:06.9430000', N'2026-04-30 01:34:06.9390000')
-GO
-
-INSERT INTO [dbo].[Unpolite] ([upId], [word], [createdAt], [updatedAt], [deletedAt]) VALUES (N'14', N'打手枪', N'2026-04-30 01:53:25.5140000', N'2026-05-01 03:54:51.1190000', N'2026-05-01 03:54:51.1090000')
+INSERT INTO [dbo].[Unpolite] ([upId], [word], [createdAt], [updatedAt], [deletedAt]) VALUES (N'12', N'ควยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยย', N'2026-05-18 03:11:39.0350000', N'2026-05-18 03:33:57.2850000', N'2026-05-18 03:33:57.2710000')
 GO
 
 SET IDENTITY_INSERT [dbo].[Unpolite] OFF
@@ -91,7 +85,7 @@ GO
 -- ----------------------------
 -- Auto increment value for Unpolite
 -- ----------------------------
-DBCC CHECKIDENT ('[dbo].[Unpolite]', RESEED, 14)
+DBCC CHECKIDENT ('[dbo].[Unpolite]', RESEED, 12)
 GO
 
 

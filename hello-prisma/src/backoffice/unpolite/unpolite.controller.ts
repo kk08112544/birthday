@@ -17,12 +17,12 @@ import { JwtAuthGuard } from 'src/common/guard/jwt/jwt-auth.guard';
 import { Roles } from 'src/common/decorator/roles.decorator';
 import { RolesGuard } from 'src/common/guard/roles.guard';
 
+@Roles('superAdmin', 'admin')
 @UseGuards(JwtAuthGuard)
 @Controller('backoffice/unpolite')
 export class AdminUnpoliteController {
   constructor(private readonly adminunpoliteService: AdminUnpoliteService) {}
 
-  @Roles('superAdmin')
   @UseGuards(RolesGuard)
   @Post()
   create(@Body() createUnpoliteDto: CreateUnpoliteDto) {
@@ -44,7 +44,6 @@ export class AdminUnpoliteController {
     return this.adminunpoliteService.findById(id);
   }
 
-  @Roles('superAdmin')
   @UseGuards(RolesGuard)
   @Patch(':id')
   update(
@@ -54,7 +53,6 @@ export class AdminUnpoliteController {
     return this.adminunpoliteService.update(id, updateUnpoliteDto);
   }
 
-  @Roles('superAdmin')
   @UseGuards(RolesGuard)
   @Delete(':id')
   delete(@Param('id') id: number) {

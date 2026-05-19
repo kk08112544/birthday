@@ -24,6 +24,7 @@ export const MESSAGE = {
     NOT_FOUND: 'ไม่พบคำไม่สุภาพคำนี้',
     DELETE_SUCCESS: 'ลบคำไม่สุภาพสำเร็จ',
     UPDATE_SUCCESS: 'แก้ไขคำไม่สุภาพสำเร็จ',
+    WORD_CONFLICT: 'มีคำนี้ในระบบแล้ว',
   },
   AUTH: {
     INVALID_USERNAME: 'ไม่มีชื่อผู้ใช้นี้ในระบบ',

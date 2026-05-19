@@ -74,4 +74,8 @@ export class ExceptionsService {
   throwEmailAlreadyExits(): never {
     throw new ConflictException(MESSAGE.ADMIN.USERNAME_CONFLICT);
   }
+
+  throwBadWordAlreadyExits(): never {
+    throw new ConflictException(MESSAGE.UNPOLITE.WORD_CONFLICT);
+  }
 }

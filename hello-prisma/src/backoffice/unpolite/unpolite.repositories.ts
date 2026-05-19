@@ -128,4 +128,14 @@ export class AdminUnpoliteRepositories {
     });
     return data;
   }
+
+  async exits(word: string): Promise<boolean> {
+    const data = await this.prisma.unpolite.findFirst({
+      where: {
+        word: word,
+        deletedAt: null,
+      },
+    });
+    return !!data;
+  }
 }

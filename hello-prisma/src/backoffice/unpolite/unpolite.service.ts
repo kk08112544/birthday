@@ -14,6 +14,12 @@ export class AdminUnpoliteService {
   ) {}
 
   async create(createUnpoliteDto: CreateUnpoliteDto) {
+    const check = await this.adminunpoliteRepositories.exits(
+      createUnpoliteDto.word,
+    );
+    if (!check) {
+      this.exceptionsService.throwBadWordAlreadyExits();
+    }
     const data = await this.adminunpoliteRepositories.create(createUnpoliteDto);
     return {
       unpolite: data,
@@ -62,8 +68,14 @@ export class AdminUnpoliteService {
   async update(id: number, updateUnpoliteDto: UpdateUnpoliteDto) {
     const check = await this.adminunpoliteRepositories.findById(id);
 
+    const exits = await this.adminunpoliteRepositories.exits(
+      String(updateUnpoliteDto.word),
+    );
     if (!check) {
       this.exceptionsService.throwBadWordNotFound();
+    }
+    if (!exits) {
+      this.exceptionsService.throwBadWordAlreadyExits();
     }
     const data = await this.adminunpoliteRepositories.update(
       id,
