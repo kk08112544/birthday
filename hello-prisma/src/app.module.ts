@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { LoggerModule } from './common/logger/logger.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -18,6 +19,7 @@ import { AdminScheduleModule } from './backoffice/schedule/schedule.module';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    LoggerModule,
     ScheduleModule.forRoot(),
     PrismaModule,
     FestivalModule,

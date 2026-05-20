@@ -2,7 +2,6 @@ import {
   IsEmail,
   IsNotEmpty,
   IsOptional,
-  IsPhoneNumber,
   IsString,
   Matches,
 } from 'class-validator';
@@ -15,9 +14,9 @@ export class CreateAdminDto {
   // @Matches(/^แอดมิน-\s[ก-๙]{3}$/, {
   //   message: 'firstName ต้องเป็นตัวย่อหน่วยงานภาษาไทย 3 ตัว',
   // })
-  @Matches(/^แอดมิน-\s[ก-๙]{2,3}$/, {
-    message: 'firstName ต้องเป็นตัวย่อหน่วยงานภาษาไทย',
-  })
+ @Matches(/^แอดมิน-\s[ก-๙0-9]{2,5}$/, {
+  message: 'firstName ต้องเป็นตัวย่อหน่วยงานภาษาไทยหรือเลขที่หน่วยงานตั้งแต่ 0-9 จำนวน 2-5 ตัว',
+})
   firstName!: string;
 
   @IsNotEmpty()

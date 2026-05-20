@@ -83,6 +83,8 @@ const routes: RouteRecordRaw[] = [
     children: [
       { path: '', component: () => import('pages/backoffice/admin/AdminPage.vue') },
       { path: 'create', component: () => import('pages/backoffice/admin/CreatePage.vue') },
+      { path: 'edit/:id', component: () => import('pages/backoffice/admin/EditPage.vue') },
+      { path: 'view/:id', component: () => import('pages/backoffice/admin/ViewPage.vue') },
     ],
   },
   {

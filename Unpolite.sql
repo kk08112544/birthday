@@ -12,7 +12,7 @@
  Target Server Version : 17001000 (17.00.1000)
  File Encoding         : 65001
 
- Date: 19/05/2026 08:59:11
+ Date: 20/05/2026 17:40:54
 */
 
 
@@ -28,7 +28,10 @@ CREATE TABLE [dbo].[Unpolite] (
   [word] nvarchar(1000) COLLATE SQL_Latin1_General_CP1_CI_AS  NOT NULL,
   [createdAt] datetime2(7) DEFAULT getdate() NOT NULL,
   [updatedAt] datetime2(7)  NOT NULL,
-  [deletedAt] datetime2(7)  NULL
+  [deletedAt] datetime2(7)  NULL,
+  [createdBy] int  NOT NULL,
+  [deletedBy] int  NULL,
+  [updatedBy] int  NULL
 )
 GO
 
@@ -42,40 +45,31 @@ GO
 SET IDENTITY_INSERT [dbo].[Unpolite] ON
 GO
 
-INSERT INTO [dbo].[Unpolite] ([upId], [word], [createdAt], [updatedAt], [deletedAt]) VALUES (N'1', N'เย็ดแม่', N'2026-05-10 15:08:38.8810000', N'2026-05-13 00:52:34.3950000', NULL)
+INSERT INTO [dbo].[Unpolite] ([upId], [word], [createdAt], [updatedAt], [deletedAt], [createdBy], [deletedBy], [updatedBy]) VALUES (N'1', N'อีตูด', N'2026-05-20 09:34:04.5620000', N'2026-05-20 09:41:18.7440000', NULL, N'1', NULL, N'1')
 GO
 
-INSERT INTO [dbo].[Unpolite] ([upId], [word], [createdAt], [updatedAt], [deletedAt]) VALUES (N'2', N'เชี่ย', N'2026-05-10 15:08:45.0710000', N'2026-05-13 00:49:00.0170000', NULL)
+INSERT INTO [dbo].[Unpolite] ([upId], [word], [createdAt], [updatedAt], [deletedAt], [createdBy], [deletedBy], [updatedBy]) VALUES (N'2', N'操你妈', N'2026-05-20 09:39:31.0180000', N'2026-05-20 09:42:35.6100000', N'2026-05-20 09:42:35.6030000', N'1', N'1', NULL)
 GO
 
-INSERT INTO [dbo].[Unpolite] ([upId], [word], [createdAt], [updatedAt], [deletedAt]) VALUES (N'3', N'操你妈', N'2026-05-10 15:08:56.5530000', N'2026-05-15 01:42:52.0380000', NULL)
+INSERT INTO [dbo].[Unpolite] ([upId], [word], [createdAt], [updatedAt], [deletedAt], [createdBy], [deletedBy], [updatedBy]) VALUES (N'3', N'操你妈', N'2026-05-20 09:43:19.9470000', N'2026-05-20 09:43:19.9470000', NULL, N'1', NULL, NULL)
 GO
 
-INSERT INTO [dbo].[Unpolite] ([upId], [word], [createdAt], [updatedAt], [deletedAt]) VALUES (N'4', N'妈逼', N'2026-05-10 15:09:06.5110000', N'2026-05-13 01:02:32.2550000', NULL)
+INSERT INTO [dbo].[Unpolite] ([upId], [word], [createdAt], [updatedAt], [deletedAt], [createdBy], [deletedBy], [updatedBy]) VALUES (N'4', N'畜生', N'2026-05-20 09:43:26.9000000', N'2026-05-20 09:43:26.9000000', NULL, N'1', NULL, NULL)
 GO
 
-INSERT INTO [dbo].[Unpolite] ([upId], [word], [createdAt], [updatedAt], [deletedAt]) VALUES (N'5', N'畜生', N'2026-05-10 15:09:18.5960000', N'2026-05-18 04:01:25.0940000', NULL)
+INSERT INTO [dbo].[Unpolite] ([upId], [word], [createdAt], [updatedAt], [deletedAt], [createdBy], [deletedBy], [updatedBy]) VALUES (N'5', N'妈逼', N'2026-05-20 09:43:34.1770000', N'2026-05-20 09:43:34.1770000', NULL, N'1', NULL, NULL)
 GO
 
-INSERT INTO [dbo].[Unpolite] ([upId], [word], [createdAt], [updatedAt], [deletedAt]) VALUES (N'6', N'กู', N'2026-05-10 15:09:35.3550000', N'2026-05-18 02:37:58.9100000', NULL)
+INSERT INTO [dbo].[Unpolite] ([upId], [word], [createdAt], [updatedAt], [deletedAt], [createdBy], [deletedBy], [updatedBy]) VALUES (N'6', N'打飞机', N'2026-05-20 09:43:41.7950000', N'2026-05-20 09:43:41.7950000', NULL, N'1', NULL, NULL)
 GO
 
-INSERT INTO [dbo].[Unpolite] ([upId], [word], [createdAt], [updatedAt], [deletedAt]) VALUES (N'7', N'มึง', N'2026-05-10 15:09:41.7880000', N'2026-05-18 10:30:55.6830000', N'2026-05-18 10:30:55.6640000')
+INSERT INTO [dbo].[Unpolite] ([upId], [word], [createdAt], [updatedAt], [deletedAt], [createdBy], [deletedBy], [updatedBy]) VALUES (N'7', N'fuck you', N'2026-05-20 09:43:50.2030000', N'2026-05-20 09:43:50.2030000', NULL, N'1', NULL, NULL)
 GO
 
-INSERT INTO [dbo].[Unpolite] ([upId], [word], [createdAt], [updatedAt], [deletedAt]) VALUES (N'8', N'ควย', N'2026-05-10 15:20:24.2560000', N'2026-05-15 04:49:59.0490000', NULL)
+INSERT INTO [dbo].[Unpolite] ([upId], [word], [createdAt], [updatedAt], [deletedAt], [createdBy], [deletedBy], [updatedBy]) VALUES (N'8', N'ควย', N'2026-05-20 09:43:57.7670000', N'2026-05-20 09:43:57.7670000', NULL, N'1', NULL, NULL)
 GO
 
-INSERT INTO [dbo].[Unpolite] ([upId], [word], [createdAt], [updatedAt], [deletedAt]) VALUES (N'9', N'แม่ง', N'2026-05-10 15:20:35.0390000', N'2026-05-13 00:48:47.9960000', NULL)
-GO
-
-INSERT INTO [dbo].[Unpolite] ([upId], [word], [createdAt], [updatedAt], [deletedAt]) VALUES (N'10', N'Fuck You', N'2026-05-10 15:20:48.7910000', N'2026-05-15 01:44:23.9060000', NULL)
-GO
-
-INSERT INTO [dbo].[Unpolite] ([upId], [word], [createdAt], [updatedAt], [deletedAt]) VALUES (N'11', N'มึง', N'2026-05-15 02:33:32.7060000', N'2026-05-18 03:59:40.1520000', NULL)
-GO
-
-INSERT INTO [dbo].[Unpolite] ([upId], [word], [createdAt], [updatedAt], [deletedAt]) VALUES (N'12', N'ควยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยยย', N'2026-05-18 03:11:39.0350000', N'2026-05-18 03:33:57.2850000', N'2026-05-18 03:33:57.2710000')
+INSERT INTO [dbo].[Unpolite] ([upId], [word], [createdAt], [updatedAt], [deletedAt], [createdBy], [deletedBy], [updatedBy]) VALUES (N'9', N'เหี้ย', N'2026-05-20 09:44:05.4190000', N'2026-05-20 09:44:05.4190000', NULL, N'1', NULL, NULL)
 GO
 
 SET IDENTITY_INSERT [dbo].[Unpolite] OFF
@@ -85,7 +79,7 @@ GO
 -- ----------------------------
 -- Auto increment value for Unpolite
 -- ----------------------------
-DBCC CHECKIDENT ('[dbo].[Unpolite]', RESEED, 12)
+DBCC CHECKIDENT ('[dbo].[Unpolite]', RESEED, 9)
 GO
 
 
@@ -95,5 +89,18 @@ GO
 ALTER TABLE [dbo].[Unpolite] ADD CONSTRAINT [Unpolite_pkey] PRIMARY KEY CLUSTERED ([upId])
 WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON)  
 ON [PRIMARY]
+GO
+
+
+-- ----------------------------
+-- Foreign Keys structure for table Unpolite
+-- ----------------------------
+ALTER TABLE [dbo].[Unpolite] ADD CONSTRAINT [Unpolite_createdBy_fkey] FOREIGN KEY ([createdBy]) REFERENCES [dbo].[User] ([uId]) ON DELETE NO ACTION ON UPDATE NO ACTION
+GO
+
+ALTER TABLE [dbo].[Unpolite] ADD CONSTRAINT [Unpolite_updatedBy_fkey] FOREIGN KEY ([updatedBy]) REFERENCES [dbo].[User] ([uId]) ON DELETE NO ACTION ON UPDATE NO ACTION
+GO
+
+ALTER TABLE [dbo].[Unpolite] ADD CONSTRAINT [Unpolite_deletedBy_fkey] FOREIGN KEY ([deletedBy]) REFERENCES [dbo].[User] ([uId]) ON DELETE NO ACTION ON UPDATE NO ACTION
 GO
 

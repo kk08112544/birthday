@@ -12,7 +12,7 @@
  Target Server Version : 17001000 (17.00.1000)
  File Encoding         : 65001
 
- Date: 19/05/2026 08:59:03
+ Date: 20/05/2026 17:40:43
 */
 
 
@@ -43,25 +43,25 @@ GO
 SET IDENTITY_INSERT [dbo].[Wisher] ON
 GO
 
-INSERT INTO [dbo].[Wisher] ([wId], [wishWord], [festivalId], [createdAt], [deletedAt], [updatedAt]) VALUES (N'1', N'ครบรอบ 63 ปี กรมพัฒนาที่ดิน ดินนำ น้ำตาม สู่ความยั่งยืนเกษตรไทย ขอให้หน่วยงานเจริญก้าวหน้า เป็นที่พึ่งของเกษตรกรในการพัฒนาที่ดินอย่างยั่งยืน', N'1', N'2026-05-10 15:06:50.7640000', NULL, N'2026-05-18 09:29:17.1850000')
+INSERT INTO [dbo].[Wisher] ([wId], [wishWord], [festivalId], [createdAt], [deletedAt], [updatedAt]) VALUES (N'1', N'ครบรอบ 63 ปี กรมพัฒนาที่ดิน ดินนำ น้ำตาม สู่ความยั่งยืนเกษตรไทย ขอให้หน่วยงานเจริญก้าวหน้า เป็นที่พึ่งของเกษตรกรในการพัฒนาที่ดินอย่างยั่งยืน', N'1', N'2026-05-20 10:03:53.1980000', NULL, N'2026-05-20 10:05:03.8940000')
 GO
 
-INSERT INTO [dbo].[Wisher] ([wId], [wishWord], [festivalId], [createdAt], [deletedAt], [updatedAt]) VALUES (N'2', N'hbd ldd', N'1', N'2026-05-10 15:06:50.7640000', NULL, N'2026-05-18 09:29:17.1890000')
+INSERT INTO [dbo].[Wisher] ([wId], [wishWord], [festivalId], [createdAt], [deletedAt], [updatedAt]) VALUES (N'2', N'hbd ldd', N'1', N'2026-05-20 10:03:53.1980000', NULL, N'2026-05-20 10:05:03.8980000')
 GO
 
-INSERT INTO [dbo].[Wisher] ([wId], [wishWord], [festivalId], [createdAt], [deletedAt], [updatedAt]) VALUES (N'3', N'สุขสันต์วันเกิด', N'1', N'2026-05-10 15:06:50.7640000', NULL, N'2026-05-18 09:29:17.1930000')
+INSERT INTO [dbo].[Wisher] ([wId], [wishWord], [festivalId], [createdAt], [deletedAt], [updatedAt]) VALUES (N'3', N'สุขสันต์วันเกิด', N'1', N'2026-05-20 10:03:53.1980000', NULL, N'2026-05-20 10:05:03.9030000')
 GO
 
-INSERT INTO [dbo].[Wisher] ([wId], [wishWord], [festivalId], [createdAt], [deletedAt], [updatedAt]) VALUES (N'4', N'ครบรอบ 63 ปีสถาปนากรมพัฒนาที่ดิน ขอให้กรมพัฒนาที่ดินได้พัฒนาการเกษตรอย่างยั่งยืน', N'1', N'2026-05-10 15:06:50.7640000', N'2026-05-13 04:22:10.0940000', N'2026-05-13 04:22:10.0940000')
+INSERT INTO [dbo].[Wisher] ([wId], [wishWord], [festivalId], [createdAt], [deletedAt], [updatedAt]) VALUES (N'4', N'I Love Land development department', N'1', N'2026-05-20 10:03:53.1980000', NULL, N'2026-05-20 10:05:03.9060000')
 GO
 
-INSERT INTO [dbo].[Wisher] ([wId], [wishWord], [festivalId], [createdAt], [deletedAt], [updatedAt]) VALUES (N'5', N'I Love Land development department', N'1', N'2026-05-10 15:06:50.7640000', NULL, N'2026-05-18 09:29:17.1990000')
+INSERT INTO [dbo].[Wisher] ([wId], [wishWord], [festivalId], [createdAt], [deletedAt], [updatedAt]) VALUES (N'5', N'Happy Birthday to LDD', N'1', N'2026-05-20 10:03:53.1980000', NULL, N'2026-05-20 10:05:03.9130000')
 GO
 
-INSERT INTO [dbo].[Wisher] ([wId], [wishWord], [festivalId], [createdAt], [deletedAt], [updatedAt]) VALUES (N'6', N'Happy Birthday to LDD', N'1', N'2026-05-10 15:06:50.7640000', NULL, N'2026-05-18 09:29:17.2040000')
+INSERT INTO [dbo].[Wisher] ([wId], [wishWord], [festivalId], [createdAt], [deletedAt], [updatedAt]) VALUES (N'6', N'祝您生日快乐', N'1', N'2026-05-20 10:03:53.1980000', NULL, N'2026-05-20 10:05:03.9160000')
 GO
 
-INSERT INTO [dbo].[Wisher] ([wId], [wishWord], [festivalId], [createdAt], [deletedAt], [updatedAt]) VALUES (N'7', N'祝您生日快乐', N'1', N'2026-05-13 00:53:39.9960000', NULL, N'2026-05-18 09:29:17.2080000')
+INSERT INTO [dbo].[Wisher] ([wId], [wishWord], [festivalId], [createdAt], [deletedAt], [updatedAt]) VALUES (N'7', N'Love you LDD', N'1', N'2026-05-20 10:04:45.2010000', NULL, N'2026-05-20 10:05:03.9200000')
 GO
 
 SET IDENTITY_INSERT [dbo].[Wisher] OFF

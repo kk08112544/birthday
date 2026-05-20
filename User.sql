@@ -12,7 +12,7 @@
  Target Server Version : 17001000 (17.00.1000)
  File Encoding         : 65001
 
- Date: 19/05/2026 08:58:35
+ Date: 20/05/2026 14:41:44
 */
 
 
@@ -50,7 +50,7 @@ GO
 INSERT INTO [dbo].[User] ([uId], [firstName], [userName], [password], [role], [createdAt], [deletedAt], [updatedAt], [phoneNumber], [email]) VALUES (N'1', N'แอดมิน-ศทส', N'admin1', N'$2a$12$rs4g8z2n/VbeP6OOoSLuo.mBh3Xlb8XoUM4sxiBbGXb17pIRKsHgq', N'superAdmin', N'2026-05-15 13:07:51.7700000', NULL, N'2026-05-15 13:07:51.7700000', N'1328', N'cit_3@ldd.go.th')
 GO
 
-INSERT INTO [dbo].[User] ([uId], [firstName], [userName], [password], [role], [createdAt], [deletedAt], [updatedAt], [phoneNumber], [email]) VALUES (N'2', N'แอดมิน2-กกจ', N'admin2', N'$2b$10$/QhkZ6rnJz7qTSsJmlaAOu6Y3oXLscz5QfHjMc9oy8XvziUo85ap6', N'admin', N'2026-05-15 09:06:42.5010000', NULL, N'2026-05-15 09:06:42.5010000', N'1128', N'cit_1@ldd.go.th')
+INSERT INTO [dbo].[User] ([uId], [firstName], [userName], [password], [role], [createdAt], [deletedAt], [updatedAt], [phoneNumber], [email]) VALUES (N'2', N'แอดมิน2-กกจ', N'admin2', N'$2b$12$PNwtS5twnD/xnH6DPDtNpux9EplslYFyW5TiXbWl4OOvMNXNB8PhC', N'admin', N'2026-05-15 09:06:42.5010000', NULL, N'2026-05-20 05:56:21.3580000', N'1128', N'cit_1@ldd.go.th')
 GO
 
 SET IDENTITY_INSERT [dbo].[User] OFF

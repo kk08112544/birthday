@@ -146,6 +146,30 @@ export class AdminRepositories {
     return data;
   }
 
+  async updatePassword(id:number, hashPassword:string):Promise<ResponseAdminDto>{
+     const data = await this.prisma.user.update({
+      where: {
+        uId: Number(id),
+        deletedAt: null,
+      },
+      data: {
+        password:hashPassword
+      },
+      select: {
+        uId: true,
+        firstName: true,
+        userName: true,
+        role: true,
+        phoneNumber: true,
+        email: true,
+        createdAt: true,
+        updatedAt: true,
+        deletedAt: true,
+      },
+    });
+    return data;
+  }
+
   async delete(id: number): Promise<ResponseAdminDto> {
     const data = await this.prisma.user.update({
       where: {
@@ -180,23 +204,60 @@ export class AdminRepositories {
     return data._max.uId;
   }
 
-  async checkUsername(userName: string): Promise<ResponseAdminDto | null> {
+  async checkFirstName(firstName: string): Promise<ResponseAdminDto | null> {
+    // เอาเฉพาะข้อความหลัง -
+    const inputSuffix = firstName.split('-')[1]?.trim();
+
+    if (!inputSuffix) {
+      return null;
+    }
+
+    const users = await this.prisma.user.findMany({
+      where: {
+        deletedAt: null,
+        firstName: {
+          contains: '-',
+        },
+      },
+    });
+
+    const duplicate = users.find((user) => {
+      const suffix = user.firstName.split('-')[1]?.trim();
+      return suffix === inputSuffix;
+    });
+
+    return duplicate || null;
+  }
+
+  async checkUsername(userName: string): Promise<boolean> {
     const data = await this.prisma.user.findFirst({
       where: {
         userName: userName,
         deletedAt: null,
       },
     });
-    return data;
+    return !!data;
   }
 
-  async checkEmail(email: string): Promise<boolean> {
+  async checkEmail(email: string): Promise<ResponseAdminDto | null> {
     const data = await this.prisma.user.findFirst({
       where: {
         email: email,
         deletedAt: null,
       },
     });
-    return !!data;
+    return data;
+  }
+
+  async checkphoneNumber(
+    phoneNumber: string,
+  ): Promise<ResponseAdminDto | null> {
+    const data = await this.prisma.user.findFirst({
+      where: {
+        phoneNumber: phoneNumber,
+        deletedAt: null,
+      },
+    });
+    return data;
   }
 }

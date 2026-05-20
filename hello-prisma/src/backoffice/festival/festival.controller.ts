@@ -56,13 +56,7 @@ export class AdminFestivalController {
     return this.adminfestivalService.findMany(paginationDto);
   }
 
-  @Get('creator/:createdBy')
-  findByCreator(
-    @Param('createdBy') createdBy: number,
-    @Query() paginationDto: PaginationFestivalDto,
-  ) {
-    return this.adminfestivalService.findByCreator(createdBy, paginationDto);
-  }
+
 
   @Patch(':id')
   @UsePipes(

@@ -147,7 +147,7 @@
             <router-link
               v-if="
                 row.actions.update &&
-                row.isEditEndDate &&
+                row.isEditStartEndDate &&
                 row.createdBy === Number(LocalStorage.getItem('userId'))
               "
               :to="`/backoffice/festival/edit/${row.fId}`"
@@ -343,7 +343,7 @@ interface FestivalItem {
   image: string;
   startDate?: string;
   endDate?: string;
-  isEditEndDate: boolean;
+  isEditStartEndDate: boolean;
   isDelete: boolean;
   createdBy: number;
   createdByUser: {
@@ -358,7 +358,7 @@ interface TableRow {
   festivalName: string;
   image: string;
   isActive: boolean;
-  isEditEndDate: boolean;
+  isEditStartEndDate: boolean;
   isDelete: boolean;
   createdBy: number;
   createdByUser: {
@@ -464,7 +464,7 @@ const fetchFestival = async (): Promise<void> => {
           festivalName: item.festivalName || '-',
           image: item.image ? await getImageUrl(item.image) : '',
           isActive,
-          isEditEndDate: item.isEditEndDate,
+          isEditStartEndDate: item.isEditStartEndDate,
           isDelete: item.isDelete,
           createdBy: item.createdBy,
           createdByUser: item.createdByUser, // ✅ เพิ่มบรรทัดนี้

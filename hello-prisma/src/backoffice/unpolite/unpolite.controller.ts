@@ -16,17 +16,19 @@ import { PaginationUnpoliteDto } from './dto/pagination-unpolite.dto';
 import { JwtAuthGuard } from 'src/common/guard/jwt/jwt-auth.guard';
 import { Roles } from 'src/common/decorator/roles.decorator';
 import { RolesGuard } from 'src/common/guard/roles.guard';
+import type { User } from '@prisma/client';
+import { CurrentUser } from 'src/common/decorator/user.decorator';
 
 @Roles('superAdmin', 'admin')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('backoffice/unpolite')
 export class AdminUnpoliteController {
   constructor(private readonly adminunpoliteService: AdminUnpoliteService) {}
 
-  @UseGuards(RolesGuard)
+
   @Post()
-  create(@Body() createUnpoliteDto: CreateUnpoliteDto) {
-    return this.adminunpoliteService.create(createUnpoliteDto);
+  create(@Body() createUnpoliteDto: CreateUnpoliteDto,@CurrentUser() user: User) {
+    return this.adminunpoliteService.create(createUnpoliteDto, user.uId);
   }
 
   @Get('all')
@@ -44,18 +46,18 @@ export class AdminUnpoliteController {
     return this.adminunpoliteService.findById(id);
   }
 
-  @UseGuards(RolesGuard)
+
   @Patch(':id')
   update(
     @Param('id') id: number,
-    @Body() updateUnpoliteDto: UpdateUnpoliteDto,
+    @Body() updateUnpoliteDto: UpdateUnpoliteDto,@CurrentUser() user: User
   ) {
-    return this.adminunpoliteService.update(id, updateUnpoliteDto);
+    return this.adminunpoliteService.update(id, updateUnpoliteDto, user.uId);
   }
 
-  @UseGuards(RolesGuard)
+
   @Delete(':id')
-  delete(@Param('id') id: number) {
-    return this.adminunpoliteService.delete(id);
+  delete(@Param('id') id: number,@CurrentUser() user: User) {
+    return this.adminunpoliteService.delete(id, user.uId);
   }
 }

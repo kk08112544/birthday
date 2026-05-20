@@ -43,4 +43,5 @@ export class UnpoliteRepositories {
 
     return badWords[0]?.word ?? null;
   }
+ 
 }

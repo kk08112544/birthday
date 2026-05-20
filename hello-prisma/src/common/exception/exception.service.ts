@@ -67,15 +67,30 @@ export class ExceptionsService {
     throw new ForbiddenException(MESSAGE.FESTIVAL.NOT_EDIT_DELETE);
   }
 
+  throwFirstNameAlreadyExits(): never {
+    throw new ConflictException(MESSAGE.ADMIN.FIRSTNAME_CONFLICT);
+  }
+
   throwUserNameAlreadyExits(): never {
     throw new ConflictException(MESSAGE.ADMIN.USERNAME_CONFLICT);
   }
 
   throwEmailAlreadyExits(): never {
-    throw new ConflictException(MESSAGE.ADMIN.USERNAME_CONFLICT);
+    throw new ConflictException(MESSAGE.ADMIN.EMAIL_CONFLICT);
   }
 
   throwBadWordAlreadyExits(): never {
     throw new ConflictException(MESSAGE.UNPOLITE.WORD_CONFLICT);
+  }
+  throwPhoneNumberAlreadyExits(): never {
+    throw new ConflictException(MESSAGE.ADMIN.PHONENUMBER_CONFLICT);
+  }
+
+  throwSuperAdminNotExceptedChange(): never {
+     throw new ForbiddenException(MESSAGE.ADMIN.SUPER_ADMIN_NOT_EXCEPT);
+  }
+
+  throwFestivalNotExceptedChange(): never {
+    throw new ForbiddenException(MESSAGE.FESTIVAL.FESTIVAL_NOT_EXCEPT);
   }
 }

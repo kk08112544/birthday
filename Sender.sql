@@ -1,10 +1,10 @@
 /*
  Navicat Premium Dump SQL
 
- Source Server         : Localhost
+ Source Server         : birthfestival
  Source Server Type    : SQL Server
  Source Server Version : 17001000 (17.00.1000)
- Source Host           : DESKTOP-FJDU22M\SQLEXPRESS:1433
+ Source Host           : Localhost:1433
  Source Catalog        : birthfestival
  Source Schema         : dbo
 
@@ -12,7 +12,7 @@
  Target Server Version : 17001000 (17.00.1000)
  File Encoding         : 65001
 
- Date: 01/05/2026 16:48:48
+ Date: 20/05/2026 14:41:18
 */
 
 
@@ -45,117 +45,6 @@ GO
 SET IDENTITY_INSERT [dbo].[Sender] ON
 GO
 
-INSERT INTO [dbo].[Sender] ([sId], [position], [department], [cardId], [wishId], [createdAt], [festivalId], [fullname]) VALUES (N'7', N'นักวิชาการคอมพิวเตอร์ปฏิบัติการ', N'ศูนย์เทคโนโลยีสารสนเทศและการสื่อสาร', N'8', N'2', N'2026-04-21 07:21:15.1030000', N'1', N'นาย สุวรา สังข์ทอง')
-GO
-
-INSERT INTO [dbo].[Sender] ([sId], [position], [department], [cardId], [wishId], [createdAt], [festivalId], [fullname]) VALUES (N'8', N'นักวิชาการคอมพิวเตอร์ปฏิบัติการ', N'ศูนย์เทคโนโลยีสารสนเทศและการสื่อสาร', N'8', N'2', N'2026-04-21 10:17:09.8300000', N'1', N'นาย เอ บี')
-GO
-
-INSERT INTO [dbo].[Sender] ([sId], [position], [department], [cardId], [wishId], [createdAt], [festivalId], [fullname]) VALUES (N'9', N'นักวิชาการคอมพิวเตอร์ชำนาญการ', N'ศูนย์เทคโนโลยีสารสนเทศและการสื่อสาร', N'8', N'2', N'2026-04-21 10:17:38.3530000', N'1', N'นาย  ก ข')
-GO
-
-INSERT INTO [dbo].[Sender] ([sId], [position], [department], [cardId], [wishId], [createdAt], [festivalId], [fullname]) VALUES (N'10', N'นักวิชาการแผนที่ชำนาญการพิเศษ', N'ศูนย์เทคโนโลยีสารสนเทศและการสื่อสาร', N'8', N'2', N'2026-04-21 10:18:05.6380000', N'1', N'นาย  ก ข')
-GO
-
-INSERT INTO [dbo].[Sender] ([sId], [position], [department], [cardId], [wishId], [createdAt], [festivalId], [fullname]) VALUES (N'11', N'นักวิชาการแผนที่ชำนาญการพิเศษ', N'ศูนย์เทคโนโลยีสารสนเทศและการสื่อสาร', N'8', N'2', N'2026-04-21 10:18:18.8540000', N'1', N'นางสาว ดินดี คนสวย')
-GO
-
-INSERT INTO [dbo].[Sender] ([sId], [position], [department], [cardId], [wishId], [createdAt], [festivalId], [fullname]) VALUES (N'12', N'นักวิชาการแผนที่ชำนาญการพิเศษ', N'ศูนย์เทคโนโลยีสารสนเทศและการสื่อสาร', N'8', N'2', N'2026-04-21 10:36:48.7980000', N'1', N'เปรต')
-GO
-
-INSERT INTO [dbo].[Sender] ([sId], [position], [department], [cardId], [wishId], [createdAt], [festivalId], [fullname]) VALUES (N'13', N'นักวิชาการแผนที่ชำนาญการพิเศษ', N'ศูนย์เทคโนโลยีสารสนเทศและการสื่อสาร', N'8', N'2', N'2026-04-21 10:38:25.8780000', N'1', N'เปรต')
-GO
-
-INSERT INTO [dbo].[Sender] ([sId], [position], [department], [cardId], [wishId], [createdAt], [festivalId], [fullname]) VALUES (N'14', N'นักวิชาการแผนที่ชำนาญการพิเศษ', N'ศูนย์เทคโนโลยีสารสนเทศและการสื่อสาร', N'8', N'2', N'2026-04-21 10:38:38.5960000', N'1', N'ควย')
-GO
-
-INSERT INTO [dbo].[Sender] ([sId], [position], [department], [cardId], [wishId], [createdAt], [festivalId], [fullname]) VALUES (N'15', N'นักวิชาการแผนที่ชำนาญการพิเศษ', N'ศูนย์เทคโนโลยีสารสนเทศและการสื่อสาร', N'8', N'2', N'2026-04-21 10:39:16.0100000', N'1', N'สัส')
-GO
-
-INSERT INTO [dbo].[Sender] ([sId], [position], [department], [cardId], [wishId], [createdAt], [festivalId], [fullname]) VALUES (N'16', N'นักวิชาการ', N'รัก', N'8', N'2', N'2026-04-21 10:44:03.8380000', N'1', N'เคเค')
-GO
-
-INSERT INTO [dbo].[Sender] ([sId], [position], [department], [cardId], [wishId], [createdAt], [festivalId], [fullname]) VALUES (N'17', N'นักวิชาการ', N'รักFuck  U', N'8', N'2', N'2026-04-21 10:45:50.1560000', N'1', N'เคเค')
-GO
-
-INSERT INTO [dbo].[Sender] ([sId], [position], [department], [cardId], [wishId], [createdAt], [festivalId], [fullname]) VALUES (N'18', N'นักวิชาการ', N'รักFuck ', N'8', N'2', N'2026-04-21 10:46:00.5020000', N'1', N'เคเค')
-GO
-
-INSERT INTO [dbo].[Sender] ([sId], [position], [department], [cardId], [wishId], [createdAt], [festivalId], [fullname]) VALUES (N'19', N'นักวิชาการ', N'รักFuck ', N'8', N'2', N'2026-04-23 01:23:51.9700000', N'1', N'เคเค')
-GO
-
-INSERT INTO [dbo].[Sender] ([sId], [position], [department], [cardId], [wishId], [createdAt], [festivalId], [fullname]) VALUES (N'20', N'นักวิชาการคอม', N'ศูนย์เทคโนโลยีสารสนเทศและการสื่อสาร', N'8', N'2', N'2026-04-23 01:26:19.1230000', N'1', N'เคเค')
-GO
-
-INSERT INTO [dbo].[Sender] ([sId], [position], [department], [cardId], [wishId], [createdAt], [festivalId], [fullname]) VALUES (N'21', N'นักวิชาการคอมพิวเตอร์ปฏิบัติการ', N'ศูนย์เทคโนโลยีสารสนเทศและการสื่อสาร', N'8', N'2', N'2026-04-23 01:28:22.6790000', N'1', N'เคเค')
-GO
-
-INSERT INTO [dbo].[Sender] ([sId], [position], [department], [cardId], [wishId], [createdAt], [festivalId], [fullname]) VALUES (N'22', N'นักวิชาการคอมพิวเตอร์ปฏิบัติการ', N'ศูนย์เทคโนโลยีสารสนเทศและการสื่อสาร', N'8', N'2', N'2026-04-23 07:24:07.0910000', N'1', N'เคเคมึง')
-GO
-
-INSERT INTO [dbo].[Sender] ([sId], [position], [department], [cardId], [wishId], [createdAt], [festivalId], [fullname]) VALUES (N'23', N'นักวิชาการคอมพิวเตอร์ปฏิบัติการ', N'ศูนย์เทคโนโลยีสารสนเทศและการสื่อสาร', N'8', N'2', N'2026-04-23 07:24:49.4850000', N'1', N'เคเคเย็ด')
-GO
-
-INSERT INTO [dbo].[Sender] ([sId], [position], [department], [cardId], [wishId], [createdAt], [festivalId], [fullname]) VALUES (N'24', N'นักวิชาการคอมพิวเตอร์ปฏิบัติการ', N'ศูนย์เทคโนโลยีสารสนเทศและการสื่อสาร', N'8', N'2', N'2026-04-23 07:24:52.3950000', N'1', N'เคเค')
-GO
-
-INSERT INTO [dbo].[Sender] ([sId], [position], [department], [cardId], [wishId], [createdAt], [festivalId], [fullname]) VALUES (N'25', N'นักวิชาการคอมพิวเตอร์ปฏิบัติการ', N'ศูนย์เทคโนโลยีสารสนเทศและการสื่อสาร', N'8', N'2', N'2026-04-23 10:01:13.1280000', N'1', N'เคเค')
-GO
-
-INSERT INTO [dbo].[Sender] ([sId], [position], [department], [cardId], [wishId], [createdAt], [festivalId], [fullname]) VALUES (N'27', N'sdfsdfdsf', N'sdf', N'8', N'2', N'2026-04-23 10:27:00.7300000', N'1', N'sdfsd')
-GO
-
-INSERT INTO [dbo].[Sender] ([sId], [position], [department], [cardId], [wishId], [createdAt], [festivalId], [fullname]) VALUES (N'28', N'นักวิชาการคอมพิวเตอร์ชำนาญการ', N'ศูนย์เทคโนโลยีสารสนเทศและการสื่อสาร', N'8', N'2', N'2026-04-23 10:31:22.4750000', N'1', N'นางสาวเอ บี')
-GO
-
-INSERT INTO [dbo].[Sender] ([sId], [position], [department], [cardId], [wishId], [createdAt], [festivalId], [fullname]) VALUES (N'29', N'dsf', N'dsfdsf', N'10', N'2', N'2026-04-23 10:33:15.2160000', N'1', N'sdf')
-GO
-
-INSERT INTO [dbo].[Sender] ([sId], [position], [department], [cardId], [wishId], [createdAt], [festivalId], [fullname]) VALUES (N'30', N'sdad', N'asdads', N'11', N'2', N'2026-04-23 10:34:47.5400000', N'1', N'zaas')
-GO
-
-INSERT INTO [dbo].[Sender] ([sId], [position], [department], [cardId], [wishId], [createdAt], [festivalId], [fullname]) VALUES (N'31', N'dfsdsf', N'sdfsdf', N'8', N'2', N'2026-04-23 10:52:29.9170000', N'1', N'sdfdf')
-GO
-
-INSERT INTO [dbo].[Sender] ([sId], [position], [department], [cardId], [wishId], [createdAt], [festivalId], [fullname]) VALUES (N'32', N'dsfdsf', N'dfdsfsdf', N'8', N'2', N'2026-04-23 10:55:41.1950000', N'1', N'sdf')
-GO
-
-INSERT INTO [dbo].[Sender] ([sId], [position], [department], [cardId], [wishId], [createdAt], [festivalId], [fullname]) VALUES (N'33', N'dsfdsfdsf', N'dsfdsf', N'8', N'2', N'2026-04-24 02:05:16.2270000', N'1', N'sdfs')
-GO
-
-INSERT INTO [dbo].[Sender] ([sId], [position], [department], [cardId], [wishId], [createdAt], [festivalId], [fullname]) VALUES (N'34', N'นวก.คอม', N'ศทส', N'10', N'2', N'2026-04-24 02:14:20.0390000', N'1', N'นายเคเค ')
-GO
-
-INSERT INTO [dbo].[Sender] ([sId], [position], [department], [cardId], [wishId], [createdAt], [festivalId], [fullname]) VALUES (N'35', N'นักวิชาการคอมพิวเตอร์ปฏิบัติการ', N'ศทส', N'14', N'2', N'2026-04-24 02:16:57.8190000', N'1', N'นาย สุวรา สังข์ทอง')
-GO
-
-INSERT INTO [dbo].[Sender] ([sId], [position], [department], [cardId], [wishId], [createdAt], [festivalId], [fullname]) VALUES (N'36', N'นักวิชาการคอมพิวเตอร์ปฏิบัติการ', N'ศทส', N'8', N'2', N'2026-04-24 02:31:05.2130000', N'1', N'เคเค')
-GO
-
-INSERT INTO [dbo].[Sender] ([sId], [position], [department], [cardId], [wishId], [createdAt], [festivalId], [fullname]) VALUES (N'37', N'นักวิชาการแผนที่ชำนาญการ', N'ศทส', N'8', N'2', N'2026-04-24 06:23:35.1760000', N'1', N'นาย ข ค')
-GO
-
-INSERT INTO [dbo].[Sender] ([sId], [position], [department], [cardId], [wishId], [createdAt], [festivalId], [fullname]) VALUES (N'38', N'นักวิชาการคอมพิวเตอร์ชำนาญการ', N'ศทส', N'8', N'2', N'2026-04-24 09:31:34.5510000', N'1', N'นางสาว เอ บี')
-GO
-
-INSERT INTO [dbo].[Sender] ([sId], [position], [department], [cardId], [wishId], [createdAt], [festivalId], [fullname]) VALUES (N'39', N'นวก คอม', N'ศทส', N'8', N'5', N'2026-04-30 04:08:56.6870000', N'1', N'เคเค')
-GO
-
-INSERT INTO [dbo].[Sender] ([sId], [position], [department], [cardId], [wishId], [createdAt], [festivalId], [fullname]) VALUES (N'40', N'นักวิชาการคอมพิวเตอร์ปฏิบัติการ', N'ศทส', N'8', N'5', N'2026-05-01 01:38:25.6140000', N'1', N'นาย สุวรา สังข์ทอง')
-GO
-
-INSERT INTO [dbo].[Sender] ([sId], [position], [department], [cardId], [wishId], [createdAt], [festivalId], [fullname]) VALUES (N'41', N'นวก คอม', N'ศทส', N'8', N'2', N'2026-05-01 02:12:38.4450000', N'1', N'เคเค')
-GO
-
-INSERT INTO [dbo].[Sender] ([sId], [position], [department], [cardId], [wishId], [createdAt], [festivalId], [fullname]) VALUES (N'42', N'นวก เกษตร', N'กวจ', N'14', N'8', N'2026-05-01 02:14:14.8490000', N'1', N'นาย ก ข')
-GO
-
-INSERT INTO [dbo].[Sender] ([sId], [position], [department], [cardId], [wishId], [createdAt], [festivalId], [fullname]) VALUES (N'43', N'นวกแผนที่', N'ศทส', N'8', N'5', N'2026-05-01 06:30:08.0880000', N'1', N'นาย ก')
-GO
-
-INSERT INTO [dbo].[Sender] ([sId], [position], [department], [cardId], [wishId], [createdAt], [festivalId], [fullname]) VALUES (N'44', N'หกดหก', N'ดหกด', N'8', N'2', N'2026-05-01 08:26:06.1530000', N'1', N'กหก')
-GO
-
 SET IDENTITY_INSERT [dbo].[Sender] OFF
 GO
 
@@ -163,7 +52,7 @@ GO
 -- ----------------------------
 -- Auto increment value for Sender
 -- ----------------------------
-DBCC CHECKIDENT ('[dbo].[Sender]', RESEED, 44)
+DBCC CHECKIDENT ('[dbo].[Sender]', RESEED, 1)
 GO
 
 
@@ -185,6 +74,6 @@ GO
 ALTER TABLE [dbo].[Sender] ADD CONSTRAINT [Sender_wishId_fkey] FOREIGN KEY ([wishId]) REFERENCES [dbo].[Wisher] ([wId]) ON DELETE NO ACTION ON UPDATE NO ACTION
 GO
 
-ALTER TABLE [dbo].[Sender] ADD CONSTRAINT [Sender_festivalId_fkey] FOREIGN KEY ([festivalId]) REFERENCES [dbo].[Festival] ([fId]) ON DELETE NO ACTION ON UPDATE CASCADE
+ALTER TABLE [dbo].[Sender] ADD CONSTRAINT [Sender_festivalId_fkey] FOREIGN KEY ([festivalId]) REFERENCES [dbo].[Festival] ([fId]) ON DELETE NO ACTION ON UPDATE NO ACTION
 GO
 

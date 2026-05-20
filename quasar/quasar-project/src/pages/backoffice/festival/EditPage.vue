@@ -694,7 +694,7 @@ interface FestivalData {
   startDate?: string;
   endDate?: string;
   isEdit: boolean;
-  isEditEndDate: boolean;
+  isEditStartEndDate: boolean;
   wisher?: WisherApi[];
   card?: CardApi[];
   createdBy: number;
@@ -736,11 +736,11 @@ const createdBy = ref<number>(0);
 
 // ─── Permissions ──────────────────────────────────────────────────────────────
 const isEdit = ref(false);
-const isEditEndDate = ref(false);
+const isEditStartEndDate = ref(false);
 
 const isOwner = computed(() => createdBy.value === Number(LocalStorage.getItem('userId')));
 const canEdit = computed(() => isEdit.value && isOwner.value);
-const canEditEndDate = computed(() => isEditEndDate.value && isOwner.value);
+const canEditEndDate = computed(() => isEditStartEndDate.value && isOwner.value);
 
 // ─── Date State ───────────────────────────────────────────────────────────────
 const startDate = ref('');
@@ -948,7 +948,7 @@ const fetchFestival = async (id: string): Promise<void> => {
     festivalName.value = data.festivalName;
     webName.value = data.webName;
     isEdit.value = data.isEdit;
-    isEditEndDate.value = data.isEditEndDate;
+    isEditStartEndDate.value = data.isEditStartEndDate;
     createdBy.value = Number(data.createdBy);
 
     if (data.startDate) startDate.value = data.startDate.substring(0, 10).replace(/-/g, '/');

@@ -12,7 +12,7 @@
  Target Server Version : 17001000 (17.00.1000)
  File Encoding         : 65001
 
- Date: 19/05/2026 08:58:49
+ Date: 20/05/2026 17:40:26
 */
 
 
@@ -35,10 +35,11 @@ CREATE TABLE [dbo].[Festival] (
   [endDate] datetime2(7)  NOT NULL,
   [isDelete] bit DEFAULT 1 NOT NULL,
   [isEdit] bit DEFAULT 1 NOT NULL,
-  [isEditEndDate] bit DEFAULT 1 NOT NULL,
   [startDate] datetime2(7)  NOT NULL,
   [createdBy] int  NOT NULL,
-  [deletedBy] int  NULL
+  [deletedBy] int  NULL,
+  [isEditStartEndDate] bit DEFAULT 1 NOT NULL,
+  [updatedBy] int  NULL
 )
 GO
 
@@ -52,7 +53,7 @@ GO
 SET IDENTITY_INSERT [dbo].[Festival] ON
 GO
 
-INSERT INTO [dbo].[Festival] ([fId], [festivalName], [image], [createdAt], [updatedAt], [deletedAt], [logo], [webName], [endDate], [isDelete], [isEdit], [isEditEndDate], [startDate], [createdBy], [deletedBy]) VALUES (N'1', N'เนื่องในวันครบรอบสถาปนากรมพัฒนาที่ดิน-ศทส-2569', N'Fileupload-1778425610314.jpeg', N'2026-05-01 15:06:50.7640000', N'2026-05-18 09:29:17.2420000', NULL, N'Fileupload-1779096557110.png', N'ร่วมอวยพรวันสถาปนากรมพัฒนาที่ดิน 2569', N'2026-06-05 00:00:00.0000000', N'1', N'1', N'1', N'2026-05-17 00:00:00.0000000', N'1', NULL)
+INSERT INTO [dbo].[Festival] ([fId], [festivalName], [image], [createdAt], [updatedAt], [deletedAt], [logo], [webName], [endDate], [isDelete], [isEdit], [startDate], [createdBy], [deletedBy], [isEditStartEndDate], [updatedBy]) VALUES (N'1', N'เนื่องในวันครบรอบสถาปนากรมพัฒนาที่ดิน-ศทส-2569', N'Fileupload-1779271432977.png', N'2026-05-20 10:03:53.1980000', N'2026-05-20 10:05:03.9520000', NULL, N'Fileupload-1779271503854.png', N'ร่วมอวยพรวันสถาปนากรมพัฒนาที่ดิน 2569', N'2026-06-05 00:00:00.0000000', N'1', N'1', N'2026-05-25 00:00:00.0000000', N'1', NULL, N'1', N'1')
 GO
 
 SET IDENTITY_INSERT [dbo].[Festival] OFF
@@ -82,5 +83,8 @@ ALTER TABLE [dbo].[Festival] ADD CONSTRAINT [Festival_createdBy_fkey] FOREIGN KE
 GO
 
 ALTER TABLE [dbo].[Festival] ADD CONSTRAINT [Festival_deletedBy_fkey] FOREIGN KEY ([deletedBy]) REFERENCES [dbo].[User] ([uId]) ON DELETE NO ACTION ON UPDATE NO ACTION
+GO
+
+ALTER TABLE [dbo].[Festival] ADD CONSTRAINT [Festival_updatedBy_fkey] FOREIGN KEY ([updatedBy]) REFERENCES [dbo].[User] ([uId]) ON DELETE NO ACTION ON UPDATE NO ACTION
 GO
 

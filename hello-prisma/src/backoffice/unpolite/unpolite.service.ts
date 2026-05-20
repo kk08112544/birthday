@@ -6,21 +6,30 @@ import { STATUS } from 'src/common/status';
 import { MESSAGE } from 'src/common/message';
 import { ExceptionsService } from 'src/common/exception/exception.service';
 import { PaginationUnpoliteDto } from './dto/pagination-unpolite.dto';
+import { AppLoggerService } from 'src/common/logger/app-logger.service';
+
 @Injectable()
 export class AdminUnpoliteService {
   constructor(
     private readonly adminunpoliteRepositories: AdminUnpoliteRepositories,
     private readonly exceptionsService: ExceptionsService,
+    private loggerService: AppLoggerService,
   ) {}
 
-  async create(createUnpoliteDto: CreateUnpoliteDto) {
+  async create(createUnpoliteDto: CreateUnpoliteDto, createdBy: number) {
+    console.log('=== CREATE CALLED ===');  // เพิ่มตรงนี้
+  
     const check = await this.adminunpoliteRepositories.exits(
       createUnpoliteDto.word,
     );
     if (check) {
       this.exceptionsService.throwBadWordAlreadyExits();
     }
-    const data = await this.adminunpoliteRepositories.create(createUnpoliteDto);
+    const data = await this.adminunpoliteRepositories.create(createUnpoliteDto,createdBy);
+ console.log('=== BEFORE LOG ===');    // เพิ่มตรงนี้
+  this.loggerService.create('UNPOLITE', { ...data, createdBy });
+  console.log('=== AFTER LOG ===');     // เพิ่มตรงนี้
+   
     return {
       unpolite: data,
       action: STATUS.SUCCESS,
@@ -65,7 +74,7 @@ export class AdminUnpoliteService {
     };
   }
 
-  async update(id: number, updateUnpoliteDto: UpdateUnpoliteDto) {
+  async update(id: number, updateUnpoliteDto: UpdateUnpoliteDto,updatedBy:number) {
     const check = await this.adminunpoliteRepositories.findById(id);
 
     const exits = await this.adminunpoliteRepositories.exits(
@@ -76,14 +85,20 @@ export class AdminUnpoliteService {
     }
     if (exits) {
       // this.exceptionsService.throwBadWordAlreadyExits();
-      if(Number(exits.upId) !== Number(id)){
- this.exceptionsService.throwBadWordAlreadyExits();
+      if (Number(exits.upId) !== Number(id)) {
+        this.exceptionsService.throwBadWordAlreadyExits();
       }
     }
     const data = await this.adminunpoliteRepositories.update(
       id,
       updateUnpoliteDto,
+      updatedBy
     );
+     /* LOG UPDATE */
+ 
+   
+// ถูก — แยก oldData และ newData ออกจากกัน
+this.loggerService.update('UNPOLITE', { ...check },{...data});
     return {
       unpolite: data,
       action: STATUS.SUCCESS,
@@ -91,14 +106,19 @@ export class AdminUnpoliteService {
     };
   }
 
-  async delete(id: number) {
+  async delete(id: number,deletedBy:number) {
     const check = await this.adminunpoliteRepositories.findById(id);
 
     if (!check) {
       this.exceptionsService.throwBadWordNotFound();
     }
 
-    const data = await this.adminunpoliteRepositories.delete(id);
+    const data = await this.adminunpoliteRepositories.delete(id,deletedBy);
+     this.loggerService.delete(
+    'UNPOLITE',
+    check,
+  );
+
     return {
       unpolite: data,
       action: STATUS.SUCCESS,

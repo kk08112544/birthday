@@ -40,7 +40,7 @@
           <div ref="firstNameRef" class="field-group">
             <label class="form-label">
               ชื่อย่อหน่วยงาน <span class="form-required">*</span>
-              <span class="form-hint">( 2–5 ตัวอักษร )</span>
+              <span class="form-hint">( 2–3 ตัวอักษร )</span>
             </label>
             <div class="abbr-input-wrap">
               <q-input
@@ -48,7 +48,7 @@
                 outlined
                 dense
                 placeholder="เช่น IT, กสก, สบก"
-                maxlength="5"
+                maxlength="3"
                 :error="firstNameError"
                 error-message=" "
                 hide-bottom-space
@@ -63,9 +63,7 @@
               <!-- Live preview badge -->
               <transition name="badge-pop">
                 <div v-if="form.firstName" class="abbr-badge">
-                  <div class="abbr-badge-avatar">
-                    {{ form.firstName.trim().charAt(0).toUpperCase() }}
-                  </div>
+                  <div class="abbr-badge-avatar">{{ form.firstName.toUpperCase() }}</div>
                   <div class="abbr-badge-label">ตัวอย่างอักษรย่อ</div>
                 </div>
               </transition>
@@ -317,7 +315,7 @@
           >
             <span v-if="!loading" class="submit-btn-inner">
               <q-icon name="check_circle" size="20px" />
-              บันทึกผู้ใช้แลระบบ
+              บันทึกผู้ดูแลระบบ
             </span>
             <span v-else class="submit-btn-inner">
               <q-circular-progress indeterminate size="20px" color="white" />
@@ -435,10 +433,7 @@ let particleId = 0;
 // ─── Computed ─────────────────────────────────────────────────────────────────
 const hasSummary = computed(
   () =>
-    form.value.firstName ||
-    form.value.emailPrefix ||
-    form.value.phoneNumber ||
-    form.value.dateOfBirth,
+    form.value.firstName || form.value.emailPrefix || form.value.phoneNumber || form.value.dateOfBirth,
 );
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -476,50 +471,23 @@ const openNotify = (success: boolean, message: string) => {
 };
 
 // ─── Field Handlers ───────────────────────────────────────────────────────────
-const onFirstNameChange = (val: string | number | null) => {
-  if (typeof val !== 'string') return;
-  form.value.firstName = Array.from(val).slice(0, 5).join('');
-  const nameLen = Array.from(form.value.firstName.trim()).length;
-  if (!form.value.firstName.trim()) {
-    firstNameError.value = false;
-    firstNameErrorMsg.value = '';
-  } else if (nameLen < 2) {
-    firstNameError.value = true;
-    firstNameErrorMsg.value = 'ชื่อย่อต้องมีอย่างน้อย 2 ตัวอักษร';
-  } else {
-    firstNameError.value = false;
-    firstNameErrorMsg.value = '';
-  }
+const onFirstNameChange = () => {
+  firstNameError.value = false;
+  firstNameErrorMsg.value = '';
+  form.value.firstName = Array.from(form.value.firstName).slice(0, 3).join('');
 };
 
-const onEmailPrefixChange = (val: string | number | null) => {
-  if (typeof val !== 'string') return;
-  form.value.emailPrefix = val.replace(/@.*/g, '');
-  if (!form.value.emailPrefix.trim()) {
-    emailError.value = false;
-    emailErrorMsg.value = '';
-  } else if (!/^[^\s@]+$/.test(form.value.emailPrefix.trim())) {
-    emailError.value = true;
-    emailErrorMsg.value = 'รูปแบบอีเมลไม่ถูกต้อง (ห้ามมีช่องว่างหรืออักขระพิเศษ)';
-  } else {
-    emailError.value = false;
-    emailErrorMsg.value = '';
-  }
+const onEmailPrefixChange = () => {
+  emailError.value = false;
+  emailErrorMsg.value = '';
+  // กรอง @ และทุกอย่างหลังจากนั้นออก ป้องกันพิมพ์โดเมนเอง
+  form.value.emailPrefix = form.value.emailPrefix.replace(/@.*/g, '');
 };
 
-const onPhoneChange = (val: string | number | null) => {
-  if (typeof val !== 'string') return;
-  form.value.phoneNumber = val.replace(/\D/g, '').slice(0, 4);
-  if (!form.value.phoneNumber) {
-    phoneError.value = false;
-    phoneErrorMsg.value = '';
-  } else if (!/^\d{4}$/.test(form.value.phoneNumber)) {
-    phoneError.value = true;
-    phoneErrorMsg.value = 'เบอร์โทรต้องเป็นตัวเลข 4 หลัก';
-  } else {
-    phoneError.value = false;
-    phoneErrorMsg.value = '';
-  }
+const onPhoneChange = () => {
+  phoneError.value = false;
+  phoneErrorMsg.value = '';
+  form.value.phoneNumber = form.value.phoneNumber.replace(/\D/g, '').slice(0, 4);
 };
 
 // ─── Validation (แบบเดียวกับ festival) ───────────────────────────────────────
@@ -595,7 +563,7 @@ const submitCreate = async () => {
     if (form.value.dateOfBirth) payload.password = form.value.dateOfBirth;
 
     const response = await api.post('/backoffice/admin', payload);
-    openNotify(true, response.data.message);
+    openNotify(true, response.data.message || `สร้างผู้ดูแล "${form.value.firstName}" สำเร็จ!`);
   } catch (err: unknown) {
     const error = err as AxiosError<{ message: string }>;
     openNotify(false, error.response?.data?.message ?? 'เกิดข้อผิดพลาด กรุณาลองใหม่');

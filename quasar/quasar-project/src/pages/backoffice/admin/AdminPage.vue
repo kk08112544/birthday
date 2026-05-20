@@ -141,7 +141,7 @@
                   icon="visibility"
                   size="sm"
                   class="action-btn action-btn--view"
-                  @click="onView(props.row)"
+                  :to="`/backoffice/admin/view/${props.row.uId}`"
                 >
                   <q-tooltip class="bg-indigo-8">ดูรายละเอียด</q-tooltip>
                 </q-btn>
@@ -154,7 +154,7 @@
                   icon="edit"
                   size="sm"
                   class="action-btn action-btn--edit"
-                  @click="onEdit(props.row)"
+                  :to="`/backoffice/admin/edit/${props.row.uId}`"
                 >
                   <q-tooltip class="bg-amber-8">แก้ไข</q-tooltip>
                 </q-btn>
@@ -289,112 +289,6 @@
             ปิด
           </button>
         </div>
-      </div>
-    </q-dialog>
-
-    <!-- ===== EDIT DIALOG ===== -->
-    <q-dialog v-model="editDialog" persistent :maximized="$q.screen.xs">
-      <div class="custom-dialog" :class="{ 'custom-dialog--mobile': $q.screen.xs }">
-        <div v-if="$q.screen.xs" class="dialog-drag-handle" />
-        <div class="dialog-header dialog-header--amber">
-          <div class="dialog-header-icon dialog-header-icon--amber">
-            <q-icon name="edit" color="white" size="18px" />
-          </div>
-          <span>แก้ไข Admin</span>
-          <q-space />
-          <button class="dialog-close-btn" type="button" @click="editDialog = false">
-            <q-icon name="close" size="18px" />
-          </button>
-        </div>
-        <q-form @submit="submitEdit">
-          <div class="dialog-body">
-            <div class="create-grid">
-              <div class="form-field form-field--full">
-                <label class="form-label">ชื่อ <span class="form-required">*</span></label>
-                <q-input
-                  v-model="editForm.firstName"
-                  outlined
-                  dense
-                  autofocus
-                  bg-color="white"
-                  class="form-input"
-                  :rules="[(val) => !!val?.trim() || 'กรุณากรอกชื่อ']"
-                />
-              </div>
-              <div class="form-field form-field--full">
-                <label class="form-label">อีเมล <span class="form-required">*</span></label>
-                <q-input
-                  v-model="editForm.email"
-                  outlined
-                  dense
-                  type="email"
-                  bg-color="white"
-                  class="form-input"
-                  :rules="[(val) => !!val?.trim() || 'กรุณากรอกอีเมล']"
-                >
-                  <template v-slot:prepend>
-                    <q-icon name="email" color="indigo-4" size="18px" />
-                  </template>
-                </q-input>
-              </div>
-              <div class="form-field">
-                <label class="form-label">เบอร์โทร</label>
-                <q-input
-                  v-model="editForm.phoneNumber"
-                  outlined
-                  dense
-                  bg-color="white"
-                  class="form-input"
-                >
-                  <template v-slot:prepend>
-                    <q-icon name="phone" color="indigo-4" size="18px" />
-                  </template>
-                </q-input>
-              </div>
-              <div class="form-field">
-                <label class="form-label">วันเกิด</label>
-                <q-input
-                  v-model="editForm.dateOfBirth"
-                  outlined
-                  dense
-                  placeholder="YYYY/MM/DD"
-                  bg-color="white"
-                  class="form-input"
-                >
-                  <template v-slot:prepend>
-                    <q-icon name="cake" color="indigo-4" size="18px" />
-                  </template>
-                  <template v-slot:append>
-                    <q-icon name="event" color="indigo-4" size="18px" class="cursor-pointer">
-                      <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-                        <q-date v-model="editForm.dateOfBirth" mask="YYYY/MM/DD">
-                          <div class="row items-center justify-end">
-                            <q-btn v-close-popup label="ตกลง" color="indigo-6" flat />
-                          </div>
-                        </q-date>
-                      </q-popup-proxy>
-                    </q-icon>
-                  </template>
-                </q-input>
-              </div>
-            </div>
-          </div>
-          <div class="dialog-footer" :class="{ 'dialog-footer--mobile': $q.screen.xs }">
-            <button type="button" class="dlg-btn dlg-btn--cancel" @click="editDialog = false">
-              ยกเลิก
-            </button>
-            <button type="submit" class="dlg-btn dlg-btn--amber" :disabled="isSubmitting">
-              <q-circular-progress
-                v-if="isSubmitting"
-                indeterminate
-                size="16px"
-                color="white"
-                class="q-mr-xs"
-              />
-              อัปเดต
-            </button>
-          </div>
-        </q-form>
       </div>
     </q-dialog>
 
@@ -566,26 +460,13 @@ const columns: QTableColumn[] = [
 
 // ─── Dialog State ─────────────────────────────────────────────────────────────
 const viewDialog = ref(false);
-const editDialog = ref(false);
+
 const deleteDialog = ref(false);
 const isSubmitting = ref(false);
 
 const viewForm = ref<TableRow | null>(null);
-const editForm = ref<{
-  uId: number;
-  firstName: string;
-  email: string;
-  phoneNumber: string;
-  dateOfBirth: string;
-}>({
-  uId: 0,
-  firstName: '',
-  email: '',
-  phoneNumber: '',
-  dateOfBirth: '',
-});
-const itemToDelete = ref<TableRow | null>(null);
 
+const itemToDelete = ref<TableRow | null>(null);
 
 // ─── Notify State ─────────────────────────────────────────────────────────────
 const showNotifyDialog = ref(false);
@@ -610,7 +491,14 @@ const openNotify = (success: boolean, message: string) => {
   }, NOTIFY_DURATION);
 };
 
-const getInitial = (name: string) => (name?.charAt(0) ?? '?').toUpperCase();
+// const getInitial = (name: string) => (name?.charAt(0) ?? '?').toUpperCase();
+// ✅ แก้เป็น
+const getInitial = (name: string): string => {
+  if (!name) return '?';
+  const parts = name.split('-');
+  const target = parts.length > 1 ? parts[parts.length - 1] : parts[0];
+  return (target?.trim().charAt(0) ?? '?').toUpperCase();
+};
 
 const getRoleLabel = (role: string): string => {
   const map: Record<string, string> = { superAdmin: 'Super Admin', admin: 'Admin' };
@@ -659,7 +547,7 @@ const fetchAdmins = async (): Promise<void> => {
     });
 
     const res = response.data;
-    const list: AdminItem[] = res.festival?.data ?? [];
+    const list: AdminItem[] = res.admin?.data ?? [];
     const startIndex = (pagination.value.page - 1) * pagination.value.rowsPerPage;
 
     rows.value = list.map((item, index) => ({
@@ -680,49 +568,6 @@ const fetchAdmins = async (): Promise<void> => {
     rows.value = [];
   } finally {
     loading.value = false;
-  }
-};
-
-// ─── View Action ──────────────────────────────────────────────────────────────
-const onView = (row: TableRow) => {
-  viewForm.value = row;
-  viewDialog.value = true;
-};
-
-// ─── Create Action ────────────────────────────────────────────────────────────
-
-// ─── Edit Action ──────────────────────────────────────────────────────────────
-const onEdit = (row: TableRow) => {
-  editForm.value = {
-    uId: row.uId,
-    firstName: row.firstName,
-    email: row.email,
-    phoneNumber: row.phoneNumber ?? '',
-    dateOfBirth: '',
-  };
-  editDialog.value = true;
-};
-
-const submitEdit = async () => {
-  if (isSubmitting.value) return;
-  isSubmitting.value = true;
-  try {
-    const payload: Record<string, string> = {
-      firstName: editForm.value.firstName.trim(),
-      email: editForm.value.email.trim(),
-    };
-    if (editForm.value.phoneNumber) payload.phoneNumber = editForm.value.phoneNumber.trim();
-    if (editForm.value.dateOfBirth) payload.dateOfBirth = editForm.value.dateOfBirth;
-
-    const response = await api.patch(`/backoffice/admin/${editForm.value.uId}`, payload);
-    editDialog.value = false;
-    openNotify(true, response.data.message || 'แก้ไข Admin สำเร็จ');
-    void fetchAdmins();
-  } catch (err: unknown) {
-    const error = err as AxiosError<{ message: string }>;
-    openNotify(false, error.response?.data?.message ?? 'เกิดข้อผิดพลาด');
-  } finally {
-    isSubmitting.value = false;
   }
 };
 

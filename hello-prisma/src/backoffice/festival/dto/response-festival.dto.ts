@@ -10,12 +10,13 @@ export class ResponseFestivalDto {
 
   isEdit!: boolean;
   isDelete!: boolean;
-  isEditEndDate!: boolean;
+  isEditStartEndDate!: boolean;
 
   startDate!: Date;
   endDate!: Date;
 
   createdBy!: number;
+  updatedBy!:number | null;
   deletedBy!: number | null;
 
   createdByUser!: {
@@ -24,6 +25,13 @@ export class ResponseFestivalDto {
     userName: string;
     role: string;
   };
+
+   updatedByUser!: {
+    uId: number;
+    firstName: string;
+    userName: string;
+    role: string;
+  }| null;;
 
   deletedByUser!: {
     uId: number;

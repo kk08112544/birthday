@@ -14,6 +14,7 @@ import {
 import { AdminService } from './admin.service';
 import { CreateAdminDto } from './dto/create-admin.dto';
 import { UpdateAdminDto } from './dto/update-admin.dto';
+import { UpdatePasswordDto } from './dto/update-password.dto';
 import { PaginationAdminDto } from './dto/pagination-admin.dto';
 import { JwtAuthGuard } from 'src/common/guard/jwt/jwt-auth.guard';
 import { Roles } from 'src/common/decorator/roles.decorator';
@@ -58,6 +59,16 @@ export class AdminController {
   )
   update(@Param('id') id: number, @Body() updateAdminDto: UpdateAdminDto) {
     return this.adminService.update(id, updateAdminDto);
+  }
+
+  @Patch('password/:id')
+  @UsePipes(
+    new ValidationPipe({
+      transform: true,
+    }),
+  )
+  updatePassword(@Param('id') id: number, @Body() updatePasswordDto: UpdatePasswordDto) {
+    return this.adminService.updatePassword(id, updatePasswordDto);
   }
 
   @Delete(':id')

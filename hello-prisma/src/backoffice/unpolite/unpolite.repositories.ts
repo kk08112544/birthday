@@ -7,145 +7,99 @@ import { PrismaService } from 'src/prisma.service';
 import { PaginatedResult } from 'src/common/pagination/paginate.interface';
 import { Prisma } from '@prisma/client';
 import { paginate } from 'src/common/pagination/paginate.util';
+
+const userSelect = {
+  uId: true,
+  firstName: true,
+  userName: true,
+};
+
+const unpoliteSelect = {
+  upId: true,
+  word: true,
+  createdBy: true,
+  updatedBy: true,
+  deletedBy: true,
+  createdByUser: { select: userSelect },
+  updatedByUser: { select: userSelect },
+  deletedByUser: { select: userSelect },
+  createdAt: true,
+  updatedAt: true,
+  deletedAt: true,
+};
+
 @Injectable()
 export class AdminUnpoliteRepositories {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(
-    createUnpoliteDto: CreateUnpoliteDto,
-  ): Promise<ResponseUnpoliteDto> {
-    const unpolite = await this.prisma.unpolite.create({
-      data: createUnpoliteDto,
-      select: {
-        upId: true,
-        word: true,
-        createdAt: true,
-        updatedAt: true,
-        deletedAt: true,
-      },
+  async create(createUnpoliteDto: CreateUnpoliteDto, createdBy: number): Promise<ResponseUnpoliteDto> {
+    return this.prisma.unpolite.create({
+      data: { ...createUnpoliteDto, createdBy },
+      select: unpoliteSelect,
     });
-    return unpolite;
   }
 
   async findAll(): Promise<ResponseUnpoliteDto[]> {
-    const data = await this.prisma.unpolite.findMany({
-      where: {
-        deletedAt: null,
-      },
+    return this.prisma.unpolite.findMany({
+      where: { deletedAt: null },
+      select: unpoliteSelect,
     });
-    return data;
   }
 
   async findById(id: number): Promise<ResponseUnpoliteDto | null> {
-    const data = await this.prisma.unpolite.findUnique({
-      where: {
-        upId: Number(id),
-        deletedAt: null,
-      },
+    return this.prisma.unpolite.findUnique({
+      where: { upId: Number(id), deletedAt: null },
+      select: unpoliteSelect,
     });
-    return data;
   }
 
-  async findManyPaginated(
-    options: PaginationUnpoliteDto,
-  ): Promise<PaginatedResult<ResponseUnpoliteDto>> {
-    const whereCondition: Prisma.UnpoliteWhereInput = {
-      deletedAt: null,
-    };
+  async findManyPaginated(options: PaginationUnpoliteDto): Promise<PaginatedResult<ResponseUnpoliteDto>> {
+    const whereCondition: Prisma.UnpoliteWhereInput = { deletedAt: null };
+
     if (options.search) {
-      whereCondition.OR = [
-        {
-          word: {
-            contains: options.search,
-          },
-        },
-      ];
+      whereCondition.OR = [{ word: { contains: options.search } }];
     }
-    const queryFn = (skip: number, take: number) => {
-      return this.prisma.unpolite.findMany({
+
+    const queryFn = (skip: number, take: number) =>
+      this.prisma.unpolite.findMany({
         where: whereCondition,
-        skip, // ✅ ต้องมีค่าเสมอ
-        take, // ✅ ต้องมีค่าเสมอ
-        orderBy: {
-          createdAt: 'desc',
-        },
-        select: {
-          upId: true,
-          word: true,
-          createdAt: true,
-          updatedAt: true,
-          deletedAt: true,
-        },
+        skip,
+        take,
+        orderBy: { createdAt: 'desc' },
+        select: unpoliteSelect,
       });
-    };
-    const countFn = () => {
-      return this.prisma.unpolite.count({
-        where: whereCondition,
-      });
-    };
+
+    const countFn = () => this.prisma.unpolite.count({ where: whereCondition });
 
     return paginate(queryFn, countFn, options);
   }
 
-  async update(
-    id: number,
-    updateUnpoliteDto: UpdateUnpoliteDto,
-  ): Promise<ResponseUnpoliteDto> {
-    const data = await this.prisma.unpolite.update({
-      where: {
-        upId: Number(id),
-        deletedAt: null,
-      },
-      data: {
-        ...updateUnpoliteDto,
-      },
-      select: {
-        upId: true,
-        word: true,
-        createdAt: true,
-        updatedAt: true,
-        deletedAt: true,
-      },
+  async update(id: number, updateUnpoliteDto: UpdateUnpoliteDto, updatedBy: number): Promise<ResponseUnpoliteDto> {
+    return this.prisma.unpolite.update({
+      where: { upId: Number(id), deletedAt: null },
+      data: { ...updateUnpoliteDto, updatedBy },
+      select: unpoliteSelect,
     });
-    return data;
   }
 
-  async delete(id: number): Promise<ResponseUnpoliteDto> {
-    const data = await this.prisma.unpolite.update({
-      where: {
-        upId: Number(id),
-      },
-      data: {
-        deletedAt: new Date(),
-      },
-      select: {
-        upId: true,
-        word: true,
-        createdAt: true,
-        updatedAt: true,
-        deletedAt: true,
-      },
+  async delete(id: number, deletedBy: number): Promise<ResponseUnpoliteDto> {
+    return this.prisma.unpolite.update({
+      where: { upId: Number(id) },
+      data: { deletedAt: new Date(), deletedBy },
+      select: unpoliteSelect,
     });
-    return data;
   }
 
   async exits(word: string): Promise<ResponseUnpoliteDto | null> {
-    const data = await this.prisma.unpolite.findFirst({
-      where: {
-        word: word,
-        deletedAt: null,
-      },
+    return this.prisma.unpolite.findFirst({
+      where: { word, deletedAt: null },
+      select: unpoliteSelect,
     });
-    return data;
   }
 
-  async findupdateExits(id:number, word:string): Promise<boolean> {
+  async findupdateExits(id: number, word: string): Promise<boolean> {
     const data = await this.prisma.unpolite.findFirst({
-      where: {
-        upId:Number(id),
-        word: word,
-        deletedAt: null,
-      },
+      where: { upId: Number(id), word, deletedAt: null },
     });
     return !!data;
   }
