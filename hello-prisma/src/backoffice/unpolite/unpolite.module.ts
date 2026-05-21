@@ -5,7 +5,7 @@ import { AdminUnpoliteController } from './unpolite.controller';
 import { AdminUnpoliteRepositories } from './unpolite.repositories';
 import { PrismaService } from 'src/prisma.service';
 @Module({
-   imports: [LoggerModule],
+  imports: [LoggerModule],
   controllers: [AdminUnpoliteController],
   providers: [AdminUnpoliteService, AdminUnpoliteRepositories, PrismaService],
 })

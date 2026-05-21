@@ -33,10 +33,14 @@ export class AdminFestivalRepositories {
         endDate: new Date(createFestivalDto.endDate),
         createdByUser: { connect: { uId: createdBy } },
         wisher: {
-          create: createFestivalDto.wisher?.map((w) => ({ wishWord: w.wishWord })) || [],
+          create:
+            createFestivalDto.wisher?.map((w) => ({ wishWord: w.wishWord })) ||
+            [],
         },
         card: {
-          create: createFestivalDto.card?.map((c) => ({ imageCard: c.imageCard })) || [],
+          create:
+            createFestivalDto.card?.map((c) => ({ imageCard: c.imageCard })) ||
+            [],
         },
       },
       include: {
@@ -67,29 +71,32 @@ export class AdminFestivalRepositories {
   }
 
   async findById(id: number): Promise<ResponseFestivalDto | null> {
-  return this.prisma.festival.findUnique({
-    where: { fId: Number(id), deletedAt: null },
-    include: {
-      wisher: { where: { deletedAt: null } },
-      card: { where: { deletedAt: null } },
-      createdByUser: { select: userSelect },
-      updatedByUser: { select: userSelect },
-      deletedByUser: { select: userSelect },
-    },
-  }) as unknown as Promise<ResponseFestivalDto | null>;
-}
-async findByCreatorId(id: number, createdBy: number): Promise<ResponseFestivalDto | null> {
-  return this.prisma.festival.findFirst({
-    where: { fId: Number(id), createdBy: Number(createdBy), deletedAt: null },
-    include: {
-      wisher: { where: { deletedAt: null } },
-      card: { where: { deletedAt: null } },
-      createdByUser: { select: userSelect },
-      updatedByUser: { select: userSelect },
-      deletedByUser: { select: userSelect },
-    },
-  }) as unknown as Promise<ResponseFestivalDto | null>;
-}
+    return this.prisma.festival.findUnique({
+      where: { fId: Number(id), deletedAt: null },
+      include: {
+        wisher: { where: { deletedAt: null } },
+        card: { where: { deletedAt: null } },
+        createdByUser: { select: userSelect },
+        updatedByUser: { select: userSelect },
+        deletedByUser: { select: userSelect },
+      },
+    }) as unknown as Promise<ResponseFestivalDto | null>;
+  }
+  async findByCreatorId(
+    id: number,
+    createdBy: number,
+  ): Promise<ResponseFestivalDto | null> {
+    return this.prisma.festival.findFirst({
+      where: { fId: Number(id), createdBy: Number(createdBy), deletedAt: null },
+      include: {
+        wisher: { where: { deletedAt: null } },
+        card: { where: { deletedAt: null } },
+        createdByUser: { select: userSelect },
+        updatedByUser: { select: userSelect },
+        deletedByUser: { select: userSelect },
+      },
+    }) as unknown as Promise<ResponseFestivalDto | null>;
+  }
   // async findManyPaginated(
   //   options: PaginationFestivalDto,
   // ): Promise<PaginatedResult<ResponseFestivalDto>> {
@@ -119,126 +126,134 @@ async findByCreatorId(id: number, createdBy: number): Promise<ResponseFestivalDt
   //   return paginate(queryFn, countFn, options);
   // }
   async findManyPaginated(
-  options: PaginationFestivalDto,
-): Promise<PaginatedResult<ResponseFestivalDto>> {
-  const whereCondition: Prisma.FestivalWhereInput = { deletedAt: null };
+    options: PaginationFestivalDto,
+  ): Promise<PaginatedResult<ResponseFestivalDto>> {
+    const whereCondition: Prisma.FestivalWhereInput = { deletedAt: null };
 
-  if (options.search) {
-    whereCondition.OR = [{ festivalName: { contains: options.search } }];
+    if (options.search) {
+      whereCondition.OR = [{ festivalName: { contains: options.search } }];
+    }
+
+    const queryFn = (skip: number, take: number) =>
+      this.prisma.festival.findMany({
+        where: whereCondition,
+        skip,
+        take,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          wisher: { where: { deletedAt: null } },
+          card: { where: { deletedAt: null } },
+          createdByUser: { select: userSelect },
+          updatedByUser: { select: userSelect },
+          deletedByUser: { select: userSelect },
+        },
+      }) as unknown as Promise<ResponseFestivalDto[]>;
+
+    const countFn = () => this.prisma.festival.count({ where: whereCondition });
+
+    return paginate(queryFn, countFn, options) as unknown as Promise<
+      PaginatedResult<ResponseFestivalDto>
+    >;
   }
 
-  const queryFn = (skip: number, take: number) =>
-    this.prisma.festival.findMany({
-      where: whereCondition,
-      skip,
-      take,
-      orderBy: { createdAt: 'desc' },
-      include: {
-        wisher: { where: { deletedAt: null } },
-        card: { where: { deletedAt: null } },
-        createdByUser: { select: userSelect },
-        updatedByUser: { select: userSelect },
-        deletedByUser: { select: userSelect },
-      },
-    }) as unknown as Promise<ResponseFestivalDto[]>;
+  async update(
+    id: number,
+    updateFestivalDto: UpdateFestivalDto,
+    updatedBy: number,
+  ): Promise<ResponseFestivalDto> {
+    const {
+      festivalName,
+      image,
+      wisher,
+      card,
+      logo,
+      webName,
+      startDate,
+      endDate,
+    } = updateFestivalDto;
 
-  const countFn = () => this.prisma.festival.count({ where: whereCondition });
-
-  return paginate(queryFn, countFn, options) as unknown as Promise<PaginatedResult<ResponseFestivalDto>>;
-}
-
-
-
-async update(
-  id: number,
-  updateFestivalDto: UpdateFestivalDto,
-  updatedBy: number,
-): Promise<ResponseFestivalDto> {
-  const { festivalName, image, wisher, card, logo, webName, startDate, endDate } = updateFestivalDto;
-
-  return await this.prisma.$transaction(async (tx) => {
-    const existing = await tx.festival.findUnique({
-      where: { fId: Number(id) },
-    });
-
-    if (!existing || existing.deletedAt) {
-      throw new Error('Festival not found');
-    }
-
-    if (wisher) {
-      const wisherIdsToKeep = wisher.filter((w) => w.wId).map((w) => w.wId);
-
-      await tx.wisher.updateMany({
-        where: {
-          festivalId: Number(id),
-          wId: { notIn: wisherIdsToKeep },
-          deletedAt: null,
-        },
-        data: { deletedAt: new Date() },
+    return (await this.prisma.$transaction(async (tx) => {
+      const existing = await tx.festival.findUnique({
+        where: { fId: Number(id) },
       });
 
-      for (const wData of wisher) {
-        if (wData.wId) {
-          await tx.wisher.update({
-            where: { wId: wData.wId },
-            data: { wishWord: wData.wishWord },
-          });
-        } else {
-          await tx.wisher.create({
-            data: { wishWord: wData.wishWord, festivalId: Number(id) },
-          });
+      if (!existing || existing.deletedAt) {
+        throw new Error('Festival not found');
+      }
+
+      if (wisher) {
+        const wisherIdsToKeep = wisher.filter((w) => w.wId).map((w) => w.wId);
+
+        await tx.wisher.updateMany({
+          where: {
+            festivalId: Number(id),
+            wId: { notIn: wisherIdsToKeep },
+            deletedAt: null,
+          },
+          data: { deletedAt: new Date() },
+        });
+
+        for (const wData of wisher) {
+          if (wData.wId) {
+            await tx.wisher.update({
+              where: { wId: wData.wId },
+              data: { wishWord: wData.wishWord },
+            });
+          } else {
+            await tx.wisher.create({
+              data: { wishWord: wData.wishWord, festivalId: Number(id) },
+            });
+          }
         }
       }
-    }
 
-    if (card) {
-      const cardIdsToKeep = card.filter((c) => c.cId).map((c) => c.cId);
+      if (card) {
+        const cardIdsToKeep = card.filter((c) => c.cId).map((c) => c.cId);
 
-      await tx.card.updateMany({
-        where: {
-          festivalId: Number(id),
-          cId: { notIn: cardIdsToKeep },
-          deletedAt: null,
+        await tx.card.updateMany({
+          where: {
+            festivalId: Number(id),
+            cId: { notIn: cardIdsToKeep },
+            deletedAt: null,
+          },
+          data: { deletedAt: new Date() },
+        });
+
+        for (const cData of card) {
+          if (cData.cId) {
+            await tx.card.update({
+              where: { cId: cData.cId },
+              data: { imageCard: cData.imageCard },
+            });
+          } else {
+            await tx.card.create({
+              data: { imageCard: cData.imageCard, festivalId: Number(id) },
+            });
+          }
+        }
+      }
+
+      return (await tx.festival.update({
+        where: { fId: Number(id) },
+        data: {
+          festivalName,
+          image,
+          logo,
+          webName,
+          updatedBy,
+          ...(startDate && { startDate: new Date(startDate) }),
+          ...(endDate && { endDate: new Date(endDate) }),
         },
-        data: { deletedAt: new Date() },
-      });
-
-      for (const cData of card) {
-        if (cData.cId) {
-          await tx.card.update({
-            where: { cId: cData.cId },
-            data: { imageCard: cData.imageCard },
-          });
-        } else {
-          await tx.card.create({
-            data: { imageCard: cData.imageCard, festivalId: Number(id) },
-          });
-        }
-      }
-    }
-
-    return await tx.festival.update({
-      where: { fId: Number(id) },
-      data: {
-        festivalName,
-        image,
-        logo,
-        webName,
-        updatedBy,
-        ...(startDate && { startDate: new Date(startDate) }),
-        ...(endDate && { endDate: new Date(endDate) }),
-      },
-      include: {
-        wisher: { where: { deletedAt: null } },
-        card: { where: { deletedAt: null } },
-        createdByUser: { select: userSelect },
-        updatedByUser: { select: userSelect },
-        deletedByUser: { select: userSelect },
-      },
-    }) as unknown as ResponseFestivalDto;
-
-  }) as unknown as ResponseFestivalDto;
-}
+        include: {
+          wisher: { where: { deletedAt: null } },
+          card: { where: { deletedAt: null } },
+          createdByUser: { select: userSelect },
+          updatedByUser: { select: userSelect },
+          deletedByUser: { select: userSelect },
+        },
+      })) as unknown as ResponseFestivalDto;
+    })) as unknown as ResponseFestivalDto;
+  }
 
   // async delete(id: number, deletedBy: number): Promise<ResponseFestivalDto> {
   //   return this.prisma.festival.update({
@@ -268,34 +283,34 @@ async update(
   //     },
   //   });
   // }
-async delete(id: number, deletedBy: number): Promise<ResponseFestivalDto> {
-  return this.prisma.festival.update({
-    where: { fId: Number(id) },
-    data: {
-      deletedAt: new Date(),
-      deletedBy,
-      wisher: {
-        updateMany: {
-          where: { festivalId: Number(id), deletedAt: null },
-          data: { deletedAt: new Date() },
+  async delete(id: number, deletedBy: number): Promise<ResponseFestivalDto> {
+    return this.prisma.festival.update({
+      where: { fId: Number(id) },
+      data: {
+        deletedAt: new Date(),
+        deletedBy,
+        wisher: {
+          updateMany: {
+            where: { festivalId: Number(id), deletedAt: null },
+            data: { deletedAt: new Date() },
+          },
+        },
+        card: {
+          updateMany: {
+            where: { festivalId: Number(id), deletedAt: null },
+            data: { deletedAt: new Date() },
+          },
         },
       },
-      card: {
-        updateMany: {
-          where: { festivalId: Number(id), deletedAt: null },
-          data: { deletedAt: new Date() },
-        },
+      include: {
+        wisher: true,
+        card: true,
+        createdByUser: { select: userSelect },
+        updatedByUser: { select: userSelect },
+        deletedByUser: { select: userSelect },
       },
-    },
-    include: {
-      wisher: true,
-      card: true,
-      createdByUser: { select: userSelect },
-      updatedByUser: { select: userSelect },
-      deletedByUser: { select: userSelect },
-    },
-  }) as unknown as Promise<ResponseFestivalDto>;
-}
+    }) as unknown as Promise<ResponseFestivalDto>;
+  }
 
   async findDeleteExits(id: number): Promise<boolean> {
     const data = await this.prisma.festival.findFirst({
@@ -307,7 +322,4 @@ async delete(id: number, deletedBy: number): Promise<ResponseFestivalDto> {
     });
     return !!data;
   }
-
-
-  
 }

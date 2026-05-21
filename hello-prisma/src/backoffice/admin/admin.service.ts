@@ -3,17 +3,20 @@ import { CreateAdminDto } from './dto/create-admin.dto';
 import { UpdateAdminDto } from './dto/update-admin.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { PaginationAdminDto } from './dto/pagination-admin.dto';
+import { PaginationAdminLogDto } from './dto/pagination-adminlog.dto';
 import { ExceptionsService } from 'src/common/exception/exception.service';
 import { STATUS } from 'src/common/status';
 import { MESSAGE } from 'src/common/message';
 import { AdminRepositories } from './admin.repositories';
 import { hashPassword } from 'src/common/utils/bcrypt.util';
+import { AppLoggerService } from 'src/common/logger/app-logger.service';
 
 @Injectable()
 export class AdminService {
   constructor(
     private adminRepositories: AdminRepositories,
     private exceptionService: ExceptionsService,
+    private loggerService: AppLoggerService,
   ) {}
 
   async create(createAdminDto: CreateAdminDto) {
@@ -54,6 +57,9 @@ export class AdminService {
     }
 
     const data = await this.adminRepositories.create(createAdminDto);
+    console.log('=== BEFORE LOG ==='); // เพิ่มตรงนี้
+    this.loggerService.create('ADMIN', { ...data });
+    console.log('=== AFTER LOG ==='); // เพิ่มตรงนี้
     return {
       admin: data,
       action: STATUS.SUCCESS,
@@ -70,6 +76,10 @@ export class AdminService {
     };
   }
 
+  async getLog(paginationDto: PaginationAdminLogDto) {
+    return this.adminRepositories.getLog(paginationDto);
+  }
+
   async findById(id: number) {
     const data = await this.adminRepositories.findById(id);
     if (!data) {
@@ -79,6 +89,15 @@ export class AdminService {
       admin: data,
       action: STATUS.SUCCESS, // ใช้ตัวแปร STATUS
       message: MESSAGE.ADMIN.GET_SUCCESS, // ใช้ตัวแปร MESSAGE
+    };
+  }
+
+  async findMin() {
+    const data = await this.adminRepositories.findMin();
+    return {
+      admin: data,
+      action: STATUS.SUCCESS,
+      message: MESSAGE.ADMIN.MIN_SUCCESS,
     };
   }
 
@@ -104,7 +123,7 @@ export class AdminService {
       this.exceptionService.throwAdminNotFound();
     }
 
-      if(check.role==='superAdmin'){
+    if (check.role === 'superAdmin') {
       this.exceptionService.throwSuperAdminNotExceptedChange();
     }
     const checkFirstName = await this.adminRepositories.checkFirstName(
@@ -138,10 +157,9 @@ export class AdminService {
       ...updateAdminDto,
     };
 
-  
-
     const data = await this.adminRepositories.update(id, payload);
-
+    // ถูก — แยก oldData และ newData ออกจากกัน
+    this.loggerService.update('ADMIN', { ...check }, { ...data });
     return {
       admin: data,
       action: STATUS.SUCCESS,
@@ -149,26 +167,26 @@ export class AdminService {
     };
   }
 
-
-  async updatePassword(id: number, updatePasswordDto: UpdatePasswordDto){
-     const check = await this.adminRepositories.findById(id);
+  async updatePassword(id: number, updatePasswordDto: UpdatePasswordDto) {
+    const check = await this.adminRepositories.findById(id);
 
     if (!check) {
       this.exceptionService.throwAdminNotFound();
     }
- if(check.role==='superAdmin'){
+    if (check.role === 'superAdmin') {
       this.exceptionService.throwSuperAdminNotExceptedChange();
     }
-  
-     const hashedPassword = await hashPassword(updatePasswordDto.password);
-     const data = await this.adminRepositories.updatePassword(id, hashedPassword);
+
+    const hashedPassword = await hashPassword(updatePasswordDto.password);
+    const data = await this.adminRepositories.updatePassword(
+      id,
+      hashedPassword,
+    );
     return {
       admin: data,
       action: STATUS.SUCCESS, // ใช้ตัวแปร STATUS
       message: MESSAGE.ADMIN.UPDATE_PASSWORD_SUCCESS, // ใช้ตัวแปร MESSAGE
     };
-
-
   }
 
   async delete(id: number) {
@@ -177,10 +195,11 @@ export class AdminService {
       this.exceptionService.throwAdminNotFound();
     }
 
-     if(check.role==='superAdmin'){
+    if (check.role === 'superAdmin') {
       this.exceptionService.throwSuperAdminNotExceptedChange();
     }
     const data = await this.adminRepositories.delete(id);
+    this.loggerService.delete('ADMIN', check);
     return {
       admin: data,
       action: STATUS.SUCCESS, // ใช้ตัวแปร STATUS

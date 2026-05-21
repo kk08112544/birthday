@@ -16,6 +16,7 @@ import { CreateAdminDto } from './dto/create-admin.dto';
 import { UpdateAdminDto } from './dto/update-admin.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { PaginationAdminDto } from './dto/pagination-admin.dto';
+import { PaginationAdminLogDto } from './dto/pagination-adminlog.dto';
 import { JwtAuthGuard } from 'src/common/guard/jwt/jwt-auth.guard';
 import { Roles } from 'src/common/decorator/roles.decorator';
 import { RolesGuard } from 'src/common/guard/roles.guard';
@@ -41,9 +42,19 @@ export class AdminController {
     return this.adminService.findAll();
   }
 
+  @Get('log')
+  async getLog(@Query() paginationDto: PaginationAdminLogDto) {
+    return this.adminService.getLog(paginationDto);
+  }
+
   @Get(':id')
   findById(@Param('id') id: number) {
     return this.adminService.findById(id);
+  }
+
+  @Get('min')
+  findMin() {
+    return this.adminService.findMin();
   }
 
   @Get()
@@ -67,7 +78,10 @@ export class AdminController {
       transform: true,
     }),
   )
-  updatePassword(@Param('id') id: number, @Body() updatePasswordDto: UpdatePasswordDto) {
+  updatePassword(
+    @Param('id') id: number,
+    @Body() updatePasswordDto: UpdatePasswordDto,
+  ) {
     return this.adminService.updatePassword(id, updatePasswordDto);
   }
 

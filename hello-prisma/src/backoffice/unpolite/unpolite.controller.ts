@@ -18,6 +18,7 @@ import { Roles } from 'src/common/decorator/roles.decorator';
 import { RolesGuard } from 'src/common/guard/roles.guard';
 import type { User } from '@prisma/client';
 import { CurrentUser } from 'src/common/decorator/user.decorator';
+import { PaginationUnpoliteLogDto } from './dto/pagination-unpolitelog.dto';
 
 @Roles('superAdmin', 'admin')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -25,9 +26,11 @@ import { CurrentUser } from 'src/common/decorator/user.decorator';
 export class AdminUnpoliteController {
   constructor(private readonly adminunpoliteService: AdminUnpoliteService) {}
 
-
   @Post()
-  create(@Body() createUnpoliteDto: CreateUnpoliteDto,@CurrentUser() user: User) {
+  create(
+    @Body() createUnpoliteDto: CreateUnpoliteDto,
+    @CurrentUser() user: User,
+  ) {
     return this.adminunpoliteService.create(createUnpoliteDto, user.uId);
   }
 
@@ -41,23 +44,27 @@ export class AdminUnpoliteController {
     return this.adminunpoliteService.findMany(paginationDto);
   }
 
+  @Get('log')
+  async getLog(@Query() paginationDto: PaginationUnpoliteLogDto) {
+    return this.adminunpoliteService.getLog(paginationDto);
+  }
+
   @Get(':id')
   async findById(@Param('id') id: number) {
     return this.adminunpoliteService.findById(id);
   }
 
-
   @Patch(':id')
   update(
     @Param('id') id: number,
-    @Body() updateUnpoliteDto: UpdateUnpoliteDto,@CurrentUser() user: User
+    @Body() updateUnpoliteDto: UpdateUnpoliteDto,
+    @CurrentUser() user: User,
   ) {
     return this.adminunpoliteService.update(id, updateUnpoliteDto, user.uId);
   }
 
-
   @Delete(':id')
-  delete(@Param('id') id: number,@CurrentUser() user: User) {
+  delete(@Param('id') id: number, @CurrentUser() user: User) {
     return this.adminunpoliteService.delete(id, user.uId);
   }
 }

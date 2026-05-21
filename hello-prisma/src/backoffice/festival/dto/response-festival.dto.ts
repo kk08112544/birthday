@@ -16,7 +16,7 @@ export class ResponseFestivalDto {
   endDate!: Date;
 
   createdBy!: number;
-  updatedBy!:number | null;
+  updatedBy!: number | null;
   deletedBy!: number | null;
 
   createdByUser!: {
@@ -26,12 +26,12 @@ export class ResponseFestivalDto {
     role: string;
   };
 
-   updatedByUser!: {
+  updatedByUser!: {
     uId: number;
     firstName: string;
     userName: string;
     role: string;
-  }| null;;
+  } | null;
 
   deletedByUser!: {
     uId: number;

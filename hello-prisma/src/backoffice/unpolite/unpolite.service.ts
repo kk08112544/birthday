@@ -17,19 +17,22 @@ export class AdminUnpoliteService {
   ) {}
 
   async create(createUnpoliteDto: CreateUnpoliteDto, createdBy: number) {
-    console.log('=== CREATE CALLED ===');  // เพิ่มตรงนี้
-  
+    console.log('=== CREATE CALLED ==='); // เพิ่มตรงนี้
+
     const check = await this.adminunpoliteRepositories.exits(
       createUnpoliteDto.word,
     );
     if (check) {
       this.exceptionsService.throwBadWordAlreadyExits();
     }
-    const data = await this.adminunpoliteRepositories.create(createUnpoliteDto,createdBy);
- console.log('=== BEFORE LOG ===');    // เพิ่มตรงนี้
-  this.loggerService.create('UNPOLITE', { ...data, createdBy });
-  console.log('=== AFTER LOG ===');     // เพิ่มตรงนี้
-   
+    const data = await this.adminunpoliteRepositories.create(
+      createUnpoliteDto,
+      createdBy,
+    );
+    console.log('=== BEFORE LOG ==='); // เพิ่มตรงนี้
+    this.loggerService.create('UNPOLITE', { ...data, createdBy });
+    console.log('=== AFTER LOG ==='); // เพิ่มตรงนี้
+
     return {
       unpolite: data,
       action: STATUS.SUCCESS,
@@ -74,7 +77,24 @@ export class AdminUnpoliteService {
     };
   }
 
-  async update(id: number, updateUnpoliteDto: UpdateUnpoliteDto,updatedBy:number) {
+  //   async getLog(): Promise<{ log: string }> {
+  //   const logPath = path.resolve('logs/unpolite.log'); // ปรับ path ตามจริง
+  //   try {
+  //     const log = fs.readFileSync(logPath, 'utf-8');
+  //     return { log };
+  //   } catch {
+  //     return { log: '' };
+  //   }
+  // }
+  async getLog(paginationDto: PaginationUnpoliteDto) {
+    return this.adminunpoliteRepositories.getLog(paginationDto);
+  }
+
+  async update(
+    id: number,
+    updateUnpoliteDto: UpdateUnpoliteDto,
+    updatedBy: number,
+  ) {
     const check = await this.adminunpoliteRepositories.findById(id);
 
     const exits = await this.adminunpoliteRepositories.exits(
@@ -92,13 +112,12 @@ export class AdminUnpoliteService {
     const data = await this.adminunpoliteRepositories.update(
       id,
       updateUnpoliteDto,
-      updatedBy
+      updatedBy,
     );
-     /* LOG UPDATE */
- 
-   
-// ถูก — แยก oldData และ newData ออกจากกัน
-this.loggerService.update('UNPOLITE', { ...check },{...data});
+    /* LOG UPDATE */
+
+    // ถูก — แยก oldData และ newData ออกจากกัน
+    this.loggerService.update('UNPOLITE', { ...check }, { ...data });
     return {
       unpolite: data,
       action: STATUS.SUCCESS,
@@ -106,18 +125,15 @@ this.loggerService.update('UNPOLITE', { ...check },{...data});
     };
   }
 
-  async delete(id: number,deletedBy:number) {
+  async delete(id: number, deletedBy: number) {
     const check = await this.adminunpoliteRepositories.findById(id);
 
     if (!check) {
       this.exceptionsService.throwBadWordNotFound();
     }
 
-    const data = await this.adminunpoliteRepositories.delete(id,deletedBy);
-     this.loggerService.delete(
-    'UNPOLITE',
-    check,
-  );
+    const data = await this.adminunpoliteRepositories.delete(id, deletedBy);
+    this.loggerService.delete('UNPOLITE', data);
 
     return {
       unpolite: data,

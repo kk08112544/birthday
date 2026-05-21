@@ -85,13 +85,18 @@ const routes: RouteRecordRaw[] = [
       { path: 'create', component: () => import('pages/backoffice/admin/CreatePage.vue') },
       { path: 'edit/:id', component: () => import('pages/backoffice/admin/EditPage.vue') },
       { path: 'view/:id', component: () => import('pages/backoffice/admin/ViewPage.vue') },
+       { path: 'log', component: () => import('pages/backoffice/admin/Adminlog.vue') },
     ],
   },
   {
-    path: '/backoffice',
+    path: '/backoffice/unpolite',
     component: () => import('src/layouts/BackofficeLayout.vue'),
     meta: { requiresAuth: true },
-    children: [{ path: 'unpolite', component: () => import('pages/backoffice/UnpolitePage.vue') }],
+    children: [
+               { path: '', component: () => import('pages/backoffice/unpolite/UnpolitePage.vue') },
+               { path: 'log', component: () => import('pages/backoffice/unpolite/Unpolitelog.vue') },
+    ],
+  
   },
   // Always leave this as last one,
   // but you can also remove it

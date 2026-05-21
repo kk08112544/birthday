@@ -56,8 +56,6 @@ export class AdminFestivalController {
     return this.adminfestivalService.findMany(paginationDto);
   }
 
-
-
   @Patch(':id')
   @UsePipes(
     new ValidationPipe({

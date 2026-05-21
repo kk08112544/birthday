@@ -4,10 +4,13 @@ import { UpdateAdminDto } from './dto/update-admin.dto';
 import { PrismaService } from 'src/prisma.service';
 import { ResponseAdminDto } from './dto/response-admin.dto';
 import { PaginationAdminDto } from './dto/pagination-admin.dto';
+import { PaginationAdminLogDto } from './dto/pagination-adminlog.dto';
 import { PaginatedResult } from 'src/common/pagination/paginate.interface';
 import { Prisma } from '@prisma/client';
 
 import { paginate } from 'src/common/pagination/paginate.util';
+import * as fs from 'fs/promises'; // เปลี่ยนเป็นดึงเวอร์ชัน promises มาใช้งาน
+import * as path from 'path';
 
 @Injectable()
 export class AdminRepositories {
@@ -51,6 +54,59 @@ export class AdminRepositories {
       },
     });
     return data;
+  }
+
+  async getLog(dto: PaginationAdminLogDto) {
+    const { page, limit, search, action } = dto;
+
+    const logPath = path.resolve('logs/admin.log');
+    let raw = '';
+    try {
+      // ใช้ await fs.readFile เพื่อแก้อาการแจ้งเตือนของ ESLint (@typescript-eslint/require-await)
+      raw = await fs.readFile(logPath, 'utf-8');
+    } catch {
+      raw = '';
+    }
+
+    // ทำความสะอาดและแยกบรรทัด Log เพียงรอบเดียวเพื่อประหยัดทรัพยากรเซิร์ฟเวอร์
+    const allEntries = raw
+      .split('\n')
+      .map((l) => l.trim())
+      .filter((l) => l.length > 0);
+
+    // นับสถิติจากอาเรย์รวมก่อนนำไปกรองเงื่อนไข
+    const createCount = allEntries.filter((l) => l.includes('[CREATE]')).length;
+    const updateCount = allEntries.filter((l) => l.includes('[UPDATE]')).length;
+    const deleteCount = allEntries.filter((l) => l.includes('[DELETE]')).length;
+
+    // ทำสำเนาข้อมูลออกมาสำหรับสไลด์แบ่งหน้าและทำตามเงื่อนไขค้นหา
+    let entries = [...allEntries];
+
+    if (action) {
+      entries = entries.filter((l) => l.includes(`[${action}]`));
+    }
+
+    if (search) {
+      const q = search.toLowerCase();
+      entries = entries.filter((l) => l.toLowerCase().includes(q));
+    }
+
+    entries = entries.reverse();
+
+    const total = entries.length;
+    const totalPages = Math.ceil(total / limit) || 1;
+    const data = entries.slice((page - 1) * limit, page * limit);
+
+    return {
+      data,
+      total,
+      page,
+      limit,
+      totalPages,
+      createCount,
+      updateCount,
+      deleteCount,
+    };
   }
 
   async findById(id: number): Promise<ResponseAdminDto | null> {
@@ -146,14 +202,17 @@ export class AdminRepositories {
     return data;
   }
 
-  async updatePassword(id:number, hashPassword:string):Promise<ResponseAdminDto>{
-     const data = await this.prisma.user.update({
+  async updatePassword(
+    id: number,
+    hashPassword: string,
+  ): Promise<ResponseAdminDto> {
+    const data = await this.prisma.user.update({
       where: {
         uId: Number(id),
         deletedAt: null,
       },
       data: {
-        password:hashPassword
+        password: hashPassword,
       },
       select: {
         uId: true,
@@ -204,8 +263,17 @@ export class AdminRepositories {
     return data._max.uId;
   }
 
+  async findMin(): Promise<number | null> {
+    const data = await this.prisma.user.aggregate({
+      _min: {
+        uId: true,
+      },
+    });
+
+    return data._min.uId;
+  }
+
   async checkFirstName(firstName: string): Promise<ResponseAdminDto | null> {
-    // เอาเฉพาะข้อความหลัง -
     const inputSuffix = firstName.split('-')[1]?.trim();
 
     if (!inputSuffix) {

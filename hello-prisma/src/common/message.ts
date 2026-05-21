@@ -7,7 +7,7 @@ export const MESSAGE = {
     INVALID_FESTIVALID: 'ไม่มีเทศกาลนี้ในระบบ',
     DELETE_SUCCESS: 'ลบข้อมูลเทศกาลสำเร็จ',
     NOT_EDIT_DELETE: 'ผู้สร้างหรือซุปเปอร์แอดมินสามารถลบหรือแก้ไขเทศกาลนี้ได้',
-    FESTIVAL_NOT_EXCEPT:'คุณไม่มีสิทธิ์แก้ไขหรือลบเทศกาลนี้',
+    FESTIVAL_NOT_EXCEPT: 'คุณไม่มีสิทธิ์แก้ไขหรือลบเทศกาลนี้',
     NOT_FOUND: 'ไม่มีเทศกาลนี้ในระบบ',
     // FESTIVAL_CONFLICT: 'มีข้อมูลเทศกาลแล้ว',
   },
@@ -58,7 +58,7 @@ export const MESSAGE = {
   ADMIN: {
     CREATE_SUCCESS: 'สร้างแอดมินสำเร็จ',
     UPDATE_SUCCESS: 'แก้ไขแอดมินสำเร็จ',
-    UPDATE_PASSWORD_SUCCESS:'แก้ไขรหัสผ่านแอดมินสำเร็๋จ',
+    UPDATE_PASSWORD_SUCCESS: 'แก้ไขรหัสผ่านแอดมินสำเร็๋จ',
     GET_SUCCESS: 'แสดงรายการแอดมินสำเร็จ',
     DELETE_SUCCESS: 'ลบแอดมินสำเร็จ',
     NOT_FOUND: 'ไม่พบรายชื่อแอดมิน',
@@ -66,7 +66,7 @@ export const MESSAGE = {
     EMAIL_CONFLICT: 'อีเมลล์นี้มีในระบบแล้ว',
     FIRSTNAME_CONFLICT: 'ชื่อนี้มีในระบบแล้ว',
     PHONENUMBER_CONFLICT: 'เบอร์โต๊ะมีระบบแล้ว',
-    SUPER_ADMIN_NOT_EXCEPT:'ไม่่สามารถแก้ไขหรือลบซุปเปอร์แอดมินได้',
-    
+    SUPER_ADMIN_NOT_EXCEPT: 'ไม่่สามารถแก้ไขหรือลบซุปเปอร์แอดมินได้',
+    MIN_SUCCESS: 'แสดงค่าที่น้อยที่สุดสำเร็จ',
   },
 };

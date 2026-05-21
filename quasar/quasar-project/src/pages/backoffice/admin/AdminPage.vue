@@ -15,6 +15,14 @@
         </div>
         <q-space />
         <q-btn
+  unelevated
+  icon="history"
+  label="บันทึกกิจกรรม"
+  to="/backoffice/admin/log"
+  class="hero-add-btn"
+  :class="$q.screen.xs ? 'full-width q-mt-sm' : ''"
+/>
+        <q-btn
           unelevated
           icon="add_circle"
           label="สร้างผู้ใช้ระบบ"
@@ -194,103 +202,7 @@
       </div>
     </div>
 
-    <!-- ===== VIEW DIALOG ===== -->
-    <q-dialog v-model="viewDialog" :maximized="$q.screen.xs">
-      <div class="custom-dialog" :class="{ 'custom-dialog--mobile': $q.screen.xs }">
-        <div v-if="$q.screen.xs" class="dialog-drag-handle" />
-        <div class="dialog-header dialog-header--indigo">
-          <div class="dialog-header-icon dialog-header-icon--indigo">
-            <q-icon name="person" color="white" size="18px" />
-          </div>
-          <span>รายละเอียด Admin</span>
-          <q-space />
-          <button class="dialog-close-btn" type="button" @click="viewDialog = false">
-            <q-icon name="close" size="18px" />
-          </button>
-        </div>
-
-        <div class="dialog-body" v-if="viewForm">
-          <div class="view-avatar-wrap">
-            <div class="view-avatar">{{ getInitial(viewForm.firstName) }}</div>
-            <div>
-              <div class="view-name">{{ viewForm.firstName }}</div>
-              <div
-                class="role-badge"
-                :class="getRoleClass(viewForm.role)"
-                style="display: inline-flex; margin-top: 6px"
-              >
-                <q-icon :name="getRoleIcon(viewForm.role)" size="13px" class="q-mr-xs" />
-                {{ getRoleLabel(viewForm.role) }}
-              </div>
-            </div>
-          </div>
-
-          <div class="view-divider" />
-
-          <div class="view-grid">
-            <div class="view-field">
-              <div class="view-field-label">ชื่อผู้ใช้</div>
-              <div class="view-field-value">
-                <q-icon name="alternate_email" size="15px" color="indigo-4" class="q-mr-xs" />
-                {{ viewForm.userName }}
-              </div>
-            </div>
-            <div class="view-field">
-              <div class="view-field-label">อีเมล</div>
-              <div class="view-field-value">
-                <q-icon name="email" size="15px" color="indigo-4" class="q-mr-xs" />
-                {{ viewForm.email }}
-              </div>
-            </div>
-            <div class="view-field">
-              <div class="view-field-label">เบอร์โทร</div>
-              <div class="view-field-value">
-                <q-icon name="phone" size="15px" color="indigo-4" class="q-mr-xs" />
-                {{ viewForm.phoneNumber || '-' }}
-              </div>
-            </div>
-            <div class="view-field">
-              <div class="view-field-label">สถานะ</div>
-              <div
-                class="status-badge"
-                :class="viewForm.deletedAt ? 'status-badge--inactive' : 'status-badge--active'"
-                style="display: inline-flex; margin-top: 2px"
-              >
-                <span class="status-dot" />
-                {{ viewForm.deletedAt ? 'ถูกลบแล้ว' : 'ใช้งานอยู่' }}
-              </div>
-            </div>
-            <div class="view-field">
-              <div class="view-field-label">วันที่สร้าง</div>
-              <div class="view-field-value">
-                <q-icon name="calendar_today" size="15px" color="indigo-4" class="q-mr-xs" />
-                {{ formatDate(viewForm.createdAt) }}
-              </div>
-            </div>
-            <div class="view-field">
-              <div class="view-field-label">อัปเดตล่าสุด</div>
-              <div class="view-field-value">
-                <q-icon name="update" size="15px" color="indigo-4" class="q-mr-xs" />
-                {{ formatDate(viewForm.updatedAt) }}
-              </div>
-            </div>
-            <div v-if="viewForm.deletedAt" class="view-field view-field--full">
-              <div class="view-field-label">วันที่ลบ</div>
-              <div class="view-field-value view-field-value--danger">
-                <q-icon name="delete_outline" size="15px" color="negative" class="q-mr-xs" />
-                {{ formatDate(viewForm.deletedAt) }}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="dialog-footer" :class="{ 'dialog-footer--mobile': $q.screen.xs }">
-          <button type="button" class="dlg-btn dlg-btn--cancel" @click="viewDialog = false">
-            ปิด
-          </button>
-        </div>
-      </div>
-    </q-dialog>
+   
 
     <!-- ===== DELETE DIALOG ===== -->
     <q-dialog v-model="deleteDialog" persistent>
@@ -459,12 +371,12 @@ const columns: QTableColumn[] = [
 ];
 
 // ─── Dialog State ─────────────────────────────────────────────────────────────
-const viewDialog = ref(false);
+
 
 const deleteDialog = ref(false);
 const isSubmitting = ref(false);
 
-const viewForm = ref<TableRow | null>(null);
+
 
 const itemToDelete = ref<TableRow | null>(null);
 

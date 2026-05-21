@@ -1,0 +1,1198 @@
+<template>
+  <q-page class="log-page">
+    <!-- ===== HERO ===== -->
+    <div class="page-hero">
+      <div class="hero-blob hero-blob-1" />
+      <div class="hero-blob hero-blob-2" />
+      <div class="hero-blob hero-blob-3" />
+      <div class="hero-inner">
+        <div class="hero-icon-wrap">
+          <q-icon name="history" size="2rem" color="white" />
+        </div>
+        <div>
+          <h1 class="hero-title">บันทึกกิจกรรม Admin</h1>
+          <p class="hero-sub">ประวัติการสร้าง แก้ไข และลบโดย Admin ทั้งหมด</p>
+        </div>
+        <q-space />
+        <q-btn
+          unelevated
+          icon="refresh"
+          label="รีเฟรช"
+          class="hero-add-btn"
+          :class="$q.screen.xs ? 'full-width q-mt-sm' : ''"
+          :loading="loading"
+          @click="fetchLogs"
+        />
+      </div>
+    </div>
+
+    <!-- ===== CONTENT ===== -->
+    <div class="content-wrap">
+
+      <!-- STATS ROW -->
+      <div class="stats-row">
+        <div class="stat-chip">
+          <q-icon name="format_list_numbered" size="18px" color="indigo-5" />
+          <span class="stat-num">{{ totalCount }}</span>
+          <span class="stat-label">รายการทั้งหมด</span>
+        </div>
+        <div class="stat-chip stat-chip--create">
+          <q-icon name="add_circle_outline" size="18px" color="green-7" />
+          <span class="stat-num">{{ createCount }}</span>
+          <span class="stat-label">สร้าง</span>
+        </div>
+        <div class="stat-chip stat-chip--update">
+          <q-icon name="edit_note" size="18px" color="amber-8" />
+          <span class="stat-num">{{ updateCount }}</span>
+          <span class="stat-label">แก้ไข</span>
+        </div>
+        <div class="stat-chip stat-chip--delete">
+          <q-icon name="delete_outline" size="18px" color="red-6" />
+          <span class="stat-num">{{ deleteCount }}</span>
+          <span class="stat-label">ลบ</span>
+        </div>
+      </div>
+
+      <!-- FILTER BAR -->
+      <div class="filter-bar">
+        <div class="action-filter-group">
+          <button
+            v-for="opt in actionOptions"
+            :key="opt.value"
+            class="action-filter-btn"
+            :class="[`action-filter-btn--${opt.value}`, { 'action-filter-btn--active': activeAction === opt.value }]"
+            @click="setAction(opt.value)"
+          >
+            <q-icon :name="opt.icon" size="15px" class="q-mr-xs" />
+            {{ opt.label }}
+          </button>
+        </div>
+
+        <q-input
+          v-model="search"
+          placeholder="ค้นหาใน log..."
+          outlined
+          rounded
+          dense
+          debounce="300"
+          class="search-bar"
+          bg-color="white"
+          @update:model-value="onSearch"
+        >
+          <template v-slot:prepend><q-icon name="search" color="grey-5" /></template>
+          <template v-slot:append>
+            <q-icon
+              v-if="search"
+              name="close"
+              color="grey-5"
+              class="cursor-pointer"
+              @click="clearSearch"
+            />
+          </template>
+        </q-input>
+      </div>
+
+      <!-- LOG LIST CARD -->
+      <div class="table-card">
+        <!-- Loading -->
+        <div v-if="loading" class="log-loading">
+          <q-spinner-dots color="indigo-5" size="2rem" />
+          <span class="log-loading-text">กำลังโหลด log...</span>
+        </div>
+
+        <!-- Empty -->
+        <div v-else-if="rows.length === 0" class="empty-state">
+          <div class="empty-icon">📋</div>
+          <div class="empty-title">ไม่พบบันทึก</div>
+          <div class="empty-sub">ลองค้นหาด้วยคำอื่น หรือเปลี่ยนตัวกรอง</div>
+        </div>
+
+        <!-- Log entries -->
+        <div v-else class="log-list">
+          <div
+            v-for="(entry, idx) in rows"
+            :key="idx"
+            class="log-entry"
+            :class="`log-entry--${entry.action.toLowerCase()}`"
+            @click="openDetail(entry)"
+          >
+            <!-- Action badge -->
+            <div class="log-action-col">
+              <div class="action-badge" :class="`action-badge--${entry.action.toLowerCase()}`">
+                <q-icon :name="getActionIcon(entry.action)" size="13px" class="q-mr-xs" />
+                {{ entry.action }}
+              </div>
+            </div>
+
+            <!-- Info -->
+            <div class="log-info-col">
+              <div class="log-who">
+                <div class="log-avatar">{{ getInitial(entry.data?.firstName || entry.newData?.firstName || '?') }}</div>
+                <span class="log-name">{{ entry.data?.firstName || entry.newData?.firstName || '-' }}</span>
+                <span class="log-username">@{{ entry.data?.userName || entry.newData?.userName || '-' }}</span>
+                <div class="role-badge-sm" :class="getRoleClass(entry.data?.role || entry.newData?.role)">
+                  {{ getRoleLabel(entry.data?.role || entry.newData?.role) }}
+                </div>
+              </div>
+              <div class="log-raw-preview">{{ getPreview(entry) }}</div>
+            </div>
+
+            <!-- Timestamp -->
+            <div class="log-time-col">
+              <q-icon name="schedule" size="13px" color="grey-5" class="q-mr-xs" />
+              <span class="log-time">{{ formatDate(entry.timestamp) }}</span>
+            </div>
+
+            <!-- Expand arrow -->
+            <q-icon name="chevron_right" size="18px" color="grey-4" class="log-arrow" />
+          </div>
+        </div>
+
+        <!-- Pagination -->
+        <div v-if="!loading && rows.length > 0" class="log-pagination">
+          <div class="pagination-info">
+            แสดง {{ (page - 1) * limit + 1 }}–{{ Math.min(page * limit, totalCount) }} จาก {{ totalCount }} รายการ
+          </div>
+          <div class="pagination-controls">
+            <q-btn
+              flat
+              round
+              dense
+              icon="chevron_left"
+              :disable="page <= 1"
+              color="indigo-5"
+              @click="prevPage"
+            />
+            <span class="page-indicator">{{ page }} / {{ totalPages || 1 }}</span>
+            <q-btn
+              flat
+              round
+              dense
+              icon="chevron_right"
+              :disable="page >= totalPages"
+              color="indigo-5"
+              @click="nextPage"
+            />
+          </div>
+          <q-select
+            v-model="limit"
+            :options="[10, 20, 50]"
+            outlined
+            dense
+            class="per-page-select"
+            @update:model-value="onLimitChange"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== DETAIL DIALOG ===== -->
+    <q-dialog v-model="detailDialog" :maximized="$q.screen.xs">
+      <div class="custom-dialog" :class="{ 'custom-dialog--mobile': $q.screen.xs }">
+        <div v-if="$q.screen.xs" class="dialog-drag-handle" />
+        <div class="dialog-header" :class="getHeaderClass(selectedEntry?.action)">
+          <div class="dialog-header-icon" :class="getHeaderIconClass(selectedEntry?.action)">
+            <q-icon :name="getActionIcon(selectedEntry?.action)" color="white" size="18px" />
+          </div>
+          <span>รายละเอียด — {{ selectedEntry?.action }}</span>
+          <q-space />
+          <button class="dialog-close-btn" type="button" @click="detailDialog = false">
+            <q-icon name="close" size="18px" />
+          </button>
+        </div>
+
+        <div class="dialog-body" v-if="selectedEntry">
+          <!-- Timestamp -->
+          <div class="detail-timestamp">
+            <q-icon name="schedule" size="14px" color="indigo-4" class="q-mr-xs" />
+            {{ formatDate(selectedEntry.timestamp) }}
+          </div>
+
+          <!-- CREATE / DELETE: single block -->
+          <template v-if="selectedEntry.action !== 'UPDATE'">
+            <div class="detail-section-label">ข้อมูล</div>
+            <div class="detail-grid">
+              <div v-for="(val, key) in selectedEntry.data" :key="key" class="detail-field">
+                <div class="detail-key">{{ key }}</div>
+                <div class="detail-val" :class="{ 'detail-val--null': val === null }">
+                  {{ val === null ? 'null' : String(val) }}
+                </div>
+              </div>
+            </div>
+          </template>
+
+          <!-- UPDATE: old vs new side by side -->
+          <template v-else>
+            <div class="update-diff">
+              <div class="diff-col diff-col--old">
+                <div class="diff-label diff-label--old">
+                  <q-icon name="history" size="14px" class="q-mr-xs" />ก่อนแก้ไข
+                </div>
+                <div class="detail-grid">
+                  <div v-for="(val, key) in selectedEntry.oldData" :key="key" class="detail-field"
+                    :class="{ 'detail-field--changed': String(val) !== String(selectedEntry.newData?.[key]) }">
+                    <div class="detail-key">{{ key }}</div>
+                    <div class="detail-val" :class="{ 'detail-val--null': val === null }">
+                      {{ val === null ? 'null' : String(val) }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="diff-divider">
+                <q-icon name="arrow_forward" size="20px" color="indigo-4" />
+              </div>
+              <div class="diff-col diff-col--new">
+                <div class="diff-label diff-label--new">
+                  <q-icon name="check_circle_outline" size="14px" class="q-mr-xs" />หลังแก้ไข
+                </div>
+                <div class="detail-grid">
+                  <div v-for="(val, key) in selectedEntry.newData" :key="key" class="detail-field"
+                    :class="{ 'detail-field--changed': String(val) !== String(selectedEntry.oldData?.[key]) }">
+                    <div class="detail-key">{{ key }}</div>
+                    <div class="detail-val" :class="{ 'detail-val--null': val === null }">
+                      {{ val === null ? 'null' : String(val) }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </template>
+
+          <!-- Raw line -->
+          <div class="raw-log-wrap">
+            <div class="raw-log-label">Raw log</div>
+            <div class="raw-log-text">{{ selectedEntry.raw }}</div>
+          </div>
+        </div>
+
+        <div class="dialog-footer">
+          <button type="button" class="dlg-btn dlg-btn--cancel" @click="detailDialog = false">
+            ปิด
+          </button>
+        </div>
+      </div>
+    </q-dialog>
+  </q-page>
+</template>
+
+<script setup lang="ts">
+import { ref, onMounted } from 'vue';
+import { api } from 'src/boot/axios';
+import { useQuasar } from 'quasar';
+import type { AxiosError } from 'axios';
+
+const $q = useQuasar();
+
+// ─── Types ────────────────────────────────────────────────────────────────────
+interface LogData {
+  uId?: number;
+  firstName?: string;
+  userName?: string;
+  role?: string;
+  phoneNumber?: string;
+  email?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  deletedAt?: string | null;
+  [key: string]: unknown;
+}
+
+interface LogEntry {
+  raw: string;
+  timestamp: string;
+  action: string;
+  data?: LogData;
+  oldData?: LogData;
+  newData?: LogData;
+}
+
+// ─── State ────────────────────────────────────────────────────────────────────
+const rows = ref<LogEntry[]>([]);
+const loading = ref(false);
+const search = ref('');
+const activeAction = ref('ALL');
+const page = ref(1);
+const limit = ref(10);
+const totalCount = ref(0);
+const totalPages = ref(1);
+const createCount = ref(0);
+const updateCount = ref(0);
+const deleteCount = ref(0);
+
+const detailDialog = ref(false);
+const selectedEntry = ref<LogEntry | null>(null);
+
+// ─── Action filter options ─────────────────────────────────────────────────
+const actionOptions = [
+  { value: 'ALL', label: 'ทั้งหมด', icon: 'list' },
+  { value: 'CREATE', label: 'สร้าง', icon: 'add_circle_outline' },
+  { value: 'UPDATE', label: 'แก้ไข', icon: 'edit_note' },
+  { value: 'DELETE', label: 'ลบ', icon: 'delete_outline' },
+];
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+const getInitial = (name: string): string => {
+  if (!name) return '?';
+  const parts = name.split('-');
+  const target = parts.length > 1 ? parts[parts.length - 1] : parts[0];
+  return (target?.trim().charAt(0) ?? '?').toUpperCase();
+};
+
+const getRoleLabel = (role?: string): string => {
+  const map: Record<string, string> = { superAdmin: 'Super Admin', admin: 'Admin' };
+  return role ? (map[role] ?? role) : '-';
+};
+
+const getRoleClass = (role?: string): string => {
+  const map: Record<string, string> = {
+    superAdmin: 'role-badge-sm--super',
+    admin: 'role-badge-sm--admin',
+  };
+  return role ? (map[role] ?? 'role-badge-sm--admin') : 'role-badge-sm--admin';
+};
+
+const getActionIcon = (action: string | undefined): string => {
+  const map: Record<string, string> = {
+    CREATE: 'add_circle_outline',
+    UPDATE: 'edit_note',
+    DELETE: 'delete_outline',
+  };
+  return (action && map[action]) ? map[action]! : 'info_outline';
+};
+
+const getHeaderClass = (action: string | undefined): string => {
+  const map: Record<string, string> = {
+    CREATE: 'dialog-header--create',
+    UPDATE: 'dialog-header--update',
+    DELETE: 'dialog-header--danger',
+  };
+  return (action && map[action]) ? map[action]! : 'dialog-header--indigo';
+};
+
+const getHeaderIconClass = (action: string | undefined): string => {
+  const map: Record<string, string> = {
+    CREATE: 'dialog-header-icon--create',
+    UPDATE: 'dialog-header-icon--update',
+    DELETE: 'dialog-header-icon--danger',
+  };
+  return (action && map[action]) ? map[action]! : 'dialog-header-icon--indigo';
+};
+
+const formatDate = (ts: string | undefined): string => {
+  if (!ts) return '-';
+  return new Intl.DateTimeFormat('th-TH', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  }).format(new Date(ts));
+};
+
+const getPreview = (entry: LogEntry): string => {
+  if (entry.action === 'UPDATE') {
+    const name = entry.newData?.firstName ?? entry.oldData?.firstName ?? '';
+    const user = entry.newData?.userName ?? entry.oldData?.userName ?? '';
+    return `อัปเดตข้อมูล: ${name} (@${user})`;
+  }
+  const d = entry.data;
+  if (!d) return entry.raw.slice(0, 80);
+  return `${d.firstName ?? ''} (@${d.userName ?? ''}) — ${d.email ?? ''}`;
+};
+
+// ─── Parse raw log line ───────────────────────────────────────────────────────
+const parseLogLine = (line: string): LogEntry => {
+  // Format: "2026-05-20T21:12:03.927Z [CREATE] {...}"
+  // or UPDATE: "timestamp [UPDATE] OLD: {...} | NEW: {...}"
+  const tsMatch = line.match(/^(\S+Z)/);
+  const timestamp: string = tsMatch?.[1] ?? '';
+  const actionMatch = line.match(/\[(CREATE|UPDATE|DELETE)\]/);
+  const action: string = actionMatch?.[1] ?? 'UNKNOWN';
+
+  if (action === 'UPDATE') {
+    const oldMatch = line.match(/OLD:\s*(\{.*?\})\s*\|/s);
+    const newMatch = line.match(/\|\s*NEW:\s*(\{.*\})/s);
+    try {
+      const oldData: LogData = oldMatch ? JSON.parse(oldMatch[1] ?? '{}') : {};
+      const newData: LogData = newMatch ? JSON.parse(newMatch[1] ?? '{}') : {};
+      return { raw: line, timestamp, action, oldData, newData };
+    } catch {
+      return { raw: line, timestamp, action };
+    }
+  } else {
+    const jsonMatch = line.match(/\]\s*(\{.*\})/s);
+    try {
+      const data: LogData = jsonMatch ? JSON.parse(jsonMatch[1] ?? '{}') : {};
+      return { raw: line, timestamp, action, data };
+    } catch {
+      return { raw: line, timestamp, action };
+    }
+  }
+};
+
+// ─── Fetch ────────────────────────────────────────────────────────────────────
+const fetchLogs = async () => {
+  loading.value = true;
+  try {
+    const response = await api.get('/backoffice/admin/log', {
+      params: {
+        page: page.value,
+        limit: limit.value,
+        search: search.value.trim() || undefined,
+        action: activeAction.value !== 'ALL' ? activeAction.value : undefined,
+      },
+    });
+    const res = response.data;
+    totalCount.value = res.total ?? 0;
+    totalPages.value = res.totalPages ?? 1;
+    createCount.value = res.createCount ?? 0;
+    updateCount.value = res.updateCount ?? 0;
+    deleteCount.value = res.deleteCount ?? 0;
+
+    rows.value = (res.data as string[]).map(parseLogLine);
+  } catch (err: unknown) {
+    const error = err as AxiosError<{ message: string }>;
+    console.error('fetch log error', error.response?.data?.message);
+    rows.value = [];
+  } finally {
+    loading.value = false;
+  }
+};
+
+// ─── Controls ─────────────────────────────────────────────────────────────────
+const setAction = (val: string) => {
+  activeAction.value = val;
+  page.value = 1;
+  void fetchLogs();
+};
+
+const onSearch = () => {
+  page.value = 1;
+  void fetchLogs();
+};
+
+const clearSearch = () => {
+  search.value = '';
+  onSearch();
+};
+
+const prevPage = () => {
+  if (page.value > 1) { page.value--; void fetchLogs(); }
+};
+
+const nextPage = () => {
+  if (page.value < totalPages.value) { page.value++; void fetchLogs(); }
+};
+
+const onLimitChange = () => {
+  page.value = 1;
+  void fetchLogs();
+};
+
+// ─── Detail Dialog ────────────────────────────────────────────────────────────
+const openDetail = (entry: LogEntry) => {
+  selectedEntry.value = entry;
+  detailDialog.value = true;
+};
+
+// ─── Lifecycle ────────────────────────────────────────────────────────────────
+onMounted(() => void fetchLogs());
+</script>
+
+<style lang="scss" scoped>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&family=Prompt:wght@500;600;700&display=swap');
+
+// ─── Design Tokens (mirrors AdminPage) ───────────────────────────────────────
+$indigo: #3730a3;
+$indigo-mid: #4f46e5;
+$indigo-soft: #eef2ff;
+$amber: #d97706;
+$amber-soft: #fef3c7;
+$red: #dc2626;
+$red-soft: #fee2e2;
+$green: #16a34a;
+$green-dark: #14532d;
+$green-soft: #f0fdf4;
+$surface: #ffffff;
+$surface-2: #f8f7ff;
+$text-main: #1e1b4b;
+$text-muted: #9ca3af;
+$radius: 16px;
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
+.log-page {
+  font-family: 'Noto Sans Thai', 'Prompt', sans-serif;
+  background: linear-gradient(150deg, #eef2ff 0%, #f0f9ff 50%, #f0fdf4 100%);
+  min-height: 100vh;
+}
+
+// ─── Hero (identical pattern) ─────────────────────────────────────────────────
+.page-hero {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #1e1b4b 0%, $indigo 45%, $indigo-mid 100%);
+  padding: 2rem 1.5rem 3.5rem;
+}
+
+.hero-blob {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.12;
+}
+.hero-blob-1 {
+  width: 300px; height: 300px;
+  background: #a5b4fc;
+  top: -80px; right: -80px;
+  animation: drift 7s ease-in-out infinite;
+}
+.hero-blob-2 {
+  width: 200px; height: 200px;
+  background: #67e8f9;
+  bottom: -60px; left: -50px;
+  animation: drift 9s ease-in-out infinite reverse;
+}
+.hero-blob-3 {
+  width: 120px; height: 120px;
+  background: #fbbf24;
+  top: 10px; left: 40%;
+  animation: drift 5s ease-in-out infinite 1.5s;
+}
+@keyframes drift {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-14px) scale(1.05); }
+}
+
+.hero-inner {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.hero-icon-wrap {
+  width: 52px; height: 52px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(8px);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+.hero-title {
+  font-family: 'Prompt', sans-serif;
+  font-size: clamp(1.2rem, 4vw, 1.75rem);
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 2px;
+  line-height: 1.2;
+}
+.hero-sub {
+  font-size: clamp(0.75rem, 2.5vw, 0.9rem);
+  color: rgba(255,255,255,0.65);
+  margin: 0;
+}
+
+.hero-add-btn {
+  background: rgba(255,255,255,0.15) !important;
+  backdrop-filter: blur(8px);
+  color: white !important;
+  border: 1px solid rgba(255,255,255,0.3) !important;
+  border-radius: 12px !important;
+  font-family: 'Noto Sans Thai', sans-serif !important;
+  font-weight: 600 !important;
+  letter-spacing: 0 !important;
+  transition: background 0.2s, transform 0.15s !important;
+  &:hover { background: rgba(255,255,255,0.25) !important; transform: translateY(-2px); }
+}
+
+// ─── Content ──────────────────────────────────────────────────────────────────
+.content-wrap {
+  max-width: 960px;
+  margin: -1.75rem auto 0;
+  padding: 0 1rem 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+// ─── Stats Row ────────────────────────────────────────────────────────────────
+.stats-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.stat-chip {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: $surface;
+  border-radius: 12px;
+  padding: 9px 16px;
+  box-shadow: 0 2px 12px rgba(55, 48, 163, 0.08);
+  border: 1px solid rgba(79, 70, 229, 0.1);
+
+  &--create { border-color: rgba(22, 163, 74, 0.2); }
+  &--update { border-color: rgba(217, 119, 6, 0.2); }
+  &--delete { border-color: rgba(220, 38, 38, 0.2); }
+}
+
+.stat-num {
+  font-family: 'Prompt', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: $text-main;
+  line-height: 1;
+}
+.stat-label {
+  font-size: 0.78rem;
+  color: $text-muted;
+}
+
+// ─── Filter Bar ───────────────────────────────────────────────────────────────
+.filter-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.action-filter-group {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.action-filter-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 16px;
+  border-radius: 20px;
+  border: 1.5px solid transparent;
+  font-family: 'Noto Sans Thai', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s;
+  background: $surface;
+  color: $text-muted;
+  box-shadow: 0 1px 6px rgba(55, 48, 163, 0.07);
+
+  &:hover {
+    border-color: rgba(79, 70, 229, 0.2);
+    color: $indigo-mid;
+  }
+
+  // ALL active
+  &--ALL.action-filter-btn--active {
+    background: linear-gradient(135deg, $indigo-mid, $indigo);
+    color: white;
+    border-color: transparent;
+    box-shadow: 0 3px 10px rgba(55, 48, 163, 0.3);
+  }
+  // CREATE active
+  &--CREATE.action-filter-btn--active {
+    background: $green-soft;
+    color: $green;
+    border-color: rgba(22, 163, 74, 0.3);
+    box-shadow: 0 2px 8px rgba(22, 163, 74, 0.15);
+  }
+  // UPDATE active
+  &--UPDATE.action-filter-btn--active {
+    background: $amber-soft;
+    color: $amber;
+    border-color: rgba(217, 119, 6, 0.3);
+    box-shadow: 0 2px 8px rgba(217, 119, 6, 0.15);
+  }
+  // DELETE active
+  &--DELETE.action-filter-btn--active {
+    background: $red-soft;
+    color: $red;
+    border-color: rgba(220, 38, 38, 0.3);
+    box-shadow: 0 2px 8px rgba(220, 38, 38, 0.15);
+  }
+}
+
+.search-bar {
+  width: 100%;
+  max-width: 280px;
+  :deep(.q-field__control) {
+    border-radius: 14px !important;
+    box-shadow: 0 2px 12px rgba(55, 48, 163, 0.08);
+  }
+  @media (max-width: 600px) { max-width: 100%; }
+}
+
+// ─── Table Card ───────────────────────────────────────────────────────────────
+.table-card {
+  background: $surface;
+  border-radius: $radius;
+  overflow: hidden;
+  box-shadow: 0 4px 28px rgba(55, 48, 163, 0.09);
+  border: 1px solid rgba(79, 70, 229, 0.08);
+}
+
+// ─── Loading / Empty ──────────────────────────────────────────────────────────
+.log-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 3rem 1rem;
+}
+.log-loading-text {
+  font-size: 0.85rem;
+  color: $text-muted;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 3rem 1rem;
+}
+.empty-icon { font-size: 3rem; margin-bottom: 12px; }
+.empty-title {
+  font-family: 'Prompt', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: $text-main;
+}
+.empty-sub { font-size: 0.82rem; color: $text-muted; margin-top: 4px; }
+
+// ─── Log List ─────────────────────────────────────────────────────────────────
+.log-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.log-entry {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 20px;
+  border-bottom: 1px solid rgba(79, 70, 229, 0.06);
+  cursor: pointer;
+  transition: background 0.15s;
+  position: relative;
+
+  &:last-child { border-bottom: none; }
+
+  &:hover { background: rgba(79, 70, 229, 0.03); }
+
+  &--create:hover { background: rgba(22, 163, 74, 0.03); }
+  &--update:hover { background: rgba(217, 119, 6, 0.03); }
+  &--delete:hover { background: rgba(220, 38, 38, 0.03); }
+}
+
+.log-action-col {
+  flex-shrink: 0;
+  width: 90px;
+  display: flex;
+  justify-content: center;
+}
+
+.action-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+
+  &--create {
+    background: $green-soft;
+    color: $green;
+    border: 1px solid rgba(22, 163, 74, 0.2);
+  }
+  &--update {
+    background: $amber-soft;
+    color: $amber;
+    border: 1px solid rgba(217, 119, 6, 0.2);
+  }
+  &--delete {
+    background: $red-soft;
+    color: $red;
+    border: 1px solid rgba(220, 38, 38, 0.2);
+  }
+}
+
+.log-info-col {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.log-who {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.log-avatar {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, $indigo-mid, $indigo);
+  color: #fff;
+  font-family: 'Prompt', sans-serif;
+  font-weight: 700;
+  font-size: 0.75rem;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 1px 6px rgba(55, 48, 163, 0.2);
+}
+
+.log-name {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: $text-main;
+}
+
+.log-username {
+  font-size: 0.78rem;
+  color: #6b7280;
+}
+
+.role-badge-sm {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 6px;
+  padding: 2px 8px;
+  font-size: 0.7rem;
+  font-weight: 600;
+
+  &--super {
+    background: linear-gradient(135deg, #ede9fe, #ddd6fe);
+    color: #5b21b6;
+    border: 1px solid rgba(139, 92, 246, 0.2);
+  }
+  &--admin {
+    background: $indigo-soft;
+    color: $indigo;
+    border: 1px solid rgba(79, 70, 229, 0.15);
+  }
+}
+
+.log-raw-preview {
+  font-size: 0.75rem;
+  color: $text-muted;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.log-time-col {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  @media (max-width: 600px) { display: none; }
+}
+
+.log-time {
+  font-size: 0.75rem;
+  color: $text-muted;
+  white-space: nowrap;
+}
+
+.log-arrow {
+  flex-shrink: 0;
+  transition: transform 0.15s;
+  .log-entry:hover & { transform: translateX(3px); }
+}
+
+// ─── Pagination ───────────────────────────────────────────────────────────────
+.log-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 12px 20px;
+  border-top: 1px solid rgba(79, 70, 229, 0.08);
+  background: $surface-2;
+}
+
+.pagination-info {
+  font-size: 0.78rem;
+  color: $text-muted;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.page-indicator {
+  font-family: 'Prompt', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: $text-main;
+  min-width: 50px;
+  text-align: center;
+}
+
+.per-page-select {
+  width: 70px;
+  :deep(.q-field__control) { border-radius: 10px !important; }
+}
+
+// ─── Dialogs ──────────────────────────────────────────────────────────────────
+.custom-dialog {
+  background: $surface;
+  border-radius: 20px;
+  overflow: hidden;
+  width: 560px;
+  max-width: 95vw;
+  max-height: 90vh;
+  box-shadow: 0 20px 60px rgba(55, 48, 163, 0.18);
+  display: flex;
+  flex-direction: column;
+
+  &--mobile {
+    border-radius: 20px 20px 0 0;
+    width: 100%;
+    max-width: 100%;
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+  }
+}
+
+.dialog-drag-handle {
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: $surface;
+  &::before {
+    content: '';
+    width: 36px; height: 3px;
+    border-radius: 2px;
+    background: rgba(79, 70, 229, 0.2);
+  }
+}
+
+.dialog-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 1rem 1.25rem;
+  font-family: 'Prompt', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: $text-main;
+  border-bottom: 1px solid rgba(79, 70, 229, 0.07);
+  flex-shrink: 0;
+
+  &--indigo { background: linear-gradient(135deg, $indigo-soft, #e0e7ff); }
+  &--create { background: linear-gradient(135deg, $green-soft, #dcfce7); }
+  &--update { background: linear-gradient(135deg, $amber-soft, #fffbeb); }
+  &--danger { background: linear-gradient(135deg, $red-soft, #fff1f2); }
+}
+
+.dialog-header-icon {
+  width: 34px; height: 34px;
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+
+  &--indigo { background: linear-gradient(135deg, $indigo-mid, $indigo); }
+  &--create { background: linear-gradient(135deg, #22c55e, $green); }
+  &--update { background: linear-gradient(135deg, #f59e0b, $amber); }
+  &--danger { background: linear-gradient(135deg, #ef4444, $red); }
+}
+
+.dialog-close-btn {
+  width: 28px; height: 28px;
+  border-radius: 8px;
+  border: none;
+  background: rgba(55, 48, 163, 0.07);
+  color: $text-muted;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s;
+  &:hover { background: rgba(55, 48, 163, 0.14); }
+}
+
+.dialog-body {
+  padding: 1.25rem;
+  overflow-y: auto;
+  flex: 1;
+}
+
+// ─── Detail content ───────────────────────────────────────────────────────────
+.detail-timestamp {
+  display: flex;
+  align-items: center;
+  font-size: 0.8rem;
+  color: $text-muted;
+  margin-bottom: 16px;
+}
+
+.detail-section-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: $text-muted;
+  margin-bottom: 10px;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  @media (max-width: 480px) { grid-template-columns: 1fr; }
+}
+
+.detail-field {
+  background: $surface-2;
+  border-radius: 10px;
+  padding: 8px 12px;
+  border: 1px solid rgba(79, 70, 229, 0.07);
+
+  &--changed {
+    border-color: rgba(217, 119, 6, 0.25);
+    background: $amber-soft;
+  }
+}
+
+.detail-key {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: $text-muted;
+  margin-bottom: 3px;
+}
+
+.detail-val {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: $text-main;
+  word-break: break-all;
+
+  &--null {
+    color: $text-muted;
+    font-style: italic;
+  }
+}
+
+// ─── Update diff layout ───────────────────────────────────────────────────────
+.update-diff {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 12px;
+  align-items: start;
+  margin-bottom: 16px;
+  @media (max-width: 520px) {
+    grid-template-columns: 1fr;
+    .diff-divider { display: none; }
+  }
+}
+
+.diff-col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.diff-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 32px;
+}
+
+.diff-label {
+  display: flex;
+  align-items: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+
+  &--old { color: #92400e; }
+  &--new { color: $green-dark; }
+}
+
+.diff-col--old .detail-grid { margin: 0; }
+.diff-col--new .detail-grid { margin: 0; }
+
+// ─── Raw log ──────────────────────────────────────────────────────────────────
+.raw-log-wrap {
+  margin-top: 16px;
+  background: #1e1b4b;
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+
+.raw-log-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: rgba(165, 180, 252, 0.7);
+  margin-bottom: 6px;
+}
+
+.raw-log-text {
+  font-family: 'Courier New', monospace;
+  font-size: 0.72rem;
+  color: #a5b4fc;
+  word-break: break-all;
+  white-space: pre-wrap;
+  line-height: 1.6;
+}
+
+// ─── Dialog Footer ────────────────────────────────────────────────────────────
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 0 1.25rem 1.25rem;
+  flex-shrink: 0;
+}
+
+.dlg-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 9px 22px;
+  border-radius: 10px;
+  border: none;
+  font-family: 'Noto Sans Thai', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.15s;
+  &:active { transform: scale(0.96); }
+  &--cancel {
+    background: rgba(55, 48, 163, 0.07);
+    color: $text-muted;
+    &:hover { background: rgba(55, 48, 163, 0.13); }
+  }
+}
+
+// ─── Responsive ───────────────────────────────────────────────────────────────
+@media (max-width: 600px) {
+  .page-hero { padding: 1.5rem 1rem 3rem; }
+  .content-wrap { padding: 0 0.75rem 2rem; gap: 0.85rem; }
+  .hero-inner { gap: 10px; }
+  .hero-icon-wrap { width: 44px; height: 44px; }
+  .log-action-col { width: 70px; }
+  .log-entry { padding: 12px 14px; gap: 10px; }
+}
+</style>

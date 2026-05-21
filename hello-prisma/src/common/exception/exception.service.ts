@@ -87,7 +87,7 @@ export class ExceptionsService {
   }
 
   throwSuperAdminNotExceptedChange(): never {
-     throw new ForbiddenException(MESSAGE.ADMIN.SUPER_ADMIN_NOT_EXCEPT);
+    throw new ForbiddenException(MESSAGE.ADMIN.SUPER_ADMIN_NOT_EXCEPT);
   }
 
   throwFestivalNotExceptedChange(): never {

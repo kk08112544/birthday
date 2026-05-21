@@ -12,7 +12,7 @@ export class AdminFestivalService {
   constructor(
     private adminFestivalRepositories: AdminFestivalRepositories,
     private exceptionService: ExceptionsService,
-     private loggerService: AppLoggerService,
+    private loggerService: AppLoggerService,
   ) {}
   async create(createFestivalDto: CreateFestivalDto, createdBy: number) {
     // createFestivalDto.createdBy = createdBy;
@@ -22,9 +22,9 @@ export class AdminFestivalService {
       createdBy,
     );
 
-     console.log('=== BEFORE LOG ===');    // เพิ่มตรงนี้
-  this.loggerService.create('FESTIVAL', { ...data, createdBy });
-  console.log('=== AFTER LOG ===');     // เพิ่มตรงนี้
+    console.log('=== BEFORE LOG ==='); // เพิ่มตรงนี้
+    this.loggerService.create('FESTIVAL', { ...data, createdBy });
+    console.log('=== AFTER LOG ==='); // เพิ่มตรงนี้
 
     return {
       festival: data,
@@ -68,8 +68,6 @@ export class AdminFestivalService {
     };
   }
 
-
-
   async update(
     id: number,
     updateFestivalDto: UpdateFestivalDto,
@@ -80,20 +78,23 @@ export class AdminFestivalService {
     if (!checkId) {
       this.exceptionService.throwFestivalNotFound();
     }
-    if(Number(checkId.createdBy)!==updatedBy){
-      if(checkId.createdByUser.role!=='superAdmin'){
+    if (Number(checkId.createdBy) !== updatedBy) {
+      if (checkId.createdByUser.role !== 'superAdmin') {
         this.exceptionService.throwFestivalNotExceptedChange();
       }
     }
 
-   
     const data = await this.adminFestivalRepositories.update(
       id,
       updateFestivalDto,
-      updatedBy
+      updatedBy,
     );
     console.log(data);
-this.loggerService.update('FESTIVAL', { ...checkId }, { ...data, updatedBy });
+    this.loggerService.update(
+      'FESTIVAL',
+      { ...checkId },
+      { ...data, updatedBy },
+    );
     return {
       festival: data,
       action: STATUS.SUCCESS,
@@ -108,11 +109,11 @@ this.loggerService.update('FESTIVAL', { ...checkId }, { ...data, updatedBy });
       this.exceptionService.throwFestivalNotFound();
     }
 
-      if (!checkId) {
+    if (!checkId) {
       this.exceptionService.throwFestivalNotFound();
     }
-    if(Number(checkId.createdBy)!==deletedBy){
-      if(checkId.createdByUser.role!=='superAdmin'){
+    if (Number(checkId.createdBy) !== deletedBy) {
+      if (checkId.createdByUser.role !== 'superAdmin') {
         this.exceptionService.throwFestivalNotExceptedChange();
       }
     }

@@ -13,15 +13,33 @@
           <h1 class="hero-title">คำไม่พึงประสงค์</h1>
           <p class="hero-sub">จัดการคำที่ไม่เหมาะสมในระบบ</p>
         </div>
-        <q-space />
-        <q-btn
-          unelevated
-          icon="add_circle"
-          label="เพิ่มคำ"
-          class="hero-add-btn"
-          :class="$q.screen.xs ? 'full-width q-mt-sm' : ''"
-          @click="onAdd"
-        />
+       <q-space />
+        <div class="hero-actions">
+          <!-- <q-btn
+            unelevated
+            icon="history"
+            label="ดู Log"
+            class="hero-log-btn"
+            :class="$q.screen.xs ? 'full-width q-mt-sm' : ''"
+            @click="$router.push(`/backoffice/unpolite/log`)"
+          /> -->
+             <q-btn
+            unelevated
+            icon="history"
+            label="บันทึกกิจกรรม"
+            class="hero-add-btn"
+            :class="$q.screen.xs ? 'full-width q-mt-sm' : ''"
+            @click="$router.push(`/backoffice/unpolite/log`)"
+          />
+          <q-btn
+            unelevated
+            icon="add_circle"
+            label="เพิ่มคำ"
+            class="hero-add-btn"
+            :class="$q.screen.xs ? 'full-width q-mt-sm' : ''"
+            @click="onAdd"
+          />
+        </div>
       </div>
     </div>
 
@@ -394,6 +412,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch } from 'vue';
+import { useRouter } from 'vue-router';
 import { api } from 'src/boot/axios';
 import { useQuasar } from 'quasar';
 import type { QTableProps, QTableColumn } from 'quasar';
@@ -425,6 +444,7 @@ type ShapeType = 'circle' | 'square' | 'star' | 'triangle' | 'emoji';
 // ─── Props & Quasar ───────────────────────────────────────────────────────────
 const props = defineProps<{ id: string }>();
 const $q = useQuasar();
+const router = useRouter();
 
 // ─── Table State ──────────────────────────────────────────────────────────────
 const rows = ref<TableRow[]>([]);
@@ -614,41 +634,14 @@ const onSearch = () => {
 
 // ─── Particle Constants ───────────────────────────────────────────────────────
 const PARTICLE_COLORS = [
-  '#e11d48',
-  '#fbbf24',
-  '#6366f1',
-  '#22c55e',
-  '#fb7185',
-  '#f59e0b',
-  '#a78bfa',
-  '#34d399',
-  '#f472b6',
-  '#38bdf8',
-  '#4ade80',
-  '#facc15',
+  '#e11d48', '#fbbf24', '#6366f1', '#22c55e', '#fb7185',
+  '#f59e0b', '#a78bfa', '#34d399', '#f472b6', '#38bdf8',
+  '#4ade80', '#facc15',
 ];
 
 const PARTICLE_EMOJIS = [
-  '🎉',
-  '✨',
-  '🎊',
-  '⭐',
-  '💫',
-  '🌟',
-  '🎈',
-  '🌸',
-  '🌺',
-  '🌼',
-  '🎀',
-  '💥',
-  '🎆',
-  '🎇',
-  '🦋',
-  '🍀',
-  '❄️',
-  '🎵',
-  '💎',
-  '🏵️',
+  '🎉', '✨', '🎊', '⭐', '💫', '🌟', '🎈', '🌸', '🌺', '🌼',
+  '🎀', '💥', '🎆', '🎇', '🦋', '🍀', '❄️', '🎵', '💎', '🏵️',
 ];
 
 // ─── Particle Spawn ───────────────────────────────────────────────────────────
@@ -680,12 +673,9 @@ const spawnParticles = (x: number, y: number) => {
     };
 
     activeParticles.value.push({ id, style });
-    setTimeout(
-      () => {
-        activeParticles.value = activeParticles.value.filter((p) => p.id !== id);
-      },
-      dur * 1000 + 100,
-    );
+    setTimeout(() => {
+      activeParticles.value = activeParticles.value.filter((p) => p.id !== id);
+    }, dur * 1000 + 100);
   }
 };
 
@@ -781,13 +771,8 @@ $radius: 16px;
 }
 
 @keyframes drift {
-  0%,
-  100% {
-    transform: translateY(0) scale(1);
-  }
-  50% {
-    transform: translateY(-14px) scale(1.05);
-  }
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-14px) scale(1.05); }
 }
 
 .hero-inner {
@@ -828,6 +813,29 @@ $radius: 16px;
   margin: 0;
 }
 
+.hero-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+// .hero-log-btn {
+//   background: rgba(251, 191, 36, 0.18) !important;
+//   backdrop-filter: blur(8px);
+//   color: #fbbf24 !important;
+//   border: 1px solid rgba(251, 191, 36, 0.4) !important;
+//   border-radius: 12px !important;
+//   font-family: 'Noto Sans Thai', sans-serif !important;
+//   font-weight: 600 !important;
+//   letter-spacing: 0 !important;
+//   transition: background 0.2s, transform 0.15s !important;
+//   &:hover {
+//     background: rgba(251, 191, 36, 0.28) !important;
+//     transform: translateY(-2px);
+//   }
+// }
+
 .hero-add-btn {
   background: rgba(255, 255, 255, 0.15) !important;
   backdrop-filter: blur(8px);
@@ -837,9 +845,7 @@ $radius: 16px;
   font-family: 'Noto Sans Thai', sans-serif !important;
   font-weight: 600 !important;
   letter-spacing: 0 !important;
-  transition:
-    background 0.2s,
-    transform 0.15s !important;
+  transition: background 0.2s, transform 0.15s !important;
   &:hover {
     background: rgba(255, 255, 255, 0.25) !important;
     transform: translateY(-2px);
@@ -927,9 +933,7 @@ $radius: 16px;
   }
   :deep(tbody tr) {
     transition: background 0.15s;
-    &:hover {
-      background: rgba(124, 58, 237, 0.03) !important;
-    }
+    &:hover { background: rgba(124, 58, 237, 0.03) !important; }
   }
   :deep(tbody tr td) {
     font-size: clamp(0.78rem, 2vw, 0.875rem);
@@ -962,9 +966,7 @@ $radius: 16px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  @media (max-width: 600px) {
-    max-width: 130px;
-  }
+  @media (max-width: 600px) { max-width: 130px; }
 }
 
 .actions-wrap {
@@ -975,26 +977,18 @@ $radius: 16px;
 
 .action-btn {
   transition: transform 0.15s !important;
-  &:hover {
-    transform: scale(1.15);
-  }
+  &:hover { transform: scale(1.15); }
   &--view {
     color: $indigo-mid !important;
-    :deep(.q-icon) {
-      color: $indigo-mid !important;
-    }
+    :deep(.q-icon) { color: $indigo-mid !important; }
   }
   &--edit {
     color: $amber !important;
-    :deep(.q-icon) {
-      color: $amber !important;
-    }
+    :deep(.q-icon) { color: $amber !important; }
   }
   &--delete {
     color: $red !important;
-    :deep(.q-icon) {
-      color: $red !important;
-    }
+    :deep(.q-icon) { color: $red !important; }
   }
 }
 
@@ -1004,21 +998,14 @@ $radius: 16px;
   align-items: center;
   padding: 3rem 1rem;
 }
-.empty-icon {
-  font-size: 3rem;
-  margin-bottom: 12px;
-}
+.empty-icon { font-size: 3rem; margin-bottom: 12px; }
 .empty-title {
   font-family: 'Prompt', sans-serif;
   font-size: 1.05rem;
   font-weight: 600;
   color: $text-main;
 }
-.empty-sub {
-  font-size: 0.82rem;
-  color: $text-muted;
-  margin-top: 4px;
-}
+.empty-sub { font-size: 0.82rem; color: $text-muted; margin-top: 4px; }
 
 // ─── Dialogs ──────────────────────────────────────────────────────────────────
 .custom-dialog {
@@ -1039,9 +1026,7 @@ $radius: 16px;
   }
 }
 
-.delete-dialog {
-  max-width: 380px;
-}
+.delete-dialog { max-width: 380px; }
 
 .dialog-header {
   display: flex;
@@ -1053,19 +1038,10 @@ $radius: 16px;
   font-weight: 600;
   color: $text-main;
   border-bottom: 1px solid rgba(124, 58, 237, 0.07);
-
-  &--indigo {
-    background: linear-gradient(135deg, $indigo-soft, #e0e7ff);
-  }
-  &--purple {
-    background: linear-gradient(135deg, #ede9fe, #f5f3ff);
-  }
-  &--amber {
-    background: linear-gradient(135deg, $amber-soft, #fffbeb);
-  }
-  &--danger {
-    background: linear-gradient(135deg, $red-soft, #fff1f2);
-  }
+  &--indigo { background: linear-gradient(135deg, $indigo-soft, #e0e7ff); }
+  &--purple { background: linear-gradient(135deg, #ede9fe, #f5f3ff); }
+  &--amber { background: linear-gradient(135deg, $amber-soft, #fffbeb); }
+  &--danger { background: linear-gradient(135deg, $red-soft, #fff1f2); }
 }
 
 .dialog-header-icon {
@@ -1077,16 +1053,9 @@ $radius: 16px;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-
-  &--indigo {
-    background: linear-gradient(135deg, $indigo-mid, $indigo);
-  }
-  &--amber {
-    background: linear-gradient(135deg, #f59e0b, $amber);
-  }
-  &--danger {
-    background: linear-gradient(135deg, #ef4444, $red);
-  }
+  &--indigo { background: linear-gradient(135deg, $indigo-mid, $indigo); }
+  &--amber { background: linear-gradient(135deg, #f59e0b, $amber); }
+  &--danger { background: linear-gradient(135deg, #ef4444, $red); }
 }
 
 .dialog-close-btn {
@@ -1101,18 +1070,12 @@ $radius: 16px;
   align-items: center;
   justify-content: center;
   transition: background 0.15s;
-  &:hover {
-    background: rgba(91, 33, 182, 0.14);
-  }
+  &:hover { background: rgba(91, 33, 182, 0.14); }
 }
 
-.dialog-body {
-  padding: 1.25rem;
-}
+.dialog-body { padding: 1.25rem; }
 
-.styled-input :deep(.q-field__control) {
-  border-radius: 12px !important;
-}
+.styled-input :deep(.q-field__control) { border-radius: 12px !important; }
 
 .dialog-footer {
   display: flex;
@@ -1124,13 +1087,9 @@ $radius: 16px;
 .dialog-footer--mobile {
   display: grid !important;
   grid-template-columns: 1fr 1fr;
-  .dlg-btn {
-    justify-content: center;
-    width: 100%;
-  }
+  .dlg-btn { justify-content: center; width: 100%; }
 }
 
-// ─── Drag handle ──────────────────────────────────────────────────────────────
 .dialog-drag-handle {
   height: 20px;
   display: flex;
@@ -1146,7 +1105,6 @@ $radius: 16px;
   }
 }
 
-// ─── Shared word chip (view + delete) ─────────────────────────────────────────
 .word-chip {
   display: flex;
   align-items: flex-start;
@@ -1162,7 +1120,6 @@ $radius: 16px;
   word-break: break-all;
   white-space: normal;
   line-height: 1.5;
-
   &--delete {
     border-radius: 10px;
     font-size: 0.95rem;
@@ -1171,7 +1128,6 @@ $radius: 16px;
   }
 }
 
-// ─── View label ───────────────────────────────────────────────────────────────
 .view-field-label {
   font-size: 0.72rem;
   font-weight: 700;
@@ -1181,16 +1137,8 @@ $radius: 16px;
   margin-bottom: 8px;
 }
 
-// ─── Delete confirm body ──────────────────────────────────────────────────────
-.delete-confirm-body {
-  text-align: center;
-  padding: 0.5rem 0;
-}
-.delete-text {
-  font-size: 0.9rem;
-  color: $text-muted;
-  margin: 0 0 10px;
-}
+.delete-confirm-body { text-align: center; padding: 0.5rem 0; }
+.delete-text { font-size: 0.9rem; color: $text-muted; margin: 0 0 10px; }
 .delete-warn {
   display: flex;
   align-items: center;
@@ -1200,7 +1148,6 @@ $radius: 16px;
   margin: 0;
 }
 
-// ─── Dialog buttons ───────────────────────────────────────────────────────────
 .dlg-btn {
   display: inline-flex;
   align-items: center;
@@ -1211,49 +1158,31 @@ $radius: 16px;
   font-size: 0.88rem;
   font-weight: 600;
   cursor: pointer;
-  transition:
-    transform 0.1s,
-    box-shadow 0.15s,
-    opacity 0.15s;
-
-  &:active {
-    transform: scale(0.96);
-  }
-  &:disabled {
-    opacity: 0.65;
-    cursor: not-allowed;
-  }
-
+  transition: transform 0.1s, box-shadow 0.15s, opacity 0.15s;
+  &:active { transform: scale(0.96); }
+  &:disabled { opacity: 0.65; cursor: not-allowed; }
   &--cancel {
     background: rgba(91, 33, 182, 0.07);
     color: $text-muted;
-    &:hover {
-      background: rgba(91, 33, 182, 0.13);
-    }
+    &:hover { background: rgba(91, 33, 182, 0.13); }
   }
   &--confirm {
     background: linear-gradient(135deg, $purple-mid, $purple);
     color: white;
     box-shadow: 0 3px 12px rgba(91, 33, 182, 0.3);
-    &:hover {
-      box-shadow: 0 5px 18px rgba(91, 33, 182, 0.4);
-    }
+    &:hover { box-shadow: 0 5px 18px rgba(91, 33, 182, 0.4); }
   }
   &--amber {
     background: linear-gradient(135deg, #f59e0b, $amber);
     color: white;
     box-shadow: 0 3px 12px rgba(217, 119, 6, 0.3);
-    &:hover {
-      box-shadow: 0 5px 18px rgba(217, 119, 6, 0.4);
-    }
+    &:hover { box-shadow: 0 5px 18px rgba(217, 119, 6, 0.4); }
   }
   &--danger {
     background: linear-gradient(135deg, #ef4444, $red);
     color: white;
     box-shadow: 0 3px 12px rgba(220, 38, 38, 0.3);
-    &:hover {
-      box-shadow: 0 5px 18px rgba(220, 38, 38, 0.4);
-    }
+    &:hover { box-shadow: 0 5px 18px rgba(220, 38, 38, 0.4); }
   }
 }
 
@@ -1272,12 +1201,8 @@ $radius: 16px;
   align-items: center;
   gap: 12px;
   padding: 1.25rem 1.5rem;
-  &--success {
-    background: linear-gradient(135deg, $green-dark, $green);
-  }
-  &--error {
-    background: linear-gradient(135deg, #7f1d1d, $red);
-  }
+  &--success { background: linear-gradient(135deg, $green-dark, $green); }
+  &--error { background: linear-gradient(135deg, #7f1d1d, $red); }
 }
 
 .notify-header-icon {
@@ -1299,15 +1224,8 @@ $radius: 16px;
   color: #fff;
   line-height: 1.2;
 }
-.notify-sub {
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.72);
-  margin-top: 2px;
-}
-.notify-body {
-  padding: 1.5rem 1.5rem 0.75rem;
-  text-align: center;
-}
+.notify-sub { font-size: 0.75rem; color: rgba(255, 255, 255, 0.72); margin-top: 2px; }
+.notify-body { padding: 1.5rem 1.5rem 0.75rem; text-align: center; }
 
 .notify-emoji {
   font-size: 2.8rem;
@@ -1317,17 +1235,9 @@ $radius: 16px;
 }
 
 @keyframes notifyPop {
-  0% {
-    transform: scale(0.5);
-    opacity: 0;
-  }
-  80% {
-    transform: scale(1.15);
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
+  0% { transform: scale(0.5); opacity: 0; }
+  80% { transform: scale(1.15); }
+  100% { transform: scale(1); opacity: 1; }
 }
 
 .notify-msg {
@@ -1338,51 +1248,31 @@ $radius: 16px;
   padding: 10px 14px;
   margin: 0 0 1rem;
   line-height: 1.6;
-  &--success {
-    background: $green-soft;
-  }
-  &--error {
-    background: $red-soft;
-  }
+  &--success { background: $green-soft; }
+  &--error { background: $red-soft; }
 }
 
 .notify-progress {
   height: 4px;
   width: 100%;
   animation: progressShrink linear forwards;
-  &--success {
-    background: linear-gradient(90deg, $green-dark, $green);
-  }
-  &--error {
-    background: linear-gradient(90deg, #7f1d1d, $red);
-  }
+  &--success { background: linear-gradient(90deg, $green-dark, $green); }
+  &--error { background: linear-gradient(90deg, #7f1d1d, $red); }
 }
 
 @keyframes progressShrink {
-  from {
-    width: 100%;
-  }
-  to {
-    width: 0%;
-  }
+  from { width: 100%; }
+  to { width: 0%; }
 }
 
 // ─── Responsive ───────────────────────────────────────────────────────────────
 @media (max-width: 600px) {
-  .page-hero {
-    padding: 1.5rem 1rem 3rem;
-  }
-  .content-wrap {
-    padding: 0 0.75rem 2rem;
-    gap: 0.85rem;
-  }
-  .hero-inner {
-    gap: 10px;
-  }
-  .hero-icon-wrap {
-    width: 44px;
-    height: 44px;
-  }
+  .page-hero { padding: 1.5rem 1rem 3rem; }
+  .content-wrap { padding: 0 0.75rem 2rem; gap: 0.85rem; }
+  .hero-inner { gap: 10px; }
+  .hero-icon-wrap { width: 44px; height: 44px; }
+  .hero-actions { width: 100%; }
+  .hero-log-btn, .hero-add-btn { flex: 1; justify-content: center; }
 }
 
 // ─── Click Particles ──────────────────────────────────────────────────────────
@@ -1405,23 +1295,10 @@ $radius: 16px;
   animation: clickFall var(--dur) cubic-bezier(0.2, 0.9, 0.4, 1) forwards;
   border-radius: 50%;
 
-  &[style*='--shape: square'] {
-    border-radius: 3px;
-  }
+  &[style*='--shape: square'] { border-radius: 3px; }
   &[style*='--shape: star'] {
     border-radius: 0;
-    clip-path: polygon(
-      50% 0%,
-      61% 35%,
-      98% 35%,
-      68% 57%,
-      79% 91%,
-      50% 70%,
-      21% 91%,
-      32% 57%,
-      2% 35%,
-      39% 35%
-    );
+    clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
   }
   &[style*='--shape: triangle'] {
     background: transparent !important;
@@ -1453,8 +1330,7 @@ $radius: 16px;
   }
   12% {
     opacity: 1;
-    transform: translate(-50%, -50%) translate(calc(var(--dx) * 0.15), calc(var(--dy) * 0.15))
-      rotate(calc(var(--rot) * 0.1)) scale(1.2);
+    transform: translate(-50%, -50%) translate(calc(var(--dx) * 0.15), calc(var(--dy) * 0.15)) rotate(calc(var(--rot) * 0.1)) scale(1.2);
   }
   100% {
     opacity: 0;

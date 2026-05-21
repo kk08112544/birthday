@@ -1,5 +1,5 @@
 // src/main.ts
-  import * as fs from 'fs';
+import * as fs from 'fs';
 import * as dotenv from 'dotenv';
 dotenv.config(); // <--- บรรทัดนี้ต้องอยู่บนสุด ห้ามย้าย!
 
@@ -18,8 +18,7 @@ async function bootstrap() {
 
   await app.listen(Number(process.env.PORT));
 
-
-fs.writeFileSync('test.log', 'hello');
+  fs.writeFileSync('test.log', 'hello');
 }
 
 bootstrap().catch((err) => {
