@@ -80,15 +80,15 @@ export class AdminService {
   //   return this.adminRepositories.getLog(paginationDto);
   // }
 
-     async getLog(paginationDto: PaginationAdminLogDto) {
-      const result = await this.adminRepositories.getLog(paginationDto);
-       console.log(result);
-        return {
-        admin: result,
-        action: STATUS.SUCCESS,
-        message: MESSAGE.ADMIN.GET_SUCCESS,
-      };
-    }
+  async getLog(paginationDto: PaginationAdminLogDto) {
+    const result = await this.adminRepositories.getLog(paginationDto);
+    console.log(result);
+    return {
+      admin: result,
+      action: STATUS.SUCCESS,
+      message: MESSAGE.ADMIN.GET_SUCCESS,
+    };
+  }
 
   async findById(id: number) {
     const data = await this.adminRepositories.findById(id);

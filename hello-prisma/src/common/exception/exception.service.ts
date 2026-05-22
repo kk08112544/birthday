@@ -93,6 +93,4 @@ export class ExceptionsService {
   throwFestivalNotExceptedChange(): never {
     throw new ForbiddenException(MESSAGE.FESTIVAL.FESTIVAL_NOT_EXCEPT);
   }
-
-  
 }

@@ -91,10 +91,10 @@ export class AdminUnpoliteService {
   //   return this.adminunpoliteRepositories.getLog(paginationDto);
   // }
 
-   async getLog(paginationDto: PaginationUnpoliteLogDto) {
+  async getLog(paginationDto: PaginationUnpoliteLogDto) {
     const result = await this.adminunpoliteRepositories.getLog(paginationDto);
-     console.log(result);
-      return {
+    console.log(result);
+    return {
       unpolite: result,
       action: STATUS.SUCCESS,
       message: MESSAGE.UNPOLITE.GET_SUCCESS,

@@ -6,7 +6,10 @@ import { ResponseAdminDto } from './dto/response-admin.dto';
 import { ResponseAdminLog } from './dto/response-adminlog.dto';
 import { PaginationAdminDto } from './dto/pagination-admin.dto';
 import { PaginationAdminLogDto } from './dto/pagination-adminlog.dto';
-import { calculatePagination, createPaginatedResult } from 'src/common/pagination/paginate.util';
+import {
+  calculatePagination,
+  createPaginatedResult,
+} from 'src/common/pagination/paginate.util';
 import { PaginatedResult } from 'src/common/pagination/paginate.interface';
 import { Prisma } from '@prisma/client';
 
@@ -58,76 +61,59 @@ export class AdminRepositories {
     return data;
   }
 
-async getLog(
-  dto: PaginationAdminLogDto,
-): Promise<ResponseAdminLog> {
+  async getLog(dto: PaginationAdminLogDto): Promise<ResponseAdminLog> {
+    const page = Number(dto.page) || 1;
+    const limit = Number(dto.limit) || 10;
 
-  const page = Number(dto.page) || 1;
-  const limit = Number(dto.limit) || 10;
+    const { search, action } = dto;
 
-  const { search, action } = dto;
+    const logPath = path.resolve('logs/admin.log');
 
-  const logPath = path.resolve('logs/admin.log');
+    let raw = '';
 
-  let raw = '';
+    try {
+      raw = await fs.readFile(logPath, 'utf-8');
+    } catch {
+      raw = '';
+    }
 
-  try {
-    raw = await fs.readFile(logPath, 'utf-8');
-  } catch {
-    raw = '';
+    let entries = raw
+      .split('\n')
+      .map((l) => l.trim())
+      .filter((l) => l.length > 0);
+
+    if (search) {
+      const q = search.toLowerCase();
+
+      entries = entries.filter((l) => l.toLowerCase().includes(q));
+    }
+
+    const createCount = entries.filter((l) => l.includes('[CREATE]')).length;
+
+    const updateCount = entries.filter((l) => l.includes('[UPDATE]')).length;
+
+    const deleteCount = entries.filter((l) => l.includes('[DELETE]')).length;
+
+    if (action) {
+      entries = entries.filter((l) => l.includes(`[${action}]`));
+    }
+
+    entries.reverse();
+
+    const { skip, take } = calculatePagination({
+      page,
+      limit,
+    });
+
+    const data = entries.slice(skip, skip + take);
+
+    return {
+      ...createPaginatedResult(data, entries.length, { page, limit }),
+      createCount,
+      updateCount,
+      deleteCount,
+    };
   }
-
-  let entries = raw
-    .split('\n')
-    .map((l) => l.trim())
-    .filter((l) => l.length > 0);
-
-  if (search) {
-    const q = search.toLowerCase();
-
-    entries = entries.filter((l) =>
-      l.toLowerCase().includes(q),
-    );
-  }
-
-  const createCount = entries.filter((l) =>
-    l.includes('[CREATE]'),
-  ).length;
-
-  const updateCount = entries.filter((l) =>
-    l.includes('[UPDATE]'),
-  ).length;
-
-  const deleteCount = entries.filter((l) =>
-    l.includes('[DELETE]'),
-  ).length;
-
-  if (action) {
-    entries = entries.filter((l) =>
-      l.includes(`[${action}]`),
-    );
-  }
-
-  entries.reverse();
-
-  const { skip, take } = calculatePagination({
-    page,
-    limit,
-  });
-
-  const data = entries.slice(skip, skip + take);
-
-  return {
-    ...createPaginatedResult(
-      data,
-      entries.length,
-      { page, limit },
-    ),
-    createCount,
-    updateCount,
-    deleteCount,
-  };
-}
 
   async findById(id: number): Promise<ResponseAdminDto | null> {
     const data = await this.prisma.user.findUnique({
@@ -282,7 +268,6 @@ async getLog(
 
     return data._max.uId;
   }
-
 
   async checkFirstName(firstName: string): Promise<ResponseAdminDto | null> {
     const inputSuffix = firstName.split('-')[1]?.trim();

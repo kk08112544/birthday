@@ -57,7 +57,7 @@ export class AdminFestivalController {
   }
 
   @Get()
-  findMin(){
+  findMin() {
     return this.adminfestivalService.findMin();
   }
 

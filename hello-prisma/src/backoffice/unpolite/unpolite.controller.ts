@@ -47,7 +47,12 @@ export class AdminUnpoliteController {
   }
 
   @Get('log')
-  @UsePipes(new ValidationPipe({ transform: true, transformOptions: { enableImplicitConversion: true } }))
+  @UsePipes(
+    new ValidationPipe({
+      transform: true,
+      transformOptions: { enableImplicitConversion: true },
+    }),
+  )
   async getLog(@Query() paginationDto: PaginationUnpoliteLogDto) {
     return this.adminunpoliteService.getLog(paginationDto);
   }
