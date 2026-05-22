@@ -70,6 +70,8 @@ export class AdminFestivalRepositories {
     return result as unknown as ResponseFestivalDto[];
   }
 
+
+
   async findById(id: number): Promise<ResponseFestivalDto | null> {
     return this.prisma.festival.findUnique({
       where: { fId: Number(id), deletedAt: null },
@@ -154,6 +156,18 @@ export class AdminFestivalRepositories {
     return paginate(queryFn, countFn, options) as unknown as Promise<
       PaginatedResult<ResponseFestivalDto>
     >;
+  }
+
+
+  
+  async findMin(): Promise<number | null> {
+    const data = await this.prisma.festival.aggregate({
+      _min: {
+        fId: true,
+      },
+    });
+
+    return data._min.fId;
   }
 
   async update(

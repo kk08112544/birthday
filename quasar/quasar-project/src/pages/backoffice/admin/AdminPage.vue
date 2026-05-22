@@ -14,43 +14,30 @@
           <p class="hero-sub">ข้อมูลและสิทธิ์การเข้าถึงของ Admin ทั้งหมด</p>
         </div>
         <q-space />
-        <q-btn
-  unelevated
-  icon="history"
-  label="บันทึกกิจกรรม"
-  to="/backoffice/admin/log"
-  class="hero-add-btn"
-  :class="$q.screen.xs ? 'full-width q-mt-sm' : ''"
-/>
-        <q-btn
-          unelevated
-          icon="add_circle"
-          label="สร้างผู้ใช้ระบบ"
-          to="/backoffice/admin/create"
-          class="hero-add-btn"
-          :class="$q.screen.xs ? 'full-width q-mt-sm' : ''"
-        />
+        <div class="hero-actions">
+          <q-btn
+            unelevated
+            icon="history"
+            label="บันทึกกิจกรรม"
+            to="/backoffice/admin/log"
+            class="hero-add-btn"
+            :class="$q.screen.xs ? 'full-width q-mt-sm' : ''"
+          />
+          <q-btn
+            unelevated
+            icon="add_circle"
+            label="สร้างผู้ใช้ระบบ"
+            to="/backoffice/admin/create"
+            class="hero-add-btn"
+            :class="$q.screen.xs ? 'full-width q-mt-sm' : ''"
+          />
+        </div>
       </div>
     </div>
 
     <!-- ===== CONTENT ===== -->
     <div class="content-wrap">
       <div class="top-bar">
-        <div class="stats-row">
-          <div class="stat-chip">
-            <q-icon name="format_list_numbered" size="18px" color="indigo-5" />
-            <span class="stat-num">{{ pagination.rowsNumber }}</span>
-            <span class="stat-label">ผู้ดูแลทั้งหมด</span>
-          </div>
-          <div class="stat-chip">
-            <q-icon name="description" size="18px" color="teal-6" />
-            <span class="stat-num">{{ pagination.page }}</span>
-            <span class="stat-label">
-              / {{ Math.ceil(pagination.rowsNumber / pagination.rowsPerPage) || 1 }} หน้า
-            </span>
-          </div>
-        </div>
-
         <q-input
           v-model="search"
           placeholder="ค้นหา admin..."
@@ -95,26 +82,21 @@
             <q-inner-loading showing color="indigo-5" />
           </template>
 
-          <!-- firstName cell -->
           <template v-slot:body-cell-firstName="props">
             <q-td :props="props">
               <div class="name-cell">
-                <div class="avatar-circle">
-                  {{ getInitial(props.row.firstName) }}
-                </div>
+                <div class="avatar-circle">{{ getInitial(props.row.firstName) }}</div>
                 <div class="name-text">{{ props.row.firstName }}</div>
               </div>
             </q-td>
           </template>
 
-          <!-- userName cell -->
           <template v-slot:body-cell-userName="props">
             <q-td :props="props">
               <div class="username-text">@{{ props.row.userName }}</div>
             </q-td>
           </template>
 
-          <!-- Role cell -->
           <template v-slot:body-cell-role="props">
             <q-td :props="props">
               <div class="role-badge" :class="getRoleClass(props.row.role)">
@@ -124,7 +106,6 @@
             </q-td>
           </template>
 
-          <!-- Status cell -->
           <template v-slot:body-cell-status="props">
             <q-td :props="props">
               <div
@@ -137,7 +118,6 @@
             </q-td>
           </template>
 
-          <!-- Actions cell -->
           <template v-slot:body-cell-actions="props">
             <q-td :props="props">
               <div class="actions-wrap">
@@ -193,16 +173,13 @@
                 icon="add_circle"
                 label="สร้างผู้ใช้ระบบ"
                 to="/backoffice/admin/create"
-                class="hero-add-btn"
-                :class="$q.screen.xs ? 'full-width q-mt-sm' : ''"
+                class="hero-add-btn q-mt-md"
               />
             </div>
           </template>
         </q-table>
       </div>
     </div>
-
-   
 
     <!-- ===== DELETE DIALOG ===== -->
     <q-dialog v-model="deleteDialog" persistent>
@@ -371,13 +348,8 @@ const columns: QTableColumn[] = [
 ];
 
 // ─── Dialog State ─────────────────────────────────────────────────────────────
-
-
 const deleteDialog = ref(false);
 const isSubmitting = ref(false);
-
-
-
 const itemToDelete = ref<TableRow | null>(null);
 
 // ─── Notify State ─────────────────────────────────────────────────────────────
@@ -403,43 +375,30 @@ const openNotify = (success: boolean, message: string) => {
   }, NOTIFY_DURATION);
 };
 
-// const getInitial = (name: string) => (name?.charAt(0) ?? '?').toUpperCase();
-// ✅ แก้เป็น
-const getInitial = (name: string): string => {
+function getInitial(name: string): string {
   if (!name) return '?';
   const parts = name.split('-');
   const target = parts.length > 1 ? parts[parts.length - 1] : parts[0];
   return (target?.trim().charAt(0) ?? '?').toUpperCase();
-};
+}
 
-const getRoleLabel = (role: string): string => {
+function getRoleLabel(role: string): string {
   const map: Record<string, string> = { superAdmin: 'Super Admin', admin: 'Admin' };
   return map[role] ?? role;
-};
+}
 
-const getRoleIcon = (role: string): string => {
+function getRoleIcon(role: string): string {
   const map: Record<string, string> = { superAdmin: 'shield', admin: 'admin_panel_settings' };
   return map[role] ?? 'person';
-};
+}
 
-const getRoleClass = (role: string): string => {
+function getRoleClass(role: string): string {
   const map: Record<string, string> = {
     superAdmin: 'role-badge--super',
     admin: 'role-badge--admin',
   };
   return map[role] ?? 'role-badge--admin';
-};
-
-const formatDate = (date: Date | string | null): string => {
-  if (!date) return '-';
-  return new Intl.DateTimeFormat('th-TH', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(new Date(date));
-};
+}
 
 const clearSearch = () => {
   search.value = '';
@@ -465,7 +424,6 @@ const fetchAdmins = async (): Promise<void> => {
     rows.value = list.map((item, index) => ({
       ...item,
       displayIndex: startIndex + index + 1,
-      // actions: { create: false, update: true, delete: !item.deletedAt },
       actions: {
         create: false,
         update: item.role !== 'superAdmin',
@@ -473,7 +431,7 @@ const fetchAdmins = async (): Promise<void> => {
       },
     }));
 
-    pagination.value.rowsNumber = res.festival?.total ?? 0;
+    pagination.value.rowsNumber = res.admin?.total ?? 0;
   } catch (err: unknown) {
     const error = err as AxiosError<{ message: string }>;
     openNotify(false, error.response?.data?.message ?? 'โหลดข้อมูลไม่สำเร็จ กรุณาลองใหม่');
@@ -521,7 +479,7 @@ const onSearch = () => {
   void fetchAdmins();
 };
 
-// ─── Particle Constants ───────────────────────────────────────────────────────
+// ─── Particles ────────────────────────────────────────────────────────────────
 const PARTICLE_COLORS = [
   '#e11d48',
   '#fbbf24',
@@ -536,7 +494,6 @@ const PARTICLE_COLORS = [
   '#4ade80',
   '#facc15',
 ];
-
 const PARTICLE_EMOJIS = [
   '🎉',
   '✨',
@@ -560,16 +517,13 @@ const PARTICLE_EMOJIS = [
   '🏵️',
 ];
 
-// ─── Particle Spawn ───────────────────────────────────────────────────────────
-const spawnParticles = (x: number, y: number) => {
+function spawnParticles(x: number, y: number): void {
   const count = 12 + Math.floor(Math.random() * 6);
+  const shapes: ShapeType[] = ['circle', 'circle', 'square', 'star', 'emoji'];
+
   for (let i = 0; i < count; i++) {
     const id = ++particleId;
-    const size = 6 + Math.random() * 7;
-    const color = PARTICLE_COLORS[Math.floor(Math.random() * PARTICLE_COLORS.length)]!;
     const dur = 0.7 + Math.random() * 0.5;
-    const emoji = PARTICLE_EMOJIS[Math.floor(Math.random() * PARTICLE_EMOJIS.length)]!;
-    const shapes: ShapeType[] = ['circle', 'circle', 'square', 'star', 'emoji'];
     const shape = shapes[Math.floor(Math.random() * shapes.length)]!;
     const isEmoji = shape === 'emoji';
     const angle = (i / count) * Math.PI * 2 + (Math.random() - 0.5) * 0.8;
@@ -581,10 +535,14 @@ const spawnParticles = (x: number, y: number) => {
       '--dx': `${Math.cos(angle) * dist}px`,
       '--dy': `${Math.sin(angle) * dist}px`,
       '--dur': `${dur}s`,
-      '--color': isEmoji ? 'transparent' : color,
-      '--size': isEmoji ? '18px' : `${size}px`,
+      '--color': isEmoji
+        ? 'transparent'
+        : PARTICLE_COLORS[Math.floor(Math.random() * PARTICLE_COLORS.length)]!,
+      '--size': isEmoji ? '18px' : `${6 + Math.random() * 7}px`,
       '--shape': shape,
-      '--emoji-content': isEmoji ? `"${emoji}"` : '""',
+      '--emoji-content': isEmoji
+        ? `"${PARTICLE_EMOJIS[Math.floor(Math.random() * PARTICLE_EMOJIS.length)]!}"`
+        : '""',
       '--rot': `${Math.random() * 360 - 180}deg`,
     };
 
@@ -596,7 +554,7 @@ const spawnParticles = (x: number, y: number) => {
       dur * 1000 + 100,
     );
   }
-};
+}
 
 const handleGlobalClick = (e: MouseEvent) => spawnParticles(e.clientX, e.clientY);
 
@@ -735,7 +693,13 @@ $radius: 16px;
   margin: 0;
 }
 
-// ─── Hero Button (same pattern as unpolite) ───────────────────────────────────
+.hero-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
 .hero-add-btn {
   background: rgba(255, 255, 255, 0.15) !important;
   backdrop-filter: blur(8px);
@@ -768,37 +732,9 @@ $radius: 16px;
 .top-bar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   flex-wrap: wrap;
   gap: 10px;
-}
-.stats-row {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.stat-chip {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  background: $surface;
-  border-radius: 12px;
-  padding: 9px 16px;
-  box-shadow: 0 2px 12px rgba(55, 48, 163, 0.08);
-  border: 1px solid rgba(79, 70, 229, 0.1);
-}
-
-.stat-num {
-  font-family: 'Prompt', sans-serif;
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: $text-main;
-  line-height: 1;
-}
-.stat-label {
-  font-size: 0.78rem;
-  color: $text-muted;
 }
 
 .search-bar {
@@ -807,9 +743,6 @@ $radius: 16px;
   :deep(.q-field__control) {
     border-radius: 14px !important;
     box-shadow: 0 2px 12px rgba(55, 48, 163, 0.08);
-  }
-  @media (max-width: 600px) {
-    max-width: 100%;
   }
 }
 
@@ -1008,7 +941,7 @@ $radius: 16px;
   margin-top: 4px;
 }
 
-// ─── Dialogs ──────────────────────────────────────────────────────────────────
+// ─── Dialog ───────────────────────────────────────────────────────────────────
 .custom-dialog {
   background: $surface;
   border-radius: 20px;
@@ -1016,34 +949,10 @@ $radius: 16px;
   width: 460px;
   max-width: 95vw;
   box-shadow: 0 20px 60px rgba(55, 48, 163, 0.18);
-  &--mobile {
-    border-radius: 20px 20px 0 0;
-    width: 100%;
-    max-width: 100%;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-  }
 }
 
 .delete-dialog {
   max-width: 380px;
-}
-
-.dialog-drag-handle {
-  height: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: $surface;
-  &::before {
-    content: '';
-    width: 36px;
-    height: 3px;
-    border-radius: 2px;
-    background: rgba(79, 70, 229, 0.2);
-  }
 }
 
 .dialog-header {
@@ -1056,12 +965,6 @@ $radius: 16px;
   font-weight: 600;
   color: $text-main;
   border-bottom: 1px solid rgba(79, 70, 229, 0.07);
-  &--indigo {
-    background: linear-gradient(135deg, $indigo-soft, #e0e7ff);
-  }
-  &--amber {
-    background: linear-gradient(135deg, $amber-soft, #fffbeb);
-  }
   &--danger {
     background: linear-gradient(135deg, $red-soft, #fff1f2);
   }
@@ -1075,13 +978,6 @@ $radius: 16px;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  background: linear-gradient(135deg, $indigo-mid, $indigo);
-  &--indigo {
-    background: linear-gradient(135deg, $indigo-mid, $indigo);
-  }
-  &--amber {
-    background: linear-gradient(135deg, #f59e0b, $amber);
-  }
   &--danger {
     background: linear-gradient(135deg, #ef4444, $red);
   }
@@ -1107,7 +1003,6 @@ $radius: 16px;
 .dialog-body {
   padding: 1.25rem;
 }
-
 .dialog-footer {
   display: flex;
   justify-content: flex-end;
@@ -1115,120 +1010,6 @@ $radius: 16px;
   padding: 0 1.25rem 1.25rem;
 }
 
-.dialog-footer--mobile {
-  display: grid !important;
-  grid-template-columns: 1fr 1fr;
-  .dlg-btn {
-    justify-content: center;
-    width: 100%;
-  }
-}
-
-// ─── Create / Edit Form ───────────────────────────────────────────────────────
-.create-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 4px 16px;
-  @media (max-width: 480px) {
-    grid-template-columns: 1fr;
-  }
-}
-
-.form-field {
-  display: flex;
-  flex-direction: column;
-  &--full {
-    grid-column: 1 / -1;
-  }
-}
-
-.form-label {
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: $text-muted;
-  margin-bottom: 4px;
-}
-
-.form-required {
-  color: $red;
-}
-
-.form-input {
-  :deep(.q-field__control) {
-    border-radius: 10px !important;
-  }
-}
-
-// ─── View Dialog Body ─────────────────────────────────────────────────────────
-.view-avatar-wrap {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 16px;
-}
-
-.view-avatar {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  flex-shrink: 0;
-  background: linear-gradient(135deg, $indigo-mid, $indigo);
-  color: #fff;
-  font-family: 'Prompt', sans-serif;
-  font-weight: 700;
-  font-size: 1.4rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 16px rgba(55, 48, 163, 0.3);
-}
-
-.view-name {
-  font-family: 'Prompt', sans-serif;
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: $text-main;
-}
-.view-divider {
-  height: 1px;
-  background: rgba(79, 70, 229, 0.09);
-  margin-bottom: 16px;
-}
-.view-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
-}
-.view-field {
-  &--full {
-    grid-column: 1 / -1;
-  }
-}
-
-.view-field-label {
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  color: $text-muted;
-  margin-bottom: 5px;
-}
-
-.view-field-value {
-  display: flex;
-  align-items: center;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: $text-main;
-  word-break: break-all;
-  &--danger {
-    color: $red;
-  }
-}
-
-// ─── Delete Confirm Body ──────────────────────────────────────────────────────
 .delete-confirm-body {
   text-align: center;
   padding: 0.5rem 0;
@@ -1261,7 +1042,6 @@ $radius: 16px;
   margin: 0;
 }
 
-// ─── Dialog Buttons ───────────────────────────────────────────────────────────
 .dlg-btn {
   display: inline-flex;
   align-items: center;
@@ -1288,22 +1068,6 @@ $radius: 16px;
     color: $text-muted;
     &:hover {
       background: rgba(55, 48, 163, 0.13);
-    }
-  }
-  &--confirm {
-    background: linear-gradient(135deg, $indigo-mid, $indigo);
-    color: white;
-    box-shadow: 0 3px 12px rgba(55, 48, 163, 0.3);
-    &:hover {
-      box-shadow: 0 5px 18px rgba(55, 48, 163, 0.4);
-    }
-  }
-  &--amber {
-    background: linear-gradient(135deg, #f59e0b, $amber);
-    color: white;
-    box-shadow: 0 3px 12px rgba(217, 119, 6, 0.3);
-    &:hover {
-      box-shadow: 0 5px 18px rgba(217, 119, 6, 0.4);
     }
   }
   &--danger {
@@ -1442,8 +1206,15 @@ $radius: 16px;
     width: 44px;
     height: 44px;
   }
-  .view-grid {
-    grid-template-columns: 1fr;
+  .hero-actions {
+    width: 100%;
+  }
+  .hero-add-btn {
+    flex: 1;
+    justify-content: center;
+  }
+  .search-bar {
+    max-width: 100%;
   }
 }
 

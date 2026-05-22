@@ -68,6 +68,15 @@ export class AdminFestivalService {
     };
   }
 
+  async findMin(){
+    const data = await this.adminFestivalRepositories.findMin();
+    return {
+      festival:data,
+      action:STATUS.SUCCESS,
+      message: MESSAGE.FESTIVAL.GET_SUCCESS, // ใช้ตัวแปร MESSAGE
+    }
+  }
+
   async update(
     id: number,
     updateFestivalDto: UpdateFestivalDto,
@@ -109,13 +118,14 @@ export class AdminFestivalService {
       this.exceptionService.throwFestivalNotFound();
     }
 
-    if (!checkId) {
-      this.exceptionService.throwFestivalNotFound();
-    }
     if (Number(checkId.createdBy) !== deletedBy) {
       if (checkId.createdByUser.role !== 'superAdmin') {
         this.exceptionService.throwFestivalNotExceptedChange();
       }
+    }
+    const checkMinId = await this.adminFestivalRepositories.findMin();
+    if(id === Number(checkMinId)){
+        this.exceptionService.throwFestivalNotExceptedChange();
     }
     const data = await this.adminFestivalRepositories.delete(id, deletedBy);
     return {

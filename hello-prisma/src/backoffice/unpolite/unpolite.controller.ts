@@ -8,6 +8,8 @@ import {
   Delete,
   Query,
   UseGuards,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
 import { AdminUnpoliteService } from './unpolite.service';
 import { CreateUnpoliteDto } from './dto/create-unpolite.dto';
@@ -45,6 +47,7 @@ export class AdminUnpoliteController {
   }
 
   @Get('log')
+  @UsePipes(new ValidationPipe({ transform: true, transformOptions: { enableImplicitConversion: true } }))
   async getLog(@Query() paginationDto: PaginationUnpoliteLogDto) {
     return this.adminunpoliteService.getLog(paginationDto);
   }

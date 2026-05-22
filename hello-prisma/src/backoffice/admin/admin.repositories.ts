@@ -3,8 +3,10 @@ import { CreateAdminDto } from './dto/create-admin.dto';
 import { UpdateAdminDto } from './dto/update-admin.dto';
 import { PrismaService } from 'src/prisma.service';
 import { ResponseAdminDto } from './dto/response-admin.dto';
+import { ResponseAdminLog } from './dto/response-adminlog.dto';
 import { PaginationAdminDto } from './dto/pagination-admin.dto';
 import { PaginationAdminLogDto } from './dto/pagination-adminlog.dto';
+import { calculatePagination, createPaginatedResult } from 'src/common/pagination/paginate.util';
 import { PaginatedResult } from 'src/common/pagination/paginate.interface';
 import { Prisma } from '@prisma/client';
 
@@ -56,58 +58,76 @@ export class AdminRepositories {
     return data;
   }
 
-  async getLog(dto: PaginationAdminLogDto) {
-    const { page, limit, search, action } = dto;
+async getLog(
+  dto: PaginationAdminLogDto,
+): Promise<ResponseAdminLog> {
 
-    const logPath = path.resolve('logs/admin.log');
-    let raw = '';
-    try {
-      // ใช้ await fs.readFile เพื่อแก้อาการแจ้งเตือนของ ESLint (@typescript-eslint/require-await)
-      raw = await fs.readFile(logPath, 'utf-8');
-    } catch {
-      raw = '';
-    }
+  const page = Number(dto.page) || 1;
+  const limit = Number(dto.limit) || 10;
 
-    // ทำความสะอาดและแยกบรรทัด Log เพียงรอบเดียวเพื่อประหยัดทรัพยากรเซิร์ฟเวอร์
-    const allEntries = raw
-      .split('\n')
-      .map((l) => l.trim())
-      .filter((l) => l.length > 0);
+  const { search, action } = dto;
 
-    // นับสถิติจากอาเรย์รวมก่อนนำไปกรองเงื่อนไข
-    const createCount = allEntries.filter((l) => l.includes('[CREATE]')).length;
-    const updateCount = allEntries.filter((l) => l.includes('[UPDATE]')).length;
-    const deleteCount = allEntries.filter((l) => l.includes('[DELETE]')).length;
+  const logPath = path.resolve('logs/admin.log');
 
-    // ทำสำเนาข้อมูลออกมาสำหรับสไลด์แบ่งหน้าและทำตามเงื่อนไขค้นหา
-    let entries = [...allEntries];
+  let raw = '';
 
-    if (action) {
-      entries = entries.filter((l) => l.includes(`[${action}]`));
-    }
-
-    if (search) {
-      const q = search.toLowerCase();
-      entries = entries.filter((l) => l.toLowerCase().includes(q));
-    }
-
-    entries = entries.reverse();
-
-    const total = entries.length;
-    const totalPages = Math.ceil(total / limit) || 1;
-    const data = entries.slice((page - 1) * limit, page * limit);
-
-    return {
-      data,
-      total,
-      page,
-      limit,
-      totalPages,
-      createCount,
-      updateCount,
-      deleteCount,
-    };
+  try {
+    raw = await fs.readFile(logPath, 'utf-8');
+  } catch {
+    raw = '';
   }
+
+  let entries = raw
+    .split('\n')
+    .map((l) => l.trim())
+    .filter((l) => l.length > 0);
+
+  if (search) {
+    const q = search.toLowerCase();
+
+    entries = entries.filter((l) =>
+      l.toLowerCase().includes(q),
+    );
+  }
+
+  const createCount = entries.filter((l) =>
+    l.includes('[CREATE]'),
+  ).length;
+
+  const updateCount = entries.filter((l) =>
+    l.includes('[UPDATE]'),
+  ).length;
+
+  const deleteCount = entries.filter((l) =>
+    l.includes('[DELETE]'),
+  ).length;
+
+  if (action) {
+    entries = entries.filter((l) =>
+      l.includes(`[${action}]`),
+    );
+  }
+
+  entries.reverse();
+
+  const { skip, take } = calculatePagination({
+    page,
+    limit,
+  });
+
+  const data = entries.slice(skip, skip + take);
+
+  return {
+    ...createPaginatedResult(
+      data,
+      entries.length,
+      { page, limit },
+    ),
+    createCount,
+    updateCount,
+    deleteCount,
+  };
+}
 
   async findById(id: number): Promise<ResponseAdminDto | null> {
     const data = await this.prisma.user.findUnique({
@@ -263,15 +283,6 @@ export class AdminRepositories {
     return data._max.uId;
   }
 
-  async findMin(): Promise<number | null> {
-    const data = await this.prisma.user.aggregate({
-      _min: {
-        uId: true,
-      },
-    });
-
-    return data._min.uId;
-  }
 
   async checkFirstName(firstName: string): Promise<ResponseAdminDto | null> {
     const inputSuffix = firstName.split('-')[1]?.trim();

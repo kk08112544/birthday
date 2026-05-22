@@ -56,6 +56,11 @@ export class AdminFestivalController {
     return this.adminfestivalService.findMany(paginationDto);
   }
 
+  @Get()
+  findMin(){
+    return this.adminfestivalService.findMin();
+  }
+
   @Patch(':id')
   @UsePipes(
     new ValidationPipe({

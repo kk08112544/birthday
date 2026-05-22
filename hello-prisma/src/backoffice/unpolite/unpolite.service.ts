@@ -6,6 +6,7 @@ import { STATUS } from 'src/common/status';
 import { MESSAGE } from 'src/common/message';
 import { ExceptionsService } from 'src/common/exception/exception.service';
 import { PaginationUnpoliteDto } from './dto/pagination-unpolite.dto';
+import { PaginationUnpoliteLogDto } from './dto/pagination-unpolitelog.dto';
 import { AppLoggerService } from 'src/common/logger/app-logger.service';
 
 @Injectable()
@@ -86,8 +87,18 @@ export class AdminUnpoliteService {
   //     return { log: '' };
   //   }
   // }
-  async getLog(paginationDto: PaginationUnpoliteDto) {
-    return this.adminunpoliteRepositories.getLog(paginationDto);
+  // async getLog(paginationDto: PaginationUnpoliteDto) {
+  //   return this.adminunpoliteRepositories.getLog(paginationDto);
+  // }
+
+   async getLog(paginationDto: PaginationUnpoliteLogDto) {
+    const result = await this.adminunpoliteRepositories.getLog(paginationDto);
+     console.log(result);
+      return {
+      unpolite: result,
+      action: STATUS.SUCCESS,
+      message: MESSAGE.UNPOLITE.GET_SUCCESS,
+    };
   }
 
   async update(

@@ -76,9 +76,19 @@ export class AdminService {
     };
   }
 
-  async getLog(paginationDto: PaginationAdminLogDto) {
-    return this.adminRepositories.getLog(paginationDto);
-  }
+  // async getLog(paginationDto: PaginationAdminLogDto) {
+  //   return this.adminRepositories.getLog(paginationDto);
+  // }
+
+     async getLog(paginationDto: PaginationAdminLogDto) {
+      const result = await this.adminRepositories.getLog(paginationDto);
+       console.log(result);
+        return {
+        admin: result,
+        action: STATUS.SUCCESS,
+        message: MESSAGE.ADMIN.GET_SUCCESS,
+      };
+    }
 
   async findById(id: number) {
     const data = await this.adminRepositories.findById(id);
@@ -89,15 +99,6 @@ export class AdminService {
       admin: data,
       action: STATUS.SUCCESS, // ใช้ตัวแปร STATUS
       message: MESSAGE.ADMIN.GET_SUCCESS, // ใช้ตัวแปร MESSAGE
-    };
-  }
-
-  async findMin() {
-    const data = await this.adminRepositories.findMin();
-    return {
-      admin: data,
-      action: STATUS.SUCCESS,
-      message: MESSAGE.ADMIN.MIN_SUCCESS,
     };
   }
 

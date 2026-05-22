@@ -43,6 +43,7 @@ export class AdminController {
   }
 
   @Get('log')
+   @UsePipes(new ValidationPipe({ transform: true, transformOptions: { enableImplicitConversion: true } }))
   async getLog(@Query() paginationDto: PaginationAdminLogDto) {
     return this.adminService.getLog(paginationDto);
   }
@@ -52,10 +53,7 @@ export class AdminController {
     return this.adminService.findById(id);
   }
 
-  @Get('min')
-  findMin() {
-    return this.adminService.findMin();
-  }
+
 
   @Get()
   findMany(@Query() paginationDto: PaginationAdminDto) {

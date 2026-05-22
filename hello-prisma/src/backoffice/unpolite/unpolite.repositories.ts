@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { CreateUnpoliteDto } from './dto/create-unpolite.dto';
 import { UpdateUnpoliteDto } from './dto/update-unpolite.dto';
 import { ResponseUnpoliteDto } from './dto/response-unpolite.dto';
+import { calculatePagination, createPaginatedResult } from 'src/common/pagination/paginate.util';
+import { ResponseUnpoliteLog } from './dto/response-unpolitelog.dto';
 import { PaginationUnpoliteDto } from './dto/pagination-unpolite.dto';
 import { PaginationUnpoliteLogDto } from './dto/pagination-unpolitelog.dto';
 import { PrismaService } from 'src/prisma.service';
@@ -82,59 +84,235 @@ export class AdminUnpoliteRepositories {
     return paginate(queryFn, countFn, options);
   }
 
-  async getLog(dto: PaginationUnpoliteLogDto) {
-    const { page, limit, search, action } = dto;
+// async getLog(
+//   dto: PaginationUnpoliteLogDto,
+// ): Promise<ResponseUnpoliteLogDto> {
+//   const { page, limit, search, action } = dto;
 
-    const logPath = path.resolve('logs/unpolite.log');
-    let raw = '';
-    try {
-      // ใช้ await fs.readFile เพื่อแก้อาการแจ้งเตือนของ ESLint
-      raw = await fs.readFile(logPath, 'utf-8');
-    } catch {
-      raw = '';
-    }
+//   const logPath = path.resolve('logs/unpolite.log');
 
-    // ทำความสะอาดและแยกบรรทัด Log เพียงรอบเดียว (Single-source of truth)
-    const allEntries = raw
-      .split('\n')
-      .map((l) => l.trim())
-      .filter((l) => l.length > 0);
+//   let raw = '';
 
-    // นับสถิติจากอาเรย์ต้นฉบับก่อนโดน filter
-    const createCount = allEntries.filter((l) => l.includes('[CREATE]')).length;
-    const updateCount = allEntries.filter((l) => l.includes('[UPDATE]')).length;
-    const deleteCount = allEntries.filter((l) => l.includes('[DELETE]')).length;
+//   try {
+//     raw = await fs.readFile(logPath, 'utf-8');
+//   } catch {
+//     raw = '';
+//   }
 
-    // ทำสำเนาชุดข้อมูลเพื่อนำไป filter ต่อตามเงื่อนไขที่ส่งมา
-    let entries = [...allEntries];
+//   const allEntries = raw
+//     .split('\n')
+//     .map((l) => l.trim())
+//     .filter((l) => l.length > 0);
 
-    if (action) {
-      entries = entries.filter((l) => l.includes(`[${action}]`));
-    }
+//   const createCount = allEntries.filter((l) =>
+//     l.includes('[CREATE]'),
+//   ).length;
 
-    if (search) {
-      const q = search.toLowerCase();
-      entries = entries.filter((l) => l.toLowerCase().includes(q));
-    }
+//   const updateCount = allEntries.filter((l) =>
+//     l.includes('[UPDATE]'),
+//   ).length;
 
-    entries = entries.reverse();
+//   const deleteCount = allEntries.filter((l) =>
+//     l.includes('[DELETE]'),
+//   ).length;
 
-    const total = entries.length;
-    const totalPages = Math.ceil(total / limit) || 1;
-    const data = entries.slice((page - 1) * limit, page * limit);
+//   let entries = [...allEntries];
 
-    return {
-      data,
-      total,
-      page,
-      limit,
-      totalPages,
-      createCount,
-      updateCount,
-      deleteCount,
-    };
+//   if (action) {
+//     entries = entries.filter((l) =>
+//       l.includes(`[${action}]`),
+//     );
+//   }
+
+//   if (search) {
+//     const q = search.toLowerCase();
+
+//     entries = entries.filter((l) =>
+//       l.toLowerCase().includes(q),
+//     );
+//   }
+
+//   entries.reverse();
+
+//   const total = entries.length;
+
+//   const totalPages = Math.ceil(total / limit) || 1;
+
+//   const data = entries.slice(
+//     (page - 1) * limit,
+//     page * limit,
+//   );
+
+//   return {
+//     data,
+//     total,
+//     page,
+//     limit,
+//     totalPages,
+//     createCount,
+//     updateCount,
+//     deleteCount,
+//   };
+// }
+// async getLog(
+//   dto: PaginationUnpoliteLogDto,
+// ): Promise<PaginatedResult<string> & ResponseUnpoliteLog> {
+//   const { page, limit, search, action } = dto;
+
+//   const logPath = path.resolve('logs/unpolite.log');
+
+//   let raw = '';
+//   try {
+//     raw = await fs.readFile(logPath, 'utf-8');
+//   } catch {
+//     raw = '';
+//   }
+
+//   let entries = raw
+//     .split('\n')
+//     .map((l) => l.trim())
+//     .filter((l) => l.length > 0);
+
+//   if (search) {
+//     const q = search.toLowerCase();
+//     entries = entries.filter((l) => l.toLowerCase().includes(q));
+//   }
+
+//   const createCount = entries.filter((l) => l.includes('[CREATE]')).length;
+//   const updateCount = entries.filter((l) => l.includes('[UPDATE]')).length;
+//   const deleteCount = entries.filter((l) => l.includes('[DELETE]')).length;
+
+//   if (action) {
+//     entries = entries.filter((l) => l.includes(`[${action}]`));
+//   }
+
+//   entries.reverse();
+
+//   const { skip, take } = calculatePagination({ page, limit });
+//   const data = entries.slice(skip, skip + take);
+
+//   return {
+//     ...createPaginatedResult(data, entries.length, { page, limit }),
+//     createCount,
+//     updateCount,
+//     deleteCount,
+//   };
+// }
+async getLog(
+  dto: PaginationUnpoliteLogDto,
+): Promise<ResponseUnpoliteLog> {
+  const { page, limit, search, action } = dto;
+
+  const logPath = path.resolve('logs/unpolite.log');
+
+  let raw = '';
+
+  try {
+    raw = await fs.readFile(logPath, 'utf-8');
+  } catch {
+    raw = '';
   }
 
+  let entries = raw
+    .split('\n')
+    .map((l) => l.trim())
+    .filter((l) => l.length > 0);
+
+  if (search) {
+    const q = search.toLowerCase();
+
+    entries = entries.filter((l) =>
+      l.toLowerCase().includes(q),
+    );
+  }
+
+  const createCount = entries.filter((l) =>
+    l.includes('[CREATE]'),
+  ).length;
+
+  const updateCount = entries.filter((l) =>
+    l.includes('[UPDATE]'),
+  ).length;
+
+  const deleteCount = entries.filter((l) =>
+    l.includes('[DELETE]'),
+  ).length;
+
+  if (action) {
+    entries = entries.filter((l) =>
+      l.includes(`[${action}]`),
+    );
+  }
+
+  entries.reverse();
+
+  const { skip, take } = calculatePagination({
+    page,
+    limit,
+  });
+
+  const data = entries.slice(skip, skip + take);
+
+  return {
+   
+  ...createPaginatedResult(data, entries.length, { page: Number(page), limit: Number(limit) }),
+  createCount,
+  updateCount,
+  deleteCount,
+  };
+}
+  // async getLog(dto: PaginationUnpoliteLogDto) {
+  //   const { page, limit, search, action } = dto;
+
+  //   const logPath = path.resolve('logs/unpolite.log');
+  //   let raw = '';
+  //   try {
+  //     // ใช้ await fs.readFile เพื่อแก้อาการแจ้งเตือนของ ESLint
+  //     raw = await fs.readFile(logPath, 'utf-8');
+  //   } catch {
+  //     raw = '';
+  //   }
+
+  //   // ทำความสะอาดและแยกบรรทัด Log เพียงรอบเดียว (Single-source of truth)
+  //   const allEntries = raw
+  //     .split('\n')
+  //     .map((l) => l.trim())
+  //     .filter((l) => l.length > 0);
+
+  //   // นับสถิติจากอาเรย์ต้นฉบับก่อนโดน filter
+  //   const createCount = allEntries.filter((l) => l.includes('[CREATE]')).length;
+  //   const updateCount = allEntries.filter((l) => l.includes('[UPDATE]')).length;
+  //   const deleteCount = allEntries.filter((l) => l.includes('[DELETE]')).length;
+
+  //   // ทำสำเนาชุดข้อมูลเพื่อนำไป filter ต่อตามเงื่อนไขที่ส่งมา
+  //   let entries = [...allEntries];
+
+  //   if (action) {
+  //     entries = entries.filter((l) => l.includes(`[${action}]`));
+  //   }
+
+  //   if (search) {
+  //     const q = search.toLowerCase();
+  //     entries = entries.filter((l) => l.toLowerCase().includes(q));
+  //   }
+
+  //   entries = entries.reverse();
+
+  //   const total = entries.length;
+  //   const totalPages = Math.ceil(total / limit) || 1;
+  //   const data = entries.slice((page - 1) * limit, page * limit);
+
+  //   return {
+  //     data,
+  //     total,
+  //     page,
+  //     limit,
+  //     totalPages,
+  //     createCount,
+  //     updateCount,
+  //     deleteCount,
+  //   };
+  // }
   async update(
     id: number,
     updateUnpoliteDto: UpdateUnpoliteDto,

@@ -10,6 +10,7 @@ export interface PaginatedResult<T> {
   page: number;
   limit: number;
   totalPages: number;
+  [key: string]: unknown; // รองรับ extra fields เช่น createCount
 }
 
 // export interface PaginatedResult<T> {

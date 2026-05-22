@@ -99,10 +99,11 @@
           <router-link
             to="/backoffice/unpolite"
             class="nav-item"
-            :class="{ 'nav-item--active': 
-               route.path.startsWith('/backoffice/unpolite') ||
+            :class="{
+              'nav-item--active':
+                route.path.startsWith('/backoffice/unpolite') ||
                 route.path.startsWith('/backoffice/unpolite/log'),
-             }"
+            }"
           >
             <div class="nav-item-icon"><q-icon name="block" size="18px" /></div>
             <span>รายการคำต้องห้าม</span>
