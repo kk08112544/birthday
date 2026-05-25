@@ -69,4 +69,13 @@ export const MESSAGE = {
     SUPER_ADMIN_NOT_EXCEPT: 'ไม่่สามารถแก้ไขหรือลบซุปเปอร์แอดมินได้',
     MIN_SUCCESS: 'แสดงค่าที่น้อยที่สุดสำเร็จ',
   },
+
+  IGNORE: {
+    WORD_CONFLICT: 'มีคำนี้ในระบบแล้ว',
+    CREATE_SUCCESS: 'สร้างคำละเว้นสำเร็จ',
+    GET_SUCCESS: 'แสดงรายการคำละเว้นสำเร็จ',
+    NOT_FOUND: 'ไม่พบคำละเว้น',
+    UPDATE_SUCCESS: 'แก้ไขคำละเว้นสำเร็จ',
+    DELETE_SUCCESS: 'ลบคำละเว้นสำเร็จ',
+  },
 };

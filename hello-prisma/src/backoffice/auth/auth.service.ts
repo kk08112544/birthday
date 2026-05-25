@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { LoginDto } from './dto/login-auth.dto';
 import { AuthRepositories } from './auth.repositories';
 import { ExceptionsService } from 'src/common/exception/exception.service';
+import { JwtService } from '@nestjs/jwt';
 import { comparePassword } from 'src/common/utils/bcrypt.util';
 import { generateTokens, verifyRefreshToken } from 'src/common/utils/jwt.util';
 import { RenewTokenDto } from './dto/renew-auth.dto';
@@ -14,6 +15,7 @@ export class AuthService {
   constructor(
     private readonly authRepositories: AuthRepositories,
     private readonly exceptionsService: ExceptionsService,
+    private readonly jwtService: JwtService,
   ) {}
   async login(loginDto: LoginDto) {
     // แก้ไข: ส่งเฉพาะ username ไปค้นหา (ขึ้นอยู่กับ implementation ของ repository คุณด้วยนะ)

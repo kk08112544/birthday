@@ -531,11 +531,17 @@ $error-red: #dc2626;
 }
 
 // ─── Hero ─────────────────────────────────────────────────────────────────────
+// .page-hero {
+//   position: relative;
+//   overflow: hidden;
+//   background: linear-gradient(135deg, #1e1b4b 0%, $indigo 45%, $indigo-mid 100%);
+//   padding: 2.25rem 1.5rem 0;
+// }
 .page-hero {
   position: relative;
   overflow: hidden;
   background: linear-gradient(135deg, #1e1b4b 0%, $indigo 45%, $indigo-mid 100%);
-  padding: 2.25rem 1.5rem 0;
+  padding: 1rem 1.5rem 2.5rem; // เปลี่ยนจาก 2.25rem 1.5rem 4rem
 }
 .hero-blob {
   position: absolute;
@@ -677,18 +683,29 @@ $error-red: #dc2626;
 }
 
 // ─── Content ─────────────────────────────────────────────────────────────────
+// .content-wrap {
+//   max-width: 760px;
+//   margin: 0 auto;
+//   padding: 0 1rem 4rem;
+//   &::before {
+//     content: '';
+//     display: block;
+//     height: 1.5rem;
+//     background: #fff;
+//     border-radius: 0 16px 0 0;
+//     margin-bottom: -1rem;
+//   }
+// }
+
 .content-wrap {
-  max-width: 760px;
-  margin: 0 auto;
-  padding: 0 1rem 4rem;
-  &::before {
-    content: '';
-    display: block;
-    height: 1.5rem;
-    background: #fff;
-    border-radius: 0 16px 0 0;
-    margin-bottom: -1rem;
-  }
+  max-width: 1100px;
+  margin: -1.25rem auto 0;
+  padding: 1.5rem 1rem 4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  position: relative;
+  z-index: 2;
 }
 .form-container {
   display: flex;

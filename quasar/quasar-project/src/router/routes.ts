@@ -74,6 +74,11 @@ const routes: RouteRecordRaw[] = [
         component: () => import('pages/backoffice/festival/ViewPage.vue'),
         props: true,
       },
+        {
+        path: 'log',
+        component: () => import('pages/backoffice/festival/FestivallogPage.vue'),
+        props: true,
+      },
     ],
   },
   {
@@ -85,7 +90,7 @@ const routes: RouteRecordRaw[] = [
       { path: 'create', component: () => import('pages/backoffice/admin/CreatePage.vue') },
       { path: 'edit/:id', component: () => import('pages/backoffice/admin/EditPage.vue') },
       { path: 'view/:id', component: () => import('pages/backoffice/admin/ViewPage.vue') },
-      { path: 'log', component: () => import('pages/backoffice/admin/Adminlog.vue') },
+      { path: 'log', component: () => import('src/pages/backoffice/admin/AdminlogPage.vue') },
     ],
   },
   {
@@ -94,7 +99,18 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: true },
     children: [
       { path: '', component: () => import('pages/backoffice/unpolite/UnpolitePage.vue') },
-      { path: 'log', component: () => import('pages/backoffice/unpolite/Unpolitelog.vue') },
+      {path: 'log', component: ()=> import('pages/backoffice/unpolite/UnpolitelogPage.vue')}
+      // { path: 'log', component: () => import('pages/backoffice/unpolite/UnpoliteLog.vue') },
+      //  { path: 'log', component: () => import('src/pages/backoffice/unpolite/UnpoliteLog.vue') },
+    ],
+  },
+    {
+    path: '/backoffice/ignore',
+    component: () => import('src/layouts/BackofficeLayout.vue'),
+    meta: { requiresAuth: true },
+    children: [
+      { path: '', component: () => import('pages/backoffice/ignore/IgnorePage.vue') },
+      { path: 'log', component: () => import('pages/backoffice/ignore/IgnorelogPage.vue') },
       //  { path: 'log', component: () => import('src/pages/backoffice/unpolite/UnpoliteLog.vue') },
     ],
   },

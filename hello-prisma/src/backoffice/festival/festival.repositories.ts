@@ -3,10 +3,18 @@ import { CreateFestivalDto } from './dto/create-festival.dto';
 import { UpdateFestivalDto } from './dto/update-festival.dto';
 import { PrismaService } from 'src/prisma.service';
 import { ResponseFestivalDto } from './dto/response-festival.dto';
+import { ResponseFestivalLog } from './dto/response-festivallog.dto';
 import { PaginationFestivalDto } from './dto/pagination-festival.dto';
+import { PaginationFestivalLogDto } from './dto/pagination-festivallog.dto';
 import { PaginatedResult } from 'src/common/pagination/paginate.interface';
 import { Prisma } from '@prisma/client';
 import { paginate } from 'src/common/pagination/paginate.util';
+import * as fs from 'fs/promises'; // เปลี่ยนเป็นดึงเวอร์ชัน promises มาใช้งาน
+import * as path from 'path';
+import {
+  calculatePagination,
+  createPaginatedResult,
+} from 'src/common/pagination/paginate.util';
 
 const userSelect = {
   uId: true,
@@ -71,17 +79,91 @@ export class AdminFestivalRepositories {
   }
 
   async findById(id: number): Promise<ResponseFestivalDto | null> {
-    return this.prisma.festival.findUnique({
-      where: { fId: Number(id), deletedAt: null },
-      include: {
-        wisher: { where: { deletedAt: null } },
-        card: { where: { deletedAt: null } },
-        createdByUser: { select: userSelect },
-        updatedByUser: { select: userSelect },
-        deletedByUser: { select: userSelect },
+    const data = await this.prisma.festival.findFirst({
+      where: {
+        fId: Number(id),
+        deletedAt: null,
       },
-    }) as unknown as Promise<ResponseFestivalDto | null>;
+      include: {
+        wisher: {
+          where: {
+            deletedAt: null,
+          },
+        },
+        card: {
+          where: {
+            deletedAt: null,
+          },
+        },
+        createdByUser: {
+          select: userSelect,
+        },
+        updatedByUser: {
+          select: userSelect,
+        },
+        deletedByUser: {
+          select: userSelect,
+        },
+      },
+    });
+
+    return data as ResponseFestivalDto | null;
   }
+
+  async getLog(dto: PaginationFestivalLogDto): Promise<ResponseFestivalLog> {
+    const { page, limit, search, action } = dto;
+
+    const logPath = path.resolve('logs/festival.log');
+
+    let raw = '';
+
+    try {
+      raw = await fs.readFile(logPath, 'utf-8');
+    } catch {
+      raw = '';
+    }
+
+    let entries = raw
+      .split('\n')
+      .map((l) => l.trim())
+      .filter((l) => l.length > 0);
+
+    if (search) {
+      const q = search.toLowerCase();
+
+      entries = entries.filter((l) => l.toLowerCase().includes(q));
+    }
+
+    const createCount = entries.filter((l) => l.includes('[CREATE]')).length;
+
+    const updateCount = entries.filter((l) => l.includes('[UPDATE]')).length;
+
+    const deleteCount = entries.filter((l) => l.includes('[DELETE]')).length;
+
+    if (action) {
+      entries = entries.filter((l) => l.includes(`[${action}]`));
+    }
+
+    entries.reverse();
+
+    const { skip, take } = calculatePagination({
+      page,
+      limit,
+    });
+
+    const data = entries.slice(skip, skip + take);
+
+    return {
+      ...createPaginatedResult(data, entries.length, {
+        page: Number(page),
+        limit: Number(limit),
+      }),
+      createCount,
+      updateCount,
+      deleteCount,
+    };
+  }
+
   async findByCreatorId(
     id: number,
     createdBy: number,
@@ -163,7 +245,7 @@ export class AdminFestivalRepositories {
       },
     });
 
-    return data._min.fId;
+    return Number(data._min.fId);
   }
 
   async update(

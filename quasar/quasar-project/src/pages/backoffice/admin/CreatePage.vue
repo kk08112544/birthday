@@ -723,7 +723,7 @@ $error-red: #dc2626;
   position: relative;
   overflow: hidden;
   background: linear-gradient(135deg, #1e1b4b 0%, $indigo 45%, $indigo-mid 100%);
-  padding: 2.25rem 1.5rem 4rem;
+  padding: 1rem 1.5rem 2.5rem; // เปลี่ยนจาก 2.25rem 1.5rem 4rem
 }
 
 .hero-blob {
@@ -831,11 +831,15 @@ $error-red: #dc2626;
 
 // ─── Content ──────────────────────────────────────────────────────────────────
 .content-wrap {
-  max-width: 680px;
-  margin: -2rem auto 0;
-  padding: 0 1rem 4rem;
+  max-width: 1100px;
+  margin: -1.25rem auto 0;
+  padding: 1.5rem 1rem 4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  position: relative;
+  z-index: 2;
 }
-
 .form-container {
   display: flex;
   flex-direction: column;

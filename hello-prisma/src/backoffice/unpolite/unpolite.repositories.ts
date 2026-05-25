@@ -44,24 +44,27 @@ export class AdminUnpoliteRepositories {
     createUnpoliteDto: CreateUnpoliteDto,
     createdBy: number,
   ): Promise<ResponseUnpoliteDto> {
-    return this.prisma.unpolite.create({
+    const data = await this.prisma.unpolite.create({
       data: { ...createUnpoliteDto, createdBy },
       select: unpoliteSelect,
     });
+    return data;
   }
 
   async findAll(): Promise<ResponseUnpoliteDto[]> {
-    return this.prisma.unpolite.findMany({
+    const data = await this.prisma.unpolite.findMany({
       where: { deletedAt: null },
       select: unpoliteSelect,
     });
+    return data;
   }
 
   async findById(id: number): Promise<ResponseUnpoliteDto | null> {
-    return this.prisma.unpolite.findUnique({
+    const data = await this.prisma.unpolite.findUnique({
       where: { upId: Number(id), deletedAt: null },
       select: unpoliteSelect,
     });
+    return data;
   }
 
   async findManyPaginated(

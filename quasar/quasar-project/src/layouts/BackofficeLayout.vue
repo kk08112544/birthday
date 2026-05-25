@@ -1,14 +1,27 @@
 <template>
-  <q-layout view="lhh LpR lf">
+  <q-layout view="lhh LpR lf" dark>
     <!-- ===== HEADER ===== -->
     <q-header class="admin-header">
       <q-toolbar class="admin-toolbar">
-        <div class="header-logo">
-          <q-icon name="celebration" size="20px" color="white" />
-        </div>
+        <!-- Hamburger toggle (mobile + collapsed desktop) -->
+        <q-btn
+          flat
+          round
+          dense
+          :icon="sidebarOpen ? 'menu_open' : 'menu'"
+          color="white"
+          size="md"
+          class="sidebar-toggle-btn"
+          @click="toggleSidebar"
+        >
+          <q-tooltip>{{ sidebarOpen ? 'ย่อเมนู' : 'ขยายเมนู' }}</q-tooltip>
+        </q-btn>
 
         <q-toolbar-title class="admin-title">
-          <span class="admin-title-text">ระบบบริหารจัดการอวยพรเนื่องในโอกาสต่างๆ ของกรมฯ</span>
+          <span class="admin-title-text">
+            ระบบบริหารจัดการอวยพรเนื่องในโอกาสต่างๆ
+            <span class="new-line">ของกรมฯ</span>
+          </span>
         </q-toolbar-title>
 
         <q-space />
@@ -16,7 +29,6 @@
         <div class="admin-badge gt-xs" v-if="isLoggedIn">
           <q-icon name="admin_panel_settings" size="16px" />
           <span>{{ firstName }}</span>
-          <!-- Crown badge — superAdmin only -->
           <div v-if="isSuperAdmin" class="super-crown">
             <q-icon name="workspace_premium" size="16px" color="amber-4" />
             <q-tooltip>Super Administrator</q-tooltip>
@@ -45,92 +57,281 @@
       </q-toolbar>
     </q-header>
 
+    <!-- ===== SIDEBAR DRAWER ===== -->
+    <q-drawer
+      v-model="sidebarOpen"
+      :width="sidebarWidth"
+      :mini="sidebarMini"
+      :mini-width="64"
+      :breakpoint="768"
+      bordered
+      @mouseover="onSidebarHover(true)"
+      @mouseleave="onSidebarHover(false)"
+    >
+      <!-- Sidebar brand -->
+      <div
+        style="
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 18px 16px 14px;
+          border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+          background: #fff;
+        "
+      >
+        <div
+          style="
+            width: 38px;
+            height: 38px;
+            border-radius: 11px;
+            flex-shrink: 0;
+            background: linear-gradient(135deg, #e11d48, #db2777);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          "
+        >
+          <q-icon name="celebration" size="22px" color="white" />
+        </div>
+        <span
+          v-if="!sidebarMini || sidebarHovered"
+          style="
+            font-family: 'Sarabun', 'Noto Sans Thai', sans-serif;
+            font-size: clamp(13px, 3.5vw, 20px);
+            font-weight: 700;
+            color: #1a1a1a;
+            line-height: 1.45;
+          "
+          >LDD Celebration</span
+        >
+      </div>
+
+      <!-- Nav items -->
+      <div style="background: #fff; flex: 1; padding: 10px 8px; min-height: calc(100vh - 80px)">
+
+        <!-- เทศกาล -->
+        <q-item
+          clickable
+          :to="'/backoffice/festival'"
+          style="border-radius: 12px; margin-bottom: 2px"
+          :style="
+            route.path.startsWith('/backoffice/festival')
+              ? 'background:linear-gradient(135deg,#7f1d1d,#e11d48,#db2777); border-left:3px solid #e11d48;'
+              : ''
+          "
+          @mouseover="
+            (e: MouseEvent) => {
+              if (!route.path.startsWith('/backoffice/festival'))
+                (e.currentTarget as HTMLElement).style.background = 'rgba(225,29,72,0.08)';
+            }
+          "
+          @mouseleave="
+            (e: MouseEvent) => {
+              if (!route.path.startsWith('/backoffice/festival'))
+                (e.currentTarget as HTMLElement).style.background = '';
+            }
+          "
+        >
+          <q-item-section avatar>
+            <q-icon
+              name="celebration"
+              size="22px"
+              :color="route.path.startsWith('/backoffice/festival') ? 'white' : 'pink-8'"
+            />
+          </q-item-section>
+          <q-item-section v-if="!sidebarMini || sidebarHovered">
+            <span
+              style="
+                color: #1a1a1a;
+                font-family: Sarabun, sans-serif;
+                font-size: 0.93rem;
+                font-weight: 600;
+              "
+            >
+              เทศกาล
+            </span>
+          </q-item-section>
+          <q-tooltip v-if="sidebarMini && !sidebarHovered" anchor="center right" self="center left"
+            >เทศกาล</q-tooltip
+          >
+        </q-item>
+
+        <!-- รายการคำต้องห้าม -->
+        <q-item
+          clickable
+          :to="'/backoffice/unpolite'"
+          style="border-radius: 12px; margin-bottom: 2px"
+          :style="
+            route.path.startsWith('/backoffice/unpolite')
+              ? 'background:linear-gradient(135deg,#7f1d1d,#e11d48,#db2777); border-left:3px solid #e11d48;'
+              : ''
+          "
+          @mouseover="
+            (e: MouseEvent) => {
+              if (!route.path.startsWith('/backoffice/unpolite'))
+                (e.currentTarget as HTMLElement).style.background = 'rgba(225,29,72,0.08)';
+            }
+          "
+          @mouseleave="
+            (e: MouseEvent) => {
+              if (!route.path.startsWith('/backoffice/unpolite'))
+                (e.currentTarget as HTMLElement).style.background = '';
+            }
+          "
+        >
+          <q-item-section avatar>
+            <q-icon
+              name="block"
+              size="22px"
+              :color="route.path.startsWith('/backoffice/unpolite') ? 'white' : 'pink-8'"
+            />
+          </q-item-section>
+          <q-item-section v-if="!sidebarMini || sidebarHovered">
+            <span
+              style="
+                color: #1a1a1a;
+                font-family: Sarabun, sans-serif;
+                font-size: 0.93rem;
+                font-weight: 600;
+              "
+            >
+              รายการคำต้องห้าม
+            </span>
+          </q-item-section>
+          <q-tooltip v-if="sidebarMini && !sidebarHovered" anchor="center right" self="center left"
+            >รายการคำต้องห้าม</q-tooltip
+          >
+        </q-item>
+
+        <!-- ✅ คำที่ถูกละเว้น (NEW) -->
+        <q-item
+          clickable
+          :to="'/backoffice/ignore'"
+          style="border-radius: 12px; margin-bottom: 2px"
+          :style="
+            route.path.startsWith('/backoffice/ignore')
+              ? 'background:linear-gradient(135deg,#7f1d1d,#e11d48,#db2777); border-left:3px solid  #e11d48;'
+              : ''
+          "
+          @mouseover="
+            (e: MouseEvent) => {
+              if (!route.path.startsWith('/backoffice/ignore'))
+                (e.currentTarget as HTMLElement).style.background = 'rgba(225,29,72,0.08)';
+            }
+          "
+          @mouseleave="
+            (e: MouseEvent) => {
+              if (!route.path.startsWith('/backoffice/ignore'))
+                (e.currentTarget as HTMLElement).style.background = '';
+            }
+          "
+        >
+          <q-item-section avatar>
+            <q-icon
+              name="visibility_off"
+              size="22px"
+              :color="route.path.startsWith('/backoffice/ignore') ? 'white' : 'pink-8'"
+            />
+            
+          </q-item-section>
+          <q-item-section v-if="!sidebarMini || sidebarHovered">
+            <span
+              style="
+                color: #1a1a1a;
+                font-family: Sarabun, sans-serif;
+                font-size: 0.93rem;
+                font-weight: 600;
+              "
+            >
+              คำที่ถูกละเว้น
+            </span>
+          </q-item-section>
+          <q-tooltip v-if="sidebarMini && !sidebarHovered" anchor="center right" self="center left"
+            >คำที่ถูกละเว้น</q-tooltip
+          >
+        </q-item>
+
+        <!-- Divider -->
+        <q-separator style="background: rgba(0, 0, 0, 0.08); margin: 6px 4px" />
+
+        <!-- จัดการผู้ใช้ (superAdmin only) -->
+        <template v-if="isSuperAdmin">
+          <q-item
+            clickable
+            :to="'/backoffice/admin'"
+            style="border-radius: 12px; margin-bottom: 2px"
+            :style="
+              route.path.startsWith('/backoffice/admin')
+                ? 'background:linear-gradient(135deg,#7f1d1d,#e11d48,#db2777); border-left:3px solid #e11d48;'
+                : ''
+            "
+            @mouseover="
+              (e: MouseEvent) => {
+                if (!route.path.startsWith('/backoffice/admin'))
+                  (e.currentTarget as HTMLElement).style.background = 'rgba(225,29,72,0.08)';
+              }
+            "
+            @mouseleave="
+              (e: MouseEvent) => {
+                if (!route.path.startsWith('/backoffice/admin'))
+                  (e.currentTarget as HTMLElement).style.background = '';
+              }
+            "
+          >
+            <q-item-section avatar>
+              <q-icon
+                name="manage_accounts"
+                size="22px"
+                :color="route.path.startsWith('/backoffice/admin') ? 'white' : 'pink-8'"
+              />
+            </q-item-section>
+            <q-item-section v-if="!sidebarMini || sidebarHovered">
+              <span
+                :style="
+                  route.path.startsWith('/backoffice/admin')
+                    ? 'color:#fff; font-family:Sarabun,sans-serif; font-size:0.93rem; font-weight:600;'
+                    : 'color:#1a1a1a; font-family:Sarabun,sans-serif; font-size:0.93rem; font-weight:600;'
+                "
+              >
+                จัดการผู้ใช้
+              </span>
+            </q-item-section>
+            <q-item-section v-if="!sidebarMini || sidebarHovered" side>
+              <q-icon name="workspace_premium" size="14px" color="amber-6" />
+            </q-item-section>
+            <q-tooltip
+              v-if="sidebarMini && !sidebarHovered"
+              anchor="center right"
+              self="center left"
+              >จัดการผู้ใช้ (Super Admin)</q-tooltip
+            >
+          </q-item>
+        </template>
+      </div>
+
+      <!-- Collapse toggle (desktop only) -->
+      <div
+        class="gt-sm"
+        @click="toggleMini"
+        style="
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          height: 44px;
+          margin: 8px;
+          border-radius: 10px;
+          color: #666;
+          cursor: pointer;
+          border: 1px solid rgba(0, 0, 0, 0.1);
+          background: #fff;
+        "
+      >
+        <q-icon :name="sidebarMini ? 'chevron_right' : 'chevron_left'" size="18px" color="grey-7" />
+      </div>
+    </q-drawer>
+
     <!-- ===== PAGE CONTENT ===== -->
     <q-page-container>
-      <!-- BANNER -->
-      <div class="banner-section">
-        <div class="banner-wrap">
-          <!-- :ratio="18 / 9" -->
-          <!-- <q-img src="/ldd_banner.jpg" class="banner-img" fit="cover" :ratio="18 / 9"> -->
-          <q-img src="/logo_v2.png" class="banner-img" fit="cover" :ratio="2188 / 417">
-            <template v-slot:loading>
-              <div class="banner-loading">
-                <div class="banner-loading-inner">
-                  <q-spinner-dots color="white" size="2rem" />
-                  <span>กำลังโหลด...</span>
-                </div>
-              </div>
-            </template>
-            <template v-slot:error>
-              <div class="banner-error">
-                <q-icon name="image_not_supported" size="3rem" color="white" class="q-mb-sm" />
-                <span>ไม่สามารถโหลดรูปภาพได้</span>
-              </div>
-            </template>
-            <div class="banner-overlay" />
-          </q-img>
-          <div class="banner-shimmer-bar" />
-        </div>
-      </div>
-
-      <!-- NAV BAR -->
-      <div class="nav-bar-wrap">
-        <div class="nav-bar">
-          <!-- เทศกาล -->
-          <router-link
-            to="/backoffice/festival"
-            class="nav-item"
-            :class="{
-              'nav-item--active':
-                route.path.startsWith('/backoffice/festival') ||
-                route.path.startsWith('/backoffice/festival/create') ||
-                route.path.startsWith('/backoffice/festival/edit') ||
-                route.path.startsWith('/backoffice/festival/view'),
-            }"
-          >
-            <div class="nav-item-icon"><q-icon name="celebration" size="18px" /></div>
-            <span>เทศกาล</span>
-            <div class="nav-item-indicator" />
-          </router-link>
-
-          <div class="nav-divider" />
-
-          <!-- รายการคำต้องห้าม -->
-          <router-link
-            to="/backoffice/unpolite"
-            class="nav-item"
-            :class="{
-              'nav-item--active':
-                route.path.startsWith('/backoffice/unpolite') ||
-                route.path.startsWith('/backoffice/unpolite/log'),
-            }"
-          >
-            <div class="nav-item-icon"><q-icon name="block" size="18px" /></div>
-            <span>รายการคำต้องห้าม</span>
-            <div class="nav-item-indicator" />
-          </router-link>
-
-          <!-- SuperAdmin nav item — จัดการผู้ใช้ -->
-          <template v-if="isSuperAdmin">
-            <div class="nav-divider" />
-            <router-link
-              to="/backoffice/admin"
-              class="nav-item nav-item--super"
-              :class="{ 'nav-item--active': route.path.startsWith('/backoffice/admin') }"
-            >
-              <!-- :class="{ 'nav-item--active': route.path.startsWith('/backoffice/users') }" -->
-              <div class="nav-item-icon"><q-icon name="manage_accounts" size="18px" /></div>
-              <span>จัดการผู้ใช้</span>
-              <div class="nav-super-badge">
-                <q-icon name="workspace_premium" size="13px" />
-              </div>
-              <div class="nav-item-indicator" />
-            </router-link>
-          </template>
-        </div>
-      </div>
-
-      <!-- PAGE CONTENT -->
       <div class="page-content">
         <router-view />
       </div>
@@ -186,11 +387,14 @@
               <router-link to="/backoffice/unpolite" class="footer-link">
                 <q-icon name="block" size="14px" class="q-mr-xs" />รายการคำต้องห้าม
               </router-link>
-              <!-- Footer shortcut — superAdmin only -->
+              <!-- ✅ คำที่ถูกละเว้น (NEW) -->
+              <router-link to="/backoffice/ignore" class="footer-link">
+                <q-icon name="visibility_off" size="14px" class="q-mr-xs" />คำที่ถูกละเว้น
+              </router-link>
               <router-link
                 v-if="isSuperAdmin"
-                to="/backoffice/users"
-                class="footer-link footer-link--super"
+                to="/backoffice/admin"
+                class="footer-link "
               >
                 <q-icon name="manage_accounts" size="14px" class="q-mr-xs" />จัดการผู้ใช้
                 <q-icon name="workspace_premium" size="12px" class="q-ml-xs" color="amber-4" />
@@ -238,7 +442,6 @@ import { ref, reactive, computed, onMounted, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
-
 interface AlertDialog {
   show: boolean;
   type: AlertType;
@@ -247,12 +450,30 @@ interface AlertDialog {
   message: string;
   btnLabel: string;
 }
-
 type AlertType = 'error' | 'success' | 'warning' | 'info';
 
 // ─── Router ───────────────────────────────────────────────────────────────────
 const route = useRoute();
 const router = useRouter();
+
+// ─── Sidebar State ────────────────────────────────────────────────────────────
+const sidebarOpen = ref<boolean>(true);
+const sidebarMini = ref<boolean>(false);
+const sidebarHovered = ref<boolean>(false);
+const sidebarWidth = 280;
+
+const toggleSidebar = (): void => {
+  sidebarOpen.value = !sidebarOpen.value;
+};
+
+const toggleMini = (): void => {
+  sidebarMini.value = !sidebarMini.value;
+  if (!sidebarMini.value) sidebarHovered.value = false;
+};
+
+const onSidebarHover = (state: boolean): void => {
+  if (sidebarMini.value) sidebarHovered.value = state;
+};
 
 // ─── Auth State ───────────────────────────────────────────────────────────────
 const firstName = ref<string>('');
@@ -261,13 +482,11 @@ const userRole = ref<string>('');
 const isLoggedIn = computed(() => !!firstName.value);
 const isSuperAdmin = computed(() => userRole.value === 'superAdmin');
 
-/** Read auth fields from localStorage into reactive refs. */
 const syncAuthState = (): void => {
   firstName.value = localStorage.getItem('firstName') ?? '';
   userRole.value = localStorage.getItem('role') ?? '';
 };
 
-// Re-sync on every route change (e.g. after login redirect)
 watch(() => route.path, syncAuthState, { immediate: true });
 
 // ─── Alert Dialog ─────────────────────────────────────────────────────────────
@@ -313,10 +532,11 @@ $rose-light: #fb7185;
 $gold: #ca8a04;
 $gold-light: #fbbf24;
 $amber: #f59e0b;
+$teal: #0f766e;
+$teal-mid: #0d9488;
 $surface: #ffffff;
 $text-main: #4a0010;
 $text-muted: #9ca3af;
-$nav-h: 52px;
 
 // ─── HEADER ───────────────────────────────────────────────────────────────────
 .admin-header {
@@ -331,17 +551,16 @@ $nav-h: 52px;
   gap: 12px;
 }
 
-.header-logo {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(6px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.sidebar-toggle-btn {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 10px !important;
+  transition: background 0.2s, transform 0.15s !important;
   flex-shrink: 0;
+  &:hover {
+    background: rgba(255, 255, 255, 0.2) !important;
+    transform: scale(1.05);
+  }
 }
 
 .admin-title {
@@ -366,6 +585,8 @@ $nav-h: 52px;
   letter-spacing: 0.01em;
 }
 
+.new-line { display: block; }
+
 .admin-badge {
   display: flex;
   align-items: center;
@@ -382,7 +603,6 @@ $nav-h: 52px;
   flex-shrink: 0;
 }
 
-// Animated gold crown for superAdmin
 .super-crown {
   display: flex;
   align-items: center;
@@ -390,26 +610,16 @@ $nav-h: 52px;
 }
 
 @keyframes crown-glow {
-  0%,
-  100% {
-    filter: drop-shadow(0 0 2px rgba(251, 191, 36, 0.6));
-    opacity: 0.85;
-  }
-  50% {
-    filter: drop-shadow(0 0 7px rgba(251, 191, 36, 0.95));
-    opacity: 1;
-  }
+  0%, 100% { filter: drop-shadow(0 0 2px rgba(251, 191, 36, 0.6)); opacity: 0.85; }
+  50% { filter: drop-shadow(0 0 7px rgba(251, 191, 36, 0.95)); opacity: 1; }
 }
 
 .logout-btn {
   background: rgba(255, 255, 255, 0.1) !important;
   border: 1px solid rgba(255, 255, 255, 0.2) !important;
   border-radius: 10px !important;
-  transition:
-    background 0.2s,
-    transform 0.15s !important;
+  transition: background 0.2s, transform 0.15s !important;
   flex-shrink: 0;
-
   &:hover {
     background: rgba(255, 255, 255, 0.2) !important;
     transform: scale(1.05);
@@ -429,244 +639,20 @@ $nav-h: 52px;
   opacity: 0.6;
   animation: dot-pulse 1.5s ease-in-out infinite;
 }
-
-.dot-1 {
-  width: 6px;
-  height: 6px;
-  background: $gold-light;
-  animation-delay: 0s;
-}
-.dot-2 {
-  width: 8px;
-  height: 8px;
-  background: white;
-  animation-delay: 0.2s;
-}
-.dot-3 {
-  width: 6px;
-  height: 6px;
-  background: $rose-light;
-  animation-delay: 0.4s;
-}
+.dot-1 { width: 6px; height: 6px; background: $gold-light; animation-delay: 0s; }
+.dot-2 { width: 8px; height: 8px; background: white; animation-delay: 0.2s; }
+.dot-3 { width: 6px; height: 6px; background: $rose-light; animation-delay: 0.4s; }
 
 @keyframes dot-pulse {
-  0%,
-  100% {
-    transform: scale(1);
-    opacity: 0.5;
-  }
-  50% {
-    transform: scale(1.3);
-    opacity: 1;
-  }
-}
-
-// ─── BANNER ───────────────────────────────────────────────────────────────────
-.banner-section {
-  background: linear-gradient(180deg, #fff1f2 0%, #fce7f3 100%);
-  padding: 4px 0 0;
-  position: relative;
-
-  @media (max-width: 768px) {
-    padding: 18px 12px 0;
-  }
-}
-
-.banner-wrap {
-  max-width: 1200px;
-  margin: auto;
-
-  @media (max-width: 768px) {
-    border-radius: 16px;
-    overflow: hidden;
-  }
-  @media (max-width: 480px) {
-    border-radius: 0;
-  }
-}
-
-.banner-img {
-  width: 100%;
-  display: block;
-}
-
-:deep(.q-img__image) {
-  object-position: center center;
-}
-
-.banner-loading,
-.banner-error {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, $rose-mid, #db2777);
-  color: white;
-  font-family: 'Noto Sans Thai', sans-serif;
-  font-size: 0.9rem;
-}
-
-.banner-loading-inner {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-}
-
-.banner-overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    to bottom,
-    rgba(127, 29, 29, 0.05) 0%,
-    transparent 35%,
-    rgba(127, 29, 29, 0.55) 100%
-  );
-  pointer-events: none;
-}
-
-.banner-shimmer-bar {
-  height: 4px;
-  background: linear-gradient(90deg, $rose-mid, $gold-light, $rose-light, $rose-mid);
-  background-size: 200% 100%;
-  animation: shimmer 2.5s linear infinite;
-}
-
-@keyframes shimmer {
-  0% {
-    background-position: 200% center;
-  }
-  100% {
-    background-position: -200% center;
-  }
-}
-
-// ─── NAV BAR ──────────────────────────────────────────────────────────────────
-.nav-bar-wrap {
-  background: $surface;
-  border-bottom: 1px solid rgba(190, 18, 60, 0.1);
-  box-shadow: 0 2px 12px rgba(190, 18, 60, 0.07);
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
-
-.nav-bar {
-  display: flex;
-  align-items: stretch;
-  justify-content: center;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 1rem;
-
-  @media (max-width: 480px) {
-    padding: 0;
-  }
-}
-
-.nav-item {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 0 28px;
-  height: $nav-h;
-  flex: 1;
-  font-family: 'Sarabun', 'Noto Sans Thai', sans-serif;
-  font-size: clamp(0.85rem, 3vw, 1rem);
-  font-weight: 600;
-  color: $text-muted;
-  text-decoration: none;
-  position: relative;
-  transition:
-    color 0.2s,
-    background 0.2s;
-  white-space: nowrap;
-
-  @media (max-width: 480px) {
-    padding: 0 10px;
-    font-size: 0.82rem;
-    gap: 5px;
-  }
-
-  .nav-item-icon {
-    display: flex;
-    align-items: center;
-    opacity: 0.55;
-    transition:
-      opacity 0.2s,
-      transform 0.2s;
-  }
-
-  .nav-item-indicator {
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%) scaleX(0);
-    width: 60%;
-    height: 3px;
-    border-radius: 3px 3px 0 0;
-    background: linear-gradient(90deg, $rose-mid, $rose-light);
-    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-
-  &:hover {
-    color: $rose-mid;
-    background: rgba(190, 18, 60, 0.04);
-
-    .nav-item-icon {
-      opacity: 1;
-      transform: scale(1.1);
-    }
-  }
-
-  &--active {
-    color: $rose-mid;
-    background: rgba(190, 18, 60, 0.05);
-
-    .nav-item-icon {
-      opacity: 1;
-    }
-    .nav-item-indicator {
-      transform: translateX(-50%) scaleX(1);
-    }
-  }
-
-  // ── SuperAdmin nav item ──────────────────────────────────────────────────────
-  &--super {
-    .nav-super-badge {
-      display: flex;
-      align-items: center;
-      color: $gold-light;
-      opacity: 0.65;
-      margin-left: -2px;
-      transition: opacity 0.2s;
-    }
-
-    &:hover .nav-super-badge,
-    &.nav-item--active .nav-super-badge {
-      opacity: 1;
-    }
-
-    // Gold indicator line when active
-    &.nav-item--active .nav-item-indicator {
-      background: linear-gradient(90deg, $gold, $gold-light);
-    }
-  }
-}
-
-.nav-divider {
-  width: 1px;
-  background: rgba(190, 18, 60, 0.1);
-  margin: 8px 0;
-  flex-shrink: 0;
+  0%, 100% { transform: scale(1); opacity: 0.5; }
+  50% { transform: scale(1.3); opacity: 1; }
 }
 
 // ─── PAGE CONTENT ─────────────────────────────────────────────────────────────
 .page-content {
   background: linear-gradient(150deg, #fff1f2 0%, #fdf4ff 50%, #fff7ed 100%);
   min-height: 60vh;
+  padding: 0;
 }
 
 // ─── ALERT DIALOG ─────────────────────────────────────────────────────────────
@@ -684,19 +670,10 @@ $nav-h: 52px;
   align-items: center;
   justify-content: center;
   padding: 28px 0 20px;
-
-  &--error {
-    background: linear-gradient(135deg, #7f1d1d, $rose-mid);
-  }
-  &--success {
-    background: linear-gradient(135deg, #14532d, #16a34a);
-  }
-  &--warning {
-    background: linear-gradient(135deg, #78350f, $amber);
-  }
-  &--info {
-    background: linear-gradient(135deg, #1e3a5f, #2563eb);
-  }
+  &--error { background: linear-gradient(135deg, #7f1d1d, $rose-mid); }
+  &--success { background: linear-gradient(135deg, #14532d, #16a34a); }
+  &--warning { background: linear-gradient(135deg, #78350f, $amber); }
+  &--info { background: linear-gradient(135deg, #1e3a5f, #2563eb); }
 }
 
 .alert-icon-ring {
@@ -711,10 +688,7 @@ $nav-h: 52px;
   backdrop-filter: blur(4px);
 }
 
-.alert-body {
-  padding: 20px 24px 8px !important;
-  text-align: center;
-}
+.alert-body { padding: 20px 24px 8px !important; text-align: center; }
 .alert-title {
   font-family: 'Prompt', 'Noto Sans Thai', sans-serif;
   font-size: 1.05rem;
@@ -722,14 +696,8 @@ $nav-h: 52px;
   color: $text-main;
   margin-bottom: 8px;
 }
-.alert-message {
-  font-size: 0.92rem;
-  color: #64748b;
-  line-height: 1.65;
-}
-.alert-actions {
-  padding: 12px 24px 22px !important;
-}
+.alert-message { font-size: 0.92rem; color: #64748b; line-height: 1.65; }
+.alert-actions { padding: 12px 24px 22px !important; }
 
 .alert-btn {
   min-width: 110px;
@@ -739,23 +707,10 @@ $nav-h: 52px;
   font-weight: 600;
   padding: 8px 28px !important;
   letter-spacing: 0.01em;
-
-  &--error {
-    background: linear-gradient(135deg, $rose-mid, #db2777) !important;
-    color: #fff !important;
-  }
-  &--success {
-    background: linear-gradient(135deg, #16a34a, #15803d) !important;
-    color: #fff !important;
-  }
-  &--warning {
-    background: linear-gradient(135deg, $amber, #d97706) !important;
-    color: #fff !important;
-  }
-  &--info {
-    background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
-    color: #fff !important;
-  }
+  &--error { background: linear-gradient(135deg, $rose-mid, #db2777) !important; color: #fff !important; }
+  &--success { background: linear-gradient(135deg, #16a34a, #15803d) !important; color: #fff !important; }
+  &--warning { background: linear-gradient(135deg, $amber, #d97706) !important; color: #fff !important; }
+  &--info { background: linear-gradient(135deg, #2563eb, #1d4ed8) !important; color: #fff !important; }
 }
 
 // ─── FOOTER ───────────────────────────────────────────────────────────────────
@@ -768,26 +723,15 @@ $nav-h: 52px;
   max-width: 1100px;
   margin: 0 auto;
   padding: 3rem 1.5rem 1.5rem;
-
-  @media (max-width: 600px) {
-    padding: 2rem 1rem 1.25rem;
-  }
+  @media (max-width: 600px) { padding: 2rem 1rem 1.25rem; }
 }
 
 .footer-grid {
   display: grid;
   grid-template-columns: 2fr 1fr 1.5fr;
   gap: 2.5rem;
-
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr 1fr;
-    gap: 2rem;
-  }
-  @media (max-width: 480px) {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-    text-align: center;
-  }
+  @media (max-width: 768px) { grid-template-columns: 1fr 1fr; gap: 2rem; }
+  @media (max-width: 480px) { grid-template-columns: 1fr; gap: 1.5rem; text-align: center; }
 }
 
 .footer-col-title {
@@ -805,10 +749,7 @@ $nav-h: 52px;
   align-items: center;
   gap: 10px;
   margin-bottom: 0.9rem;
-
-  @media (max-width: 480px) {
-    justify-content: center;
-  }
+  @media (max-width: 480px) { justify-content: center; }
 }
 
 .footer-brand-icon {
@@ -840,10 +781,7 @@ $nav-h: 52px;
   display: flex;
   flex-direction: column;
   gap: 10px;
-
-  @media (max-width: 480px) {
-    align-items: center;
-  }
+  @media (max-width: 480px) { align-items: center; }
 }
 
 .footer-link {
@@ -852,22 +790,16 @@ $nav-h: 52px;
   color: rgba(255, 255, 255, 0.7);
   font-size: 0.86rem;
   text-decoration: none;
-  transition:
-    color 0.2s,
-    padding-left 0.2s;
-
-  &:hover {
-    color: $gold-light;
-    padding-left: 4px;
+  transition: color 0.2s, padding-left 0.2s;
+  &:hover { color: $gold-light; padding-left: 4px; }
+  // ✅ ignore link ใช้สี teal เมื่อ hover
+  &--ignore {
+    color: rgba(94, 234, 212, 0.75);
+    &:hover { color: #5eead4; }
   }
-
-  // SuperAdmin footer link — subtle gold tint
   &--super {
     color: rgba(251, 191, 36, 0.65);
-
-    &:hover {
-      color: $gold-light;
-    }
+    &:hover { color: $gold-light; }
   }
 }
 
@@ -875,10 +807,7 @@ $nav-h: 52px;
   display: flex;
   flex-direction: column;
   gap: 10px;
-
-  @media (max-width: 480px) {
-    align-items: center;
-  }
+  @media (max-width: 480px) { align-items: center; }
 }
 
 .footer-contact-item {
@@ -888,11 +817,7 @@ $nav-h: 52px;
   color: rgba(255, 255, 255, 0.7);
   font-size: 0.84rem;
   line-height: 1.5;
-
-  @media (max-width: 480px) {
-    justify-content: center;
-    align-items: center;
-  }
+  @media (max-width: 480px) { justify-content: center; align-items: center; }
 }
 
 .footer-contact-icon {
@@ -920,14 +845,17 @@ $nav-h: 52px;
   line-height: 1.6;
 }
 
-.footer-bottom-sep {
-  opacity: 0.4;
-}
+.footer-bottom-sep { opacity: 0.4; }
 
 @media (max-width: 480px) {
-  .footer-bottom {
-    flex-direction: column;
-    gap: 4px;
-  }
+  .footer-bottom { flex-direction: column; gap: 4px; }
+}
+</style>
+
+<style lang="scss">
+body .q-drawer,
+body .q-drawer .q-drawer__content {
+  background: #fff !important;
+  overflow: hidden !important;
 }
 </style>

@@ -13,8 +13,8 @@ import { CreateCardDto } from './create-card.dto';
 export class CreateFestivalDto {
   @IsNotEmpty()
   @IsString()
-  @Matches(/^[ก-๙A-Za-z0-9]+-[ก-๙A-Za-z0-9]{3}-\d{4}$/, {
-    message: 'รูปแบบต้องเป็น ชื่อเทศกาล-3ตัวย่อหน่วยงาน-ปี',
+  @Matches(/^[ก-๙A-Za-z0-9]+-[ก-๙A-Za-z0-9]{2,5}-\d{4}$/, {
+    message: 'รูปแบบต้องเป็น ชื่อเทศกาล-ตัวย่อหน่วยงาน-ปี',
   })
   festivalName!: string;
 

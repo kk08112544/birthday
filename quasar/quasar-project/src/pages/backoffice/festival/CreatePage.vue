@@ -94,7 +94,7 @@
               v-model="festivalName"
               label="ชื่อเทศกาล"
               placeholder="เช่น สงกรานต์-กกจ-2568"
-              hint="รูปแบบ: เทศกาล-ตัวย่อหน่วยงาน (2-3)-ปี"
+              hint="รูปแบบ: เทศกาล-ตัวย่อหน่วยงาน (2-5)-ปี"
               dense
               autofocus
               :error="nameError"
@@ -111,7 +111,7 @@
           </div>
 
           <!-- LOGO UPLOAD -->
-          <div ref="logoRef" class="q-mt-md field-group">
+          <!-- <div ref="logoRef" class="q-mt-md field-group">
             <div class="logo-row">
               <div
                 class="logo-upload-zone"
@@ -149,7 +149,63 @@
                 กรุณาอัปโหลด Logo PNG/JPG ขนาด 100 × 100 px ไม่เกิน 2 MB
               </div>
             </transition>
-          </div>
+          </div> -->
+          <!-- LOGO UPLOAD -->
+<div ref="logoRef" class="q-mt-md field-group">
+  <div class="logo-row">
+
+    <!-- Checkbox เลือกใช้ logo กรม -->
+    <!-- <div class="dept-logo-option" @click="toggleDeptLogo">
+      <img
+        src="/logo-ldd.png"
+        class="dept-logo-img"
+        alt="logo กรม"
+      />
+      <div class="dept-logo-check" :class="{ 'dept-logo-check--active': useDeptLogo }">
+        <q-icon v-if="useDeptLogo" name="check" size="14px" color="white" />
+      </div>
+    </div> -->
+
+    <!-- Upload zone ปกติ -->
+    <div
+      class="logo-upload-zone"
+      :class="{ 'upload-zone--error': logoError }"
+      @click="!useDeptLogo && logoInput?.pickFiles()"
+    >
+      <img
+        v-if="logoFile || useDeptLogo"
+        :src="useDeptLogo ? '/logo-ldd.png' : getFilePreview(logoFile!)"
+        class="logo-preview-img"
+        alt="logo preview"
+      />
+      <div v-else class="logo-placeholder">
+        <div class="logo-placeholder-icon">🏷️</div>
+        <div class="cover-placeholder-text">อัปโหลด Logo</div>
+        <div class="cover-placeholder-sub">100 × 100 px</div>
+      </div>
+    </div>
+
+    
+
+    <div class="logo-hint">
+      <div class="logo-hint-title">Logo เทศกาล</div>
+      <div class="logo-hint-sub">
+        PNG, JPG · แนะนำสี่เหลี่ยมจัตุรัส<br />ขนาด 100 × 100 px · ไม่เกิน 2 MB
+      </div>
+    </div>
+
+    <div class="dept-logo-option" @click="toggleDeptLogo">
+      <img
+        src="/logo-ldd.png"
+        class="dept-logo-img"
+        alt="logo กรม"
+      />
+      <div class="dept-logo-check" :class="{ 'dept-logo-check--active': useDeptLogo }">
+        <q-icon v-if="useDeptLogo" name="check" size="14px" color="white" />
+      </div>
+    </div>
+  </div>
+</div>
 
           <q-file
             v-model="logoFile"
@@ -624,6 +680,17 @@ const loading = ref(false);
 // ─── File Input Refs ──────────────────────────────────────────────────────────
 const fileInput = ref<InstanceType<typeof QFile> | null>(null);
 const logoInput = ref<InstanceType<typeof QFile> | null>(null);
+  
+
+  const useDeptLogo = ref(false)
+
+const toggleDeptLogo = () => {
+  useDeptLogo.value = !useDeptLogo.value
+  if (useDeptLogo.value) {
+    logoFile.value = null  // clear uploaded file
+    logoError.value = false
+  }
+}
 
 // ─── Date State ───────────────────────────────────────────────────────────────
 const startDate = ref('');
@@ -787,7 +854,7 @@ const onFestivalNameChange = (val: string | number | null) => {
   nameError.value = false;
   if (typeof val !== 'string') return;
   // const pattern = /^[^-].*[^-]-[^-]+-\d{4}$/;
-  const pattern = /^[^-].*-[^-]{2,3}-\d{4}$/;
+  const pattern = /^[^-].*-[^-]{2,5}-\d{4}$/;
   if (val && !pattern.test(val.trim())) nameError.value = true;
 };
 
@@ -888,7 +955,7 @@ const validateAndScroll = async (): Promise<boolean> => {
   const isNameValid =
     typeof festivalName.value === 'string' &&
     /^[^-].*-[^-]{2,3}-\d{4}$/.test(festivalName.value.trim());
-  const isLogoValid = !!logoFile.value;
+  const isLogoValid = !!logoFile.value || useDeptLogo.value;
   const isWebNameValid = typeof webName.value === 'string' && webName.value.trim().length > 0;
 
   let isDateValid = true;
@@ -940,9 +1007,25 @@ const submitAdd = async () => {
       return (await api.post('/upload', fd)).data.image as string;
     };
 
+     // ← ถ้าเลือก useDeptLogo ให้ fetch รูปจาก path แล้ว convert เป็น File
+    const getDeptLogoFile = async (): Promise<File> => {
+  const res = await fetch('/logo-ldd.png');
+  console.log('status:', res.status);  // ← ถ้าไม่ใช่ 200 แสดงว่าหาไฟล์ไม่เจอ
+  const blob = await res.blob();
+  console.log('blob size:', blob.size, 'type:', blob.type);  // ← ถ้า size = 0 คือปัญหา
+  const file = new File([blob], 'logo-ldd.png', { type: 'image/png' });
+  console.log('file:', file);
+  return file;
+};
+
+    const logoToUpload = useDeptLogo.value
+      ? await getDeptLogoFile()
+      : logoFile.value;
+     
+
     const [festivalImageName, festivalLogoName] = await Promise.all([
       imageFile.value ? uploadFile(imageFile.value) : Promise.resolve(''),
-      logoFile.value ? uploadFile(logoFile.value) : Promise.resolve(''),
+       logoToUpload ? uploadFile(logoToUpload) : Promise.resolve(''),
     ]);
 
     const cardImageNames = await Promise.all(cardFileList.value.map(uploadFile));
@@ -1093,11 +1176,17 @@ $error-red: #dc2626;
 }
 
 // ─── Hero (เหมือน festival-list-page) ────────────────────────────────────────
+// .page-hero {
+//   position: relative;
+//   overflow: hidden;
+//   background: linear-gradient(135deg, #7c2d12 0%, $orange 55%, $gold 100%);
+//   padding: 2.25rem 1.5rem 4rem;
+// }
 .page-hero {
   position: relative;
   overflow: hidden;
   background: linear-gradient(135deg, #7c2d12 0%, $orange 55%, $gold 100%);
-  padding: 2.25rem 1.5rem 4rem;
+  padding: 1rem 1.5rem 2.5rem; // เปลี่ยนจาก 2.25rem 1.5rem 4rem
 }
 
 .hero-blob {
@@ -1209,10 +1298,20 @@ $error-red: #dc2626;
 }
 
 // ─── Content ──────────────────────────────────────────────────────────────────
+// .content-wrap {
+//   max-width: 780px;
+//   margin: -2rem auto 0;
+//   padding: 0 1rem 4rem;
+// }
 .content-wrap {
-  max-width: 780px;
-  margin: -2rem auto 0;
-  padding: 0 1rem 4rem;
+  max-width: 1100px;
+  margin: -1.25rem auto 0;
+  padding: 1.5rem 1rem 4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  position: relative;
+  z-index: 2;
 }
 
 .form-container {
@@ -1483,6 +1582,54 @@ $error-red: #dc2626;
   display: flex;
   align-items: center;
   gap: 1rem;
+}
+
+.dept-logo-option {
+  position: relative;
+  width: 130px;
+  height: 130px;
+  flex-shrink: 0;
+  cursor: pointer;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 2px solid rgba(234, 88, 12, 0.2);
+}
+
+.dept-logo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 6px;
+  box-sizing: border-box;
+}
+
+.dept-logo-check {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid $orange;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+
+  &--active {
+    background: $orange;
+    border-color: $orange;
+  }
+}
+
+.logo-preview-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  padding: 8px;
+  box-sizing: border-box;
 }
 
 .logo-upload-zone {

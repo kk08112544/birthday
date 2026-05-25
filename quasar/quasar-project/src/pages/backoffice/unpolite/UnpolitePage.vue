@@ -6,23 +6,17 @@
       <div class="hero-blob hero-blob-2" />
       <div class="hero-blob hero-blob-3" />
       <div class="hero-inner">
-        <div class="hero-icon-wrap">
-          <q-icon name="block" size="2rem" color="white" />
+        <div class="hero-left">
+          <div class="hero-icon-wrap">
+            <q-icon name="block" size="2rem" color="white" />
+          </div>
+          <div>
+            <h1 class="hero-title">คำไม่พึงประสงค์</h1>
+            <p class="hero-sub">จัดการคำที่ไม่เหมาะสมในระบบ</p>
+          </div>
         </div>
-        <div>
-          <h1 class="hero-title">คำไม่พึงประสงค์</h1>
-          <p class="hero-sub">จัดการคำที่ไม่เหมาะสมในระบบ</p>
-        </div>
-        <q-space />
         <div class="hero-actions">
-          <!-- <q-btn
-            unelevated
-            icon="history"
-            label="ดู Log"
-            class="hero-log-btn"
-            :class="$q.screen.xs ? 'full-width q-mt-sm' : ''"
-            @click="$router.push(`/backoffice/unpolite/log`)"
-          /> -->
+          <!-- ← hero-actions อยู่นอก hero-left -->
           <q-btn
             unelevated
             icon="history"
@@ -40,6 +34,35 @@
             @click="onAdd"
           />
         </div>
+        <!-- <div class="hero-left">
+        <div class="hero-icon-wrap">
+          <q-icon name="block" size="2rem" color="white" />
+        </div>
+        <div>
+          <h1 class="hero-title">คำไม่พึงประสงค์</h1>
+          <p class="hero-sub">จัดการคำที่ไม่เหมาะสมในระบบ</p>
+        </div>
+       
+        <div class="hero-actions">
+        
+          <q-btn
+            unelevated
+            icon="history"
+            label="บันทึกกิจกรรม"
+            class="hero-add-btn"
+            :class="$q.screen.xs ? 'full-width q-mt-sm' : ''"
+            @click="$router.push(`/backoffice/unpolite/log`)"
+          />
+          <q-btn
+            unelevated
+            icon="add_circle"
+            label="เพิ่มคำ"
+            class="hero-add-btn"
+            :class="$q.screen.xs ? 'full-width q-mt-sm' : ''"
+            @click="onAdd"
+          />
+        </div>
+        </div> -->
       </div>
     </div>
 
@@ -47,18 +70,18 @@
     <div class="content-wrap">
       <div class="top-bar">
         <div class="stats-row">
-          <!-- <div class="stat-chip">
+          <div class="stat-chip">
             <q-icon name="format_list_numbered" size="18px" color="deep-purple-5" />
             <span class="stat-num">{{ pagination.rowsNumber }}</span>
             <span class="stat-label">คำทั้งหมด</span>
-          </div> -->
-          <!-- <div class="stat-chip">
+          </div>
+          <div class="stat-chip">
             <q-icon name="description" size="18px" color="teal-6" />
             <span class="stat-num">{{ pagination.page }}</span>
             <span class="stat-label">
               / {{ Math.ceil(pagination.rowsNumber / pagination.rowsPerPage) || 1 }} หน้า
             </span>
-          </div> -->
+          </div>
         </div>
 
         <q-input
@@ -763,11 +786,18 @@ $radius: 16px;
 }
 
 // ─── Hero ─────────────────────────────────────────────────────────────────────
+// .page-hero {
+//   position: relative;
+//   overflow: hidden;
+//   background: linear-gradient(135deg, #3b0764 0%, $purple 40%, $purple-mid 100%);
+//   padding: 2rem 1.5rem 3.5rem;
+// }
+
 .page-hero {
   position: relative;
   overflow: hidden;
   background: linear-gradient(135deg, #3b0764 0%, $purple 40%, $purple-mid 100%);
-  padding: 2rem 1.5rem 3.5rem;
+  padding: 1rem 1.5rem 2.5rem; // เปลี่ยนจาก 2.25rem 1.5rem 4rem
 }
 
 .hero-blob {
@@ -821,17 +851,36 @@ $radius: 16px;
   margin: 0 auto;
 }
 
+.hero-inner {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between; // ← เปลี่ยนจากไม่มี เป็น space-between
+  flex-wrap: wrap;
+  gap: 14px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+// เพิ่มใหม่
+.hero-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
 .hero-icon-wrap {
-  width: 52px;
-  height: 52px;
-  border-radius: 14px;
+  width: 54px;
+  height: 54px;
+  border-radius: 15px;
   background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .hero-title {
@@ -839,8 +888,8 @@ $radius: 16px;
   font-size: clamp(1.2rem, 4vw, 1.75rem);
   font-weight: 700;
   color: #fff;
-  margin: 0 0 2px;
-  line-height: 1.2;
+  margin: 0 0 3px;
+  line-height: 1.15;
 }
 .hero-sub {
   font-size: clamp(0.75rem, 2.5vw, 0.9rem);
@@ -890,13 +939,24 @@ $radius: 16px;
 }
 
 // ─── Content ──────────────────────────────────────────────────────────────────
+// .content-wrap {
+//   max-width: 900px;
+//   margin: -1.75rem auto 0;
+//   padding: 0 1rem 3rem;
+//   display: flex;
+//   flex-direction: column;
+//   gap: 1rem;
+// }
+
 .content-wrap {
-  max-width: 900px;
-  margin: -1.75rem auto 0;
-  padding: 0 1rem 3rem;
+  max-width: 1100px;
+  margin: -1.25rem auto 0;
+  padding: 1.5rem 1rem 4rem;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.25rem;
+  position: relative;
+  z-index: 2;
 }
 
 @media (max-width: 600px) {

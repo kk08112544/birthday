@@ -4,6 +4,7 @@ import { CreateSenderDto } from './dto/create-sender.dto';
 import { FestivalRepositories } from '../festival/festival.repositories';
 import { SenderRepositories } from './sender.repositories';
 import { UnpoliteRepositories } from 'src/unpolite/unpolite.repositories';
+import { IgnoreRepositories } from 'src/ignore/ignore.repositories';
 import { PaginationSenderDto } from './dto/pagination-sender.dto';
 import { STATUS } from 'src/common/status';
 import { MESSAGE } from 'src/common/message';
@@ -15,6 +16,7 @@ export class SenderService {
     private readonly festivalRepositories: FestivalRepositories,
     private readonly senderRepositories: SenderRepositories,
     private readonly unpoliteRepositories: UnpoliteRepositories,
+    private readonly ignoreRespositories: IgnoreRepositories,
     private readonly exceptionsService: ExceptionsService,
   ) {}
 
@@ -25,7 +27,11 @@ export class SenderService {
       //   status: STATUS.ERROR,
       //   message: MESSAGE.SENDER.BAD_WORD_FOUND,
       // };
-      this.exceptionsService.throwFoundBadWord();
+      const checkIgnore =
+        await this.ignoreRespositories.findWord(createSenderDto);
+      if (!checkIgnore) {
+        this.exceptionsService.throwFoundBadWord();
+      }
     }
 
     const data = await this.senderRepositories.create(createSenderDto);

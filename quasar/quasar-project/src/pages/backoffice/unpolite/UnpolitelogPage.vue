@@ -10,8 +10,8 @@
           <q-icon name="history" size="2rem" color="white" />
         </div>
         <div>
-          <h1 class="hero-title">บันทึกกิจกรรม Admin</h1>
-          <p class="hero-sub">ประวัติการสร้าง แก้ไข และลบโดย Admin ทั้งหมด</p>
+          <h1 class="hero-title">บันทึกกิจกรรม</h1>
+          <p class="hero-sub">ประวัติการเปลี่ยนแปลงคำไม่พึงประสงค์</p>
         </div>
         <q-space />
         <div class="hero-actions">
@@ -33,16 +33,18 @@
       <div class="top-bar">
         <q-input
           v-model="search"
-          placeholder="ค้นหาใน log..."
+          placeholder="ค้นหาคำไม่พึงประสงค์..."
           outlined
           rounded
           dense
-          debounce="400"
+          debounce="300"
           class="search-bar"
           bg-color="white"
           @update:model-value="onSearch"
         >
-          <template v-slot:prepend><q-icon name="search" color="grey-5" /></template>
+          <template v-slot:prepend>
+            <q-icon name="search" color="grey-5" />
+          </template>
           <template v-slot:append>
             <q-icon
               v-if="search"
@@ -61,8 +63,8 @@
           v-for="f in filterOptions"
           :key="f.value"
           class="filter-pill"
-          :class="[`filter-pill--${f.value}`, { active: activeAction === f.value }]"
-          @click="setAction(f.value)"
+          :class="[`filter-pill--${f.value}`, { active: activeFilter === f.value }]"
+          @click="setFilter(f.value)"
         >
           <q-icon :name="f.icon" size="14px" class="q-mr-xs" />
           {{ f.label }}
@@ -86,7 +88,7 @@
           class="styled-table"
         >
           <template v-slot:loading>
-            <q-inner-loading showing color="indigo-5" />
+            <q-inner-loading showing color="deep-purple-5" />
           </template>
 
           <template v-slot:body-cell-action="props">
@@ -98,29 +100,11 @@
             </q-td>
           </template>
 
-          <template v-slot:body-cell-actor="props">
+          <template v-slot:body-cell-word="props">
             <q-td :props="props">
-              <div class="actor-wrap">
-                <div class="actor-avatar-outer">
-                  <div
-                    class="actor-avatar"
-                    :class="`actor-avatar--${getAvatarColor(props.row.actorName)}`"
-                  >
-                    <span class="actor-initial">{{ getInitial(props.row.actorName) }}</span>
-                    <span class="actor-avatar-shine" />
-                  </div>
-                </div>
-                <div class="actor-info">
-                  <span class="actor-name">{{ props.row.actorName }}</span>
-                  <div class="actor-meta-row">
-                    <span class="actor-username-chip">
-                      <span class="actor-at-symbol">@</span>{{ props.row.actorUsername }}
-                    </span>
-                    <span class="role-badge" :class="`role-badge--${props.row.actorRole}`">
-                      {{ getRoleLabel(props.row.actorRole) }}
-                    </span>
-                  </div>
-                </div>
+              <div class="word-badge">
+                <q-icon name="label_off" size="14px" color="negative" class="q-mr-xs" />
+                {{ props.row.word }}
               </div>
             </q-td>
           </template>
@@ -128,8 +112,8 @@
           <template v-slot:body-cell-diff="props">
             <q-td :props="props">
               <template v-if="props.row.action === 'UPDATE'">
-                <div v-if="props.row.changedFields.length > 0">
-                  <div v-for="diff in props.row.changedFields" :key="diff.key" class="diff-row">
+                <div v-if="props.row.diffs.length > 0">
+                  <div v-for="diff in props.row.diffs" :key="diff.key" class="diff-row">
                     <span class="diff-old">{{ diff.old }}</span>
                     <q-icon name="arrow_forward" size="13px" class="diff-arrow" />
                     <span class="diff-new">{{ diff.new }}</span>
@@ -141,6 +125,28 @@
                 </div>
               </template>
               <span v-else class="no-diff">—</span>
+            </q-td>
+          </template>
+
+          <template v-slot:body-cell-actor="props">
+            <q-td :props="props">
+              <div class="actor-wrap">
+                <div class="actor-avatar-outer">
+                  <div
+                    class="actor-avatar"
+                    :class="`actor-avatar--${getAvatarColor(props.row.actor)}`"
+                  >
+                    <span class="actor-initial">{{ getInitial(props.row.actor) }}</span>
+                    <span class="actor-avatar-shine" />
+                  </div>
+                </div>
+                <div class="actor-info">
+                  <span class="actor-name">{{ getActorName(props.row.actor) }}</span>
+                  <span class="actor-username-chip">
+                    <span class="actor-at-symbol">@</span>{{ getActorUsernameRaw(props.row.actor) }}
+                  </span>
+                </div>
+              </div>
             </q-td>
           </template>
 
@@ -215,35 +221,23 @@
           </div>
 
           <div class="view-section">
-            <div class="view-field-label">ผู้ดำเนินการ</div>
-            <div class="actor-wrap">
-              <div class="actor-avatar-outer">
-                <div
-                  class="actor-avatar"
-                  :class="`actor-avatar--${getAvatarColor(viewRow.actorName)}`"
-                >
-                  <span class="actor-initial">{{ getInitial(viewRow.actorName) }}</span>
-                  <span class="actor-avatar-shine" />
-                </div>
-              </div>
-              <div class="actor-info">
-                <span class="actor-name">{{ viewRow.actorName }}</span>
-                <div class="actor-meta-row">
-                  <span class="actor-username-chip">
-                    <span class="actor-at-symbol">@</span>{{ viewRow.actorUsername }}
-                  </span>
-                  <span class="role-badge" :class="`role-badge--${viewRow.actorRole}`">
-                    {{ getRoleLabel(viewRow.actorRole) }}
-                  </span>
-                </div>
-              </div>
+            <div class="view-field-label">คำไม่พึงประสงค์</div>
+            <div class="word-chip">
+              <q-icon
+                name="label_off"
+                size="18px"
+                color="negative"
+                class="q-mr-sm"
+                style="flex-shrink: 0"
+              />
+              {{ viewRow.word }}
             </div>
           </div>
 
           <div class="view-section" v-if="viewRow.action === 'UPDATE'">
             <div class="view-field-label">การเปลี่ยนแปลง</div>
-            <div v-if="viewRow.changedFields.length > 0" class="diff-wrap">
-              <div v-for="d in viewRow.changedFields" :key="d.key" class="diff-row">
+            <div v-if="viewRow.diffs.length > 0" class="diff-wrap">
+              <div v-for="d in viewRow.diffs" :key="d.key" class="diff-row">
                 <span class="diff-old">{{ d.old }}</span>
                 <q-icon name="arrow_forward" size="14px" class="diff-arrow" />
                 <span class="diff-new">{{ d.new }}</span>
@@ -251,7 +245,25 @@
             </div>
             <div v-else class="diff-no-change">
               <q-icon name="info_outline" size="13px" class="q-mr-xs" />
-              อัปเดตข้อมูลโดยไม่มีการเปลี่ยนแปลง
+              อัปเดตข้อมูลโดยไม่มีการเปลี่ยนแปลงคำ
+            </div>
+          </div>
+
+          <div class="view-section">
+            <div class="view-field-label">ผู้ดำเนินการ</div>
+            <div class="actor-wrap">
+              <div class="actor-avatar-outer">
+                <div class="actor-avatar" :class="`actor-avatar--${getAvatarColor(viewRow.actor)}`">
+                  <span class="actor-initial">{{ getInitial(viewRow.actor) }}</span>
+                  <span class="actor-avatar-shine" />
+                </div>
+              </div>
+              <div class="actor-info">
+                <span class="actor-name">{{ getActorName(viewRow.actor) }}</span>
+                <span class="actor-username-chip">
+                  <span class="actor-at-symbol">@</span>{{ getActorUsernameRaw(viewRow.actor) }}
+                </span>
+              </div>
             </div>
           </div>
 
@@ -292,31 +304,33 @@ import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { api } from 'src/boot/axios';
 import { useQuasar } from 'quasar';
 import type { QTableProps, QTableColumn } from 'quasar';
-import type { AxiosError } from 'axios';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
+type ActionType = 'CREATE' | 'UPDATE' | 'DELETE';
+type FilterType = 'all' | ActionType;
 type ShapeType = 'circle' | 'square' | 'star' | 'triangle' | 'emoji';
 
+interface LogUser {
+  uId: number;
+  firstName: string;
+  userName: string;
+}
+
 interface LogData {
-  uId?: number;
-  firstName?: string;
-  userName?: string;
-  role?: string;
-  phoneNumber?: string;
-  email?: string;
-  createdAt?: string;
-  updatedAt?: string;
-  deletedAt?: string | null;
+  upId: number | string;
+  word: string;
+  createdByUser?: LogUser | null;
+  updatedByUser?: LogUser | null;
+  deletedByUser?: LogUser | null;
   [key: string]: unknown;
 }
 
-interface RawLogEntry {
-  raw: string;
-  timestamp: string;
-  action: string;
-  data?: LogData;
-  oldData?: LogData;
-  newData?: LogData;
+interface LogEntry {
+  ts: string;
+  action: ActionType;
+  data: LogData | null;
+  oldData: LogData | null;
+  newData: LogData | null;
 }
 
 interface Diff {
@@ -328,18 +342,24 @@ interface Diff {
 interface TableRow {
   rowKey: string;
   displayIndex: number;
-  action: string;
-  actorName: string;
-  actorUsername: string;
-  actorRole: string;
+  action: ActionType;
+  word: string;
+  diffs: Diff[];
+  actor: string;
   ts: string;
-  rawEntry: RawLogEntry;
-  changedFields: Diff[];
+  upId: number | string;
 }
 
 interface Particle {
   id: number;
   style: Record<string, string>;
+}
+
+interface LogStats {
+  total: number;
+  createCount: number;
+  updateCount: number;
+  deleteCount: number;
 }
 
 // ─── Quasar ───────────────────────────────────────────────────────────────────
@@ -349,15 +369,7 @@ const $q = useQuasar();
 const rows = ref<TableRow[]>([]);
 const loading = ref(false);
 const search = ref('');
-const activeAction = ref('ALL');
-const activeParticles = ref<Particle[]>([]);
-let particleId = 0;
-
-const createCount = ref(0);
-const updateCount = ref(0);
-const deleteCount = ref(0);
-const serverPage = ref(1);
-const serverLimit = ref(10);
+const activeFilter = ref<FilterType>('all');
 
 const pagination = ref({
   page: 1,
@@ -367,36 +379,54 @@ const pagination = ref({
   descending: false,
 });
 
+const stats = ref<LogStats>({
+  total: 0,
+  createCount: 0,
+  updateCount: 0,
+  deleteCount: 0,
+});
+
 const columns: QTableColumn[] = [
-  { name: 'no', label: 'ลำดับ', field: 'displayIndex', align: 'center', style: 'width: 60px' },
+  { name: 'no', label: 'ลำดับ', field: 'displayIndex', align: 'center', style: 'width: 64px' },
   { name: 'action', label: 'ประเภท', field: 'action', align: 'left', style: 'width: 110px' },
-  { name: 'actor', label: 'Admin', field: 'actorName', align: 'left', style: 'width: 220px' },
-  { name: 'diff', label: 'การเปลี่ยนแปลง', field: 'changedFields', align: 'left' },
+  {
+    name: 'word',
+    label: 'คำ',
+    field: 'word',
+    align: 'left',
+    style: 'white-space: normal; word-break: break-word;',
+  },
+  { name: 'diff', label: 'การเปลี่ยนแปลง', field: 'diffs', align: 'left' },
+  { name: 'actor', label: 'ผู้ดำเนินการ', field: 'actor', align: 'left', style: 'width: 200px' },
   { name: 'ts', label: 'วันที่/เวลา', field: 'ts', align: 'left', style: 'width: 150px' },
-  { name: 'actions', label: 'จัดการ', field: 'actions', align: 'center', style: 'width: 80px' },
+  { name: 'actions', label: 'จัดการ', field: 'actions', align: 'center', style: 'width: 130px' },
 ];
 
 // ─── Filter Options ───────────────────────────────────────────────────────────
 const filterOptions = computed(() => [
   {
-    value: 'ALL',
+    value: 'all' as const,
     label: 'ทั้งหมด',
     icon: 'list_alt',
-    count: createCount.value + updateCount.value + deleteCount.value,
+    count: stats.value.createCount + stats.value.updateCount + stats.value.deleteCount,
   },
-  { value: 'CREATE', label: 'สร้าง', icon: 'add_circle_outline', count: createCount.value },
-  { value: 'UPDATE', label: 'แก้ไข', icon: 'edit_note', count: updateCount.value },
-  { value: 'DELETE', label: 'ลบ', icon: 'delete_outline', count: deleteCount.value },
+  {
+    value: 'CREATE' as const,
+    label: 'สร้าง',
+    icon: 'add_circle_outline',
+    count: stats.value.createCount,
+  },
+  { value: 'UPDATE' as const, label: 'แก้ไข', icon: 'edit_note', count: stats.value.updateCount },
+  { value: 'DELETE' as const, label: 'ลบ', icon: 'delete_outline', count: stats.value.deleteCount },
 ]);
 
 // ─── Dialog State ─────────────────────────────────────────────────────────────
 const viewDialog = ref(false);
 const viewRow = ref<TableRow | null>(null);
 
-function onView(row: TableRow): void {
-  viewRow.value = row;
-  viewDialog.value = true;
-}
+// ─── Particles ────────────────────────────────────────────────────────────────
+const activeParticles = ref<Particle[]>([]);
+let particleId = 0;
 
 // ─── Avatar Palette ───────────────────────────────────────────────────────────
 const AVATAR_PALETTES = [
@@ -410,175 +440,119 @@ const AVATAR_PALETTES = [
   'fuchsia',
 ] as const;
 
-function getAvatarColor(name: string): string {
-  const code = (name || '').charCodeAt(0) || 0;
+function getAvatarColor(actor: string): string {
+  const code = actor.charCodeAt(0) || 0;
   return AVATAR_PALETTES[code % AVATAR_PALETTES.length]!;
 }
 
-function getInitial(name: string): string {
-  if (!name) return '?';
-  const parts = name.split('-');
+// ─── Log Parsing ──────────────────────────────────────────────────────────────
+function parseLogLine(line: string): LogEntry | null {
+  const tsMatch = line.match(/^(\S+Z)/);
+  const actionMatch = line.match(/\[(CREATE|UPDATE|DELETE)\]/);
+  if (!tsMatch || !actionMatch) return null;
+
+  const ts = tsMatch[1]!;
+  const action = actionMatch[1]! as ActionType;
+  let data: LogData | null = null;
+  let oldData: LogData | null = null;
+  let newData: LogData | null = null;
+
+  if (action === 'UPDATE') {
+    const m = line.match(/OLD: (\{.*?\}) \| NEW: (\{.*\})$/);
+    if (m) {
+      try {
+        oldData = JSON.parse(m[1]!) as LogData;
+      } catch {
+        /* ignore */
+      }
+      try {
+        newData = JSON.parse(m[2]!) as LogData;
+      } catch {
+        /* ignore */
+      }
+    }
+  } else {
+    const m = line.match(/\[(?:CREATE|DELETE)\] (\{.*\})$/);
+    if (m) {
+      try {
+        data = JSON.parse(m[1]!) as LogData;
+      } catch {
+        /* ignore */
+      }
+    }
+  }
+
+  return { ts, action, data, oldData, newData };
+}
+
+function getWord(e: LogEntry): string {
+  if (e.action === 'CREATE' && e.data) return String(e.data.word ?? '-');
+  if (e.action === 'UPDATE' && e.newData) return String(e.newData.word ?? '-');
+  if (e.action === 'DELETE' && e.data) return String(e.data.word ?? '-');
+  return '-';
+}
+
+function getActor(e: LogEntry): string {
+  const user =
+    e.action === 'CREATE'
+      ? e.data?.createdByUser
+      : e.action === 'UPDATE'
+        ? e.newData?.updatedByUser
+        : e.data?.deletedByUser;
+  return user ? `${user.firstName} (${user.userName})` : '-';
+}
+
+function getUpId(e: LogEntry): number | string {
+  return (e.data ?? e.newData ?? e.oldData)?.upId ?? '-';
+}
+
+function getDiffs(e: LogEntry): Diff[] {
+  if (!e.oldData || !e.newData) return [];
+  return ['word']
+    .filter((k) => String(e.oldData![k]) !== String(e.newData![k]))
+    .map((k) => ({ key: k, old: String(e.oldData![k]), new: String(e.newData![k]) }));
+}
+
+function entryToRow(entry: LogEntry, index: number): TableRow {
+  return {
+    rowKey: `${entry.ts}-${index}`,
+    displayIndex: (pagination.value.page - 1) * pagination.value.rowsPerPage + index + 1,
+    action: entry.action,
+    word: getWord(entry),
+    diffs: getDiffs(entry),
+    actor: getActor(entry),
+    ts: entry.ts,
+    upId: getUpId(entry),
+  };
+}
+
+// ─── Actor Helpers ────────────────────────────────────────────────────────────
+function getInitial(actor: string): string {
+  if (!actor) return '?';
+  const parts = actor.split('-');
   const target = parts.length > 1 ? parts[parts.length - 1] : parts[0];
   return (target?.trim().charAt(0) ?? '?').toUpperCase();
 }
 
-function getRoleLabel(role: string): string {
-  const map: Record<string, string> = { superAdmin: 'Super Admin', admin: 'Admin' };
-  return map[role] ?? role ?? '-';
+function getActorName(actor: string): string {
+  return actor.includes('(') ? actor.split('(')[0]!.trim() : actor;
 }
 
-// ─── Log Parsing ──────────────────────────────────────────────────────────────
-function parseLogLine(line: string): RawLogEntry {
-  const tsMatch = line.match(/^(\S+Z)/);
-  const timestamp = tsMatch?.[1] ?? '';
-  const actionMatch = line.match(/\[(CREATE|UPDATE|DELETE)\]/);
-  const action = actionMatch?.[1] ?? 'UNKNOWN';
-
-  if (action === 'UPDATE') {
-    const oldMatch = line.match(/OLD:\s*(\{.*?\})\s*\|/s);
-    const newMatch = line.match(/\|\s*NEW:\s*(\{.*\})/s);
-    try {
-      const oldData: LogData = oldMatch ? JSON.parse(oldMatch[1]!) : {};
-      const newData: LogData = newMatch ? JSON.parse(newMatch[1]!) : {};
-      return { raw: line, timestamp, action, oldData, newData };
-    } catch {
-      return { raw: line, timestamp, action };
-    }
-  } else {
-    const jsonMatch = line.match(/\]\s*(\{.*\})/s);
-    try {
-      const data: LogData = jsonMatch ? JSON.parse(jsonMatch[1]!) : {};
-      return { raw: line, timestamp, action, data };
-    } catch {
-      return { raw: line, timestamp, action };
-    }
-  }
-}
-
-const SKIP_KEYS = new Set(['createdAt', 'updatedAt', 'deletedAt']);
-
-function getChangedFields(entry: RawLogEntry): Diff[] {
-  if (!entry.oldData || !entry.newData) return [];
-  const keys = new Set([...Object.keys(entry.oldData), ...Object.keys(entry.newData)]);
-  const result: Diff[] = [];
-
-  const normalize = (v: unknown): string => {
-    if (v === null || v === undefined || v === '') return '';
-    if (typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean') return String(v);
-    try {
-      return JSON.stringify(v);
-    } catch {
-      return '';
-    }
-  };
-
-  keys.forEach((k) => {
-    if (SKIP_KEYS.has(k)) return;
-    const o = normalize(entry.oldData![k]);
-    const n = normalize(entry.newData![k]);
-    if (o !== n) result.push({ key: k, old: o || '(ว่าง)', new: n || '(ว่าง)' });
-  });
-
-  return result;
-}
-
-function buildRow(entry: RawLogEntry, index: number): TableRow {
-  const d = entry.data ?? entry.newData ?? entry.oldData;
-  return {
-    rowKey: `${entry.timestamp}-${index}`,
-    displayIndex: (serverPage.value - 1) * serverLimit.value + index + 1,
-    action: entry.action,
-    actorName: d?.firstName ?? '-',
-    actorUsername: d?.userName ?? '-',
-    actorRole: d?.role ?? '',
-    ts: entry.timestamp,
-    rawEntry: entry,
-    changedFields: entry.action === 'UPDATE' ? getChangedFields(entry) : [],
-  };
-}
-
-// ─── Data Fetching ────────────────────────────────────────────────────────────
-const fetchLog = async (): Promise<void> => {
-  loading.value = true;
-  try {
-    const res = await api.get('/backoffice/admin/log', {
-      params: {
-        page: serverPage.value,
-        limit: serverLimit.value,
-        search: search.value.trim() || undefined,
-        action: activeAction.value !== 'ALL' ? activeAction.value : undefined,
-      },
-    });
-
-    const d = res.data.admin as {
-      data: string[];
-      total: number;
-      totalPages: number;
-      createCount: number;
-      updateCount: number;
-      deleteCount: number;
-    };
-
-    createCount.value = d.createCount ?? 0;
-    updateCount.value = d.updateCount ?? 0;
-    deleteCount.value = d.deleteCount ?? 0;
-
-    rows.value = d.data.map(parseLogLine).map((e, i) => buildRow(e, i));
-
-    pagination.value.rowsNumber = d.total ?? 0;
-    pagination.value.page = serverPage.value;
-    pagination.value.rowsPerPage = serverLimit.value;
-  } catch (err: unknown) {
-    const e = err as AxiosError<{ message: string }>;
-    console.error('fetch log error', e.response?.data?.message);
-    rows.value = [];
-  } finally {
-    loading.value = false;
-  }
-};
-
-// ─── Actions ──────────────────────────────────────────────────────────────────
-const onTableRequest: QTableProps['onRequest'] = (reqProps) => {
-  serverPage.value = reqProps.pagination.page;
-  serverLimit.value = reqProps.pagination.rowsPerPage;
-  pagination.value.page = reqProps.pagination.page;
-  pagination.value.rowsPerPage = reqProps.pagination.rowsPerPage;
-  void fetchLog();
-};
-
-function onSearch(): void {
-  serverPage.value = 1;
-  pagination.value.page = 1;
-  void fetchLog();
-}
-
-function clearSearch(): void {
-  search.value = '';
-  onSearch();
-}
-
-function setAction(val: string): void {
-  activeAction.value = val;
-  serverPage.value = 1;
-  pagination.value.page = 1;
-  void fetchLog();
+function getActorUsernameRaw(actor: string): string {
+  return actor.match(/\(([^)]+)\)/)?.[1] ?? '';
 }
 
 // ─── Format Helpers ───────────────────────────────────────────────────────────
 function actionIcon(action: string): string {
-  const map: Record<string, string> = {
-    CREATE: 'add_circle_outline',
-    UPDATE: 'edit_note',
-    DELETE: 'delete_outline',
-  };
-  return map[action] ?? 'info_outline';
+  if (action === 'CREATE') return 'add_circle_outline';
+  if (action === 'UPDATE') return 'edit_note';
+  return 'delete_outline';
 }
 
-function actionLabel(a: string): string {
-  if (a === 'CREATE') return 'สร้าง';
-  if (a === 'UPDATE') return 'แก้ไข';
-  if (a === 'DELETE') return 'ลบ';
-  return a;
+function actionLabel(action: string): string {
+  if (action === 'CREATE') return 'สร้าง';
+  if (action === 'UPDATE') return 'แก้ไข';
+  return 'ลบ';
 }
 
 function formatDateOnly(ts: string): string {
@@ -595,6 +569,73 @@ function formatTimeOnly(ts: string): string {
     minute: '2-digit',
     second: '2-digit',
   });
+}
+
+// ─── Data Fetching ────────────────────────────────────────────────────────────
+const fetchLog = async (): Promise<void> => {
+  loading.value = true;
+  try {
+    const res = await api.get('/backoffice/unpolite/log', {
+      params: {
+        page: pagination.value.page,
+        limit: pagination.value.rowsPerPage,
+        search: search.value.trim() || undefined,
+        action: activeFilter.value === 'all' ? undefined : activeFilter.value,
+      },
+    });
+
+    const d = res.data.unpolite as {
+      data: string[];
+      total: number;
+      createCount: number;
+      updateCount: number;
+      deleteCount: number;
+    };
+
+    const entries = d.data.map(parseLogLine).filter((e): e is LogEntry => e !== null);
+
+    rows.value = entries.map((entry, i) => entryToRow(entry, i));
+    pagination.value.rowsNumber = d.total;
+
+    stats.value = {
+      total: d.total,
+      createCount: d.createCount,
+      updateCount: d.updateCount,
+      deleteCount: d.deleteCount,
+    };
+  } catch {
+    rows.value = [];
+  } finally {
+    loading.value = false;
+  }
+};
+
+// ─── Actions ──────────────────────────────────────────────────────────────────
+function onView(row: TableRow): void {
+  viewRow.value = row;
+  viewDialog.value = true;
+}
+
+const onTableRequest: QTableProps['onRequest'] = (reqProps) => {
+  pagination.value.page = reqProps.pagination.page;
+  pagination.value.rowsPerPage = reqProps.pagination.rowsPerPage;
+  void fetchLog();
+};
+
+function onSearch(): void {
+  pagination.value.page = 1;
+  void fetchLog();
+}
+
+function clearSearch(): void {
+  search.value = '';
+  onSearch();
+}
+
+function setFilter(f: FilterType): void {
+  activeFilter.value = f;
+  pagination.value.page = 1;
+  void fetchLog();
 }
 
 // ─── Particles ────────────────────────────────────────────────────────────────
@@ -701,9 +742,10 @@ $amber-soft: #fef3c7;
 $red: #dc2626;
 $red-soft: #fee2e2;
 $green: #16a34a;
+$green-dark: #14532d;
 $green-soft: #f0fdf4;
 $surface: #ffffff;
-$surface-2: #f0f4ff;
+$surface-2: #f8f7ff;
 $text-main: #1e1b4b;
 $text-muted: #9ca3af;
 $radius: 16px;
@@ -711,16 +753,22 @@ $radius: 16px;
 // ─── Page ─────────────────────────────────────────────────────────────────────
 .log-page {
   font-family: 'Noto Sans Thai', 'Prompt', sans-serif;
-  background: linear-gradient(150deg, #eef2ff 0%, #f0f9ff 50%, #f0fdf4 100%);
+  background: linear-gradient(150deg, #f5f3ff 0%, #fdf4ff 40%, #f0fdf4 100%);
   min-height: 100vh;
 }
 
 // ─── Hero ─────────────────────────────────────────────────────────────────────
+// .page-hero {
+//   position: relative;
+//   overflow: hidden;
+//   background: linear-gradient(135deg, #3b0764 0%, $purple 40%, $purple-mid 100%);
+//   padding: 2rem 1.5rem 3.5rem;
+// }
 .page-hero {
   position: relative;
   overflow: hidden;
-  background: linear-gradient(135deg, #1e1b4b 0%, $indigo 45%, $indigo-mid 100%);
-  padding: 2rem 1.5rem 3.5rem;
+  background: linear-gradient(135deg, #3b0764 0%, $purple 40%, $purple-mid 100%);
+  padding: 1rem 1.5rem 2.5rem; // เปลี่ยนจาก 2.25rem 1.5rem 4rem
 }
 
 .hero-blob {
@@ -731,7 +779,7 @@ $radius: 16px;
 .hero-blob-1 {
   width: 300px;
   height: 300px;
-  background: #a5b4fc;
+  background: #a78bfa;
   top: -80px;
   right: -80px;
   animation: drift 7s ease-in-out infinite;
@@ -739,7 +787,7 @@ $radius: 16px;
 .hero-blob-2 {
   width: 200px;
   height: 200px;
-  background: #67e8f9;
+  background: #34d399;
   bottom: -60px;
   left: -50px;
   animation: drift 9s ease-in-out infinite reverse;
@@ -770,7 +818,7 @@ $radius: 16px;
   align-items: center;
   gap: 14px;
   flex-wrap: wrap;
-  max-width: 980px;
+  max-width: 960px;
   margin: 0 auto;
 }
 
@@ -780,11 +828,11 @@ $radius: 16px;
   border-radius: 14px;
   background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .hero-title {
@@ -827,13 +875,23 @@ $radius: 16px;
 }
 
 // ─── Content ──────────────────────────────────────────────────────────────────
+// .content-wrap {
+//   max-width: 960px;
+//   margin: -1.75rem auto 0;
+//   padding: 0 1rem 3rem;
+//   display: flex;
+//   flex-direction: column;
+//   gap: 1rem;
+// }
 .content-wrap {
-  max-width: 980px;
-  margin: -1.75rem auto 0;
-  padding: 0 1rem 3rem;
+  max-width: 1100px;
+  margin: -1.25rem auto 0;
+  padding: 1.5rem 1rem 4rem;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.25rem;
+  position: relative;
+  z-index: 2;
 }
 
 // ─── Top Bar ──────────────────────────────────────────────────────────────────
@@ -850,7 +908,7 @@ $radius: 16px;
   max-width: 320px;
   :deep(.q-field__control) {
     border-radius: 14px !important;
-    box-shadow: 0 2px 12px rgba(55, 48, 163, 0.08);
+    box-shadow: 0 2px 12px rgba(91, 33, 182, 0.08);
   }
 }
 
@@ -881,15 +939,15 @@ $radius: 16px;
     font-size: 0.7rem;
   }
 
-  &--ALL {
-    background: #eef2ff;
-    color: $indigo-mid;
-    border-color: rgba(79, 70, 229, 0.25);
+  &--all {
+    background: #f5f3ff;
+    color: $purple;
+    border-color: rgba(91, 33, 182, 0.3);
     &.active,
     &:hover {
-      background: $indigo-mid;
+      background: $purple;
       color: #fff;
-      border-color: $indigo-mid;
+      border-color: $purple;
     }
   }
   &--CREATE {
@@ -932,8 +990,8 @@ $radius: 16px;
   background: $surface;
   border-radius: $radius;
   overflow: hidden;
-  box-shadow: 0 4px 28px rgba(55, 48, 163, 0.09);
-  border: 1px solid rgba(79, 70, 229, 0.08);
+  box-shadow: 0 4px 28px rgba(91, 33, 182, 0.09);
+  border: 1px solid rgba(124, 58, 237, 0.08);
 }
 
 .styled-table {
@@ -944,19 +1002,19 @@ $radius: 16px;
     color: $text-main;
     background: $surface-2;
     letter-spacing: 0.03em;
-    border-bottom: 2px solid rgba(79, 70, 229, 0.12);
+    border-bottom: 2px solid rgba(124, 58, 237, 0.12);
     white-space: nowrap;
   }
   :deep(tbody tr) {
     transition: background 0.15s;
     &:hover {
-      background: rgba(79, 70, 229, 0.025) !important;
+      background: rgba(124, 58, 237, 0.03) !important;
     }
   }
   :deep(tbody tr td) {
     font-size: clamp(0.78rem, 2vw, 0.875rem);
     color: $text-main;
-    border-bottom: 1px solid rgba(79, 70, 229, 0.055);
+    border-bottom: 1px solid rgba(124, 58, 237, 0.06);
     vertical-align: middle;
   }
   :deep(tbody tr td:first-child) {
@@ -965,7 +1023,7 @@ $radius: 16px;
     text-align: center;
   }
   :deep(.q-table__bottom) {
-    border-top: 1px solid rgba(79, 70, 229, 0.08);
+    border-top: 1px solid rgba(124, 58, 237, 0.08);
     background: $surface-2;
     font-size: 0.82rem;
   }
@@ -997,6 +1055,25 @@ $radius: 16px;
     background: $red-soft;
     color: #b91c1c;
     border: 1px solid rgba(220, 38, 38, 0.2);
+  }
+}
+
+// ─── Word Badge ───────────────────────────────────────────────────────────────
+.word-badge {
+  display: inline-flex;
+  align-items: center;
+  background: $red-soft;
+  color: $red;
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  max-width: 260px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  @media (max-width: 600px) {
+    max-width: 130px;
   }
 }
 
@@ -1090,7 +1167,7 @@ $avatar-palettes: (
 .actor-wrap {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 11px;
 }
 
 .actor-avatar-outer {
@@ -1165,59 +1242,34 @@ $avatar-palettes: (
   overflow: hidden;
   text-overflow: ellipsis;
   line-height: 1.25;
-}
-
-.actor-meta-row {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  flex-wrap: wrap;
+  letter-spacing: -0.01em;
 }
 
 .actor-username-chip {
   display: inline-flex;
   align-items: center;
   gap: 2px;
-  background: linear-gradient(135deg, rgba(79, 70, 229, 0.08), rgba(55, 48, 163, 0.06));
-  border: 1px solid rgba(79, 70, 229, 0.18);
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.08), rgba(79, 70, 229, 0.06));
+  border: 1px solid rgba(124, 58, 237, 0.18);
   border-radius: 20px;
   padding: 2px 9px 2px 7px;
   font-size: 0.67rem;
   font-weight: 700;
-  color: $indigo-mid;
-  max-width: 120px;
+  color: $purple-mid;
+  width: fit-content;
+  max-width: 140px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  letter-spacing: 0.01em;
 }
 
 .actor-at-symbol {
-  color: $indigo;
+  color: $purple;
   font-size: 0.72rem;
   font-weight: 800;
   opacity: 0.8;
   margin-right: 1px;
-}
-
-// ─── Role Badge ───────────────────────────────────────────────────────────────
-.role-badge {
-  display: inline-flex;
-  align-items: center;
-  border-radius: 6px;
-  padding: 2px 8px;
-  font-size: 0.65rem;
-  font-weight: 700;
-  white-space: nowrap;
-  &--superAdmin {
-    background: linear-gradient(135deg, #ede9fe, #ddd6fe);
-    color: #5b21b6;
-    border: 1px solid rgba(139, 92, 246, 0.2);
-  }
-  &--admin {
-    background: $indigo-soft;
-    color: $indigo-mid;
-    border: 1px solid rgba(79, 70, 229, 0.15);
-  }
 }
 
 // ─── Timestamp ────────────────────────────────────────────────────────────────
@@ -1231,7 +1283,7 @@ $avatar-palettes: (
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  background: linear-gradient(135deg, rgba(79, 70, 229, 0.1), rgba(55, 48, 163, 0.07));
+  background: linear-gradient(135deg, rgba(79, 70, 229, 0.1), rgba(124, 58, 237, 0.07));
   border: 1px solid rgba(79, 70, 229, 0.2);
   border-radius: 20px;
   padding: 3px 10px 3px 7px;
@@ -1253,7 +1305,7 @@ $avatar-palettes: (
   padding-left: 2px;
 }
 .ts-clock-icon {
-  color: $indigo-mid;
+  color: $purple-mid;
   opacity: 0.55;
   flex-shrink: 0;
 }
@@ -1315,7 +1367,7 @@ $avatar-palettes: (
   overflow: hidden;
   width: 460px;
   max-width: 95vw;
-  box-shadow: 0 20px 60px rgba(55, 48, 163, 0.18);
+  box-shadow: 0 20px 60px rgba(91, 33, 182, 0.18);
   &--mobile {
     border-radius: 20px 20px 0 0;
     width: 100%;
@@ -1338,7 +1390,7 @@ $avatar-palettes: (
     width: 36px;
     height: 3px;
     border-radius: 2px;
-    background: rgba(79, 70, 229, 0.2);
+    background: rgba(124, 58, 237, 0.2);
   }
 }
 
@@ -1351,7 +1403,7 @@ $avatar-palettes: (
   font-size: 1rem;
   font-weight: 600;
   color: $text-main;
-  border-bottom: 1px solid rgba(79, 70, 229, 0.07);
+  border-bottom: 1px solid rgba(124, 58, 237, 0.07);
   &--indigo {
     background: linear-gradient(135deg, $indigo-soft, #e0e7ff);
   }
@@ -1375,7 +1427,7 @@ $avatar-palettes: (
   height: 28px;
   border-radius: 8px;
   border: none;
-  background: rgba(55, 48, 163, 0.07);
+  background: rgba(91, 33, 182, 0.07);
   color: $text-muted;
   cursor: pointer;
   display: flex;
@@ -1383,7 +1435,7 @@ $avatar-palettes: (
   justify-content: center;
   transition: background 0.15s;
   &:hover {
-    background: rgba(55, 48, 163, 0.14);
+    background: rgba(91, 33, 182, 0.14);
   }
 }
 
@@ -1418,6 +1470,23 @@ $avatar-palettes: (
   color: $text-muted;
 }
 
+.word-chip {
+  display: flex;
+  align-items: flex-start;
+  background: $red-soft;
+  color: $red;
+  border: 1px solid rgba(220, 38, 38, 0.2);
+  border-radius: 12px;
+  padding: 10px 18px;
+  font-size: 1rem;
+  font-weight: 700;
+  width: 100%;
+  box-sizing: border-box;
+  word-break: break-all;
+  white-space: normal;
+  line-height: 1.5;
+}
+
 .dlg-btn {
   display: inline-flex;
   align-items: center;
@@ -1440,10 +1509,10 @@ $avatar-palettes: (
     cursor: not-allowed;
   }
   &--cancel {
-    background: rgba(55, 48, 163, 0.07);
+    background: rgba(91, 33, 182, 0.07);
     color: $text-muted;
     &:hover {
-      background: rgba(55, 48, 163, 0.13);
+      background: rgba(91, 33, 182, 0.13);
     }
   }
 }
@@ -1472,9 +1541,6 @@ $avatar-palettes: (
     justify-content: center;
   }
   .actor-username-chip {
-    display: none;
-  }
-  .role-badge {
     display: none;
   }
   .search-bar {

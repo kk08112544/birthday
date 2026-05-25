@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateFestivalDto } from './dto/create-festival.dto';
 import { UpdateFestivalDto } from './dto/update-festival.dto';
 import { PaginationFestivalDto } from './dto/pagination-festival.dto';
+import { PaginationFestivalLogDto } from './dto/pagination-festivallog.dto';
 import { ExceptionsService } from 'src/common/exception/exception.service';
 import { STATUS } from 'src/common/status';
 import { MESSAGE } from 'src/common/message';
@@ -74,6 +75,16 @@ export class AdminFestivalService {
       festival: data,
       action: STATUS.SUCCESS,
       message: MESSAGE.FESTIVAL.GET_SUCCESS, // ใช้ตัวแปร MESSAGE
+    };
+  }
+
+  async getLog(paginationDto: PaginationFestivalLogDto) {
+    const result = await this.adminFestivalRepositories.getLog(paginationDto);
+    console.log(result);
+    return {
+      festival: result,
+      action: STATUS.SUCCESS,
+      message: MESSAGE.IGNORE.GET_SUCCESS,
     };
   }
 

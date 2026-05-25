@@ -5,6 +5,7 @@ import { SenderRepositories } from './sender.repositories';
 import { PrismaService } from '../prisma.service';
 import { FestivalRepositories } from 'src/festival/festival.repositories';
 import { UnpoliteRepositories } from 'src/unpolite/unpolite.repositories';
+import { IgnoreRepositories } from 'src/ignore/ignore.repositories';
 import { ExceptionsModule } from 'src/common/exception/exception.module';
 
 @Module({
@@ -16,6 +17,7 @@ import { ExceptionsModule } from 'src/common/exception/exception.module';
     SenderRepositories,
     PrismaService,
     UnpoliteRepositories,
+    IgnoreRepositories,
   ],
 })
 export class SenderModule {}

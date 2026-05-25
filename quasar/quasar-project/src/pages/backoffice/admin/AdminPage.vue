@@ -38,6 +38,20 @@
     <!-- ===== CONTENT ===== -->
     <div class="content-wrap">
       <div class="top-bar">
+        <div class="stats-row">
+          <div class="stat-chip">
+            <q-icon name="format_list_numbered" size="18px" color="deep-purple-5" />
+            <span class="stat-num">{{ pagination.rowsNumber }}</span>
+            <span class="stat-label">คำทั้งหมด</span>
+          </div>
+          <div class="stat-chip">
+            <q-icon name="description" size="18px" color="teal-6" />
+            <span class="stat-num">{{ pagination.page }}</span>
+            <span class="stat-label">
+              / {{ Math.ceil(pagination.rowsNumber / pagination.rowsPerPage) || 1 }} หน้า
+            </span>
+          </div>
+        </div>
         <q-input
           v-model="search"
           placeholder="ค้นหา admin..."
@@ -608,11 +622,18 @@ $radius: 16px;
 }
 
 // ─── Hero ─────────────────────────────────────────────────────────────────────
+// .page-hero {
+//   position: relative;
+//   overflow: hidden;
+//   background: linear-gradient(135deg, #1e1b4b 0%, $indigo 45%, $indigo-mid 100%);
+//   padding: 2rem 1.5rem 3.5rem;
+// }
+
 .page-hero {
   position: relative;
   overflow: hidden;
   background: linear-gradient(135deg, #1e1b4b 0%, $indigo 45%, $indigo-mid 100%);
-  padding: 2rem 1.5rem 3.5rem;
+  padding: 1rem 1.5rem 2.5rem; // เปลี่ยนจาก 2.25rem 1.5rem 4rem
 }
 
 .hero-blob {
@@ -719,22 +740,67 @@ $radius: 16px;
 }
 
 // ─── Content ──────────────────────────────────────────────────────────────────
+// .content-wrap {
+//   max-width: 960px;
+//   margin: -1.75rem auto 0;
+//   padding: 0 1rem 3rem;
+//   display: flex;
+//   flex-direction: column;
+//   gap: 1rem;
+// }
 .content-wrap {
-  max-width: 960px;
-  margin: -1.75rem auto 0;
-  padding: 0 1rem 3rem;
+  max-width: 1100px;
+  margin: -1.25rem auto 0;
+  padding: 1.5rem 1rem 4rem;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.25rem;
+  position: relative;
+  z-index: 2;
+}
+@media (max-width: 600px) {
+  .content-wrap {
+    padding: 1.75rem 0.75rem 2rem; // เพิ่ม padding-top ตรงนี้ด้วย
+    gap: 0.85rem;
+  }
 }
 
 // ─── Top Bar ──────────────────────────────────────────────────────────────────
 .top-bar {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between; // ← เปลี่ยนเป็นนี้
   flex-wrap: wrap;
   gap: 10px;
+}
+
+.stats-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.stat-chip {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: $surface;
+  border-radius: 12px;
+  padding: 9px 16px;
+  box-shadow: 0 2px 12px rgba(91, 33, 182, 0.08);
+  border: 1px solid rgba(124, 58, 237, 0.1);
+}
+
+.stat-num {
+  font-family: 'Prompt', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: $text-main;
+  line-height: 1;
+}
+.stat-label {
+  font-size: 0.78rem;
+  color: $text-muted;
 }
 
 .search-bar {

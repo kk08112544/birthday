@@ -7,6 +7,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from 'src/common/guard/jwt/jwt-strategy';
 import { LocalStrategy } from 'src/common/guard/local/local-strategy';
+
 @Module({
   imports: [
     PassportModule.register({ defaultStrategy: 'jwt' }), // กำหนด default ถ้าต้องการ

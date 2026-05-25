@@ -16,6 +16,7 @@ import { AdminFestivalService } from './festival.service';
 import { CreateFestivalDto } from './dto/create-festival.dto';
 import { UpdateFestivalDto } from './dto/update-festival.dto';
 import { PaginationFestivalDto } from './dto/pagination-festival.dto';
+import { PaginationFestivalLogDto } from './dto/pagination-festivallog.dto';
 import { JwtAuthGuard } from 'src/common/guard/jwt/jwt-auth.guard';
 import type { User } from '@prisma/client';
 import { CurrentUser } from 'src/common/decorator/user.decorator';
@@ -41,24 +42,35 @@ export class AdminFestivalController {
     return this.adminfestivalService.create(createFestivalDto, user.uId);
   }
 
+  @Get('min')
+  findMin() {
+    return this.adminfestivalService.findMin();
+  }
+
   @Get('all')
   findAll() {
     return this.adminfestivalService.findAll();
   }
 
+  @Get('log')
+  @UsePipes(
+    new ValidationPipe({
+      transform: true,
+      transformOptions: { enableImplicitConversion: true },
+    }),
+  )
+  async getLog(@Query() paginationDto: PaginationFestivalLogDto) {
+    return this.adminfestivalService.getLog(paginationDto);
+  }
+
   @Get(':id')
-  findฺById(@Param('id') id: number) {
+  findById(@Param('id') id: number) {
     return this.adminfestivalService.findById(id);
   }
 
   @Get()
   findMany(@Query() paginationDto: PaginationFestivalDto) {
     return this.adminfestivalService.findMany(paginationDto);
-  }
-
-  @Get()
-  findMin() {
-    return this.adminfestivalService.findMin();
   }
 
   @Patch(':id')

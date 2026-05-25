@@ -86,6 +86,20 @@ model Unpolite {
   deletedAt DateTime?
 }
 
+model Ignore {
+  igId      Int       @id @default(autoincrement())
+  word      String
+  createdBy    Int
+  updatedBy    Int?
+  deletedBy    Int?
+  createdByUser  User      @relation("IgnoreCreatedBy", fields: [createdBy], references: [uId], onDelete: NoAction, onUpdate: NoAction)
+  updatedByUser  User?     @relation("IgnoreUpdatedBy", fields: [updatedBy], references: [uId], onDelete: NoAction, onUpdate: NoAction)
+  deletedByUser  User?     @relation("IgnoreDeletedBy", fields: [deletedBy], references: [uId], onDelete: NoAction, onUpdate: NoAction)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+}
+
 
 model User {
   uId         Int       @id @default(autoincrement())
@@ -106,4 +120,8 @@ model User {
   unpoliteCreated  Unpolite[] @relation("UnpoliteCreatedBy")
   unpoliteUpdated  Unpolite[] @relation("UnpoliteUpdatedBy")
   unpoliteDeleted  Unpolite[] @relation("UnpoliteDeletedBy")
+
+  ignoreCreated Ignore[] @relation("IgnoreCreatedBy")
+  ignoreUpdated Ignore[] @relation("IgnoreUpdatedBy")
+  ignoreDeleted Ignore[] @relation("IgnoreDeletedBy")
 }

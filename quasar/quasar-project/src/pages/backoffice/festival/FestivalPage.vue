@@ -5,7 +5,7 @@
       <div class="hero-blob hero-blob-1" />
       <div class="hero-blob hero-blob-2" />
       <div class="hero-blob hero-blob-3" />
-      <div class="hero-inner">
+      <!-- <div class="hero-inner">
         <div class="hero-left">
           <div class="hero-icon-wrap">
             <q-icon name="celebration" size="1.8rem" color="white" />
@@ -15,6 +15,14 @@
             <p class="hero-sub">จัดการเทศกาลสำหรับส่งคำอวยพร</p>
           </div>
         </div>
+      <q-btn
+          unelevated
+          icon="history"
+          label="บันทึกกิจกรรม"
+          to="/backoffice/festival/create"
+          class="hero-add-btn"
+          :class="$q.screen.xs ? 'full-width q-mt-sm' : ''"
+        />
         <q-btn
           unelevated
           icon="add_circle"
@@ -23,7 +31,38 @@
           class="hero-add-btn"
           :class="$q.screen.xs ? 'full-width q-mt-sm' : ''"
         />
-      </div>
+      </div> -->
+      <div class="hero-inner">
+  <div class="hero-left">
+    <div class="hero-icon-wrap">
+      <q-icon name="celebration" size="1.8rem" color="white" />
+    </div>
+    <div>
+      <h1 class="hero-title">รายการเทศกาล</h1>
+      <p class="hero-sub">จัดการเทศกาลสำหรับส่งคำอวยพร</p>
+    </div>
+  </div>
+
+  <!-- ✅ ห่อปุ่มทั้งสองในก้อนเดียว -->
+  <div class="hero-actions">
+    <q-btn
+      unelevated
+      icon="history"
+      label="บันทึกกิจกรรม"
+      to="/backoffice/festival/log"
+      class="hero-add-btn"
+      :class="$q.screen.xs ? 'full-width' : ''"
+    />
+    <q-btn
+      unelevated
+      icon="add_circle"
+      label="เพิ่มเทศกาล"
+      to="/backoffice/festival/create"
+      class="hero-add-btn"
+      :class="$q.screen.xs ? 'full-width' : ''"
+    />
+  </div>
+</div>
     </div>
 
     <!-- ===== CONTENT ===== -->
@@ -433,6 +472,17 @@ const getImageUrl = async (imagePath: string): Promise<string> => {
 };
 
 // ─── Data Fetching ────────────────────────────────────────────────────────────
+
+// const fetchMinFestival = async(): Promise<void> => {
+//   loading.value = true;
+//   try{
+//      const response = await api.get('/backoffice/festival/min');
+//      const res = response.data;
+
+//   }catch(error){
+//     openNotify(false, 'ไม่พบข้อมูล');
+//   }
+// }
 const fetchFestival = async (): Promise<void> => {
   loading.value = true;
   try {
@@ -663,11 +713,17 @@ $radius: 18px;
 }
 
 // ─── Hero ─────────────────────────────────────────────────────────────────────
+// .page-hero {
+//   position: relative;
+//   overflow: hidden;
+//   background: linear-gradient(135deg, #7c2d12 0%, $orange 55%, $gold 100%);
+//   padding: 2.25rem 1.5rem 4rem;
+// }
 .page-hero {
   position: relative;
   overflow: hidden;
   background: linear-gradient(135deg, #7c2d12 0%, $orange 55%, $gold 100%);
-  padding: 2.25rem 1.5rem 4rem;
+  padding: 1rem 1.5rem 2.5rem; // เปลี่ยนจาก 2.25rem 1.5rem 4rem
 }
 
 .hero-blob {
@@ -779,15 +835,27 @@ $radius: 18px;
 }
 
 // ─── Content ──────────────────────────────────────────────────────────────────
+// .content-wrap {
+//   max-width: 1100px;
+//   // margin: -2rem auto 0;
+//     margin: -1.25rem auto 0;  // เปลี่ยนจาก -2rem
+//   padding: 0 1rem 4rem;
+//   display: flex;
+//   flex-direction: column;
+//   gap: 1.25rem;
+//    z-index: 2;
+// }
+
 .content-wrap {
   max-width: 1100px;
-  margin: -2rem auto 0;
-  padding: 0 1rem 4rem;
+  margin: -1.25rem auto 0;
+  padding: 1.5rem 1rem 4rem;
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
+  position: relative;
+  z-index: 2;
 }
-
 // ─── Top Bar ──────────────────────────────────────────────────────────────────
 .top-bar {
   display: flex;
@@ -842,13 +910,32 @@ $radius: 18px;
 }
 
 // ─── Card Grid ────────────────────────────────────────────────────────────────
+// .card-grid {
+//   display: grid;
+//   grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+//   gap: 1.1rem;
+
+//   @media (max-width: 480px) {
+//     grid-template-columns: repeat(2, 1fr);
+//     gap: 0.75rem;
+//   }
+// }
 .card-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;   // ← ทำให้อยู่กลาง
   gap: 1.1rem;
 
+  > .festival-card {
+    width: 230px;
+    flex: 0 0 230px;         // ← กำหนดขนาดคงที่
+  }
+
   @media (max-width: 480px) {
-    grid-template-columns: repeat(2, 1fr);
+    > .festival-card {
+      width: calc(50% - 0.375rem);
+      flex: 0 0 calc(50% - 0.375rem);
+    }
     gap: 0.75rem;
   }
 }

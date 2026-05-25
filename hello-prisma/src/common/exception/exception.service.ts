@@ -93,4 +93,12 @@ export class ExceptionsService {
   throwFestivalNotExceptedChange(): never {
     throw new ForbiddenException(MESSAGE.FESTIVAL.FESTIVAL_NOT_EXCEPT);
   }
+
+  throwIgnoreWordAlreadyExits(): never {
+    throw new ConflictException(MESSAGE.IGNORE.WORD_CONFLICT);
+  }
+
+  throwIgnoreWordNotFound(): never {
+    throw new NotFoundException(MESSAGE.IGNORE.NOT_FOUND);
+  }
 }
