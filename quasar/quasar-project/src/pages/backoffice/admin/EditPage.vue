@@ -640,13 +640,6 @@
         />
       </div>
     </q-dialog>
-
-    <!-- ===== CLICK PARTICLES ===== -->
-    <teleport to="body">
-      <div class="click-particles-root" aria-hidden="true">
-        <span v-for="p in activeParticles" :key="p.id" class="click-particle" :style="p.style" />
-      </div>
-    </teleport>
   </q-page>
 </template>
 
@@ -1220,7 +1213,7 @@ $error-red: #dc2626;
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 14px;
-  max-width: 760px;
+  max-width: 1100px;
   margin: 0 auto;
 }
 .hero-left {
@@ -1275,7 +1268,7 @@ $error-red: #dc2626;
 .hero-tabs-wrap {
   position: relative;
   z-index: 2;
-  max-width: 760px;
+  max-width: 1100px;
   margin: 1.5rem auto 0;
   padding: 0;
 }

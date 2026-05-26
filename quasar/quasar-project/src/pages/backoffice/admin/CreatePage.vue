@@ -15,14 +15,16 @@
             <p class="hero-sub">เพิ่มผู้ดูแลระบบพร้อมกำหนดสิทธิ์การเข้าถึง</p>
           </div>
         </div>
-        <q-btn
-          unelevated
-          icon="arrow_back"
-          label="กลับรายการ"
-          to="/backoffice/admin"
-          class="hero-back-btn"
-          :class="$q.screen.xs ? 'full-width q-mt-sm' : ''"
-        />
+        <div class="hero-actions">
+          <q-btn
+            unelevated
+            icon="arrow_back"
+            label="กลับรายการ"
+            to="/backoffice/admin"
+            class="hero-back-btn"
+            :class="$q.screen.xs ? 'full-width q-mt-sm' : ''"
+          />
+        </div>
       </div>
     </div>
 
@@ -366,13 +368,6 @@
         />
       </div>
     </q-dialog>
-
-    <!-- ===== CLICK PARTICLES ===== -->
-    <teleport to="body">
-      <div class="click-particles-root" aria-hidden="true">
-        <span v-for="p in activeParticles" :key="p.id" class="click-particle" :style="p.style" />
-      </div>
-    </teleport>
   </q-page>
 </template>
 
@@ -774,7 +769,7 @@ $error-red: #dc2626;
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 14px;
-  max-width: 680px;
+  max-width: 1100px;
   margin: 0 auto;
 }
 
@@ -809,6 +804,16 @@ $error-red: #dc2626;
   font-size: clamp(0.75rem, 2.5vw, 0.88rem);
   color: rgba(255, 255, 255, 0.68);
   margin: 0;
+}
+.hero-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+  @media (max-width: 600px) {
+    flex-direction: column;
+    width: 100%;
+  }
 }
 
 .hero-back-btn {

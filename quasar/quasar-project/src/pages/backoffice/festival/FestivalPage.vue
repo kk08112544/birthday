@@ -5,7 +5,8 @@
       <div class="hero-blob hero-blob-1" />
       <div class="hero-blob hero-blob-2" />
       <div class="hero-blob hero-blob-3" />
-      <!-- <div class="hero-inner">
+
+      <div class="hero-inner">
         <div class="hero-left">
           <div class="hero-icon-wrap">
             <q-icon name="celebration" size="1.8rem" color="white" />
@@ -15,54 +16,27 @@
             <p class="hero-sub">จัดการเทศกาลสำหรับส่งคำอวยพร</p>
           </div>
         </div>
-      <q-btn
-          unelevated
-          icon="history"
-          label="บันทึกกิจกรรม"
-          to="/backoffice/festival/create"
-          class="hero-add-btn"
-          :class="$q.screen.xs ? 'full-width q-mt-sm' : ''"
-        />
-        <q-btn
-          unelevated
-          icon="add_circle"
-          label="เพิ่มเทศกาล"
-          to="/backoffice/festival/create"
-          class="hero-add-btn"
-          :class="$q.screen.xs ? 'full-width q-mt-sm' : ''"
-        />
-      </div> -->
-      <div class="hero-inner">
-  <div class="hero-left">
-    <div class="hero-icon-wrap">
-      <q-icon name="celebration" size="1.8rem" color="white" />
-    </div>
-    <div>
-      <h1 class="hero-title">รายการเทศกาล</h1>
-      <p class="hero-sub">จัดการเทศกาลสำหรับส่งคำอวยพร</p>
-    </div>
-  </div>
 
-  <!-- ✅ ห่อปุ่มทั้งสองในก้อนเดียว -->
-  <div class="hero-actions">
-    <q-btn
-      unelevated
-      icon="history"
-      label="บันทึกกิจกรรม"
-      to="/backoffice/festival/log"
-      class="hero-add-btn"
-      :class="$q.screen.xs ? 'full-width' : ''"
-    />
-    <q-btn
-      unelevated
-      icon="add_circle"
-      label="เพิ่มเทศกาล"
-      to="/backoffice/festival/create"
-      class="hero-add-btn"
-      :class="$q.screen.xs ? 'full-width' : ''"
-    />
-  </div>
-</div>
+        <!-- ✅ ห่อปุ่มทั้งสองในก้อนเดียว -->
+        <div class="hero-actions">
+          <q-btn
+            unelevated
+            icon="history"
+            label="บันทึกกิจกรรม"
+            to="/backoffice/festival/log"
+            class="hero-add-btn"
+            :class="$q.screen.xs ? 'full-width' : ''"
+          />
+          <q-btn
+            unelevated
+            icon="add_circle"
+            label="เพิ่มเทศกาล"
+            to="/backoffice/festival/create"
+            class="hero-add-btn"
+            :class="$q.screen.xs ? 'full-width' : ''"
+          />
+        </div>
+      </div>
     </div>
 
     <!-- ===== CONTENT ===== -->
@@ -358,11 +332,6 @@
     </q-dialog>
 
     <!-- ===== CLICK PARTICLES ===== -->
-    <teleport to="body">
-      <div class="click-particles-root" aria-hidden="true">
-        <span v-for="p in activeParticles" :key="p.id" class="click-particle" :style="p.style" />
-      </div>
-    </teleport>
   </q-page>
 </template>
 
@@ -814,6 +783,16 @@ $radius: 18px;
   color: rgba(255, 255, 255, 0.68);
   margin: 0;
 }
+.hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px; // ← เพิ่มบรรทัดนี้
+
+  @media (max-width: 600px) {
+    flex-direction: column;
+    width: 100%;
+  }
+}
 
 .hero-add-btn {
   background: rgba(255, 255, 255, 0.16) !important;
@@ -923,12 +902,12 @@ $radius: 18px;
 .card-grid {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;   // ← ทำให้อยู่กลาง
+  justify-content: center; // ← ทำให้อยู่กลาง
   gap: 1.1rem;
 
   > .festival-card {
     width: 230px;
-    flex: 0 0 230px;         // ← กำหนดขนาดคงที่
+    flex: 0 0 230px; // ← กำหนดขนาดคงที่
   }
 
   @media (max-width: 480px) {

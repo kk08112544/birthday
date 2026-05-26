@@ -15,14 +15,16 @@
             <p class="hero-sub">แก้ไขข้อมูลเทศกาลสุดพิเศษของคุณ</p>
           </div>
         </div>
-        <q-btn
-          unelevated
-          icon="arrow_back"
-          label="กลับรายการ"
-          to="/backoffice/festival"
-          class="hero-back-btn"
-          :class="$q.screen.xs ? 'full-width q-mt-sm' : ''"
-        />
+        <div class="hero-actions">
+          <q-btn
+            unelevated
+            icon="arrow_back"
+            label="กลับรายการ"
+            to="/backoffice/festival"
+            class="hero-back-btn"
+            :class="$q.screen.xs ? 'full-width q-mt-sm' : ''"
+          />
+        </div>
       </div>
     </div>
 
@@ -111,7 +113,7 @@
               :disable="!canEdit"
               label="ชื่อเทศกาล"
               placeholder="เช่น สงกรานต์-กกจ-2568"
-              hint="รูปแบบ: เทศกาล-ตัวย่อหน่วยงาน (2-3)-ปี"
+              hint="รูปแบบ: เทศกาล-ตัวย่อหน่วยงาน (2-5)-ปี"
               dense
               :error="nameError"
               :error-message="
@@ -137,12 +139,11 @@
                 }"
                 @click="canEdit && logoInput?.pickFiles()"
               >
-                 <!-- v-if="logoFile "
+                <!-- v-if="logoFile "
                   :src="getFilePreview(logoFile)" -->
                 <q-img
-               
-                    v-if="logoFile || useDeptLogo"
-        :src="useDeptLogo ? '/logo-ldd.png' : getFilePreview(logoFile!)"
+                  v-if="logoFile || useDeptLogo"
+                  :src="useDeptLogo ? '/logo-ldd.png' : getFilePreview(logoFile!)"
                   class="logo-preview"
                   :ratio="1"
                   fit="contain"
@@ -164,18 +165,14 @@
                   PNG, JPG · แนะนำสี่เหลี่ยมจัตุรัส<br />ขนาด 100 × 100 px · ไม่เกิน 2 MB
                 </div>
               </div>
-               <div class="dept-logo-option" @click="toggleDeptLogo">
-      <img
-        src="/logo-ldd.png"
-        class="dept-logo-img"
-        alt="logo กรม"
-      />
-      <div class="dept-logo-check" :class="{ 'dept-logo-check--active': useDeptLogo }">
-        <q-icon v-if="useDeptLogo" name="check" size="14px" color="white" />
-      </div>
-    </div>
+              <div class="dept-logo-option" @click="toggleDeptLogo">
+                <img src="/logo-ldd.png" class="dept-logo-img" alt="logo กรม" />
+                <div class="dept-logo-check" :class="{ 'dept-logo-check--active': useDeptLogo }">
+                  <q-icon v-if="useDeptLogo" name="check" size="14px" color="white" />
+                </div>
+              </div>
             </div>
-            
+
             <transition name="err-fade">
               <div v-if="logoError" class="error-msg">
                 <q-icon name="error_outline" size="14px" />
@@ -409,7 +406,7 @@
         <div class="fest-card animate-in" style="animation-delay: 0.2s">
           <div class="card-label">
             <span class="label-dot label-dot--teal" />
-            การ์ดอวยพร
+            บัตรอวยพร
           </div>
           <div class="card-header-row">
             <div class="stat-chip">
@@ -422,7 +419,7 @@
               unelevated
               color="teal-6"
               icon="add_photo_alternate"
-              label="เพิ่มการ์ด"
+              label="เพิ่มบัตรอวยพร"
               class="action-btn"
               @click="onAddCard"
             />
@@ -454,8 +451,8 @@
 
           <div v-else class="empty-state">
             <div class="empty-icon">🃏</div>
-            <div class="empty-title">ยังไม่มีการ์ด</div>
-            <div class="empty-sub">อัปโหลดรูปสวยๆ เพื่อใช้เป็นการ์ดอวยพร (691 × 691 px)</div>
+            <div class="empty-title">ยังไม่มีบัตรอวยพร</div>
+            <div class="empty-sub">อัปโหลดรูปสวยๆ เพื่อใช้เป็นบัตรอวยพร (691 × 691 px)</div>
           </div>
         </div>
 
@@ -657,13 +654,6 @@
         />
       </div>
     </q-dialog>
-
-    <!-- ===== CLICK PARTICLES ===== -->
-    <teleport to="body">
-      <div class="click-particles-root" aria-hidden="true">
-        <span v-for="p in activeParticles" :key="p.id" class="click-particle" :style="p.style" />
-      </div>
-    </teleport>
   </q-page>
 </template>
 
@@ -748,16 +738,15 @@ const existingImageName = ref('');
 const loading = ref(false);
 const createdBy = ref<number>(0);
 
-    const useDeptLogo = ref(false)
+const useDeptLogo = ref(false);
 
 const toggleDeptLogo = () => {
-  useDeptLogo.value = !useDeptLogo.value
+  useDeptLogo.value = !useDeptLogo.value;
   if (useDeptLogo.value) {
-    logoFile.value = null  // clear uploaded file
-    logoError.value = false
+    logoFile.value = null; // clear uploaded file
+    logoError.value = false;
   }
-}
-
+};
 
 // ─── Permissions ──────────────────────────────────────────────────────────────
 const isEdit = ref(false);
@@ -1182,25 +1171,23 @@ const submitEdit = async () => {
       return (await api.post('/upload', fd)).data.image as string;
     };
 
-        const getDeptLogoFile = async (): Promise<File> => {
-  const res = await fetch('/logo-ldd.png');
-  console.log('status:', res.status);  // ← ถ้าไม่ใช่ 200 แสดงว่าหาไฟล์ไม่เจอ
-  const blob = await res.blob();
-  console.log('blob size:', blob.size, 'type:', blob.type);  // ← ถ้า size = 0 คือปัญหา
-  const file = new File([blob], 'logo-ldd.png', { type: 'image/png' });
-  console.log('file:', file);
-  return file;
-};
+    const getDeptLogoFile = async (): Promise<File> => {
+      const res = await fetch('/logo-ldd.png');
+      console.log('status:', res.status); // ← ถ้าไม่ใช่ 200 แสดงว่าหาไฟล์ไม่เจอ
+      const blob = await res.blob();
+      console.log('blob size:', blob.size, 'type:', blob.type); // ← ถ้า size = 0 คือปัญหา
+      const file = new File([blob], 'logo-ldd.png', { type: 'image/png' });
+      console.log('file:', file);
+      return file;
+    };
 
-    const logoToUpload = useDeptLogo.value
-      ? await getDeptLogoFile()
-      : logoFile.value;
-console.log("Upload :" ,logoToUpload);
+    const logoToUpload = useDeptLogo.value ? await getDeptLogoFile() : logoFile.value;
+    console.log('Upload :', logoToUpload);
     let festivalImageName = existingImageName.value;
     if (imageFile.value) festivalImageName = await uploadFile(imageFile.value);
 
     let festivalLogoName = '';
-     
+
     if (logoToUpload) festivalLogoName = await uploadFile(logoToUpload);
 
     const newCardImageNames = await Promise.all(cardFileList.value.map(uploadFile));
@@ -1423,7 +1410,7 @@ $error-red: #dc2626;
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 14px;
-  max-width: 780px;
+  max-width: 1100px;
   margin: 0 auto;
 }
 
@@ -1829,7 +1816,6 @@ $error-red: #dc2626;
     border-color: $orange;
   }
 }
-
 
 // ─── Custom Input ─────────────────────────────────────────────────────────────
 .custom-input :deep(.q-field__control) {

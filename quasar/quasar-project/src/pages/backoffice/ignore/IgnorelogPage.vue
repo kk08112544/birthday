@@ -6,14 +6,16 @@
       <div class="hero-blob hero-blob-2" />
       <div class="hero-blob hero-blob-3" />
       <div class="hero-inner">
-        <div class="hero-icon-wrap">
-          <q-icon name="history" size="2rem" color="white" />
+        <div class="hero-left">
+          <div class="hero-icon-wrap">
+            <q-icon name="history" size="2rem" color="white" />
+          </div>
+          <div>
+            <h1 class="hero-title">บันทึกกิจกรรม</h1>
+            <p class="hero-sub">ประวัติการเปลี่ยนแปลงคำที่ระบบจะข้ามการตรวจสอบ</p>
+          </div>
         </div>
-        <div>
-          <h1 class="hero-title">บันทึกกิจกรรม</h1>
-          <p class="hero-sub">ประวัติการเปลี่ยนแปลงคำที่ระบบจะข้ามการตรวจสอบ</p>
-        </div>
-        <q-space />
+
         <div class="hero-actions">
           <q-btn
             unelevated
@@ -291,11 +293,6 @@
     </q-dialog>
 
     <!-- ===== CLICK PARTICLES ===== -->
-    <teleport to="body">
-      <div class="click-particles-root" aria-hidden="true">
-        <span v-for="p in activeParticles" :key="p.id" class="click-particle" :style="p.style" />
-      </div>
-    </teleport>
   </q-page>
 </template>
 
@@ -475,13 +472,25 @@ function parseLogLine(line: string): LogEntry | null {
   if (action === 'UPDATE') {
     const m = line.match(/OLD: (\{.*?\}) \| NEW: (\{.*\})$/);
     if (m) {
-      try { oldData = JSON.parse(m[1]!) as LogData; } catch { /* ignore */ }
-      try { newData = JSON.parse(m[2]!) as LogData; } catch { /* ignore */ }
+      try {
+        oldData = JSON.parse(m[1]!) as LogData;
+      } catch {
+        /* ignore */
+      }
+      try {
+        newData = JSON.parse(m[2]!) as LogData;
+      } catch {
+        /* ignore */
+      }
     }
   } else {
     const m = line.match(/\[(?:CREATE|DELETE)\] (\{.*\})$/);
     if (m) {
-      try { data = JSON.parse(m[1]!) as LogData; } catch { /* ignore */ }
+      try {
+        data = JSON.parse(m[1]!) as LogData;
+      } catch {
+        /* ignore */
+      }
     }
   }
 
@@ -643,13 +652,38 @@ function setFilter(f: FilterType): void {
 
 // ─── Particles ────────────────────────────────────────────────────────────────
 const PARTICLE_COLORS = [
-  '#0d9488', '#06b6d4', '#0891b2', '#22c55e',
-  '#fbbf24', '#6366f1', '#34d399', '#f472b6',
-  '#38bdf8', '#4ade80', '#a78bfa', '#facc15',
+  '#0d9488',
+  '#06b6d4',
+  '#0891b2',
+  '#22c55e',
+  '#fbbf24',
+  '#6366f1',
+  '#34d399',
+  '#f472b6',
+  '#38bdf8',
+  '#4ade80',
+  '#a78bfa',
+  '#facc15',
 ];
 const PARTICLE_EMOJIS = [
-  '✨', '🌿', '🍃', '💫', '⭐', '🌟', '🎋', '🌊',
-  '❄️', '🎵', '💎', '🎀', '🌸', '🍀', '🦋', '🌺', '🎇', '🏵️',
+  '✨',
+  '🌿',
+  '🍃',
+  '💫',
+  '⭐',
+  '🌟',
+  '🎋',
+  '🌊',
+  '❄️',
+  '🎵',
+  '💎',
+  '🎀',
+  '🌸',
+  '🍀',
+  '🦋',
+  '🌺',
+  '🎇',
+  '🏵️',
 ];
 
 function spawnParticles(x: number, y: number): void {
@@ -683,7 +717,9 @@ function spawnParticles(x: number, y: number): void {
 
     activeParticles.value.push({ id, style });
     setTimeout(
-      () => { activeParticles.value = activeParticles.value.filter((p) => p.id !== id); },
+      () => {
+        activeParticles.value = activeParticles.value.filter((p) => p.id !== id);
+      },
       dur * 1000 + 100,
     );
   }
@@ -772,8 +808,13 @@ $radius: 16px;
 }
 
 @keyframes drift {
-  0%, 100% { transform: translateY(0) scale(1); }
-  50% { transform: translateY(-14px) scale(1.05); }
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-14px) scale(1.05);
+  }
 }
 
 .hero-inner {
@@ -782,9 +823,15 @@ $radius: 16px;
   display: flex;
   align-items: center;
   gap: 14px;
+  justify-content: space-between;
   flex-wrap: wrap;
-  max-width: 960px;
+  max-width: 1100px;
   margin: 0 auto;
+}
+.hero-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
 }
 
 .hero-icon-wrap {
@@ -824,9 +871,13 @@ $radius: 16px;
 
 .hero-actions {
   display: flex;
-  gap: 10px;
+  gap: 12px;
   flex-wrap: wrap;
   align-items: center;
+  @media (max-width: 600px) {
+    flex-direction: column;
+    width: 100%;
+  }
 }
 
 .hero-back-btn {
@@ -838,7 +889,9 @@ $radius: 16px;
   font-family: 'Noto Sans Thai', sans-serif !important;
   font-weight: 600 !important;
   letter-spacing: 0 !important;
-  transition: background 0.2s, transform 0.15s !important;
+  transition:
+    background 0.2s,
+    transform 0.15s !important;
   &:hover {
     background: rgba(255, 255, 255, 0.25) !important;
     transform: translateY(-2px);
@@ -906,7 +959,8 @@ $radius: 16px;
     background: $teal-soft;
     color: $teal;
     border-color: $teal-border;
-    &.active, &:hover {
+    &.active,
+    &:hover {
       background: $teal;
       color: #fff;
       border-color: $teal;
@@ -916,7 +970,8 @@ $radius: 16px;
     background: $green-soft;
     color: $green;
     border-color: rgba(22, 163, 74, 0.25);
-    &.active, &:hover {
+    &.active,
+    &:hover {
       background: $green;
       color: #fff;
       border-color: $green;
@@ -926,7 +981,8 @@ $radius: 16px;
     background: $amber-soft;
     color: $amber;
     border-color: rgba(217, 119, 6, 0.25);
-    &.active, &:hover {
+    &.active,
+    &:hover {
       background: $amber;
       color: #fff;
       border-color: $amber;
@@ -936,7 +992,8 @@ $radius: 16px;
     background: $red-soft;
     color: $red;
     border-color: rgba(220, 38, 38, 0.25);
-    &.active, &:hover {
+    &.active,
+    &:hover {
       background: $red;
       color: #fff;
       border-color: $red;
@@ -966,7 +1023,9 @@ $radius: 16px;
   }
   :deep(tbody tr) {
     transition: background 0.15s;
-    &:hover { background: rgba(13, 148, 136, 0.03) !important; }
+    &:hover {
+      background: rgba(13, 148, 136, 0.03) !important;
+    }
   }
   :deep(tbody tr td) {
     font-size: clamp(0.78rem, 2vw, 0.875rem);
@@ -1029,7 +1088,9 @@ $radius: 16px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  @media (max-width: 600px) { max-width: 130px; }
+  @media (max-width: 600px) {
+    max-width: 130px;
+  }
 }
 
 // ─── Diff ─────────────────────────────────────────────────────────────────────
@@ -1056,15 +1117,24 @@ $radius: 16px;
   font-weight: 600;
   word-break: break-all;
 }
-.diff-arrow { color: $text-muted; }
-.diff-wrap { display: flex; flex-direction: column; gap: 6px; }
+.diff-arrow {
+  color: $text-muted;
+}
+.diff-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
 .diff-no-change {
   display: flex;
   align-items: center;
   font-size: 0.75rem;
   color: $text-muted;
 }
-.no-diff { font-size: 0.82rem; color: $text-muted; }
+.no-diff {
+  font-size: 0.82rem;
+  color: $text-muted;
+}
 
 // ─── Actor ────────────────────────────────────────────────────────────────────
 // $avatar-palettes: (
@@ -1079,13 +1149,28 @@ $radius: 16px;
 // );
 // แก้เป็น
 $avatar-palettes: (
-  'teal':    (#0d9488, #0f766e, rgba(13, 148, 136, 0.4)),
-  'emerald': (#059669, #047857, rgba(5, 150, 105, 0.4)),
-  'cyan':    (#0891b2, #0e7490, rgba(8, 145, 178, 0.4)),
+  'teal': (
+    #0d9488,
+    #0f766e,
+    rgba(13, 148, 136, 0.4),
+  ),
+  'emerald': (
+    #059669,
+    #047857,
+    rgba(5, 150, 105, 0.4),
+  ),
+  'cyan': (
+    #0891b2,
+    #0e7490,
+    rgba(8, 145, 178, 0.4),
+  ),
 );
 
-
-.actor-wrap { display: flex; align-items: center; gap: 11px; }
+.actor-wrap {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
 
 .actor-avatar-outer {
   position: relative;
@@ -1114,14 +1199,18 @@ $avatar-palettes: (
     $ring: nth($palette, 3);
     &--#{$name} {
       background: linear-gradient(145deg, $from 0%, $to 100%);
-      box-shadow: 0 4px 14px $ring, inset 0 1px 0 rgba(255, 255, 255, 0.25);
+      box-shadow:
+        0 4px 14px $ring,
+        inset 0 1px 0 rgba(255, 255, 255, 0.25);
     }
   }
 }
 
 .actor-avatar-shine {
   position: absolute;
-  top: 0; left: 0; right: 0;
+  top: 0;
+  left: 0;
+  right: 0;
   height: 52%;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.28) 0%, transparent 100%);
   border-radius: 12px 12px 0 0;
@@ -1186,7 +1275,11 @@ $avatar-palettes: (
 }
 
 // ─── Timestamp ────────────────────────────────────────────────────────────────
-.ts-block { display: inline-flex; flex-direction: column; gap: 5px; }
+.ts-block {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 5px;
+}
 
 .ts-date-pill {
   display: inline-flex;
@@ -1202,9 +1295,22 @@ $avatar-palettes: (
   white-space: nowrap;
   box-shadow: 0 1px 4px rgba(13, 148, 136, 0.1);
 }
-.ts-pill-icon { color: $teal-mid; flex-shrink: 0; opacity: 0.85; }
-.ts-time-row { display: flex; align-items: center; gap: 5px; padding-left: 2px; }
-.ts-clock-icon { color: $teal-light; opacity: 0.7; flex-shrink: 0; }
+.ts-pill-icon {
+  color: $teal-mid;
+  flex-shrink: 0;
+  opacity: 0.85;
+}
+.ts-time-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding-left: 2px;
+}
+.ts-clock-icon {
+  color: $teal-light;
+  opacity: 0.7;
+  flex-shrink: 0;
+}
 .ts-time-text {
   font-size: 0.7rem;
   color: $text-muted;
@@ -1214,27 +1320,47 @@ $avatar-palettes: (
 }
 
 // ─── Table Actions ────────────────────────────────────────────────────────────
-.actions-wrap { display: flex; justify-content: center; gap: 6px; }
+.actions-wrap {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
 
 .action-btn {
   transition: transform 0.15s !important;
-  &:hover { transform: scale(1.15); }
+  &:hover {
+    transform: scale(1.15);
+  }
   &--view {
     color: $teal-mid !important;
-    :deep(.q-icon) { color: $teal-mid !important; }
+    :deep(.q-icon) {
+      color: $teal-mid !important;
+    }
   }
 }
 
 // ─── Empty State ──────────────────────────────────────────────────────────────
-.empty-state { display: flex; flex-direction: column; align-items: center; padding: 3rem 1rem; }
-.empty-icon { font-size: 3rem; margin-bottom: 12px; }
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 3rem 1rem;
+}
+.empty-icon {
+  font-size: 3rem;
+  margin-bottom: 12px;
+}
 .empty-title {
   font-family: 'Prompt', sans-serif;
   font-size: 1.05rem;
   font-weight: 600;
   color: $text-main;
 }
-.empty-sub { font-size: 0.82rem; color: $text-muted; margin-top: 4px; }
+.empty-sub {
+  font-size: 0.82rem;
+  color: $text-muted;
+  margin-top: 4px;
+}
 
 // ─── Dialog ───────────────────────────────────────────────────────────────────
 .custom-dialog {
@@ -1249,7 +1375,9 @@ $avatar-palettes: (
     width: 100%;
     max-width: 100%;
     position: fixed;
-    bottom: 0; left: 0; right: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
   }
 }
 
@@ -1278,7 +1406,9 @@ $avatar-palettes: (
   font-weight: 600;
   color: $text-main;
   border-bottom: 1px solid rgba(13, 148, 136, 0.07);
-  &--teal { background: linear-gradient(135deg, $teal-soft, #ccfbf1); }
+  &--teal {
+    background: linear-gradient(135deg, $teal-soft, #ccfbf1);
+  }
 }
 
 .dialog-header-icon {
@@ -1289,7 +1419,9 @@ $avatar-palettes: (
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  &--teal { background: linear-gradient(135deg, $teal-light, $teal); }
+  &--teal {
+    background: linear-gradient(135deg, $teal-light, $teal);
+  }
 }
 
 .dialog-close-btn {
@@ -1304,7 +1436,9 @@ $avatar-palettes: (
   align-items: center;
   justify-content: center;
   transition: background 0.15s;
-  &:hover { background: rgba(13, 148, 136, 0.14); }
+  &:hover {
+    background: rgba(13, 148, 136, 0.14);
+  }
 }
 
 .dialog-body {
@@ -1325,7 +1459,11 @@ $avatar-palettes: (
   }
 }
 
-.view-section { display: flex; flex-direction: column; gap: 6px; }
+.view-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
 .view-field-label {
   font-size: 0.72rem;
   font-weight: 700;
@@ -1361,26 +1499,55 @@ $avatar-palettes: (
   font-size: 0.88rem;
   font-weight: 600;
   cursor: pointer;
-  transition: transform 0.1s, box-shadow 0.15s, opacity 0.15s;
-  &:active { transform: scale(0.96); }
-  &:disabled { opacity: 0.65; cursor: not-allowed; }
+  transition:
+    transform 0.1s,
+    box-shadow 0.15s,
+    opacity 0.15s;
+  &:active {
+    transform: scale(0.96);
+  }
+  &:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+  }
   &--cancel {
     background: rgba(13, 148, 136, 0.07);
     color: $text-muted;
-    &:hover { background: rgba(13, 148, 136, 0.13); }
+    &:hover {
+      background: rgba(13, 148, 136, 0.13);
+    }
   }
 }
 
 // ─── Responsive ───────────────────────────────────────────────────────────────
 @media (max-width: 600px) {
-  .page-hero { padding: 1.5rem 1rem 3rem; }
-  .content-wrap { padding: 0 0.75rem 2rem; gap: 0.85rem; }
-  .hero-inner { gap: 10px; }
-  .hero-icon-wrap { width: 44px; height: 44px; }
-  .hero-actions { width: 100%; }
-  .hero-back-btn { flex: 1; justify-content: center; }
-  .actor-username-chip { display: none; }
-  .search-bar { max-width: 100%; }
+  .page-hero {
+    padding: 1.5rem 1rem 3rem;
+  }
+  .content-wrap {
+    padding: 0 0.75rem 2rem;
+    gap: 0.85rem;
+  }
+  .hero-inner {
+    gap: 10px;
+  }
+  .hero-icon-wrap {
+    width: 44px;
+    height: 44px;
+  }
+  .hero-actions {
+    width: 100%;
+  }
+  .hero-back-btn {
+    flex: 1;
+    justify-content: center;
+  }
+  .actor-username-chip {
+    display: none;
+  }
+  .search-bar {
+    max-width: 100%;
+  }
 }
 
 // ─── Click Particles ──────────────────────────────────────────────────────────
@@ -1403,12 +1570,22 @@ $avatar-palettes: (
   animation: clickFall var(--dur) cubic-bezier(0.2, 0.9, 0.4, 1) forwards;
   border-radius: 50%;
 
-  &[style*='--shape: square'] { border-radius: 3px; }
+  &[style*='--shape: square'] {
+    border-radius: 3px;
+  }
   &[style*='--shape: star'] {
     border-radius: 0;
     clip-path: polygon(
-      50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%,
-      50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%
+      50% 0%,
+      61% 35%,
+      98% 35%,
+      68% 57%,
+      79% 91%,
+      50% 70%,
+      21% 91%,
+      32% 57%,
+      2% 35%,
+      39% 35%
     );
   }
   &[style*='--shape: triangle'] {
@@ -1426,7 +1603,11 @@ $avatar-palettes: (
     display: flex;
     align-items: center;
     justify-content: center;
-    &::after { content: var(--emoji-content); font-size: var(--size); line-height: 1; }
+    &::after {
+      content: var(--emoji-content);
+      font-size: var(--size);
+      line-height: 1;
+    }
   }
 }
 

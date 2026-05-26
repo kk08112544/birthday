@@ -3,7 +3,7 @@ export const MESSAGE = {
     GET_SUCCESS: 'ดึงข้อมูลเทศกาลสำเร็จ',
     GET_FAIL: 'ดึงข้อมูลเทศกาลไม่สำเร็จ',
     CREATE_SUCCESS: 'สร้างเทศกาลสำเร็จ',
-    UPDATE_SUCCESS: 'แก้ไขขื่อเทศกาลสำเร็จ',
+    UPDATE_SUCCESS: 'แก้ไขฃ้อมูลเทศกาลสำเร็จ',
     INVALID_FESTIVALID: 'ไม่มีเทศกาลนี้ในระบบ',
     DELETE_SUCCESS: 'ลบข้อมูลเทศกาลสำเร็จ',
     NOT_EDIT_DELETE: 'ผู้สร้างหรือซุปเปอร์แอดมินสามารถลบหรือแก้ไขเทศกาลนี้ได้',

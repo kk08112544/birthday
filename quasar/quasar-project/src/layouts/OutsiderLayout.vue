@@ -426,7 +426,6 @@ $nav-h: 52px;
 
 // ─── BANNER ───────────────────────────────────────────────────────────────────
 .banner-section {
-  background: linear-gradient(180deg, #fff1f2 0%, #fce7f3 100%);
   padding: 4px 0 0;
   position: relative;
 
@@ -477,18 +476,21 @@ $nav-h: 52px;
   gap: 10px;
 }
 
-.banner-overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    to bottom,
-    rgba(127, 29, 29, 0.05) 0%,
-    transparent 35%,
-    rgba(127, 29, 29, 0.55) 100%
-  );
-  pointer-events: none;
-}
+// .banner-overlay {
+//   position: absolute;
+//   inset: 0;
+//   background: linear-gradient(
+//     to bottom,
+//     rgba(127, 29, 29, 0.05) 0%,
+//     transparent 35%,
+//     rgba(127, 29, 29, 0.55) 100%
+//   );
+//   pointer-events: none;
+// }
 
+.banner-overlay {
+  display: none;
+}
 .banner-shimmer-bar {
   height: 4px;
   background: linear-gradient(90deg, $rose-mid, $gold-light, $rose-light, $rose-mid);

@@ -289,13 +289,6 @@
         </div>
       </div>
     </q-dialog>
-
-    <!-- ===== CLICK PARTICLES ===== -->
-    <teleport to="body">
-      <div class="click-particles-root" aria-hidden="true">
-        <span v-for="p in activeParticles" :key="p.id" class="click-particle" :style="p.style" />
-      </div>
-    </teleport>
   </q-page>
 </template>
 
@@ -816,15 +809,16 @@ $radius: 16px;
   z-index: 2;
   display: flex;
   align-items: center;
+  justify-content: space-between; // ← เพิ่มบรรทัดนี้
   gap: 14px;
   flex-wrap: wrap;
-  max-width: 960px;
+  max-width: 1100px;
   margin: 0 auto;
 }
 
 .hero-icon-wrap {
-  width: 52px;
-  height: 52px;
+  width: 54px;
+  height: 54px;
   border-radius: 14px;
   background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(8px);
@@ -851,9 +845,13 @@ $radius: 16px;
 
 .hero-actions {
   display: flex;
-  gap: 10px;
+  gap: 12px;
   flex-wrap: wrap;
-  align-items: center;
+
+  @media (max-width: 600px) {
+    flex-direction: column;
+    width: 100%;
+  }
 }
 
 .hero-back-btn {

@@ -261,31 +261,6 @@
                 <q-icon name="visibility_off" color="teal-6" />
               </template>
             </q-input>
-            <q-select
-              v-model="addForm.category"
-              label="หมวดหมู่"
-              outlined
-              dense
-              clearable
-              :options="categoryOptions"
-              class="styled-input q-mb-md"
-            >
-              <template v-slot:prepend>
-                <q-icon name="category" color="teal-6" />
-              </template>
-            </q-select>
-            <q-input
-              v-model="addForm.description"
-              label="หมายเหตุ (ไม่บังคับ)"
-              outlined
-              dense
-              autogrow
-              class="styled-input"
-            >
-              <template v-slot:prepend>
-                <q-icon name="notes" color="teal-6" />
-              </template>
-            </q-input>
           </div>
           <div class="dialog-footer">
             <button type="button" class="dlg-btn dlg-btn--cancel" @click="addDialog = false">
@@ -331,7 +306,6 @@
               class="styled-input q-mb-md"
               :rules="[(val) => !!val?.trim() || 'กรุณากรอกข้อมูล']"
             />
-          
           </div>
           <div class="dialog-footer">
             <button type="button" class="dlg-btn dlg-btn--cancel" @click="editDialog = false">
@@ -447,11 +421,6 @@
     </q-dialog>
 
     <!-- ===== CLICK PARTICLES ===== -->
-    <teleport to="body">
-      <div class="click-particles-root" aria-hidden="true">
-        <span v-for="p in activeParticles" :key="p.id" class="click-particle" :style="p.style" />
-      </div>
-    </teleport>
   </q-page>
 </template>
 
@@ -469,7 +438,6 @@ const NOTIFY_DURATION = 2000;
 interface IgnoreItem {
   igId: number | string;
   word: string;
-
 }
 
 interface TableRow {
@@ -491,9 +459,6 @@ type ShapeType = 'circle' | 'square' | 'star' | 'triangle' | 'emoji';
 // ─── Props & Quasar ───────────────────────────────────────────────────────────
 const props = defineProps<{ id: string }>();
 const $q = useQuasar();
-
-// ─── Category Options ─────────────────────────────────────────────────────────
-const categoryOptions = ['ทั่วไป', 'ภาษาต่างประเทศ', 'ชื่อเฉพาะ', 'คำย่อ', 'อื่นๆ'];
 
 const getCategoryColor = (category?: string): string => {
   const map: Record<string, string> = {
@@ -528,7 +493,7 @@ const columns: QTableColumn[] = [
     align: 'left',
     style: 'white-space: normal; word-break: break-word;',
   },
- 
+
   { name: 'actions', label: 'จัดการ', field: 'actions', align: 'center', style: 'width: 130px' },
 ];
 
@@ -597,7 +562,7 @@ const fetchIgnore = async (): Promise<void> => {
       displayIndex: startIndex + index + 1,
       igId: item.igId,
       word: item.word || '-',
-     
+
       actions: { create: false, update: true, delete: true },
     }));
 
@@ -727,8 +692,24 @@ const PARTICLE_COLORS = [
 ];
 
 const PARTICLE_EMOJIS = [
-  '✨', '🌿', '🍃', '💫', '⭐', '🌟', '🎋', '🌊', '❄️',
-  '🎵', '💎', '🎀', '🌸', '🍀', '🦋', '🌺', '🎇', '🏵️',
+  '✨',
+  '🌿',
+  '🍃',
+  '💫',
+  '⭐',
+  '🌟',
+  '🎋',
+  '🌊',
+  '❄️',
+  '🎵',
+  '💎',
+  '🎀',
+  '🌸',
+  '🍀',
+  '🦋',
+  '🌺',
+  '🎇',
+  '🏵️',
 ];
 
 // ─── Particle Spawn ───────────────────────────────────────────────────────────
@@ -863,8 +844,13 @@ $radius: 16px;
 }
 
 @keyframes drift {
-  0%, 100% { transform: translateY(0) scale(1); }
-  50% { transform: translateY(-14px) scale(1.05); }
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-14px) scale(1.05);
+  }
 }
 
 .hero-inner {
@@ -914,9 +900,13 @@ $radius: 16px;
 
 .hero-actions {
   display: flex;
-  gap: 10px;
+  gap: 12px;
   flex-wrap: wrap;
   align-items: center;
+  @media (max-width: 600px) {
+    flex-direction: column;
+    width: 100%;
+  }
 }
 
 .hero-add-btn {
@@ -928,7 +918,9 @@ $radius: 16px;
   font-family: 'Noto Sans Thai', sans-serif !important;
   font-weight: 600 !important;
   letter-spacing: 0 !important;
-  transition: background 0.2s, transform 0.15s !important;
+  transition:
+    background 0.2s,
+    transform 0.15s !important;
   &:hover {
     background: rgba(255, 255, 255, 0.25) !important;
     transform: translateY(-2px);
@@ -998,7 +990,9 @@ $radius: 16px;
     border-radius: 14px !important;
     box-shadow: 0 2px 12px rgba(13, 148, 136, 0.08);
   }
-  @media (max-width: 600px) { max-width: 100%; }
+  @media (max-width: 600px) {
+    max-width: 100%;
+  }
 }
 
 // ─── Table Card ───────────────────────────────────────────────────────────────
@@ -1023,7 +1017,9 @@ $radius: 16px;
   }
   :deep(tbody tr) {
     transition: background 0.15s;
-    &:hover { background: rgba(13, 148, 136, 0.03) !important; }
+    &:hover {
+      background: rgba(13, 148, 136, 0.03) !important;
+    }
   }
   :deep(tbody tr td) {
     font-size: clamp(0.78rem, 2vw, 0.875rem);
@@ -1056,7 +1052,9 @@ $radius: 16px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  @media (max-width: 600px) { max-width: 120px; }
+  @media (max-width: 600px) {
+    max-width: 120px;
+  }
 }
 
 .category-badge {
@@ -1073,18 +1071,26 @@ $radius: 16px;
 
 .action-btn {
   transition: transform 0.15s !important;
-  &:hover { transform: scale(1.15); }
+  &:hover {
+    transform: scale(1.15);
+  }
   &--view {
     color: $teal-mid !important;
-    :deep(.q-icon) { color: $teal-mid !important; }
+    :deep(.q-icon) {
+      color: $teal-mid !important;
+    }
   }
   &--edit {
     color: $amber !important;
-    :deep(.q-icon) { color: $amber !important; }
+    :deep(.q-icon) {
+      color: $amber !important;
+    }
   }
   &--delete {
     color: $red !important;
-    :deep(.q-icon) { color: $red !important; }
+    :deep(.q-icon) {
+      color: $red !important;
+    }
   }
 }
 
@@ -1094,14 +1100,21 @@ $radius: 16px;
   align-items: center;
   padding: 3rem 1rem;
 }
-.empty-icon { font-size: 3rem; margin-bottom: 12px; }
+.empty-icon {
+  font-size: 3rem;
+  margin-bottom: 12px;
+}
 .empty-title {
   font-family: 'Prompt', sans-serif;
   font-size: 1.05rem;
   font-weight: 600;
   color: $text-main;
 }
-.empty-sub { font-size: 0.82rem; color: $text-muted; margin-top: 4px; }
+.empty-sub {
+  font-size: 0.82rem;
+  color: $text-muted;
+  margin-top: 4px;
+}
 
 // ─── Dialogs ──────────────────────────────────────────────────────────────────
 .custom-dialog {
@@ -1122,7 +1135,9 @@ $radius: 16px;
   }
 }
 
-.delete-dialog { max-width: 380px; }
+.delete-dialog {
+  max-width: 380px;
+}
 
 .dialog-header {
   display: flex;
@@ -1134,10 +1149,18 @@ $radius: 16px;
   font-weight: 600;
   color: $text-main;
   border-bottom: 1px solid rgba(13, 148, 136, 0.07);
-  &--teal { background: linear-gradient(135deg, $teal-soft, #ccfbf1); }
-  &--teal-add { background: linear-gradient(135deg, #ccfbf1, #f0fdfa); }
-  &--amber { background: linear-gradient(135deg, $amber-soft, #fffbeb); }
-  &--danger { background: linear-gradient(135deg, $red-soft, #fff1f2); }
+  &--teal {
+    background: linear-gradient(135deg, $teal-soft, #ccfbf1);
+  }
+  &--teal-add {
+    background: linear-gradient(135deg, #ccfbf1, #f0fdfa);
+  }
+  &--amber {
+    background: linear-gradient(135deg, $amber-soft, #fffbeb);
+  }
+  &--danger {
+    background: linear-gradient(135deg, $red-soft, #fff1f2);
+  }
 }
 
 .dialog-header-icon {
@@ -1149,9 +1172,15 @@ $radius: 16px;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  &--teal { background: linear-gradient(135deg, $teal-light, $teal); }
-  &--amber { background: linear-gradient(135deg, #f59e0b, $amber); }
-  &--danger { background: linear-gradient(135deg, #ef4444, $red); }
+  &--teal {
+    background: linear-gradient(135deg, $teal-light, $teal);
+  }
+  &--amber {
+    background: linear-gradient(135deg, #f59e0b, $amber);
+  }
+  &--danger {
+    background: linear-gradient(135deg, #ef4444, $red);
+  }
 }
 
 .dialog-close-btn {
@@ -1166,11 +1195,17 @@ $radius: 16px;
   align-items: center;
   justify-content: center;
   transition: background 0.15s;
-  &:hover { background: rgba(13, 148, 136, 0.14); }
+  &:hover {
+    background: rgba(13, 148, 136, 0.14);
+  }
 }
 
-.dialog-body { padding: 1.25rem; }
-.styled-input :deep(.q-field__control) { border-radius: 12px !important; }
+.dialog-body {
+  padding: 1.25rem;
+}
+.styled-input :deep(.q-field__control) {
+  border-radius: 12px !important;
+}
 
 .dialog-footer {
   display: flex;
@@ -1182,7 +1217,10 @@ $radius: 16px;
 .dialog-footer--mobile {
   display: grid !important;
   grid-template-columns: 1fr 1fr;
-  .dlg-btn { justify-content: center; width: 100%; }
+  .dlg-btn {
+    justify-content: center;
+    width: 100%;
+  }
 }
 
 .dialog-drag-handle {
@@ -1248,8 +1286,15 @@ $radius: 16px;
   line-height: 1.6;
 }
 
-.delete-confirm-body { text-align: center; padding: 0.5rem 0; }
-.delete-text { font-size: 0.9rem; color: $text-muted; margin: 0 0 10px; }
+.delete-confirm-body {
+  text-align: center;
+  padding: 0.5rem 0;
+}
+.delete-text {
+  font-size: 0.9rem;
+  color: $text-muted;
+  margin: 0 0 10px;
+}
 .delete-warn {
   display: flex;
   align-items: center;
@@ -1269,31 +1314,47 @@ $radius: 16px;
   font-size: 0.88rem;
   font-weight: 600;
   cursor: pointer;
-  transition: transform 0.1s, box-shadow 0.15s, opacity 0.15s;
-  &:active { transform: scale(0.96); }
-  &:disabled { opacity: 0.65; cursor: not-allowed; }
+  transition:
+    transform 0.1s,
+    box-shadow 0.15s,
+    opacity 0.15s;
+  &:active {
+    transform: scale(0.96);
+  }
+  &:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+  }
   &--cancel {
     background: rgba(13, 148, 136, 0.07);
     color: $text-muted;
-    &:hover { background: rgba(13, 148, 136, 0.13); }
+    &:hover {
+      background: rgba(13, 148, 136, 0.13);
+    }
   }
   &--confirm-teal {
     background: linear-gradient(135deg, $teal-light, $teal);
     color: white;
     box-shadow: 0 3px 12px rgba(13, 148, 136, 0.3);
-    &:hover { box-shadow: 0 5px 18px rgba(13, 148, 136, 0.4); }
+    &:hover {
+      box-shadow: 0 5px 18px rgba(13, 148, 136, 0.4);
+    }
   }
   &--amber {
     background: linear-gradient(135deg, #f59e0b, $amber);
     color: white;
     box-shadow: 0 3px 12px rgba(217, 119, 6, 0.3);
-    &:hover { box-shadow: 0 5px 18px rgba(217, 119, 6, 0.4); }
+    &:hover {
+      box-shadow: 0 5px 18px rgba(217, 119, 6, 0.4);
+    }
   }
   &--danger {
     background: linear-gradient(135deg, #ef4444, $red);
     color: white;
     box-shadow: 0 3px 12px rgba(220, 38, 38, 0.3);
-    &:hover { box-shadow: 0 5px 18px rgba(220, 38, 38, 0.4); }
+    &:hover {
+      box-shadow: 0 5px 18px rgba(220, 38, 38, 0.4);
+    }
   }
 }
 
@@ -1312,8 +1373,12 @@ $radius: 16px;
   align-items: center;
   gap: 12px;
   padding: 1.25rem 1.5rem;
-  &--success { background: linear-gradient(135deg, $green-dark, $green); }
-  &--error { background: linear-gradient(135deg, #7f1d1d, $red); }
+  &--success {
+    background: linear-gradient(135deg, $green-dark, $green);
+  }
+  &--error {
+    background: linear-gradient(135deg, #7f1d1d, $red);
+  }
 }
 
 .notify-header-icon {
@@ -1335,8 +1400,15 @@ $radius: 16px;
   color: #fff;
   line-height: 1.2;
 }
-.notify-sub { font-size: 0.75rem; color: rgba(255, 255, 255, 0.72); margin-top: 2px; }
-.notify-body { padding: 1.5rem 1.5rem 0.75rem; text-align: center; }
+.notify-sub {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.72);
+  margin-top: 2px;
+}
+.notify-body {
+  padding: 1.5rem 1.5rem 0.75rem;
+  text-align: center;
+}
 
 .notify-emoji {
   font-size: 2.8rem;
@@ -1346,9 +1418,17 @@ $radius: 16px;
 }
 
 @keyframes notifyPop {
-  0% { transform: scale(0.5); opacity: 0; }
-  80% { transform: scale(1.15); }
-  100% { transform: scale(1); opacity: 1; }
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  80% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 .notify-msg {
@@ -1359,31 +1439,58 @@ $radius: 16px;
   padding: 10px 14px;
   margin: 0 0 1rem;
   line-height: 1.6;
-  &--success { background: $green-soft; }
-  &--error { background: $red-soft; }
+  &--success {
+    background: $green-soft;
+  }
+  &--error {
+    background: $red-soft;
+  }
 }
 
 .notify-progress {
   height: 4px;
   width: 100%;
   animation: progressShrink linear forwards;
-  &--success { background: linear-gradient(90deg, $green-dark, $green); }
-  &--error { background: linear-gradient(90deg, #7f1d1d, $red); }
+  &--success {
+    background: linear-gradient(90deg, $green-dark, $green);
+  }
+  &--error {
+    background: linear-gradient(90deg, #7f1d1d, $red);
+  }
 }
 
 @keyframes progressShrink {
-  from { width: 100%; }
-  to { width: 0%; }
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
 }
 
 // ─── Responsive ───────────────────────────────────────────────────────────────
 @media (max-width: 600px) {
-  .page-hero { padding: 1.5rem 1rem 3rem; }
-  .content-wrap { padding: 0 0.75rem 2rem; gap: 0.85rem; }
-  .hero-inner { gap: 10px; }
-  .hero-icon-wrap { width: 44px; height: 44px; }
-  .hero-actions { width: 100%; }
-  .hero-add-btn { flex: 1; justify-content: center; }
+  .page-hero {
+    padding: 1.5rem 1rem 3rem;
+  }
+  .content-wrap {
+    padding: 0 0.75rem 2rem;
+    gap: 0.85rem;
+  }
+  .hero-inner {
+    gap: 10px;
+  }
+  .hero-icon-wrap {
+    width: 44px;
+    height: 44px;
+  }
+  .hero-actions {
+    width: 100%;
+  }
+  .hero-add-btn {
+    flex: 1;
+    justify-content: center;
+  }
 }
 
 // ─── Click Particles ──────────────────────────────────────────────────────────
@@ -1406,12 +1513,22 @@ $radius: 16px;
   animation: clickFall var(--dur) cubic-bezier(0.2, 0.9, 0.4, 1) forwards;
   border-radius: 50%;
 
-  &[style*='--shape: square'] { border-radius: 3px; }
+  &[style*='--shape: square'] {
+    border-radius: 3px;
+  }
   &[style*='--shape: star'] {
     border-radius: 0;
     clip-path: polygon(
-      50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%,
-      50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%
+      50% 0%,
+      61% 35%,
+      98% 35%,
+      68% 57%,
+      79% 91%,
+      50% 70%,
+      21% 91%,
+      32% 57%,
+      2% 35%,
+      39% 35%
     );
   }
   &[style*='--shape: triangle'] {

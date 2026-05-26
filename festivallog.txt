@@ -10,8 +10,8 @@
           <q-icon name="history" size="2rem" color="white" />
         </div>
         <div>
-          <h1 class="hero-title">บันทึกกิจกรรม Admin</h1>
-          <p class="hero-sub">ประวัติการสร้าง แก้ไข และลบโดย Admin ทั้งหมด</p>
+          <h1 class="hero-title">บันทึกกิจกรรม</h1>
+          <p class="hero-sub">ประวัติการเปลี่ยนแปลงเทศกาลทั้งหมด </p>
         </div>
         <q-space />
         <div class="hero-actions">
@@ -277,6 +277,8 @@
         </div>
       </div>
     </q-dialog>
+
+   
   </q-page>
 </template>
 
@@ -290,16 +292,53 @@ import type { AxiosError } from 'axios';
 // ─── Types ────────────────────────────────────────────────────────────────────
 type ShapeType = 'circle' | 'square' | 'star' | 'triangle' | 'emoji';
 
-interface LogData {
+interface CreatedByUser {
   uId?: number;
   firstName?: string;
   userName?: string;
   role?: string;
-  phoneNumber?: string;
-  email?: string;
+}
+
+interface WisherItem {
+  wId?: number;
+  wishWord?: string;
+  festivalId?: number;
   createdAt?: string;
   updatedAt?: string;
   deletedAt?: string | null;
+}
+
+interface CardItem {
+  cId?: number;
+  imageCard?: string;
+  festivalId?: number;
+  createdAt?: string;
+  updatedAt?: string;
+  deletedAt?: string | null;
+}
+
+interface LogData {
+  fId?: number;
+  festivalName?: string;
+  image?: string;
+  logo?: string;
+  webName?: string;
+  startDate?: string;
+  endDate?: string;
+  isEdit?: boolean;
+  isDelete?: boolean;
+  isEditStartEndDate?: boolean;
+  createdBy?: number;
+  updatedBy?: number | null;
+  deletedBy?: number | null;
+  createdAt?: string;
+  updatedAt?: string;
+  deletedAt?: string | null;
+  createdByUser?: CreatedByUser;
+  updatedByUser?: CreatedByUser | null;
+  deletedByUser?: CreatedByUser | null;
+  wisher?: WisherItem[];
+  card?: CardItem[];
   [key: string]: unknown;
 }
 
@@ -365,6 +404,7 @@ const columns: QTableColumn[] = [
   { name: 'action', label: 'ประเภท', field: 'action', align: 'left', style: 'width: 110px' },
   { name: 'actor', label: 'Admin', field: 'actorName', align: 'left', style: 'width: 220px' },
   { name: 'diff', label: 'การเปลี่ยนแปลง', field: 'changedFields', align: 'left' },
+  
   { name: 'ts', label: 'วันที่/เวลา', field: 'ts', align: 'left', style: 'width: 150px' },
   { name: 'actions', label: 'จัดการ', field: 'actions', align: 'center', style: 'width: 80px' },
 ];
@@ -393,7 +433,7 @@ function onView(row: TableRow): void {
 
 // ─── Avatar Palette ───────────────────────────────────────────────────────────
 const AVATAR_PALETTES = [
-  'violet',
+  'orange',   // ← เปลี่ยนจาก 'violet'
   'indigo',
   'teal',
   'rose',
@@ -477,13 +517,14 @@ function getChangedFields(entry: RawLogEntry): Diff[] {
 
 function buildRow(entry: RawLogEntry, index: number): TableRow {
   const d = entry.data ?? entry.newData ?? entry.oldData;
+  const actor = d?.createdByUser;
   return {
     rowKey: `${entry.timestamp}-${index}`,
     displayIndex: (serverPage.value - 1) * serverLimit.value + index + 1,
     action: entry.action,
-    actorName: d?.firstName ?? '-',
-    actorUsername: d?.userName ?? '-',
-    actorRole: d?.role ?? '',
+    actorName: actor?.firstName ?? '-',
+    actorUsername: actor?.userName ?? '-',
+    actorRole: actor?.role ?? '',
     ts: entry.timestamp,
     rawEntry: entry,
     changedFields: entry.action === 'UPDATE' ? getChangedFields(entry) : [],
@@ -494,7 +535,7 @@ function buildRow(entry: RawLogEntry, index: number): TableRow {
 const fetchLog = async (): Promise<void> => {
   loading.value = true;
   try {
-    const res = await api.get('/backoffice/admin/log', {
+    const res = await api.get('/backoffice/festival/log', {
       params: {
         page: serverPage.value,
         limit: serverLimit.value,
@@ -503,7 +544,8 @@ const fetchLog = async (): Promise<void> => {
       },
     });
 
-    const d = res.data.admin as {
+    // ✅ เปลี่ยนจาก res.data.admin → res.data.festival
+    const d = res.data.festival as {
       data: string[];
       total: number;
       totalPages: number;
@@ -684,11 +726,13 @@ onUnmounted(() => {
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&family=Prompt:wght@500;600;700&display=swap');
 
 // ─── Design Tokens ────────────────────────────────────────────────────────────
-$purple: #5b21b6;
-$purple-mid: #7c3aed;
-$indigo: #3730a3;
-$indigo-mid: #4f46e5;
-$indigo-soft: #eef2ff;
+$orange: #ea580c;
+$orange-mid: #f97316;
+$orange-soft: #fff7ed;
+$gold: #f59e0b;
+$indigo: #ea580c;        // ✅ map ให้ใช้สีส้มแทน
+$indigo-mid: #f97316;    // ✅
+$indigo-soft: #fff7ed;   // ✅
 $amber: #d97706;
 $amber-soft: #fef3c7;
 $red: #dc2626;
@@ -696,11 +740,10 @@ $red-soft: #fee2e2;
 $green: #16a34a;
 $green-soft: #f0fdf4;
 $surface: #ffffff;
-$surface-2: #f0f4ff;
-$text-main: #1e1b4b;
+$surface-2: #fff9f5;
+$text-main: #431407;
 $text-muted: #9ca3af;
 $radius: 16px;
-
 // ─── Page ─────────────────────────────────────────────────────────────────────
 .log-page {
   font-family: 'Noto Sans Thai', 'Prompt', sans-serif;
@@ -712,7 +755,7 @@ $radius: 16px;
 .page-hero {
   position: relative;
   overflow: hidden;
-  background: linear-gradient(135deg, #1e1b4b 0%, $indigo 45%, $indigo-mid 100%);
+  background: linear-gradient(135deg, #7c2d12 0%, $orange 55%, $gold 100%);
   padding: 1rem 1.5rem 2.5rem; // เปลี่ยนจาก 2.25rem 1.5rem 4rem
 }
 
@@ -761,7 +804,7 @@ $radius: 16px;
   z-index: 2;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+    justify-content: space-between;
   gap: 14px;
   flex-wrap: wrap;
   max-width: 1100px;
@@ -772,7 +815,7 @@ $radius: 16px;
   width: 52px;
   height: 52px;
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.15) !important;
   backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.2);
   display: flex;
@@ -797,9 +840,13 @@ $radius: 16px;
 
 .hero-actions {
   display: flex;
-  gap: 10px;
+  gap: 12px;
   flex-wrap: wrap;
   align-items: center;
+    @media (max-width: 600px) {
+    flex-direction: column;
+    width: 100%;
+  }
 }
 
 .hero-back-btn {
@@ -1049,15 +1096,15 @@ $radius: 16px;
 
 // ─── Actor ────────────────────────────────────────────────────────────────────
 $avatar-palettes: (
-  'violet': (
-    #7c3aed,
-    #5b21b6,
-    rgba(124, 58, 237, 0.4),
+  'orange': (
+     #ea580c,
+    #f97316,
+   rgba(234, 88, 12, 0.4),  // ← เปลี่ยนจาก rgba(124, 58, 237, 0.4)
   ),
   'indigo': (
-    #4f46e5,
-    #3730a3,
-    rgba(79, 70, 229, 0.4),
+    #f97316,  // ← เปลี่ยนจาก #4f46e5
+    #ea580c,  // ← เปลี่ยนจาก #3730a3
+    rgba(249, 115, 22, 0.4),  // ← เปลี่ยนจาก rgba(79, 70, 229, 0.4)
   ),
   'teal': (
     #0d9488,
@@ -1075,9 +1122,9 @@ $avatar-palettes: (
     rgba(217, 119, 6, 0.4),
   ),
   'sky': (
-    #0284c7,
-    #0369a1,
-    rgba(2, 132, 199, 0.4),
+   #cc7333,  // ← เปลี่ยนจาก #4f46e5
+    #ea580c,  // ← เปลี่ยนจาก #3730a3
+    rgba(249, 115, 22, 0.4),  // ← เปลี่ยนจาก rgba(79, 70, 229, 0.4)
   ),
   'emerald': (
     #059669,
@@ -1214,8 +1261,8 @@ $avatar-palettes: (
   white-space: nowrap;
   &--superAdmin {
     background: linear-gradient(135deg, #ede9fe, #ddd6fe);
-    color: #5b21b6;
-    border: 1px solid rgba(139, 92, 246, 0.2);
+    color: #f58115;
+    border: 1px solid rgba(199, 68, 17, 0.2);
   }
   &--admin {
     background: $indigo-soft;

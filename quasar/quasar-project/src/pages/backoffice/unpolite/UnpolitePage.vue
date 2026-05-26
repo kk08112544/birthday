@@ -34,35 +34,6 @@
             @click="onAdd"
           />
         </div>
-        <!-- <div class="hero-left">
-        <div class="hero-icon-wrap">
-          <q-icon name="block" size="2rem" color="white" />
-        </div>
-        <div>
-          <h1 class="hero-title">คำไม่พึงประสงค์</h1>
-          <p class="hero-sub">จัดการคำที่ไม่เหมาะสมในระบบ</p>
-        </div>
-       
-        <div class="hero-actions">
-        
-          <q-btn
-            unelevated
-            icon="history"
-            label="บันทึกกิจกรรม"
-            class="hero-add-btn"
-            :class="$q.screen.xs ? 'full-width q-mt-sm' : ''"
-            @click="$router.push(`/backoffice/unpolite/log`)"
-          />
-          <q-btn
-            unelevated
-            icon="add_circle"
-            label="เพิ่มคำ"
-            class="hero-add-btn"
-            :class="$q.screen.xs ? 'full-width q-mt-sm' : ''"
-            @click="onAdd"
-          />
-        </div>
-        </div> -->
       </div>
     </div>
 
@@ -423,13 +394,6 @@
         />
       </div>
     </q-dialog>
-
-    <!-- ===== CLICK PARTICLES ===== -->
-    <teleport to="body">
-      <div class="click-particles-root" aria-hidden="true">
-        <span v-for="p in activeParticles" :key="p.id" class="click-particle" :style="p.style" />
-      </div>
-    </teleport>
   </q-page>
 </template>
 
@@ -845,21 +809,10 @@ $radius: 16px;
   z-index: 2;
   display: flex;
   align-items: center;
+  justify-content: space-between; // ← เพิ่มบรรทัดนี้
   gap: 14px;
   flex-wrap: wrap;
-  max-width: 900px;
-  margin: 0 auto;
-}
-
-.hero-inner {
-  position: relative;
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  justify-content: space-between; // ← เปลี่ยนจากไม่มี เป็น space-between
-  flex-wrap: wrap;
-  gap: 14px;
-  max-width: 900px;
+  max-width: 1100px;
   margin: 0 auto;
 }
 
@@ -899,11 +852,14 @@ $radius: 16px;
 
 .hero-actions {
   display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
   align-items: center;
-}
+  gap: 12px; // ← เพิ่มบรรทัดนี้
 
+  @media (max-width: 600px) {
+    flex-direction: column;
+    width: 100%;
+  }
+}
 // .hero-log-btn {
 //   background: rgba(251, 191, 36, 0.18) !important;
 //   backdrop-filter: blur(8px);

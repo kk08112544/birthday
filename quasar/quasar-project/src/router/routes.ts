@@ -74,7 +74,7 @@ const routes: RouteRecordRaw[] = [
         component: () => import('pages/backoffice/festival/ViewPage.vue'),
         props: true,
       },
-        {
+      {
         path: 'log',
         component: () => import('pages/backoffice/festival/FestivallogPage.vue'),
         props: true,
@@ -99,12 +99,12 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: true },
     children: [
       { path: '', component: () => import('pages/backoffice/unpolite/UnpolitePage.vue') },
-      {path: 'log', component: ()=> import('pages/backoffice/unpolite/UnpolitelogPage.vue')}
+      { path: 'log', component: () => import('pages/backoffice/unpolite/UnpolitelogPage.vue') },
       // { path: 'log', component: () => import('pages/backoffice/unpolite/UnpoliteLog.vue') },
       //  { path: 'log', component: () => import('src/pages/backoffice/unpolite/UnpoliteLog.vue') },
     ],
   },
-    {
+  {
     path: '/backoffice/ignore',
     component: () => import('src/layouts/BackofficeLayout.vue'),
     meta: { requiresAuth: true },

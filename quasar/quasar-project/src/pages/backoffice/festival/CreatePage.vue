@@ -15,14 +15,16 @@
             <p class="hero-sub">สร้างเทศกาลสุดพิเศษให้ผู้คนได้อวยพรกัน</p>
           </div>
         </div>
-        <q-btn
-          unelevated
-          icon="arrow_back"
-          label="กลับรายการ"
-          to="/backoffice/festival"
-          class="hero-back-btn"
-          :class="$q.screen.xs ? 'full-width q-mt-sm' : ''"
-        />
+        <div class="hero-actions">
+          <q-btn
+            unelevated
+            icon="arrow_back"
+            label="กลับรายการ"
+            to="/backoffice/festival"
+            class="hero-back-btn"
+            :class="$q.screen.xs ? 'full-width q-mt-sm' : ''"
+          />
+        </div>
       </div>
     </div>
 
@@ -151,11 +153,10 @@
             </transition>
           </div> -->
           <!-- LOGO UPLOAD -->
-<div ref="logoRef" class="q-mt-md field-group">
-  <div class="logo-row">
-
-    <!-- Checkbox เลือกใช้ logo กรม -->
-    <!-- <div class="dept-logo-option" @click="toggleDeptLogo">
+          <div ref="logoRef" class="q-mt-md field-group">
+            <div class="logo-row">
+              <!-- Checkbox เลือกใช้ logo กรม -->
+              <!-- <div class="dept-logo-option" @click="toggleDeptLogo">
       <img
         src="/logo-ldd.png"
         class="dept-logo-img"
@@ -166,46 +167,40 @@
       </div>
     </div> -->
 
-    <!-- Upload zone ปกติ -->
-    <div
-      class="logo-upload-zone"
-      :class="{ 'upload-zone--error': logoError }"
-      @click="!useDeptLogo && logoInput?.pickFiles()"
-    >
-      <img
-        v-if="logoFile || useDeptLogo"
-        :src="useDeptLogo ? '/logo-ldd.png' : getFilePreview(logoFile!)"
-        class="logo-preview-img"
-        alt="logo preview"
-      />
-      <div v-else class="logo-placeholder">
-        <div class="logo-placeholder-icon">🏷️</div>
-        <div class="cover-placeholder-text">อัปโหลด Logo</div>
-        <div class="cover-placeholder-sub">100 × 100 px</div>
-      </div>
-    </div>
+              <!-- Upload zone ปกติ -->
+              <div
+                class="logo-upload-zone"
+                :class="{ 'upload-zone--error': logoError }"
+                @click="!useDeptLogo && logoInput?.pickFiles()"
+              >
+                <img
+                  v-if="logoFile || useDeptLogo"
+                  :src="useDeptLogo ? '/logo-ldd.png' : getFilePreview(logoFile!)"
+                  class="logo-preview-img"
+                  alt="logo preview"
+                />
+                <div v-else class="logo-placeholder">
+                  <div class="logo-placeholder-icon">🏷️</div>
+                  <div class="cover-placeholder-text">อัปโหลด Logo</div>
+                  <div class="cover-placeholder-sub">100 × 100 px</div>
+                </div>
+              </div>
 
-    
+              <div class="logo-hint">
+                <div class="logo-hint-title">Logo เทศกาล</div>
+                <div class="logo-hint-sub">
+                  PNG, JPG · แนะนำสี่เหลี่ยมจัตุรัส<br />ขนาด 100 × 100 px · ไม่เกิน 2 MB
+                </div>
+              </div>
 
-    <div class="logo-hint">
-      <div class="logo-hint-title">Logo เทศกาล</div>
-      <div class="logo-hint-sub">
-        PNG, JPG · แนะนำสี่เหลี่ยมจัตุรัส<br />ขนาด 100 × 100 px · ไม่เกิน 2 MB
-      </div>
-    </div>
-
-    <div class="dept-logo-option" @click="toggleDeptLogo">
-      <img
-        src="/logo-ldd.png"
-        class="dept-logo-img"
-        alt="logo กรม"
-      />
-      <div class="dept-logo-check" :class="{ 'dept-logo-check--active': useDeptLogo }">
-        <q-icon v-if="useDeptLogo" name="check" size="14px" color="white" />
-      </div>
-    </div>
-  </div>
-</div>
+              <div class="dept-logo-option" @click="toggleDeptLogo">
+                <img src="/logo-ldd.png" class="dept-logo-img" alt="logo กรม" />
+                <div class="dept-logo-check" :class="{ 'dept-logo-check--active': useDeptLogo }">
+                  <q-icon v-if="useDeptLogo" name="check" size="14px" color="white" />
+                </div>
+              </div>
+            </div>
+          </div>
 
           <q-file
             v-model="logoFile"
@@ -405,7 +400,7 @@
         <div class="fest-card animate-in" style="animation-delay: 0.2s">
           <div class="card-label">
             <span class="label-dot label-dot--teal" />
-            การ์ดอวยพร
+            บัตรอวยพร
           </div>
           <div class="card-header-row">
             <div class="stat-chip">
@@ -417,7 +412,7 @@
               unelevated
               color="teal-6"
               icon="add_photo_alternate"
-              label="เพิ่มการ์ด"
+              label="เพิ่มบัตรอวยพร"
               class="action-btn"
               @click="onAddCard"
             />
@@ -434,8 +429,8 @@
 
           <div v-else class="empty-state">
             <div class="empty-icon">🃏</div>
-            <div class="empty-title">ยังไม่มีการ์ด</div>
-            <div class="empty-sub">อัปโหลดรูปสวยๆ เพื่อใช้เป็นการ์ดอวยพร (691 × 691 px)</div>
+            <div class="empty-title">ยังไม่มีบัตรอวยพร</div>
+            <div class="empty-sub">อัปโหลดรูปสวยๆ เพื่อใช้เป็นบัตรอวยพร (691 × 691 px)</div>
           </div>
         </div>
 
@@ -639,11 +634,6 @@
     </q-dialog>
 
     <!-- ===== CLICK PARTICLES ===== -->
-    <teleport to="body">
-      <div class="click-particles-root" aria-hidden="true">
-        <span v-for="p in activeParticles" :key="p.id" class="click-particle" :style="p.style" />
-      </div>
-    </teleport>
   </q-page>
 </template>
 
@@ -680,17 +670,16 @@ const loading = ref(false);
 // ─── File Input Refs ──────────────────────────────────────────────────────────
 const fileInput = ref<InstanceType<typeof QFile> | null>(null);
 const logoInput = ref<InstanceType<typeof QFile> | null>(null);
-  
 
-  const useDeptLogo = ref(false)
+const useDeptLogo = ref(false);
 
 const toggleDeptLogo = () => {
-  useDeptLogo.value = !useDeptLogo.value
+  useDeptLogo.value = !useDeptLogo.value;
   if (useDeptLogo.value) {
-    logoFile.value = null  // clear uploaded file
-    logoError.value = false
+    logoFile.value = null; // clear uploaded file
+    logoError.value = false;
   }
-}
+};
 
 // ─── Date State ───────────────────────────────────────────────────────────────
 const startDate = ref('');
@@ -1007,25 +996,22 @@ const submitAdd = async () => {
       return (await api.post('/upload', fd)).data.image as string;
     };
 
-     // ← ถ้าเลือก useDeptLogo ให้ fetch รูปจาก path แล้ว convert เป็น File
+    // ← ถ้าเลือก useDeptLogo ให้ fetch รูปจาก path แล้ว convert เป็น File
     const getDeptLogoFile = async (): Promise<File> => {
-  const res = await fetch('/logo-ldd.png');
-  console.log('status:', res.status);  // ← ถ้าไม่ใช่ 200 แสดงว่าหาไฟล์ไม่เจอ
-  const blob = await res.blob();
-  console.log('blob size:', blob.size, 'type:', blob.type);  // ← ถ้า size = 0 คือปัญหา
-  const file = new File([blob], 'logo-ldd.png', { type: 'image/png' });
-  console.log('file:', file);
-  return file;
-};
+      const res = await fetch('/logo-ldd.png');
+      console.log('status:', res.status); // ← ถ้าไม่ใช่ 200 แสดงว่าหาไฟล์ไม่เจอ
+      const blob = await res.blob();
+      console.log('blob size:', blob.size, 'type:', blob.type); // ← ถ้า size = 0 คือปัญหา
+      const file = new File([blob], 'logo-ldd.png', { type: 'image/png' });
+      console.log('file:', file);
+      return file;
+    };
 
-    const logoToUpload = useDeptLogo.value
-      ? await getDeptLogoFile()
-      : logoFile.value;
-     
+    const logoToUpload = useDeptLogo.value ? await getDeptLogoFile() : logoFile.value;
 
     const [festivalImageName, festivalLogoName] = await Promise.all([
       imageFile.value ? uploadFile(imageFile.value) : Promise.resolve(''),
-       logoToUpload ? uploadFile(logoToUpload) : Promise.resolve(''),
+      logoToUpload ? uploadFile(logoToUpload) : Promise.resolve(''),
     ]);
 
     const cardImageNames = await Promise.all(cardFileList.value.map(uploadFile));
@@ -1240,10 +1226,9 @@ $error-red: #dc2626;
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 14px;
-  max-width: 780px;
+  max-width: 1100px;
   margin: 0 auto;
 }
-
 .hero-left {
   display: flex;
   align-items: center;
@@ -1276,6 +1261,17 @@ $error-red: #dc2626;
   font-size: clamp(0.75rem, 2.5vw, 0.88rem);
   color: rgba(255, 255, 255, 0.68);
   margin: 0;
+}
+
+.hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px; // ← เพิ่มบรรทัดนี้
+
+  @media (max-width: 600px) {
+    flex-direction: column;
+    width: 100%;
+  }
 }
 
 .hero-back-btn {

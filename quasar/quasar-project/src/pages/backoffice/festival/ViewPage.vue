@@ -15,14 +15,16 @@
             <p class="hero-sub">รายละเอียดเทศกาลสุดพิเศษที่ผู้คนได้อวยพรกัน</p>
           </div>
         </div>
-        <q-btn
-          unelevated
-          icon="arrow_back"
-          label="กลับรายการ"
-          to="/backoffice/festival"
-          class="hero-back-btn"
-          :class="$q.screen.xs ? 'full-width q-mt-sm' : ''"
-        />
+        <div class="hero-actions">
+          <q-btn
+            unelevated
+            icon="arrow_back"
+            label="กลับรายการ"
+            to="/backoffice/festival"
+            class="hero-back-btn"
+            :class="$q.screen.xs ? 'full-width q-mt-sm' : ''"
+          />
+        </div>
       </div>
     </div>
 
@@ -244,7 +246,7 @@
         <div class="fest-card animate-in" style="animation-delay: 0.2s">
           <div class="card-label">
             <span class="label-dot label-dot--teal" />
-            การ์ดอวยพร
+            บัตรอวยพร
           </div>
           <div class="card-header-row">
             <div class="stat-chip">
@@ -303,13 +305,6 @@
         </div>
       </div>
     </q-dialog>
-
-    <!-- ===== CLICK PARTICLES ===== -->
-    <teleport to="body">
-      <div class="click-particles-root" aria-hidden="true">
-        <span v-for="p in activeParticles" :key="p.id" class="click-particle" :style="p.style" />
-      </div>
-    </teleport>
   </q-page>
 </template>
 
@@ -685,7 +680,7 @@ $radius: 18px;
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 14px;
-  max-width: 780px;
+  max-width: 1100px;
   margin: 0 auto;
 }
 
@@ -721,6 +716,17 @@ $radius: 18px;
   font-size: clamp(0.75rem, 2.5vw, 0.88rem);
   color: rgba(255, 255, 255, 0.68);
   margin: 0;
+}
+
+.hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px; // ← เพิ่มบรรทัดนี้
+
+  @media (max-width: 600px) {
+    flex-direction: column;
+    width: 100%;
+  }
 }
 
 .hero-back-btn {

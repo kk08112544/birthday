@@ -135,11 +135,11 @@
     </q-dialog>
 
     <!-- ===== CLICK PARTICLES ===== -->
-    <teleport to="body">
+    <!-- <teleport to="body">
       <div class="click-particles-root" aria-hidden="true">
         <span v-for="p in activeParticles" :key="p.id" class="click-particle" :style="p.style" />
       </div>
-    </teleport>
+    </teleport> -->
   </q-page>
 </template>
 

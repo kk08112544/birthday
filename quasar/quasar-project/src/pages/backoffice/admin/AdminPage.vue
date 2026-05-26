@@ -6,14 +6,16 @@
       <div class="hero-blob hero-blob-2" />
       <div class="hero-blob hero-blob-3" />
       <div class="hero-inner">
-        <div class="hero-icon-wrap">
-          <q-icon name="manage_accounts" size="2rem" color="white" />
+        <div class="hero-left">
+          <div class="hero-icon-wrap">
+            <q-icon name="manage_accounts" size="2rem" color="white" />
+          </div>
+          <div>
+            <h1 class="hero-title">จัดการผู้ดูแลระบบ</h1>
+            <p class="hero-sub">ข้อมูลและสิทธิ์การเข้าถึงของ Admin ทั้งหมด</p>
+          </div>
         </div>
-        <div>
-          <h1 class="hero-title">จัดการผู้ดูแลระบบ</h1>
-          <p class="hero-sub">ข้อมูลและสิทธิ์การเข้าถึงของ Admin ทั้งหมด</p>
-        </div>
-        <q-space />
+        <!-- <q-space /> -->
         <div class="hero-actions">
           <q-btn
             unelevated
@@ -288,13 +290,6 @@
         />
       </div>
     </q-dialog>
-
-    <!-- ===== CLICK PARTICLES ===== -->
-    <teleport to="body">
-      <div class="click-particles-root" aria-hidden="true">
-        <span v-for="p in activeParticles" :key="p.id" class="click-particle" :style="p.style" />
-      </div>
-    </teleport>
   </q-page>
 </template>
 
@@ -681,16 +676,22 @@ $radius: 16px;
   z-index: 2;
   display: flex;
   align-items: center;
+  justify-content: space-between; // ← เพิ่มบรรทัดนี้
   gap: 14px;
   flex-wrap: wrap;
-  max-width: 960px;
+  max-width: 1100px;
   margin: 0 auto;
+}
+.hero-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
 }
 
 .hero-icon-wrap {
-  width: 52px;
-  height: 52px;
-  border-radius: 14px;
+  width: 54px;
+  height: 54px;
+  border-radius: 15px;
   background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(8px);
   display: flex;
@@ -716,9 +717,13 @@ $radius: 16px;
 
 .hero-actions {
   display: flex;
-  gap: 10px;
+  gap: 12px;
   flex-wrap: wrap;
   align-items: center;
+  @media (max-width: 600px) {
+    flex-direction: column;
+    width: 100%;
+  }
 }
 
 .hero-add-btn {

@@ -108,7 +108,6 @@
 
       <!-- Nav items -->
       <div style="background: #fff; flex: 1; padding: 10px 8px; min-height: calc(100vh - 80px)">
-
         <!-- เทศกาล -->
         <q-item
           clickable
@@ -140,12 +139,20 @@
             />
           </q-item-section>
           <q-item-section v-if="!sidebarMini || sidebarHovered">
-            <span
+            <!-- <span
               style="
                 color: #1a1a1a;
                 font-family: Sarabun, sans-serif;
                 font-size: 0.93rem;
                 font-weight: 600;
+
+              "
+            > -->
+            <span
+              :style="
+                route.path.startsWith('/backoffice/festival')
+                  ? 'color:#fff; font-family:Sarabun,sans-serif; font-size:0.93rem; font-weight:600;'
+                  : 'color:#1a1a1a; font-family:Sarabun,sans-serif; font-size:0.93rem; font-weight:600;'
               "
             >
               เทศกาล
@@ -187,12 +194,19 @@
             />
           </q-item-section>
           <q-item-section v-if="!sidebarMini || sidebarHovered">
-            <span
+            <!-- <span
               style="
                 color: #1a1a1a;
                 font-family: Sarabun, sans-serif;
                 font-size: 0.93rem;
                 font-weight: 600;
+              "
+            > -->
+            <span
+              :style="
+                route.path.startsWith('/backoffice/unpolite')
+                  ? 'color:#fff; font-family:Sarabun,sans-serif; font-size:0.93rem; font-weight:600;'
+                  : 'color:#1a1a1a; font-family:Sarabun,sans-serif; font-size:0.93rem; font-weight:600;'
               "
             >
               รายการคำต้องห้าม
@@ -232,15 +246,22 @@
               size="22px"
               :color="route.path.startsWith('/backoffice/ignore') ? 'white' : 'pink-8'"
             />
-            
           </q-item-section>
           <q-item-section v-if="!sidebarMini || sidebarHovered">
-            <span
+            <!-- <span
               style="
                 color: #1a1a1a;
                 font-family: Sarabun, sans-serif;
                 font-size: 0.93rem;
                 font-weight: 600;
+              "
+
+            > -->
+            <span
+              :style="
+                route.path.startsWith('/backoffice/ignore')
+                  ? 'color:#fff; font-family:Sarabun,sans-serif; font-size:0.93rem; font-weight:600;'
+                  : 'color:#1a1a1a; font-family:Sarabun,sans-serif; font-size:0.93rem; font-weight:600;'
               "
             >
               คำที่ถูกละเว้น
@@ -391,11 +412,7 @@
               <router-link to="/backoffice/ignore" class="footer-link">
                 <q-icon name="visibility_off" size="14px" class="q-mr-xs" />คำที่ถูกละเว้น
               </router-link>
-              <router-link
-                v-if="isSuperAdmin"
-                to="/backoffice/admin"
-                class="footer-link "
-              >
+              <router-link v-if="isSuperAdmin" to="/backoffice/admin" class="footer-link">
                 <q-icon name="manage_accounts" size="14px" class="q-mr-xs" />จัดการผู้ใช้
                 <q-icon name="workspace_premium" size="12px" class="q-ml-xs" color="amber-4" />
               </router-link>
@@ -555,7 +572,9 @@ $text-muted: #9ca3af;
   background: rgba(255, 255, 255, 0.1) !important;
   border: 1px solid rgba(255, 255, 255, 0.2) !important;
   border-radius: 10px !important;
-  transition: background 0.2s, transform 0.15s !important;
+  transition:
+    background 0.2s,
+    transform 0.15s !important;
   flex-shrink: 0;
   &:hover {
     background: rgba(255, 255, 255, 0.2) !important;
@@ -585,7 +604,9 @@ $text-muted: #9ca3af;
   letter-spacing: 0.01em;
 }
 
-.new-line { display: block; }
+.new-line {
+  display: block;
+}
 
 .admin-badge {
   display: flex;
@@ -610,15 +631,24 @@ $text-muted: #9ca3af;
 }
 
 @keyframes crown-glow {
-  0%, 100% { filter: drop-shadow(0 0 2px rgba(251, 191, 36, 0.6)); opacity: 0.85; }
-  50% { filter: drop-shadow(0 0 7px rgba(251, 191, 36, 0.95)); opacity: 1; }
+  0%,
+  100% {
+    filter: drop-shadow(0 0 2px rgba(251, 191, 36, 0.6));
+    opacity: 0.85;
+  }
+  50% {
+    filter: drop-shadow(0 0 7px rgba(251, 191, 36, 0.95));
+    opacity: 1;
+  }
 }
 
 .logout-btn {
   background: rgba(255, 255, 255, 0.1) !important;
   border: 1px solid rgba(255, 255, 255, 0.2) !important;
   border-radius: 10px !important;
-  transition: background 0.2s, transform 0.15s !important;
+  transition:
+    background 0.2s,
+    transform 0.15s !important;
   flex-shrink: 0;
   &:hover {
     background: rgba(255, 255, 255, 0.2) !important;
@@ -639,13 +669,35 @@ $text-muted: #9ca3af;
   opacity: 0.6;
   animation: dot-pulse 1.5s ease-in-out infinite;
 }
-.dot-1 { width: 6px; height: 6px; background: $gold-light; animation-delay: 0s; }
-.dot-2 { width: 8px; height: 8px; background: white; animation-delay: 0.2s; }
-.dot-3 { width: 6px; height: 6px; background: $rose-light; animation-delay: 0.4s; }
+.dot-1 {
+  width: 6px;
+  height: 6px;
+  background: $gold-light;
+  animation-delay: 0s;
+}
+.dot-2 {
+  width: 8px;
+  height: 8px;
+  background: white;
+  animation-delay: 0.2s;
+}
+.dot-3 {
+  width: 6px;
+  height: 6px;
+  background: $rose-light;
+  animation-delay: 0.4s;
+}
 
 @keyframes dot-pulse {
-  0%, 100% { transform: scale(1); opacity: 0.5; }
-  50% { transform: scale(1.3); opacity: 1; }
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.3);
+    opacity: 1;
+  }
 }
 
 // ─── PAGE CONTENT ─────────────────────────────────────────────────────────────
@@ -670,10 +722,18 @@ $text-muted: #9ca3af;
   align-items: center;
   justify-content: center;
   padding: 28px 0 20px;
-  &--error { background: linear-gradient(135deg, #7f1d1d, $rose-mid); }
-  &--success { background: linear-gradient(135deg, #14532d, #16a34a); }
-  &--warning { background: linear-gradient(135deg, #78350f, $amber); }
-  &--info { background: linear-gradient(135deg, #1e3a5f, #2563eb); }
+  &--error {
+    background: linear-gradient(135deg, #7f1d1d, $rose-mid);
+  }
+  &--success {
+    background: linear-gradient(135deg, #14532d, #16a34a);
+  }
+  &--warning {
+    background: linear-gradient(135deg, #78350f, $amber);
+  }
+  &--info {
+    background: linear-gradient(135deg, #1e3a5f, #2563eb);
+  }
 }
 
 .alert-icon-ring {
@@ -688,7 +748,10 @@ $text-muted: #9ca3af;
   backdrop-filter: blur(4px);
 }
 
-.alert-body { padding: 20px 24px 8px !important; text-align: center; }
+.alert-body {
+  padding: 20px 24px 8px !important;
+  text-align: center;
+}
 .alert-title {
   font-family: 'Prompt', 'Noto Sans Thai', sans-serif;
   font-size: 1.05rem;
@@ -696,8 +759,14 @@ $text-muted: #9ca3af;
   color: $text-main;
   margin-bottom: 8px;
 }
-.alert-message { font-size: 0.92rem; color: #64748b; line-height: 1.65; }
-.alert-actions { padding: 12px 24px 22px !important; }
+.alert-message {
+  font-size: 0.92rem;
+  color: #64748b;
+  line-height: 1.65;
+}
+.alert-actions {
+  padding: 12px 24px 22px !important;
+}
 
 .alert-btn {
   min-width: 110px;
@@ -707,10 +776,22 @@ $text-muted: #9ca3af;
   font-weight: 600;
   padding: 8px 28px !important;
   letter-spacing: 0.01em;
-  &--error { background: linear-gradient(135deg, $rose-mid, #db2777) !important; color: #fff !important; }
-  &--success { background: linear-gradient(135deg, #16a34a, #15803d) !important; color: #fff !important; }
-  &--warning { background: linear-gradient(135deg, $amber, #d97706) !important; color: #fff !important; }
-  &--info { background: linear-gradient(135deg, #2563eb, #1d4ed8) !important; color: #fff !important; }
+  &--error {
+    background: linear-gradient(135deg, $rose-mid, #db2777) !important;
+    color: #fff !important;
+  }
+  &--success {
+    background: linear-gradient(135deg, #16a34a, #15803d) !important;
+    color: #fff !important;
+  }
+  &--warning {
+    background: linear-gradient(135deg, $amber, #d97706) !important;
+    color: #fff !important;
+  }
+  &--info {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
+    color: #fff !important;
+  }
 }
 
 // ─── FOOTER ───────────────────────────────────────────────────────────────────
@@ -723,15 +804,24 @@ $text-muted: #9ca3af;
   max-width: 1100px;
   margin: 0 auto;
   padding: 3rem 1.5rem 1.5rem;
-  @media (max-width: 600px) { padding: 2rem 1rem 1.25rem; }
+  @media (max-width: 600px) {
+    padding: 2rem 1rem 1.25rem;
+  }
 }
 
 .footer-grid {
   display: grid;
   grid-template-columns: 2fr 1fr 1.5fr;
   gap: 2.5rem;
-  @media (max-width: 768px) { grid-template-columns: 1fr 1fr; gap: 2rem; }
-  @media (max-width: 480px) { grid-template-columns: 1fr; gap: 1.5rem; text-align: center; }
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    text-align: center;
+  }
 }
 
 .footer-col-title {
@@ -749,7 +839,9 @@ $text-muted: #9ca3af;
   align-items: center;
   gap: 10px;
   margin-bottom: 0.9rem;
-  @media (max-width: 480px) { justify-content: center; }
+  @media (max-width: 480px) {
+    justify-content: center;
+  }
 }
 
 .footer-brand-icon {
@@ -781,7 +873,9 @@ $text-muted: #9ca3af;
   display: flex;
   flex-direction: column;
   gap: 10px;
-  @media (max-width: 480px) { align-items: center; }
+  @media (max-width: 480px) {
+    align-items: center;
+  }
 }
 
 .footer-link {
@@ -790,16 +884,25 @@ $text-muted: #9ca3af;
   color: rgba(255, 255, 255, 0.7);
   font-size: 0.86rem;
   text-decoration: none;
-  transition: color 0.2s, padding-left 0.2s;
-  &:hover { color: $gold-light; padding-left: 4px; }
+  transition:
+    color 0.2s,
+    padding-left 0.2s;
+  &:hover {
+    color: $gold-light;
+    padding-left: 4px;
+  }
   // ✅ ignore link ใช้สี teal เมื่อ hover
   &--ignore {
     color: rgba(94, 234, 212, 0.75);
-    &:hover { color: #5eead4; }
+    &:hover {
+      color: #5eead4;
+    }
   }
   &--super {
     color: rgba(251, 191, 36, 0.65);
-    &:hover { color: $gold-light; }
+    &:hover {
+      color: $gold-light;
+    }
   }
 }
 
@@ -807,7 +910,9 @@ $text-muted: #9ca3af;
   display: flex;
   flex-direction: column;
   gap: 10px;
-  @media (max-width: 480px) { align-items: center; }
+  @media (max-width: 480px) {
+    align-items: center;
+  }
 }
 
 .footer-contact-item {
@@ -817,7 +922,10 @@ $text-muted: #9ca3af;
   color: rgba(255, 255, 255, 0.7);
   font-size: 0.84rem;
   line-height: 1.5;
-  @media (max-width: 480px) { justify-content: center; align-items: center; }
+  @media (max-width: 480px) {
+    justify-content: center;
+    align-items: center;
+  }
 }
 
 .footer-contact-icon {
@@ -845,10 +953,15 @@ $text-muted: #9ca3af;
   line-height: 1.6;
 }
 
-.footer-bottom-sep { opacity: 0.4; }
+.footer-bottom-sep {
+  opacity: 0.4;
+}
 
 @media (max-width: 480px) {
-  .footer-bottom { flex-direction: column; gap: 4px; }
+  .footer-bottom {
+    flex-direction: column;
+    gap: 4px;
+  }
 }
 </style>
 
