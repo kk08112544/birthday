@@ -1,21 +1,37 @@
 <template>
   <q-page class="edit-festival-page">
-    <!-- ===== HERO HEADER ===== -->
-    <div class="hero-header">
-      <div class="hero-orb hero-orb-1" />
-      <div class="hero-orb hero-orb-2" />
-      <div class="hero-orb hero-orb-3" />
-      <div class="hero-content">
-        <div class="hero-icon">🎊</div>
-        <h1 class="hero-title">แก้ไขเทศกาลใหม่</h1>
-        <p class="hero-sub">แก้ไขเทศกาลสุดพิเศษให้ผู้คนได้อวยพรกัน</p>
+    <!-- ===== HERO ===== -->
+    <div class="page-hero">
+      <div class="hero-blob hero-blob-1" />
+      <div class="hero-blob hero-blob-2" />
+      <div class="hero-blob hero-blob-3" />
+      <div class="hero-inner">
+        <div class="hero-left">
+          <div class="hero-icon-wrap">
+            <q-icon name="edit_calendar" size="1.8rem" color="white" />
+          </div>
+          <div>
+            <h1 class="hero-title">แก้ไขเทศกาล</h1>
+            <p class="hero-sub">แก้ไขข้อมูลเทศกาลสุดพิเศษของคุณ</p>
+          </div>
+        </div>
+        <div class="hero-actions">
+          <q-btn
+            unelevated
+            icon="arrow_back"
+            label="กลับรายการ"
+            to="/backoffice/festival"
+            class="hero-back-btn"
+            :class="$q.screen.xs ? 'full-width q-mt-sm' : ''"
+          />
+        </div>
       </div>
     </div>
 
-    <!-- ===== FORM ===== -->
-    <div class="form-body">
+    <!-- ===== CONTENT ===== -->
+    <div class="content-wrap">
       <div class="form-container">
-        <!-- ===== CARD: COVER IMAGE & NAME ===== -->
+        <!-- ===== CARD: ข้อมูลเทศกาล ===== -->
         <div class="fest-card animate-in" style="animation-delay: 0.05s">
           <div class="card-label">
             <span class="label-dot" />
@@ -32,7 +48,7 @@
               }"
               @click="canEdit && fileInput?.pickFiles()"
             >
-              <q-img
+              <!-- <q-img
                 v-if="imageFile || existingImageUrl"
                 :src="imageFile ? getFilePreview(imageFile) : existingImageUrl"
                 class="cover-img"
@@ -43,13 +59,24 @@
                   <q-icon name="photo_camera" size="28px" color="white" />
                   <span>เปลี่ยนรูป</span>
                 </div>
-              </q-img>
+              </q-img> -->
+              <div
+                v-if="imageFile || existingImageUrl"
+                class="cover-img"
+                :style="{
+                  backgroundImage: `url(${imageFile ? getFilePreview(imageFile) : existingImageUrl})`,
+                }"
+              >
+                <div v-if="canEdit" class="cover-overlay">
+                  <q-icon name="photo_camera" size="28px" color="white" />
+                  <span>เปลี่ยนรูป</span>
+                </div>
+              </div>
+
               <div v-else class="cover-placeholder">
                 <div class="cover-placeholder-icon">🖼️</div>
                 <div class="cover-placeholder-text">คลิกเพื่ออัปโหลดรูปหน้าปก</div>
-                <div class="cover-placeholder-sub">
-                  PNG, JPG ขนาดไม่เกิน 2MB ขนาด 1199 x 581 pixel
-                </div>
+                <div class="cover-placeholder-sub">PNG, JPG ขนาดไม่เกิน 2MB — 2188 × 417 px</div>
                 <a
                   href="https://www.iloveimg.com/resize-image"
                   target="_blank"
@@ -65,7 +92,7 @@
             <transition name="err-fade">
               <div v-if="imageError" class="error-msg">
                 <q-icon name="error_outline" size="14px" />
-                กรุณาอัปโหลดรูปหน้าปกตามคุณสมบัติที่กำหนด
+                กรุณาอัปโหลดรูปหน้าปก PNG/JPG ขนาด 2188 × 417 px ไม่เกิน 2 MB
               </div>
             </transition>
           </div>
@@ -85,10 +112,9 @@
               v-model="festivalName"
               :disable="!canEdit"
               label="ชื่อเทศกาล"
-              placeholder="เช่น สงกรานต์-IT-2568"
-              hint="รูปแบบ: เทศกาล-หน่วยงาน-ปี"
+              placeholder="เช่น สงกรานต์-กกจ-2568"
+              hint="รูปแบบ: เทศกาล-ตัวย่อหน่วยงาน (2-5)-ปี"
               dense
-              autofocus
               :error="nameError"
               :error-message="
                 nameError ? 'รูปแบบต้องเป็น เทศกาล-หน่วยงาน-ปี เช่น สงกรานต์-IT-2568' : ''
@@ -104,46 +130,64 @@
 
           <!-- LOGO UPLOAD -->
           <div ref="logoRef" class="q-mt-md field-group">
-            <div
-              class="logo-upload-zone"
-              :class="{
-                'upload-zone--error': logoError,
-                'upload-zone--disabled': !canEdit,
-              }"
-              @click="canEdit && logoInput?.pickFiles()"
-            >
-              <q-img
-                v-if="logoFile"
-                :src="getFilePreview(logoFile)"
-                class="logo-preview"
-                :ratio="1"
-                fit="contain"
+            <div class="logo-row">
+              <div
+                class="logo-upload-zone"
+                :class="{
+                  'upload-zone--error': logoError,
+                  'upload-zone--disabled': !canEdit,
+                }"
+                @click="canEdit && logoInput?.pickFiles()"
               >
-                <div v-if="canEdit" class="cover-overlay">
-                  <q-icon name="photo_camera" size="20px" color="white" />
-                  <span>เปลี่ยน Logo</span>
+                <!-- v-if="logoFile "
+                  :src="getFilePreview(logoFile)" -->
+                <q-img
+                  v-if="logoFile || useDeptLogo"
+                  :src="useDeptLogo ? '/logo-ldd.png' : getFilePreview(logoFile!)"
+                  class="logo-preview"
+                  :ratio="1"
+                  fit="contain"
+                >
+                  <div v-if="canEdit" class="cover-overlay">
+                    <q-icon name="photo_camera" size="20px" color="white" />
+                    <span>เปลี่ยน</span>
+                  </div>
+                </q-img>
+                <div v-else class="logo-placeholder">
+                  <div class="logo-placeholder-icon">🏷️</div>
+                  <div class="cover-placeholder-text">อัปโหลด Logo</div>
+                  <div class="cover-placeholder-sub">100 × 100 px</div>
                 </div>
-              </q-img>
-              <div v-else class="logo-placeholder">
-                <div class="logo-placeholder-icon">🏷️</div>
-                <div class="cover-placeholder-text">คลิกเพื่ออัปโหลด Logo</div>
-                <div class="cover-placeholder-sub">PNG, JPG — แนะนำสี่เหลี่ยมจัตุรัส</div>
               </div>
-              <transition name="err-fade">
-                <div v-if="logoError" class="error-msg">
-                  <q-icon name="error_outline" size="14px" />
-                  กรุณาอัปโหลด Logo
+              <div class="logo-hint">
+                <div class="logo-hint-title">Logo เทศกาล</div>
+                <div class="logo-hint-sub">
+                  PNG, JPG · แนะนำสี่เหลี่ยมจัตุรัส<br />ขนาด 100 × 100 px · ไม่เกิน 2 MB
                 </div>
-              </transition>
+              </div>
+              <div class="dept-logo-option" @click="toggleDeptLogo">
+                <img src="/logo-ldd.png" class="dept-logo-img" alt="logo กรม" />
+                <div class="dept-logo-check" :class="{ 'dept-logo-check--active': useDeptLogo }">
+                  <q-icon v-if="useDeptLogo" name="check" size="14px" color="white" />
+                </div>
+              </div>
             </div>
-            <q-file
-              v-model="logoFile"
-              ref="logoInput"
-              accept=".jpg,.jpeg,.png,image/jpeg,image/png"
-              class="hidden"
-              @update:model-value="onLogoSelected"
-            />
+
+            <transition name="err-fade">
+              <div v-if="logoError" class="error-msg">
+                <q-icon name="error_outline" size="14px" />
+                กรุณาอัปโหลด Logo PNG/JPG ขนาด 100 × 100 px ไม่เกิน 2 MB
+              </div>
+            </transition>
           </div>
+
+          <q-file
+            v-model="logoFile"
+            ref="logoInput"
+            accept=".jpg,.jpeg,.png,image/jpeg,image/png"
+            class="hidden"
+            @update:model-value="onLogoSelected"
+          />
 
           <!-- WEB NAME -->
           <div ref="webNameRef" class="q-mt-md field-group">
@@ -154,175 +198,162 @@
               placeholder="เช่น songkran-2568"
               outlined
               dense
-              lazy-rules
-              :rules="[
-                (val) =>
-                  (typeof val === 'string' && val.trim().length > 0) ||
-                  'ชื่อเว็บไซต์จำเป็นต้องกรอก',
-              ]"
+              :error="webNameError"
+              :error-message="webNameError ? 'ชื่อเว็บไซต์จำเป็นต้องกรอก' : ''"
               class="custom-input"
+              @update:model-value="webNameError = false"
             >
               <template v-slot:prepend>
                 <q-icon name="language" color="deep-orange-5" />
               </template>
             </q-input>
           </div>
+        </div>
 
-          <!-- ===== DATE RANGE SECTION ===== -->
-          <div ref="dateRef" class="q-mt-lg field-group">
-            <div class="date-section-header">
-              <div class="date-section-icon">
-                <q-icon name="date_range" size="18px" color="white" />
+        <!-- ===== CARD: ช่วงเวลา ===== -->
+        <div ref="dateRef" class="fest-card animate-in field-group" style="animation-delay: 0.1s">
+          <div class="card-label">
+            <span class="label-dot label-dot--teal" />
+            ช่วงเวลาของเทศกาล
+          </div>
+
+          <!-- Date summary chips -->
+          <div class="date-summary-row">
+            <div
+              class="date-chip"
+              :class="{
+                'date-chip--active': startDate,
+                'date-chip--error': dateError && !startDate,
+              }"
+            >
+              <div class="date-chip-icon">
+                <q-icon name="play_circle" size="14px" />
               </div>
-              <div>
-                <div class="date-section-title">ช่วงเวลาของเทศกาล</div>
-                <div class="date-section-sub">กำหนดวันเริ่มต้นและวันสิ้นสุด</div>
+              <div class="date-chip-body">
+                <div class="date-chip-label">วันเริ่มต้น</div>
+                <div class="date-chip-value">
+                  {{ startDate ? formatDateThai(startDate) : 'ยังไม่ได้เลือก' }}
+                </div>
+              </div>
+              <button
+                v-if="startDate"
+                class="date-chip-clear"
+                type="button"
+                @click="startDate = ''"
+              >
+                <q-icon name="close" size="12px" />
+              </button>
+            </div>
+
+            <div class="date-range-arrow">
+              <q-icon name="arrow_forward" size="16px" />
+            </div>
+
+            <div
+              class="date-chip date-chip--end"
+              :class="{
+                'date-chip--active': endDate,
+                'date-chip--error': dateError && !endDate,
+              }"
+            >
+              <div class="date-chip-icon date-chip-icon--end">
+                <q-icon name="stop_circle" size="14px" />
+              </div>
+              <div class="date-chip-body">
+                <div class="date-chip-label">วันสิ้นสุด</div>
+                <div class="date-chip-value">
+                  {{ endDate ? formatDateThai(endDate) : 'ยังไม่ได้เลือก' }}
+                </div>
+              </div>
+              <button
+                v-if="endDate && canEditEndDate"
+                class="date-chip-clear"
+                type="button"
+                @click="endDate = ''"
+              >
+                <q-icon name="close" size="12px" />
+              </button>
+            </div>
+          </div>
+
+          <!-- Duration badge -->
+          <transition name="duration-fade">
+            <div v-if="startDate && endDate && durationDays >= 0" class="duration-badge">
+              <q-icon name="schedule" size="14px" />
+              ระยะเวลา {{ durationDays + 1 }} วัน
+              <span v-if="durationDays === 0">· วันเดียว</span>
+            </div>
+          </transition>
+
+          <!-- Date error -->
+          <transition name="err-fade">
+            <div v-if="dateError" class="error-msg q-mt-xs">
+              <q-icon name="error_outline" size="14px" />
+              {{ dateErrorMsg }}
+            </div>
+          </transition>
+
+          <!-- Calendars grid -->
+          <div class="calendars-wrap">
+            <div class="calendar-block">
+              <div class="calendar-block-label calendar-block-label--start">
+                <div class="cal-label-dot cal-label-dot--start" />
+                <span>วันเริ่มต้น</span>
+                <span v-if="startDate" class="cal-label-date">{{ formatDateThai(startDate) }}</span>
+              </div>
+              <div
+                class="cal-wrapper cal-wrapper--start"
+                :class="{ 'cal-readonly': !canEditEndDate }"
+              >
+                <q-date
+                  v-model="startDate"
+                  :options="startDateOptions"
+                  color="deep-orange-5"
+                  text-color="white"
+                  flat
+                  minimal
+                  class="fest-calendar"
+                  @update:model-value="onStartDateChange"
+                />
               </div>
             </div>
 
-            <!-- Date summary chips -->
-            <div class="date-summary-row">
+            <div class="calendar-block">
+              <div class="calendar-block-label calendar-block-label--end">
+                <div class="cal-label-dot cal-label-dot--end" />
+                <span>วันสิ้นสุด</span>
+                <span v-if="endDate" class="cal-label-date">{{ formatDateThai(endDate) }}</span>
+              </div>
               <div
-                class="date-chip"
-                :class="{
-                  'date-chip--active': startDate,
-                  'date-chip--error': dateError && !startDate,
-                }"
+                class="cal-wrapper cal-wrapper--end"
+                :class="{ 'cal-readonly': !canEditEndDate }"
               >
-                <div class="date-chip-icon">
-                  <q-icon name="play_circle" size="14px" />
-                </div>
-                <div class="date-chip-body">
-                  <div class="date-chip-label">วันเริ่มต้น</div>
-                  <div class="date-chip-value">
-                    {{ startDate ? formatDateThai(startDate) : 'ยังไม่ได้เลือก' }}
-                  </div>
-                </div>
-                <button
-                  v-if="startDate"
-                  class="date-chip-clear"
-                  type="button"
-                  :disabled="!canEdit"
-                  @click="startDate = ''"
-                >
-                  <q-icon name="close" size="12px" />
-                </button>
-              </div>
-
-              <div class="date-range-arrow">
-                <q-icon name="arrow_forward" size="16px" />
-              </div>
-
-              <div
-                class="date-chip"
-                :class="{
-                  'date-chip--active': endDate,
-                  'date-chip--error': dateError && !endDate,
-                  'date-chip--end': true,
-                }"
-              >
-                <div class="date-chip-icon date-chip-icon--end">
-                  <q-icon name="stop_circle" size="14px" />
-                </div>
-                <div class="date-chip-body">
-                  <div class="date-chip-label">วันสิ้นสุด</div>
-                  <div class="date-chip-value">
-                    {{ endDate ? formatDateThai(endDate) : 'ยังไม่ได้เลือก' }}
-                  </div>
-                </div>
-                <button
-                  v-if="endDate"
-                  class="date-chip-clear"
-                  type="button"
-                  :disabled="!canEditEndDate"
-                  @click="endDate = ''"
-                >
-                  <q-icon name="close" size="12px" />
-                </button>
-              </div>
-            </div>
-
-            <!-- Duration badge -->
-            <transition name="duration-fade">
-              <div v-if="startDate && endDate && durationDays >= 0" class="duration-badge">
-                <q-icon name="schedule" size="14px" />
-                ระยะเวลา {{ durationDays + 1 }} วัน
-                <span v-if="durationDays === 0">· วันเดียว</span>
-              </div>
-            </transition>
-
-            <!-- Date error -->
-            <transition name="err-fade">
-              <div v-if="dateError" class="error-msg q-mt-xs">
-                <q-icon name="error_outline" size="14px" />
-                {{ dateErrorMsg }}
-              </div>
-            </transition>
-
-            <!-- Calendars -->
-            <div class="calendars-wrap">
-              <!-- START DATE -->
-              <div class="calendar-block">
-                <div class="calendar-block-label calendar-block-label--start">
-                  <div class="cal-label-dot cal-label-dot--start" />
-                  <span>วันเริ่มต้น</span>
-                  <span v-if="startDate" class="cal-label-date">{{
-                    formatDateThai(startDate)
-                  }}</span>
-                </div>
-                <div class="cal-wrapper cal-wrapper--start">
-                  <!-- :class="{ 'cal-readonly': !canEdit }" -->
-                  <q-date
-                    v-model="startDate"
-                    :options="startDateOptions"
-                    color="indigo-6"
-                    text-color="white"
-                    flat
-                    minimal
-                    class="fest-calendar"
-                    @update:model-value="onStartDateChange"
-                  />
-                </div>
-              </div>
-
-              <!-- END DATE -->
-              <div class="calendar-block">
-                <div class="calendar-block-label calendar-block-label--end">
-                  <div class="cal-label-dot cal-label-dot--end" />
-                  <span>วันสิ้นสุด</span>
-                  <span v-if="endDate" class="cal-label-date">{{ formatDateThai(endDate) }}</span>
-                </div>
-                <div
-                  class="cal-wrapper cal-wrapper--end"
-                >
-                 <!-- :class="{ 'cal-readonly': !canEditEndDate }" -->
-                  <q-date
-                    v-model="endDate"
-                    :options="endDateOptions"
-                    color="teal-6"
-                    text-color="white"
-                    flat
-                    minimal
-                    class="fest-calendar"
-                    @update:model-value="onEndDateChange"
-                  />
-                </div>
+                <q-date
+                  v-model="endDate"
+                  :options="endDateOptions"
+                  color="teal-6"
+                  text-color="white"
+                  flat
+                  minimal
+                  class="fest-calendar"
+                  @update:model-value="onEndDateChange"
+                />
               </div>
             </div>
           </div>
         </div>
 
-        <!-- ===== CARD: WISHES ===== -->
-        <div class="fest-card animate-in" style="animation-delay: 0.12s">
+        <!-- ===== CARD: คำอวยพร ===== -->
+        <div class="fest-card animate-in" style="animation-delay: 0.15s">
           <div class="card-label">
             <span class="label-dot label-dot--amber" />
             คำอวยพร
           </div>
-
           <div class="card-header-row">
-            <div class="card-header-info">
-              <span class="card-header-count">{{ wishWordList.length }}</span>
-              <span class="card-header-unit">รายการ</span>
+            <div class="stat-chip">
+              <q-icon name="format_quote" size="17px" color="deep-orange-5" />
+              <span class="stat-num">{{ wishWordList.length }}</span>
+              <span class="stat-label">รายการ</span>
             </div>
             <q-btn
               :disable="!canEdit"
@@ -330,7 +361,7 @@
               color="deep-orange-5"
               icon="add"
               label="เพิ่มคำอวยพร"
-              class="add-btn"
+              class="action-btn"
               @click="onAddWish"
             />
           </div>
@@ -343,53 +374,53 @@
             >
               <div class="wish-number">{{ i + 1 }}</div>
               <div class="wish-text">{{ wish.wishWord }}</div>
-              <button
-                class="wish-btn wish-btn--edit"
-                :disabled="!canEdit"
-                type="button"
-                @click="editWish(i)"
-              >
-                <q-icon name="edit" size="16px" />
-              </button>
-              <button
-                class="wish-btn wish-btn--delete"
-                :disabled="!canEdit"
-                type="button"
-                @click="deleteWish(i)"
-              >
-                <q-icon name="delete_outline" size="16px" />
-              </button>
+              <div class="wish-actions">
+                <button
+                  class="wish-btn wish-btn--edit"
+                  :disabled="!canEdit"
+                  type="button"
+                  @click="editWish(i)"
+                >
+                  <q-icon name="edit" size="15px" />
+                </button>
+                <button
+                  class="wish-btn wish-btn--delete"
+                  :disabled="!canEdit"
+                  type="button"
+                  @click="deleteWish(i)"
+                >
+                  <q-icon name="delete_outline" size="15px" />
+                </button>
+              </div>
             </div>
           </transition-group>
 
           <div v-if="wishWordList.length === 0" class="empty-state">
-            <div class="empty-state-icon">💬</div>
-            <div class="empty-state-text">ยังไม่มีคำอวยพร</div>
-            <div class="empty-state-sub">เพิ่มคำอวยพรเพื่อให้ผู้ใช้เลือกส่งให้กัน</div>
+            <div class="empty-icon">💬</div>
+            <div class="empty-title">ยังไม่มีคำอวยพร</div>
+            <div class="empty-sub">เพิ่มคำอวยพรเพื่อให้ผู้ใช้เลือกส่งให้กัน</div>
           </div>
         </div>
 
-        <!-- ===== CARD: GREETING CARDS ===== -->
-        <div class="fest-card animate-in" style="animation-delay: 0.19s">
+        <!-- ===== CARD: การ์ดอวยพร ===== -->
+        <div class="fest-card animate-in" style="animation-delay: 0.2s">
           <div class="card-label">
             <span class="label-dot label-dot--teal" />
-            การ์ดอวยพร
+            บัตรอวยพร
           </div>
-
           <div class="card-header-row">
-            <div class="card-header-info">
-              <span class="card-header-count">{{
-                existingCards.length + cardFileList.length
-              }}</span>
-              <span class="card-header-unit">รูป</span>
+            <div class="stat-chip">
+              <q-icon name="photo_library" size="17px" color="teal-6" />
+              <span class="stat-num">{{ existingCards.length + cardFileList.length }}</span>
+              <span class="stat-label">รูป</span>
             </div>
             <q-btn
               :disable="!canEdit"
               unelevated
               color="teal-6"
               icon="add_photo_alternate"
-              label="เพิ่มการ์ด"
-              class="add-btn"
+              label="เพิ่มบัตรอวยพร"
+              class="action-btn"
               @click="onAddCard"
             />
           </div>
@@ -419,9 +450,9 @@
           </div>
 
           <div v-else class="empty-state">
-            <div class="empty-state-icon">🃏</div>
-            <div class="empty-state-text">ยังไม่มีการ์ด</div>
-            <div class="empty-state-sub">อัปโหลดรูปสวยๆ เพื่อใช้เป็นการ์ดอวยพร</div>
+            <div class="empty-icon">🃏</div>
+            <div class="empty-title">ยังไม่มีบัตรอวยพร</div>
+            <div class="empty-sub">อัปโหลดรูปสวยๆ เพื่อใช้เป็นบัตรอวยพร (691 × 691 px)</div>
           </div>
         </div>
 
@@ -430,7 +461,7 @@
           <button
             type="button"
             class="submit-btn"
-            :class="{ loading }"
+            :class="{ 'submit-btn--loading': loading }"
             :disabled="loading || !canEditEndDate"
             @click="submitEdit"
           >
@@ -447,19 +478,24 @@
       </div>
     </div>
 
-    <!-- ===== DIALOG: ADD WISH ===== -->
+    <!-- ===== DIALOG: เพิ่มคำอวยพร ===== -->
     <q-dialog v-model="addWishDialog" :maximized="$q.screen.lt.sm">
       <div class="custom-dialog" :class="{ 'custom-dialog--mobile': $q.screen.lt.sm }">
-        <div class="custom-dialog-header">
-          <span>✨ เพิ่มคำอวยพร</span>
-          <button class="dialog-close" type="button" @click="addWishDialog = false">
+        <div class="dialog-header">
+          <div class="dialog-header-icon dialog-header-icon--orange">
+            <q-icon name="format_quote" color="white" size="18px" />
+          </div>
+          <span>เพิ่มคำอวยพร</span>
+          <q-space />
+          <button class="dialog-close-btn" type="button" @click="addWishDialog = false">
             <q-icon name="close" size="18px" />
           </button>
         </div>
         <q-form @submit.prevent.stop="addWishToList">
-          <div class="custom-dialog-body">
+          <div class="dialog-body">
             <q-input
               v-model="tempWish"
+              type="textarea"
               label="คำอวยพร"
               outlined
               autofocus
@@ -468,33 +504,34 @@
               :rules="[(val) => !!val.trim() || 'กรุณากรอกคำอวยพร']"
             />
           </div>
-          <div class="custom-dialog-footer">
-            <button
-              type="button"
-              class="dialog-btn dialog-btn--cancel"
-              @click="addWishDialog = false"
-            >
+          <div class="dialog-footer">
+            <button type="button" class="dlg-btn dlg-btn--cancel" @click="addWishDialog = false">
               ยกเลิก
             </button>
-            <button type="submit" class="dialog-btn dialog-btn--confirm">บันทึก</button>
+            <button type="submit" class="dlg-btn dlg-btn--confirm">บันทึก</button>
           </div>
         </q-form>
       </div>
     </q-dialog>
 
-    <!-- ===== DIALOG: EDIT WISH ===== -->
+    <!-- ===== DIALOG: แก้ไขคำอวยพร ===== -->
     <q-dialog v-model="editWishDialog" :maximized="$q.screen.lt.sm">
       <div class="custom-dialog" :class="{ 'custom-dialog--mobile': $q.screen.lt.sm }">
-        <div class="custom-dialog-header">
-          <span>✏️ แก้ไขคำอวยพร</span>
-          <button class="dialog-close" type="button" @click="editWishDialog = false">
+        <div class="dialog-header">
+          <div class="dialog-header-icon dialog-header-icon--amber">
+            <q-icon name="edit" color="white" size="18px" />
+          </div>
+          <span>แก้ไขคำอวยพร</span>
+          <q-space />
+          <button class="dialog-close-btn" type="button" @click="editWishDialog = false">
             <q-icon name="close" size="18px" />
           </button>
         </div>
         <q-form @submit.prevent.stop="updateWish">
-          <div class="custom-dialog-body">
+          <div class="dialog-body">
             <q-input
               v-model="tempWish"
+              type="textarea"
               label="คำอวยพร"
               outlined
               autofocus
@@ -502,64 +539,68 @@
               :rules="[(val) => !!val.trim() || 'กรุณากรอกคำอวยพร']"
             />
           </div>
-          <div class="custom-dialog-footer">
-            <button
-              type="button"
-              class="dialog-btn dialog-btn--cancel"
-              @click="editWishDialog = false"
-            >
+          <div class="dialog-footer">
+            <button type="button" class="dlg-btn dlg-btn--cancel" @click="editWishDialog = false">
               ยกเลิก
             </button>
-            <button type="submit" class="dialog-btn dialog-btn--confirm">อัปเดต</button>
+            <button type="submit" class="dlg-btn dlg-btn--confirm">อัปเดต</button>
           </div>
         </q-form>
       </div>
     </q-dialog>
 
-    <!-- ===== DIALOG: DELETE WISH ===== -->
+    <!-- ===== DIALOG: ยืนยันลบคำอวยพร ===== -->
     <q-dialog v-model="deleteWishDialog" persistent>
       <div class="custom-dialog">
-        <div class="custom-dialog-header custom-dialog-header--danger">
-          <span>🗑️ ยืนยันการลบ</span>
-          <button class="dialog-close" type="button" @click="deleteWishDialog = false">
+        <div class="dialog-header dialog-header--danger">
+          <div class="dialog-header-icon">
+            <q-icon name="warning_amber" color="white" size="18px" />
+          </div>
+          <span>ยืนยันการลบ</span>
+          <q-space />
+          <button class="dialog-close-btn" type="button" @click="deleteWishDialog = false">
             <q-icon name="close" size="18px" />
           </button>
         </div>
-        <div class="custom-dialog-body">
-          <p class="delete-confirm-text">
-            คุณต้องการลบคำอวยพร<br />
-            <strong class="delete-target">"{{ itemToDelete }}"</strong><br />
+        <div class="dialog-body">
+          <p class="delete-warn-text">
+            คุณต้องการลบคำอวยพร
+            <strong class="delete-target">"{{ itemToDelete }}"</strong>
             ใช่หรือไม่?
           </p>
+          <p class="delete-warn-sub">
+            <q-icon name="info_outline" size="15px" class="q-mr-xs" />
+            การดำเนินการนี้ไม่สามารถย้อนกลับได้
+          </p>
         </div>
-        <div class="custom-dialog-footer">
-          <button
-            type="button"
-            class="dialog-btn dialog-btn--cancel"
-            @click="deleteWishDialog = false"
-          >
+        <div class="dialog-footer">
+          <button type="button" class="dlg-btn dlg-btn--cancel" @click="deleteWishDialog = false">
             ยกเลิก
           </button>
-          <button type="button" class="dialog-btn dialog-btn--danger" @click="confirmDelete">
+          <button type="button" class="dlg-btn dlg-btn--danger" @click="confirmDeleteWish">
             ยืนยันการลบ
           </button>
         </div>
       </div>
     </q-dialog>
 
-    <!-- ===== DIALOG: ADD CARD ===== -->
+    <!-- ===== DIALOG: เพิ่มการ์ด ===== -->
     <q-dialog v-model="showCardDialog" :maximized="$q.screen.lt.sm">
       <div class="custom-dialog" :class="{ 'custom-dialog--mobile': $q.screen.lt.sm }">
-        <div class="custom-dialog-header">
-          <span>🃏 เพิ่มรูปการ์ด</span>
-          <button class="dialog-close" type="button" @click="showCardDialog = false">
+        <div class="dialog-header">
+          <div class="dialog-header-icon dialog-header-icon--teal">
+            <q-icon name="add_photo_alternate" color="white" size="18px" />
+          </div>
+          <span>เพิ่มรูปการ์ด</span>
+          <q-space />
+          <button class="dialog-close-btn" type="button" @click="showCardDialog = false">
             <q-icon name="close" size="18px" />
           </button>
         </div>
-        <div class="custom-dialog-body">
+        <div class="dialog-body">
           <q-file
             v-model="tempCardFile"
-            label="เลือกรูปภาพ"
+            label="เลือกรูปภาพ (691 × 691 px)"
             outlined
             accept=".jpg,.jpeg,.png,image/jpeg,image/png"
             class="custom-input"
@@ -575,125 +616,57 @@
       </div>
     </q-dialog>
 
-    <!-- ===== SUCCESS DIALOG ===== -->
-    <q-dialog v-model="showSuccessDialog">
-      <div class="result-dialog">
-        <div class="result-dialog-header result-dialog-header--success">
-          <div class="result-dialog-icon">
-            <q-icon name="check_circle" size="1.6rem" color="white" />
-          </div>
-          <div>
-            <div class="result-dialog-title">บันทึกสำเร็จ!</div>
-            <div class="result-dialog-sub">กำลังนำท่านไปหน้ารายการ...</div>
-          </div>
-        </div>
-        <div class="result-dialog-body">
-          <div class="result-dialog-emoji">🎊</div>
-          <p class="result-dialog-msg result-dialog-msg--success">{{ successMessage }}</p>
-        </div>
+    <!-- ===== NOTIFY DIALOG ===== -->
+    <q-dialog v-model="showNotifyDialog">
+      <div class="notify-dialog">
         <div
-          :key="'s-' + successMessage"
-          class="result-dialog-progress result-dialog-progress--success"
-        />
-      </div>
-    </q-dialog>
-
-    <!-- ===== ERROR DIALOG ===== -->
-    <q-dialog v-model="showErrorDialog">
-      <div class="result-dialog">
-        <div class="result-dialog-header result-dialog-header--error">
-          <div class="result-dialog-icon">
-            <q-icon name="error_outline" size="1.6rem" color="white" />
+          class="notify-header"
+          :class="notifySuccess ? 'notify-header--success' : 'notify-header--error'"
+        >
+          <div class="notify-header-icon">
+            <q-icon
+              :name="notifySuccess ? 'check_circle' : 'error_outline'"
+              size="1.6rem"
+              color="white"
+            />
           </div>
           <div>
-            <div class="result-dialog-title">เกิดข้อผิดพลาด</div>
-            <div class="result-dialog-sub">กรุณาลองใหม่อีกครั้ง</div>
+            <div class="notify-title">{{ notifySuccess ? 'สำเร็จ!' : 'เกิดข้อผิดพลาด' }}</div>
+            <div class="notify-sub">
+              {{ notifySuccess ? 'ดำเนินการเรียบร้อยแล้ว' : 'กรุณาลองใหม่อีกครั้ง' }}
+            </div>
           </div>
         </div>
-        <div class="result-dialog-body">
-          <div class="result-dialog-emoji">⚠️</div>
-          <p class="result-dialog-msg result-dialog-msg--error">{{ errorMessage }}</p>
-        </div>
-        <div
-          :key="'e-' + errorMessage"
-          class="result-dialog-progress result-dialog-progress--error"
-        />
-      </div>
-    </q-dialog>
-
-    <!-- ===== VALIDATION DIALOG ===== -->
-    <q-dialog v-model="showValidationDialog">
-      <div class="result-dialog">
-        <div class="result-dialog-header result-dialog-header--warning">
-          <div class="result-dialog-icon">
-            <q-icon name="warning_amber" size="1.6rem" color="white" />
-          </div>
-          <div>
-            <div class="result-dialog-title">ข้อมูลไม่ครบถ้วน</div>
-            <div class="result-dialog-sub">กรุณาตรวจสอบข้อมูลอีกครั้ง</div>
-          </div>
-        </div>
-        <div class="result-dialog-body">
-          <div class="result-dialog-emoji">📋</div>
-          <p class="result-dialog-msg result-dialog-msg--warning">{{ validationMessage }}</p>
-        </div>
-        <div class="result-dialog-footer">
-          <button
-            type="button"
-            class="dialog-btn dialog-btn--confirm"
-            @click="showValidationDialog = false"
+        <div class="notify-body">
+          <div class="notify-emoji">{{ notifySuccess ? '✅' : '⚠️' }}</div>
+          <p
+            class="notify-msg"
+            :class="notifySuccess ? 'notify-msg--success' : 'notify-msg--error'"
           >
-            รับทราบ
-          </button>
-        </div>
-      </div>
-    </q-dialog>
-
-    <!-- ===== FETCH ERROR DIALOG ===== -->
-    <q-dialog v-model="showFetchErrorDialog">
-      <div class="result-dialog">
-        <div class="result-dialog-header result-dialog-header--error">
-          <div class="result-dialog-icon">
-            <q-icon name="cloud_off" size="1.6rem" color="white" />
-          </div>
-          <div>
-            <div class="result-dialog-title">โหลดข้อมูลไม่สำเร็จ</div>
-            <div class="result-dialog-sub">กรุณาลองใหม่อีกครั้ง</div>
-          </div>
-        </div>
-        <div class="result-dialog-body">
-          <div class="result-dialog-emoji">🌐</div>
-          <p class="result-dialog-msg result-dialog-msg--error">
-            ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้
+            {{ notifyMessage }}
           </p>
         </div>
-        <div class="result-dialog-footer">
-          <button
-            type="button"
-            class="dialog-btn dialog-btn--confirm"
-            @click="showFetchErrorDialog = false"
-          >
-            รับทราบ
-          </button>
-        </div>
+        <div
+          :key="notifyKey"
+          class="notify-progress"
+          :class="notifySuccess ? 'notify-progress--success' : 'notify-progress--error'"
+          :style="{ animationDuration: `${NOTIFY_DURATION}ms` }"
+        />
       </div>
     </q-dialog>
-
-    <!-- ===== CLICK PARTICLES ===== -->
-    <teleport to="body">
-      <div class="click-particles-root" aria-hidden="true">
-        <span v-for="p in activeParticles" :key="p.id" class="click-particle" :style="p.style" />
-      </div>
-    </teleport>
   </q-page>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, nextTick, computed } from 'vue';
+import { ref, computed, nextTick, onMounted, onUnmounted } from 'vue';
 import { LocalStorage, useQuasar } from 'quasar';
 import { api } from 'src/boot/axios';
 import { useRouter, useRoute } from 'vue-router';
 import type { QFile } from 'quasar';
+import type { AxiosError } from 'axios';
+
+// ─── Constants ────────────────────────────────────────────────────────────────
+const NOTIFY_DURATION = 2000;
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface WishItem {
@@ -725,7 +698,7 @@ interface FestivalData {
   startDate?: string;
   endDate?: string;
   isEdit: boolean;
-  isEditEndDate: boolean;
+  isEditStartEndDate: boolean;
   wisher?: WisherApi[];
   card?: CardApi[];
   createdBy: number;
@@ -743,9 +716,11 @@ const $q = useQuasar();
 const router = useRouter();
 const route = useRoute();
 
-// ─── Template Refs ────────────────────────────────────────────────────────────
+// ─── File Input Refs ──────────────────────────────────────────────────────────
 const fileInput = ref<InstanceType<typeof QFile> | null>(null);
 const logoInput = ref<InstanceType<typeof QFile> | null>(null);
+
+// ─── Scroll Target Refs ───────────────────────────────────────────────────────
 const coverRef = ref<HTMLElement | null>(null);
 const nameRef = ref<HTMLElement | null>(null);
 const logoRef = ref<HTMLElement | null>(null);
@@ -763,14 +738,101 @@ const existingImageName = ref('');
 const loading = ref(false);
 const createdBy = ref<number>(0);
 
+const useDeptLogo = ref(false);
+
+const toggleDeptLogo = () => {
+  useDeptLogo.value = !useDeptLogo.value;
+  if (useDeptLogo.value) {
+    logoFile.value = null; // clear uploaded file
+    logoError.value = false;
+  }
+};
+
+// ─── Permissions ──────────────────────────────────────────────────────────────
+const isEdit = ref(false);
+const isEditStartEndDate = ref(false);
+
+const isOwner = computed(() => createdBy.value === Number(LocalStorage.getItem('userId')));
+const canEdit = computed(() => isEdit.value && isOwner.value);
+const canEditEndDate = computed(() => isEditStartEndDate.value && isOwner.value);
+
 // ─── Date State ───────────────────────────────────────────────────────────────
 const startDate = ref('');
 const endDate = ref('');
-// false เพื่อป้องกัน field แก้ได้ก่อน fetch เสร็จ — จะถูก update หลัง fetch
-const isEdit = ref(false);
-const isEditEndDate = ref(false);
 const dateError = ref(false);
 const dateErrorMsg = ref('');
+
+const todayStr = (() => {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}/${m}/${day}`;
+})();
+
+const durationDays = computed(() => {
+  if (!startDate.value || !endDate.value) return -1;
+  const s = new Date(startDate.value.replace(/\//g, '-'));
+  const e = new Date(endDate.value.replace(/\//g, '-'));
+  return Math.round((e.getTime() - s.getTime()) / (1000 * 60 * 60 * 24));
+});
+
+const formatDateThai = (dateStr: string): string => {
+  if (!dateStr) return '';
+  const d = new Date(dateStr.replace(/\//g, '-'));
+  const months = [
+    'ม.ค.',
+    'ก.พ.',
+    'มี.ค.',
+    'เม.ย.',
+    'พ.ค.',
+    'มิ.ย.',
+    'ก.ค.',
+    'ส.ค.',
+    'ก.ย.',
+    'ต.ค.',
+    'พ.ย.',
+    'ธ.ค.',
+  ];
+  return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear() + 543}`;
+};
+
+// allow current date to remain selectable even if it's "today" (edit mode)
+// const startDateOptions = (dateStr: string): boolean => {
+
+//   if (dateStr === startDate.value) return true;
+//   if (dateStr < todayStr) return false;
+//   if (!endDate.value) return true;
+//   return dateStr <= endDate.value;
+// };
+
+const startDateOptions = (dateStr: string): boolean => {
+  console.log('checking:', dateStr, 'today:', todayStr, 'result:', dateStr >= todayStr);
+  if (dateStr === startDate.value) return true;
+  if (dateStr < todayStr) return false;
+  if (!endDate.value) return true;
+  return dateStr <= endDate.value;
+};
+
+const endDateOptions = (dateStr: string): boolean => {
+  if (dateStr === endDate.value) return true;
+  if (dateStr < todayStr) return false;
+  if (!startDate.value) return true;
+  return dateStr >= startDate.value;
+};
+
+// const onStartDateChange = (_val: string) => {
+//   dateError.value = false;
+//   // if (endDate.value && val > endDate.value) endDate.value = '';
+// };
+
+const onStartDateChange = () => {
+  dateError.value = false;
+};
+
+const onEndDateChange = () => {
+  dateError.value = false;
+};
 
 // ─── Error States ─────────────────────────────────────────────────────────────
 const imageError = ref(false);
@@ -795,102 +857,18 @@ const tempCardFile = ref<File | null>(null);
 const showCardDialog = ref(false);
 const cardErrorMsg = ref('');
 
-// ─── Dialog State ─────────────────────────────────────────────────────────────
-const showSuccessDialog = ref(false);
-const successMessage = ref('');
-const showErrorDialog = ref(false);
-const errorMessage = ref('');
-const showValidationDialog = ref(false);
-const validationMessage = ref('');
-const showFetchErrorDialog = ref(false);
+// ─── Notify State ─────────────────────────────────────────────────────────────
+const showNotifyDialog = ref(false);
+const notifySuccess = ref(true);
+const notifyMessage = ref('');
+const notifyKey = ref(0);
+let notifyTimer: ReturnType<typeof setTimeout> | null = null;
 
 // ─── Particles ────────────────────────────────────────────────────────────────
 const activeParticles = ref<Particle[]>([]);
 let particleId = 0;
 
-// ─── Computed ─────────────────────────────────────────────────────────────────
-const isOwner = computed(() => createdBy.value === Number(LocalStorage.getItem('userId')));
-
-// canEdit: แก้ไขได้ถ้า isEdit (จาก API) หรือเป็นเจ้าของ
-const canEdit = computed(() => isEdit.value && isOwner.value);
-
-// canEditEndDate: แก้ไข endDate ได้ถ้า isEditEndDate หรือเป็นเจ้าของ
-const canEditEndDate = computed(() => isEditEndDate.value && isOwner.value);
-
-const durationDays = computed(() => {
-  if (!startDate.value || !endDate.value) return -1;
-  const s = new Date(startDate.value.replace(/\//g, '-'));
-  const e = new Date(endDate.value.replace(/\//g, '-'));
-  return Math.round((e.getTime() - s.getTime()) / (1000 * 60 * 60 * 24));
-});
-
-// ─── Date Helpers ─────────────────────────────────────────────────────────────
-const todayStr = (() => {
-  const d = new Date();
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}/${m}/${day}`;
-})();
-
-const formatDateThai = (dateStr: string): string => {
-  if (!dateStr) return '';
-  const d = new Date(dateStr.replace(/\//g, '-'));
-  const months = [
-    'ม.ค.',
-    'ก.พ.',
-    'มี.ค.',
-    'เม.ย.',
-    'พ.ค.',
-    'มิ.ย.',
-    'ก.ค.',
-    'ส.ค.',
-    'ก.ย.',
-    'ต.ค.',
-    'พ.ย.',
-    'ธ.ค.',
-  ];
-  return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear() + 543}`;
-};
-
-const startDateOptions = (dateStr: string): boolean => {
-  if (dateStr === startDate.value) return true;
-  if (dateStr < todayStr) return false;
-  if (!endDate.value) return true;
-  return dateStr <= endDate.value;
-};
-
-const endDateOptions = (dateStr: string): boolean => {
-  if (dateStr === endDate.value) return true;
-  if (dateStr < todayStr) return false;
-  if (!startDate.value) return true;
-  return dateStr >= startDate.value;
-};
-
-const onStartDateChange = (val: string) => {
-  dateError.value = false;
-  if (endDate.value && val > endDate.value) endDate.value = '';
-};
-
-const onEndDateChange = () => {
-  dateError.value = false;
-};
-
-// ─── Dialog Helpers ───────────────────────────────────────────────────────────
-const openSuccessDialog = (msg: string) => {
-  successMessage.value = msg;
-  showSuccessDialog.value = true;
-};
-
-const openErrorDialog = (msg: string) => {
-  errorMessage.value = msg;
-  showErrorDialog.value = true;
-  setTimeout(() => {
-    showErrorDialog.value = false;
-  }, 2500);
-};
-
-// ─── Image Helpers ────────────────────────────────────────────────────────────
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 const objectUrlCache = new WeakMap<File, string>();
 
 const getFilePreview = (file: File): string => {
@@ -910,23 +888,33 @@ const getImageUrl = async (imagePath: string): Promise<string> => {
   }
 };
 
-// ─── Image Validation ─────────────────────────────────────────────────────────
+const openNotify = (success: boolean, message: string) => {
+  if (notifyTimer) clearTimeout(notifyTimer);
+  notifySuccess.value = success;
+  notifyMessage.value = message;
+  notifyKey.value++;
+  showNotifyDialog.value = true;
+  notifyTimer = setTimeout(() => {
+    showNotifyDialog.value = false;
+    if (success) void router.push('/backoffice/festival');
+  }, NOTIFY_DURATION);
+};
+
+// ─── File Validation ──────────────────────────────────────────────────────────
 const onImageSelected = (file: File | null) => {
   imageError.value = false;
   if (!file) return;
-
   if (file.size > 2 * 1024 * 1024) {
     imageError.value = true;
     imageFile.value = null;
     existingImageUrl.value = '';
     return;
   }
-
   const url = URL.createObjectURL(file);
   const img = new Image();
   img.onload = () => {
     URL.revokeObjectURL(url);
-    if (img.width !== 1199 || img.height !== 581) {
+    if (img.width !== 2188 || img.height !== 417) {
       imageError.value = true;
       imageFile.value = null;
       existingImageUrl.value = '';
@@ -938,13 +926,11 @@ const onImageSelected = (file: File | null) => {
 const onLogoSelected = (file: File | null) => {
   logoError.value = false;
   if (!file) return;
-
   if (file.size > 2 * 1024 * 1024) {
     logoError.value = true;
     logoFile.value = null;
     return;
   }
-
   const url = URL.createObjectURL(file);
   const img = new Image();
   img.onload = () => {
@@ -957,16 +943,16 @@ const onLogoSelected = (file: File | null) => {
   img.src = url;
 };
 
-// ─── Festival Name Validation ─────────────────────────────────────────────────
 const onFestivalNameChange = (val: string | number | null) => {
   nameError.value = false;
   if (typeof val !== 'string') return;
-  const pattern = /^[^-].*[^-]-[^-]+-\d{4}$/;
-  if (val && !pattern.test(val)) nameError.value = true;
+  // const pattern = /^[^-].*[^-]-[^-]+-\d{4}$/;
+  const pattern = /^[^-].*-[^-]{2,5}-\d{4}$/;
+  if (val && !pattern.test(val.trim())) nameError.value = true;
 };
 
-// ─── API: Fetch Festival ──────────────────────────────────────────────────────
-const fetchFestivalId = async (id: string): Promise<void> => {
+// ─── Fetch Festival ───────────────────────────────────────────────────────────
+const fetchFestival = async (id: string): Promise<void> => {
   $q.loading.show();
   festivalId.value = id;
   try {
@@ -976,7 +962,7 @@ const fetchFestivalId = async (id: string): Promise<void> => {
     festivalName.value = data.festivalName;
     webName.value = data.webName;
     isEdit.value = data.isEdit;
-    isEditEndDate.value = data.isEditEndDate;
+    isEditStartEndDate.value = data.isEditStartEndDate;
     createdBy.value = Number(data.createdBy);
 
     if (data.startDate) startDate.value = data.startDate.substring(0, 10).replace(/-/g, '/');
@@ -995,20 +981,23 @@ const fetchFestivalId = async (id: string): Promise<void> => {
     }
 
     wishWordList.value =
-      data.wisher?.map((w: WisherApi): WishItem => ({ wId: w.wId, wishWord: w.wishWord })) ?? [];
+      data.wisher?.map((w): WishItem => ({ wId: w.wId, wishWord: w.wishWord })) ?? [];
 
-    if (data.card && data.card.length > 0) {
-      const cardPromises = data.card.map(async (c: CardApi) => {
-        const previewUrl = await getImageUrl(c.imageCard);
-        return { cId: c.cId, imageName: c.imageCard, previewUrl };
-      });
-      existingCards.value = await Promise.all(cardPromises);
+    if (data.card?.length) {
+      existingCards.value = await Promise.all(
+        data.card.map(
+          async (c): Promise<ExistingCard> => ({
+            cId: c.cId,
+            imageName: c.imageCard,
+            previewUrl: await getImageUrl(c.imageCard),
+          }),
+        ),
+      );
     }
 
     LocalStorage.set('festivalId', id);
-  } catch (error) {
-    console.error(error);
-    showFetchErrorDialog.value = true;
+  } catch {
+    openNotify(false, 'ไม่สามารถโหลดข้อมูลได้ กรุณาลองใหม่อีกครั้ง');
   } finally {
     $q.loading.hide();
   }
@@ -1027,11 +1016,11 @@ const addWishToList = () => {
   addWishDialog.value = false;
 };
 
-const editWish = (index: number) => {
-  const wish = wishWordList.value[index];
+const editWish = (i: number) => {
+  const wish = wishWordList.value[i];
   if (!wish) return;
   tempWish.value = wish.wishWord;
-  editingIndex.value = index;
+  editingIndex.value = i;
   editWishDialog.value = true;
 };
 
@@ -1055,7 +1044,7 @@ const deleteWish = (i: number) => {
   deleteWishDialog.value = true;
 };
 
-const confirmDelete = () => {
+const confirmDeleteWish = () => {
   if (deleteIndex.value === null) return;
   wishWordList.value.splice(deleteIndex.value, 1);
   deleteIndex.value = null;
@@ -1071,28 +1060,23 @@ const onAddCard = () => {
 const addCardToList = () => {
   const file = tempCardFile.value;
   if (!file) return;
-
   cardErrorMsg.value = '';
-
-  const allowedTypes = ['image/jpeg', 'image/png'];
-  if (!allowedTypes.includes(file.type)) {
+  if (!['image/jpeg', 'image/png'].includes(file.type)) {
     cardErrorMsg.value = 'รองรับเฉพาะ JPG และ PNG';
     tempCardFile.value = null;
     return;
   }
-
   if (file.size > 2 * 1024 * 1024) {
     cardErrorMsg.value = 'ขนาดไฟล์ต้องไม่เกิน 2 MB';
     tempCardFile.value = null;
     return;
   }
-
   const url = URL.createObjectURL(file);
   const img = new Image();
   img.onload = () => {
     URL.revokeObjectURL(url);
     if (img.width !== 691 || img.height !== 691) {
-      cardErrorMsg.value = `ขนาดรูปต้องเป็น 691×691 px (พบ ${img.width}×${img.height})`;
+      cardErrorMsg.value = `ขนาดรูปต้องเป็น 691 × 691 px (พบ ${img.width} × ${img.height})`;
       tempCardFile.value = null;
       return;
     }
@@ -1119,7 +1103,7 @@ const validateAndScroll = async (): Promise<boolean> => {
   dateError.value = false;
   dateErrorMsg.value = '';
 
-  // ถ้าแก้ไขได้เฉพาะ endDate (ไม่ใช่ owner และ isEdit = false)
+  // แก้ได้เฉพาะ endDate
   if (!canEdit.value) {
     if (canEditEndDate.value && startDate.value && !endDate.value) {
       dateError.value = true;
@@ -1133,8 +1117,9 @@ const validateAndScroll = async (): Promise<boolean> => {
 
   const isImageValid = !!imageFile.value || !!existingImageUrl.value;
   const isNameValid =
-    typeof festivalName.value === 'string' && /^[^-]+-[^-]+-\d{4}$/.test(festivalName.value);
-  const isLogoValid = !!logoFile.value;
+    typeof festivalName.value === 'string' &&
+    /^[^-].*-[^-]{2,5}-\d{4}$/.test(festivalName.value.trim());
+  const isLogoValid = !!logoFile.value || useDeptLogo.value;
   const isWebNameValid = typeof webName.value === 'string' && webName.value.trim().length > 0;
 
   let isDateValid = true;
@@ -1161,7 +1146,7 @@ const validateAndScroll = async (): Promise<boolean> => {
 
   if (hasError) {
     await nextTick();
-    const targets: Array<{ valid: boolean; el: HTMLElement | null }> = [
+    const targets = [
       { valid: isImageValid, el: coverRef.value },
       { valid: isNameValid, el: nameRef.value },
       { valid: isLogoValid, el: logoRef.value },
@@ -1170,7 +1155,6 @@ const validateAndScroll = async (): Promise<boolean> => {
     ];
     targets.find((t) => !t.valid)?.el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
-
   return !hasError;
 };
 
@@ -1181,33 +1165,32 @@ const submitEdit = async () => {
 
   loading.value = true;
   try {
-    let festivalImageName = existingImageName.value;
-    if (imageFile.value) {
+    const uploadFile = async (file: File): Promise<string> => {
       const fd = new FormData();
-      fd.append('singleFile', imageFile.value);
-      const res = await api.post('/upload', fd);
-      festivalImageName = res.data.image as string;
-    }
+      fd.append('singleFile', file);
+      return (await api.post('/upload', fd)).data.image as string;
+    };
+
+    const getDeptLogoFile = async (): Promise<File> => {
+      const res = await fetch('/logo-ldd.png');
+      console.log('status:', res.status); // ← ถ้าไม่ใช่ 200 แสดงว่าหาไฟล์ไม่เจอ
+      const blob = await res.blob();
+      console.log('blob size:', blob.size, 'type:', blob.type); // ← ถ้า size = 0 คือปัญหา
+      const file = new File([blob], 'logo-ldd.png', { type: 'image/png' });
+      console.log('file:', file);
+      return file;
+    };
+
+    const logoToUpload = useDeptLogo.value ? await getDeptLogoFile() : logoFile.value;
+    console.log('Upload :', logoToUpload);
+    let festivalImageName = existingImageName.value;
+    if (imageFile.value) festivalImageName = await uploadFile(imageFile.value);
 
     let festivalLogoName = '';
-    if (logoFile.value) {
-      const fd = new FormData();
-      fd.append('singleFile', logoFile.value);
-      const res = await api.post('/upload', fd);
-      festivalLogoName = res.data.image as string;
-    }
 
-    let newCardImageNames: string[] = [];
-    if (cardFileList.value.length > 0) {
-      newCardImageNames = await Promise.all(
-        cardFileList.value.map(async (file) => {
-          const formData = new FormData();
-          formData.append('singleFile', file);
-          const res = await api.post('/upload', formData);
-          return res.data.image as string;
-        }),
-      );
-    }
+    if (logoToUpload) festivalLogoName = await uploadFile(logoToUpload);
+
+    const newCardImageNames = await Promise.all(cardFileList.value.map(uploadFile));
 
     const allCards = [
       ...existingCards.value.map((c) => ({ cId: c.cId, imageCard: c.imageName })),
@@ -1228,20 +1211,14 @@ const submitEdit = async () => {
       card: allCards,
     };
 
-    let response;
-    if (festivalId.value) {
-      response = await api.patch(`/backoffice/festival/${festivalId.value}`, payload);
-    } else {
-      response = await api.post('/backoffice/festival', payload);
-    }
+    const response = festivalId.value
+      ? await api.patch(`/backoffice/festival/${festivalId.value}`, payload)
+      : await api.post('/backoffice/festival', payload);
 
-    openSuccessDialog(response.data.message || 'บันทึกเทศกาลสำเร็จแล้ว');
-    setTimeout(() => {
-      showSuccessDialog.value = false;
-      void router.push('/backoffice/festival');
-    }, 2000);
-  } catch {
-    openErrorDialog('เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง');
+    openNotify(true, response.data.message || 'บันทึกเทศกาลสำเร็จ');
+  } catch (err: unknown) {
+    const error = err as AxiosError<{ message: string }>;
+    openNotify(false, error.response?.data?.message || 'เกิดข้อผิดพลาด กรุณาลองใหม่');
   } finally {
     loading.value = false;
   }
@@ -1261,10 +1238,6 @@ const PARTICLE_COLORS = [
   '#38bdf8',
   '#4ade80',
   '#facc15',
-  '#ff6b6b',
-  '#ffd93d',
-  '#6bcb77',
-  '#4d96ff',
 ];
 
 const PARTICLE_EMOJIS = [
@@ -1290,82 +1263,18 @@ const PARTICLE_EMOJIS = [
   '🏵️',
 ];
 
-// const SHAPES: ShapeType[] = ['circle', 'square', 'star', 'triangle', 'emoji'];
-// const WEIGHTS = [0.25, 0.2, 0.2, 0.15, 0.2];
-
-// const pickShape = (): ShapeType => {
-//   const r = Math.random();
-//   let cumulative = 0;
-//   for (let i = 0; i < SHAPES.length; i++) {
-//     cumulative += WEIGHTS[i] ?? 0;
-//     if (r < cumulative) return SHAPES[i] ?? 'circle';
-//   }
-//   return 'circle';
-// };
-
 // ─── Particle Spawn ───────────────────────────────────────────────────────────
-// const spawnParticles = (x: number, y: number) => {
-//   const count = 36 + Math.floor(Math.random() * 12);
-//   const W = window.innerWidth;
-//   const H = window.innerHeight;
-
-//   for (let i = 0; i < count; i++) {
-//     const id = ++particleId;
-//     const size = 7 + Math.random() * 11;
-//     const color = PARTICLE_COLORS[Math.floor(Math.random() * PARTICLE_COLORS.length)] ?? '#fbbf24';
-//     const dur = 1.2 + Math.random() * 1.2;
-//     const emoji = PARTICLE_EMOJIS[Math.floor(Math.random() * PARTICLE_EMOJIS.length)] ?? '🎉';
-//     const shape = pickShape();
-//     const isEmoji = shape === 'emoji';
-
-//     const zone = i % 8;
-//     let targetX: number;
-//     let targetY: number;
-
-//     switch (zone) {
-//       case 0: targetX = Math.random() * W * 0.35; targetY = Math.random() * H * 0.35; break;
-//       case 1: targetX = W * 0.25 + Math.random() * W * 0.5; targetY = Math.random() * H * 0.25; break;
-//       case 2: targetX = W * 0.65 + Math.random() * W * 0.35; targetY = Math.random() * H * 0.35; break;
-//       case 3: targetX = W * 0.65 + Math.random() * W * 0.35; targetY = H * 0.25 + Math.random() * H * 0.5; break;
-//       case 4: targetX = W * 0.65 + Math.random() * W * 0.35; targetY = H * 0.65 + Math.random() * H * 0.35; break;
-//       case 5: targetX = W * 0.25 + Math.random() * W * 0.5; targetY = H * 0.75 + Math.random() * H * 0.25; break;
-//       case 6: targetX = Math.random() * W * 0.35; targetY = H * 0.65 + Math.random() * H * 0.35; break;
-//       case 7: targetX = Math.random() * W * 0.25; targetY = H * 0.25 + Math.random() * H * 0.5; break;
-//       default: targetX = Math.random() * W; targetY = Math.random() * H;
-//     }
-
-//     const style: Record<string, string> = {
-//       '--x': `${x}px`, '--y': `${y}px`,
-//       '--dx': `${targetX - x}px`, '--dy': `${targetY - y}px`,
-//       '--dur': `${dur}s`,
-//       '--color': isEmoji ? 'transparent' : color,
-//       '--size': isEmoji ? '22px' : `${size}px`,
-//       '--shape': shape,
-//       '--emoji-content': isEmoji ? `"${emoji}"` : '""',
-//       '--rot': `${Math.random() * 720 - 360}deg`,
-//     };
-
-//     activeParticles.value.push({ id, style });
-//     setTimeout(() => {
-//       activeParticles.value = activeParticles.value.filter((p) => p.id !== id);
-//     }, dur * 1000 + 200);
-//   }
-// };
-
 const spawnParticles = (x: number, y: number) => {
   const count = 12 + Math.floor(Math.random() * 6);
-
   for (let i = 0; i < count; i++) {
     const id = ++particleId;
     const size = 6 + Math.random() * 7;
     const color = PARTICLE_COLORS[Math.floor(Math.random() * PARTICLE_COLORS.length)]!;
     const dur = 0.7 + Math.random() * 0.5;
     const emoji = PARTICLE_EMOJIS[Math.floor(Math.random() * PARTICLE_EMOJIS.length)]!;
-
     const shapes: ShapeType[] = ['circle', 'circle', 'square', 'star', 'emoji'];
     const shape = shapes[Math.floor(Math.random() * shapes.length)]!;
     const isEmoji = shape === 'emoji';
-
     const angle = (i / count) * Math.PI * 2 + (Math.random() - 0.5) * 0.8;
     const dist = 80 + Math.random() * 80;
 
@@ -1392,167 +1301,204 @@ const spawnParticles = (x: number, y: number) => {
   }
 };
 
-const handleGlobalClick = (e: MouseEvent) => {
-  spawnParticles(e.clientX, e.clientY);
-};
+const handleGlobalClick = (e: MouseEvent) => spawnParticles(e.clientX, e.clientY);
 
 // ─── Lifecycle ────────────────────────────────────────────────────────────────
 onMounted(async () => {
   const id = (route.params.id as string) || (route.query.id as string);
-  if (id) await fetchFestivalId(id);
-  window.addEventListener('click', handleGlobalClick);
+  if (id) await fetchFestival(id);
+  document.addEventListener('click', handleGlobalClick);
 });
 
 onUnmounted(() => {
-  window.removeEventListener('click', handleGlobalClick);
+  document.removeEventListener('click', handleGlobalClick);
+  if (notifyTimer) clearTimeout(notifyTimer);
 });
 </script>
 
 <style lang="scss" scoped>
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&family=Prompt:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&family=Prompt:wght@500;600;700&display=swap');
 
-// ─── Design Tokens ────────────────────────────────────────────────────────────
-$indigo-deep: #1a1460;
-$indigo-mid: #2d2d8a;
-$indigo-glow: #5a3ea0;
-$gold: #f5a623;
-$gold-light: #ffd166;
-$coral: #ff6b6b;
+// ─── Design Tokens (เหมือน create/list page) ──────────────────────────────────
+$orange: #ea580c;
+$orange-mid: #f97316;
+$orange-soft: #fff7ed;
+$gold: #f59e0b;
 $teal: #0d9488;
+$teal-soft: #ccfbf1;
+$red: #dc2626;
+$red-soft: #fee2e2;
 $green: #16a34a;
 $green-dark: #14532d;
 $green-soft: #f0fdf4;
-$amber: #d97706;
-$amber-dark: #92400e;
-$amber-soft: #fffbeb;
 $surface: #ffffff;
-$surface-2: #f7f5ff;
-$text-main: #1a1460;
-$text-muted: #8b87b0;
-$radius-card: 20px;
-$radius-btn: 12px;
-$error-red: #e53935;
+$surface-2: #fff9f5;
+$text-main: #431407;
+$text-muted: #9ca3af;
+$radius: 18px;
+$error-red: #dc2626;
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 .edit-festival-page {
   font-family: 'Noto Sans Thai', 'Prompt', sans-serif;
-  background: linear-gradient(160deg, #f0edff 0%, #fff8ee 50%, #e8f9f6 100%);
+  background: linear-gradient(155deg, #fff7ed 0%, #fdf4ff 45%, #f0fdfa 100%);
   min-height: 100vh;
-  padding-bottom: 3rem;
 }
 
 // ─── Hero ─────────────────────────────────────────────────────────────────────
-.hero-header {
+// .page-hero {
+//   position: relative;
+//   overflow: hidden;
+//   background: linear-gradient(135deg, #7c2d12 0%, $orange 55%, $gold 100%);
+//   padding: 2.25rem 1.5rem 4rem;
+// }
+.page-hero {
   position: relative;
   overflow: hidden;
-  background: linear-gradient(135deg, $indigo-deep 0%, $indigo-mid 50%, #4a2080 100%);
-  padding: 3rem 1.5rem 4.5rem;
-  text-align: center;
+  background: linear-gradient(135deg, #7c2d12 0%, $orange 55%, $gold 100%);
+  padding: 1rem 1.5rem 2.5rem; // เปลี่ยนจาก 2.25rem 1.5rem 4rem
 }
 
-.hero-orb {
+.hero-blob {
   position: absolute;
   border-radius: 50%;
-  opacity: 0.15;
-}
-.hero-orb-1 {
-  width: 280px;
-  height: 280px;
-  background: $gold;
-  top: -80px;
-  right: -60px;
-  animation: float 6s ease-in-out infinite;
-}
-.hero-orb-2 {
-  width: 180px;
-  height: 180px;
-  background: $teal;
-  bottom: -40px;
-  left: -40px;
-  animation: float 8s ease-in-out infinite reverse;
-}
-.hero-orb-3 {
-  width: 120px;
-  height: 120px;
-  background: $gold-light;
-  top: 20px;
-  left: 30%;
-  animation: float 5s ease-in-out infinite 1s;
+  opacity: 0.14;
 }
 
-@keyframes float {
+.hero-blob-1 {
+  width: 350px;
+  height: 350px;
+  background: $gold;
+  top: -100px;
+  right: -80px;
+  animation: drift 7s ease-in-out infinite;
+}
+
+.hero-blob-2 {
+  width: 200px;
+  height: 200px;
+  background: $teal;
+  bottom: -70px;
+  left: -50px;
+  animation: drift 9s ease-in-out infinite reverse;
+}
+
+.hero-blob-3 {
+  width: 130px;
+  height: 130px;
+  background: #fff;
+  top: 15px;
+  left: 38%;
+  animation: drift 5s ease-in-out infinite 1s;
+}
+
+@keyframes drift {
   0%,
   100% {
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
   }
   50% {
-    transform: translateY(-16px);
+    transform: translateY(-16px) scale(1.06);
   }
 }
 
-.hero-content {
+.hero-inner {
   position: relative;
   z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+  max-width: 1100px;
+  margin: 0 auto;
 }
 
-.hero-icon {
-  font-size: 3.5rem;
-  line-height: 1;
-  margin-bottom: 0.75rem;
-  animation: pop 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+.hero-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
 }
 
-@keyframes pop {
-  0% {
-    transform: scale(0.5);
-    opacity: 0;
-  }
-  80% {
-    transform: scale(1.1);
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
+.hero-icon-wrap {
+  width: 54px;
+  height: 54px;
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 .hero-title {
   font-family: 'Prompt', sans-serif;
-  font-size: clamp(1.6rem, 5vw, 2.4rem);
+  font-size: clamp(1.25rem, 4vw, 1.85rem);
   font-weight: 700;
   color: #fff;
-  margin: 0 0 0.4rem;
-  letter-spacing: -0.02em;
+  margin: 0 0 3px;
+  line-height: 1.15;
 }
+
 .hero-sub {
-  font-size: clamp(0.85rem, 3vw, 1rem);
-  color: rgba(255, 255, 255, 0.7);
+  font-size: clamp(0.75rem, 2.5vw, 0.88rem);
+  color: rgba(255, 255, 255, 0.68);
   margin: 0;
 }
 
-// ─── Form ─────────────────────────────────────────────────────────────────────
-.form-body {
-  margin-top: -2rem;
+.hero-back-btn {
+  background: rgba(255, 255, 255, 0.16) !important;
+  backdrop-filter: blur(8px);
+  color: white !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.32) !important;
+  border-radius: 13px !important;
+  font-family: 'Noto Sans Thai', sans-serif !important;
+  font-weight: 600 !important;
+  letter-spacing: 0 !important;
+  transition:
+    background 0.2s,
+    transform 0.15s !important;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.26) !important;
+    transform: translateY(-2px);
+  }
+}
+
+// ─── Content ──────────────────────────────────────────────────────────────────
+// .content-wrap {
+//   max-width: 780px;
+//   margin: -2rem auto 0;
+//   padding: 0 1rem 4rem;
+// }
+.content-wrap {
+  max-width: 1100px;
+  margin: -1.25rem auto 0;
+  padding: 1.5rem 1rem 4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  position: relative;
+  z-index: 2;
 }
 
 .form-container {
-  max-width: 680px;
-  margin: 0 auto;
-  padding: 0 1rem 1rem;
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
 }
 
-// ─── Cards ────────────────────────────────────────────────────────────────────
+// ─── Festival Card ────────────────────────────────────────────────────────────
 .fest-card {
   background: $surface;
-  border-radius: $radius-card;
+  border-radius: $radius;
   padding: 1.5rem;
   box-shadow:
-    0 4px 24px rgba(26, 20, 96, 0.08),
-    0 1px 4px rgba(26, 20, 96, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.8);
+    0 3px 20px rgba(234, 88, 12, 0.08),
+    0 1px 4px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(249, 115, 22, 0.1);
 }
 
 .card-label {
@@ -1571,8 +1517,9 @@ $error-red: #e53935;
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: $indigo-mid;
+  background: $orange;
   flex-shrink: 0;
+
   &--amber {
     background: $gold;
   }
@@ -1585,49 +1532,68 @@ $error-red: #e53935;
   scroll-margin-top: 80px;
 }
 
-// ─── Upload Zones ─────────────────────────────────────────────────────────────
-.cover-upload-zone {
-  border-radius: 14px;
-  overflow: hidden;
-  cursor: pointer;
-  border: 2px dashed rgba(45, 45, 138, 0.25);
-  transition:
-    border-color 0.2s,
-    transform 0.2s;
+// ─── Stat Chip ────────────────────────────────────────────────────────────────
+.stat-chip {
+  display: flex;
+  align-items: center;
+  gap: 7px;
   background: $surface-2;
-  &:hover {
-    border-color: $indigo-mid;
-    transform: translateY(-2px);
-  }
-}
-
-.logo-upload-zone {
   border-radius: 12px;
-  overflow: hidden;
-  cursor: pointer;
-  border: 2px dashed rgba(45, 45, 138, 0.25);
-  transition:
-    border-color 0.2s,
-    background 0.2s,
-    transform 0.2s;
-  background: $surface-2;
-  max-width: 140px;
-  &:hover {
-    border-color: $indigo-mid;
-    transform: translateY(-2px);
-  }
+  padding: 8px 15px;
+  box-shadow: 0 2px 12px rgba(234, 88, 12, 0.08);
+  border: 1px solid rgba(249, 115, 22, 0.12);
 }
 
+.stat-num {
+  font-family: 'Prompt', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: $text-main;
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 0.78rem;
+  color: $text-muted;
+}
+
+// ─── Card Header Row ──────────────────────────────────────────────────────────
+.card-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.action-btn {
+  border-radius: 12px !important;
+  font-weight: 600 !important;
+  font-family: 'Noto Sans Thai', sans-serif !important;
+  letter-spacing: 0 !important;
+}
+
+// ─── Error ────────────────────────────────────────────────────────────────────
 .upload-zone--error {
   border-color: $error-red !important;
   border-style: solid !important;
   background: #fff5f5 !important;
   animation: shake 0.35s cubic-bezier(0.36, 0.07, 0.19, 0.97);
 }
+
 .upload-zone--disabled {
   opacity: 0.55;
-  cursor: not-allowed;
+  cursor: not-allowed !important;
   pointer-events: none;
+}
+
+.error-msg {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: $error-red;
+  font-size: 0.78rem;
+  font-weight: 500;
+  margin-top: 6px;
 }
 
 @keyframes shake {
@@ -1635,25 +1601,65 @@ $error-red: #e53935;
   100% {
     transform: translateX(0);
   }
-  25% {
-    transform: translateX(-6px);
+  20% {
+    transform: translateX(-5px);
   }
-  75% {
-    transform: translateX(6px);
+  40% {
+    transform: translateX(5px);
+  }
+  60% {
+    transform: translateX(-4px);
+  }
+  80% {
+    transform: translateX(4px);
   }
 }
 
-.cover-img {
-  border-radius: 12px;
+.err-fade-enter-active,
+.err-fade-leave-active {
+  transition: all 0.25s ease;
 }
-.logo-preview {
-  border-radius: 10px;
+.err-fade-enter-from,
+.err-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-4px);
+}
+
+// ─── Cover Upload ─────────────────────────────────────────────────────────────
+.cover-upload-zone {
+  border-radius: 14px;
+  overflow: hidden;
+  cursor: pointer;
+  border: 2px dashed rgba(234, 88, 12, 0.25);
+  transition:
+    border-color 0.2s,
+    background 0.2s,
+    transform 0.2s;
+  background: $surface-2;
+
+  &:hover {
+    border-color: $orange;
+    transform: translateY(-2px);
+  }
+}
+
+// .cover-img {
+//   display: block;
+// }
+.cover-img {
+  width: 100%;
+  aspect-ratio: 2188 / 417; // ← สัดส่วนถูกต้อง ไม่ตายตัว
+  background-size: contain;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-color: $surface-2;
+  position: relative;
 }
 
 .cover-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(26, 20, 96, 0.5);
+  background: rgba(124, 45, 18, 0.5);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1664,28 +1670,23 @@ $error-red: #e53935;
   color: white;
   font-size: 0.85rem;
   font-weight: 500;
+
   .cover-upload-zone:hover &,
   .logo-upload-zone:hover & {
     opacity: 1;
   }
 }
 
-.cover-placeholder,
-.logo-placeholder {
+.cover-placeholder {
   padding: 2.5rem 1rem;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 6px;
 }
-.logo-placeholder {
-  padding: 1.5rem 1rem;
-}
+
 .cover-placeholder-icon {
   font-size: 2.5rem;
-}
-.logo-placeholder-icon {
-  font-size: 2rem;
 }
 .cover-placeholder-text {
   font-size: 0.95rem;
@@ -1704,86 +1705,131 @@ $error-red: #e53935;
   margin-top: 10px;
   padding: 5px 14px;
   border-radius: 20px;
-  background: rgba(45, 45, 138, 0.07);
-  border: 1px solid rgba(45, 45, 138, 0.15);
-  color: $indigo-mid;
+  background: rgba(234, 88, 12, 0.07);
+  border: 1px solid rgba(234, 88, 12, 0.15);
+  color: $orange;
   font-size: 0.75rem;
   font-weight: 600;
   text-decoration: none;
   transition:
     background 0.2s,
-    border-color 0.2s,
     transform 0.15s;
+
   &:hover {
-    background: rgba(45, 45, 138, 0.14);
-    border-color: rgba(45, 45, 138, 0.3);
+    background: rgba(234, 88, 12, 0.14);
     transform: translateY(-1px);
   }
-  &:active {
-    transform: translateY(0);
+}
+
+// ─── Logo Upload ──────────────────────────────────────────────────────────────
+.logo-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.logo-upload-zone {
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  border: 2px dashed rgba(234, 88, 12, 0.25);
+  transition:
+    border-color 0.2s,
+    background 0.2s,
+    transform 0.2s;
+  background: $surface-2;
+  width: 130px;
+  flex-shrink: 0;
+
+  &:hover {
+    border-color: $orange;
+    transform: translateY(-2px);
   }
 }
 
-.error-msg {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  color: $error-red;
-  font-size: 0.78rem;
-  font-weight: 500;
-  margin-top: 6px;
-  padding: 0 2px;
+.logo-preview {
+  border-radius: 10px;
 }
 
-// ─── Input ────────────────────────────────────────────────────────────────────
+.logo-placeholder {
+  padding: 1.25rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  text-align: center;
+}
+
+.logo-placeholder-icon {
+  font-size: 1.8rem;
+}
+
+.logo-hint-title {
+  font-family: 'Prompt', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: $text-main;
+  margin-bottom: 4px;
+}
+
+.logo-hint-sub {
+  font-size: 0.76rem;
+  color: $text-muted;
+  line-height: 1.6;
+}
+
+.dept-logo-option {
+  position: relative;
+  width: 130px;
+  height: 130px;
+  flex-shrink: 0;
+  cursor: pointer;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 2px solid rgba(234, 88, 12, 0.2);
+}
+
+.dept-logo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 6px;
+  box-sizing: border-box;
+}
+
+.dept-logo-check {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid $orange;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+
+  &--active {
+    background: $orange;
+    border-color: $orange;
+  }
+}
+
+// ─── Custom Input ─────────────────────────────────────────────────────────────
 .custom-input :deep(.q-field__control) {
   border-radius: 12px !important;
 }
 
 // ─── Date Section ─────────────────────────────────────────────────────────────
-.date-section-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 1.1rem;
-  padding: 1rem 1.25rem;
-  border-radius: 16px;
-  background: linear-gradient(135deg, $indigo-deep, $indigo-mid 55%, $indigo-glow);
-  box-shadow: 0 6px 24px rgba(45, 45, 138, 0.28);
-}
-
-.date-section-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
-  flex-shrink: 0;
-  background: rgba(255, 255, 255, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-}
-.date-section-title {
-  font-family: 'Prompt', sans-serif;
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: #fff;
-  line-height: 1.2;
-}
-.date-section-sub {
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.65);
-  margin-top: 2px;
-}
-
-// ─── Date Chips ───────────────────────────────────────────────────────────────
 .date-summary-row {
   display: flex;
   align-items: center;
   gap: 0.6rem;
   margin-bottom: 0.6rem;
   flex-wrap: wrap;
+
   @media (max-width: 480px) {
     flex-direction: column;
     align-items: stretch;
@@ -1798,19 +1844,21 @@ $error-red: #e53935;
   gap: 9px;
   padding: 0.7rem 1rem;
   border-radius: 14px;
-  background: rgba(26, 20, 96, 0.04);
-  border: 1.5px dashed rgba(45, 45, 138, 0.2);
+  background: rgba(234, 88, 12, 0.03);
+  border: 1.5px dashed rgba(234, 88, 12, 0.2);
   transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+
   &--active {
-    background: rgba(45, 45, 138, 0.06);
+    background: rgba(234, 88, 12, 0.05);
     border-style: solid;
-    border-color: $indigo-mid;
-    box-shadow: 0 4px 16px rgba(45, 45, 138, 0.12);
+    border-color: $orange;
+    box-shadow: 0 4px 16px rgba(234, 88, 12, 0.12);
     .date-chip-value {
-      color: $indigo-deep;
+      color: $text-main;
       font-weight: 700;
     }
   }
+
   &--error {
     border-color: $error-red !important;
     background: #fff5f5 !important;
@@ -1822,20 +1870,23 @@ $error-red: #e53935;
   height: 30px;
   border-radius: 9px;
   flex-shrink: 0;
-  background: linear-gradient(135deg, $indigo-mid, $indigo-glow);
+  background: linear-gradient(135deg, #7c2d12, $orange);
   color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 3px 10px rgba(45, 45, 138, 0.28);
+  box-shadow: 0 3px 10px rgba(234, 88, 12, 0.28);
+
   &--end {
     background: linear-gradient(135deg, #065f46, $teal);
   }
 }
+
 .date-chip-body {
   flex: 1;
   min-width: 0;
 }
+
 .date-chip-label {
   font-size: 0.66rem;
   font-weight: 700;
@@ -1844,6 +1895,7 @@ $error-red: #e53935;
   color: $text-muted;
   margin-bottom: 1px;
 }
+
 .date-chip-value {
   font-size: 0.82rem;
   color: $text-muted;
@@ -1858,7 +1910,7 @@ $error-red: #e53935;
   border-radius: 50%;
   border: none;
   flex-shrink: 0;
-  background: rgba(45, 45, 138, 0.1);
+  background: rgba(234, 88, 12, 0.1);
   color: $text-muted;
   cursor: pointer;
   display: flex;
@@ -1867,8 +1919,9 @@ $error-red: #e53935;
   transition:
     background 0.15s,
     transform 0.15s;
+
   &:hover {
-    background: rgba(229, 57, 53, 0.15);
+    background: rgba(220, 38, 38, 0.15);
     color: $error-red;
     transform: scale(1.1);
   }
@@ -1883,14 +1936,13 @@ $error-red: #e53935;
   }
 }
 
-// ─── Duration Badge ───────────────────────────────────────────────────────────
 .duration-badge {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   padding: 5px 14px;
   border-radius: 100px;
-  background: linear-gradient(135deg, rgba(13, 148, 136, 0.1), rgba(13, 148, 136, 0.06));
+  background: rgba(13, 148, 136, 0.08);
   border: 1px solid rgba(13, 148, 136, 0.2);
   color: $teal;
   font-size: 0.78rem;
@@ -1908,7 +1960,6 @@ $error-red: #e53935;
   transform: scale(0.85);
 }
 
-// ─── Calendars ────────────────────────────────────────────────────────────────
 .calendars-wrap {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1918,6 +1969,7 @@ $error-red: #e53935;
     grid-template-columns: 1fr;
   }
 }
+
 .calendar-block {
   display: flex;
   flex-direction: column;
@@ -1934,33 +1986,36 @@ $error-red: #e53935;
   text-transform: uppercase;
   padding: 0.4rem 0.75rem;
   border-radius: 8px;
+
   &--start {
-    color: $indigo-mid;
-    background: rgba(45, 45, 138, 0.07);
+    color: $orange;
+    background: rgba(234, 88, 12, 0.07);
   }
   &--end {
     color: $teal;
     background: rgba(13, 148, 136, 0.08);
   }
 }
+
 .cal-label-dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
   flex-shrink: 0;
   &--start {
-    background: $indigo-mid;
+    background: $orange;
   }
   &--end {
     background: $teal;
   }
 }
+
 .cal-label-date {
   margin-left: auto;
   font-weight: 600;
   font-size: 0.72rem;
   .calendar-block-label--start & {
-    color: $indigo-mid;
+    color: $orange;
   }
   .calendar-block-label--end & {
     color: $teal;
@@ -1970,27 +2025,30 @@ $error-red: #e53935;
 .cal-wrapper {
   border-radius: 18px;
   overflow: hidden;
-  box-shadow: 0 4px 20px rgba(26, 20, 96, 0.1);
+  box-shadow: 0 4px 20px rgba(234, 88, 12, 0.1);
   transition: box-shadow 0.25s;
+
   &:hover {
-    box-shadow: 0 8px 32px rgba(26, 20, 96, 0.16);
+    box-shadow: 0 8px 32px rgba(234, 88, 12, 0.16);
   }
   &--start {
-    border: 2px solid rgba(45, 45, 138, 0.18);
+    border: 2px solid rgba(234, 88, 12, 0.18);
   }
   &--end {
     border: 2px solid rgba(13, 148, 136, 0.18);
   }
 }
+
 .cal-readonly {
   pointer-events: none;
-  opacity: 0.75;
+  opacity: 0.6;
 }
 
 .fest-calendar {
   width: 100% !important;
   border-radius: 16px !important;
   font-family: 'Noto Sans Thai', 'Prompt', sans-serif !important;
+
   :deep(.q-date__header) {
     border-radius: 16px 16px 0 0 !important;
     padding: 0.85rem 1rem !important;
@@ -1999,9 +2057,6 @@ $error-red: #e53935;
     font-family: 'Prompt', sans-serif !important;
     font-weight: 700 !important;
     font-size: 1rem !important;
-  }
-  :deep(.q-date__navigation) {
-    padding: 0.3rem 0.5rem !important;
   }
   :deep(.q-date__calendar-weekdays > div) {
     font-size: 0.7rem !important;
@@ -2012,44 +2067,6 @@ $error-red: #e53935;
   :deep(.q-date__calendar-item--out) {
     opacity: 0.3 !important;
   }
-  :deep(.q-btn.q-date__today .q-btn__content) {
-    font-weight: 800 !important;
-    text-decoration: underline !important;
-    text-underline-offset: 3px !important;
-  }
-  :deep(.q-date__calendar-item--selected .q-btn) {
-    font-weight: 700 !important;
-  }
-}
-
-// ─── Card Header Row ──────────────────────────────────────────────────────────
-.card-header-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 1rem;
-}
-.card-header-info {
-  display: flex;
-  align-items: baseline;
-  gap: 5px;
-}
-.card-header-count {
-  font-family: 'Prompt', sans-serif;
-  font-size: 2rem;
-  font-weight: 700;
-  color: $indigo-mid;
-  line-height: 1;
-}
-.card-header-unit {
-  font-size: 0.85rem;
-  color: $text-muted;
-}
-.add-btn {
-  border-radius: $radius-btn !important;
-  font-weight: 600 !important;
-  font-family: 'Noto Sans Thai', sans-serif !important;
-  letter-spacing: 0 !important;
 }
 
 // ─── Wish List ────────────────────────────────────────────────────────────────
@@ -2066,12 +2083,13 @@ $error-red: #e53935;
   padding: 12px 14px;
   background: $surface-2;
   border-radius: 12px;
-  border: 1px solid rgba(45, 45, 138, 0.08);
+  border: 1px solid rgba(249, 115, 22, 0.08);
   transition:
     box-shadow 0.2s,
     transform 0.2s;
+
   &:hover {
-    box-shadow: 0 4px 16px rgba(45, 45, 138, 0.1);
+    box-shadow: 0 4px 16px rgba(234, 88, 12, 0.1);
     transform: translateX(2px);
   }
 }
@@ -2080,7 +2098,7 @@ $error-red: #e53935;
   width: 26px;
   height: 26px;
   border-radius: 50%;
-  background: linear-gradient(135deg, $indigo-mid, #6b5ce7);
+  background: linear-gradient(135deg, #7c2d12, $orange);
   color: white;
   font-size: 0.72rem;
   font-weight: 700;
@@ -2089,12 +2107,18 @@ $error-red: #e53935;
   justify-content: center;
   flex-shrink: 0;
 }
+
 .wish-text {
   flex: 1;
   font-size: 0.92rem;
   color: $text-main;
   font-weight: 500;
   line-height: 1.5;
+}
+.wish-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
 }
 
 .wish-btn {
@@ -2109,21 +2133,27 @@ $error-red: #e53935;
   transition:
     background 0.15s,
     transform 0.1s;
+
   &:active {
     transform: scale(0.92);
   }
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
   &--edit {
-    background: rgba(245, 166, 35, 0.1);
-    color: #c47a00;
-    &:hover {
-      background: rgba(245, 166, 35, 0.2);
+    background: rgba(245, 158, 11, 0.1);
+    color: $gold;
+    &:hover:not(:disabled) {
+      background: rgba(245, 158, 11, 0.2);
     }
   }
   &--delete {
-    background: rgba(255, 107, 107, 0.1);
-    color: $coral;
-    &:hover {
-      background: rgba(255, 107, 107, 0.2);
+    background: rgba(220, 38, 38, 0.08);
+    color: $red;
+    &:hover:not(:disabled) {
+      background: rgba(220, 38, 38, 0.15);
     }
   }
 }
@@ -2147,7 +2177,7 @@ $error-red: #e53935;
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
   @media (min-width: 480px) {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(5, 1fr);
   }
 }
 
@@ -2155,16 +2185,18 @@ $error-red: #e53935;
   position: relative;
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(234, 88, 12, 0.1);
   transition: transform 0.2s;
   &:hover {
-    transform: scale(1.03);
+    transform: scale(1.04);
   }
 }
+
 .card-thumb-img {
   display: block;
   border-radius: 12px;
 }
+
 .card-thumb-remove {
   position: absolute;
   top: 5px;
@@ -2173,7 +2205,7 @@ $error-red: #e53935;
   height: 22px;
   border-radius: 50%;
   border: none;
-  background: rgba(26, 20, 96, 0.75);
+  background: rgba(124, 45, 18, 0.75);
   color: white;
   cursor: pointer;
   display: flex;
@@ -2181,56 +2213,76 @@ $error-red: #e53935;
   justify-content: center;
   transition: background 0.15s;
   &:hover {
-    background: $coral;
+    background: $red;
   }
 }
 
 // ─── Empty State ──────────────────────────────────────────────────────────────
 .empty-state {
-  text-align: center;
-  padding: 1.5rem 1rem;
-}
-.empty-state-icon {
-  font-size: 2rem;
-  margin-bottom: 6px;
-}
-.empty-state-text {
-  font-size: 0.92rem;
-  font-weight: 600;
-  color: $text-main;
-  margin-bottom: 4px;
-}
-.empty-state-sub {
-  font-size: 0.78rem;
-  color: $text-muted;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem 1rem;
 }
 
-// ─── Submit Button ────────────────────────────────────────────────────────────
+.empty-icon {
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+  animation: pop 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+.empty-title {
+  font-family: 'Prompt', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: $text-main;
+}
+.empty-sub {
+  font-size: 0.78rem;
+  color: $text-muted;
+  margin-top: 4px;
+  text-align: center;
+}
+
+@keyframes pop {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  80% {
+    transform: scale(1.12);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+// ─── Submit ───────────────────────────────────────────────────────────────────
 .submit-btn {
   width: 100%;
   padding: 1rem;
   border-radius: 16px;
   border: none;
-  background: linear-gradient(135deg, $indigo-deep 0%, $indigo-mid 50%, #5a3ea0 100%);
+  background: linear-gradient(135deg, #7c2d12 0%, $orange 55%, $gold 100%);
   color: white;
   font-family: 'Noto Sans Thai', 'Prompt', sans-serif;
   font-size: 1.05rem;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 6px 24px rgba(45, 45, 138, 0.35);
+  box-shadow: 0 6px 24px rgba(234, 88, 12, 0.35);
   transition:
     transform 0.2s,
     box-shadow 0.2s,
     opacity 0.2s;
-  letter-spacing: 0.01em;
-  &:hover:not(.loading):not(:disabled) {
+
+  &:hover:not(.submit-btn--loading):not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 10px 32px rgba(45, 45, 138, 0.4);
+    box-shadow: 0 10px 32px rgba(234, 88, 12, 0.4);
   }
-  &:active:not(.loading) {
+  &:active:not(.submit-btn--loading) {
     transform: translateY(0);
   }
-  &.loading,
+  &.submit-btn--loading,
   &:disabled {
     opacity: 0.75;
     cursor: not-allowed;
@@ -2244,236 +2296,7 @@ $error-red: #e53935;
   gap: 8px;
 }
 
-// ─── Dialogs ──────────────────────────────────────────────────────────────────
-.custom-dialog {
-  background: $surface;
-  border-radius: 20px;
-  overflow: hidden;
-  min-width: 320px;
-  max-width: 420px;
-  width: 100%;
-  box-shadow: 0 20px 60px rgba(26, 20, 96, 0.2);
-  &--mobile {
-    border-radius: 20px 20px 0 0;
-    max-width: 100%;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-  }
-}
-
-.custom-dialog-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1.1rem 1.25rem 0.9rem;
-  font-family: 'Prompt', sans-serif;
-  font-size: 1rem;
-  font-weight: 600;
-  color: $text-main;
-  border-bottom: 1px solid rgba(45, 45, 138, 0.07);
-  background: $surface-2;
-  &--danger {
-    background: #fff1f1;
-  }
-}
-.dialog-close {
-  width: 30px;
-  height: 30px;
-  border-radius: 8px;
-  border: none;
-  background: rgba(45, 45, 138, 0.07);
-  color: $text-muted;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.15s;
-  &:hover {
-    background: rgba(45, 45, 138, 0.14);
-  }
-}
-.custom-dialog-body {
-  padding: 1.25rem;
-}
-.custom-dialog-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  padding: 0.75rem 1.25rem 1.25rem;
-}
-
-.dialog-btn {
-  padding: 9px 22px;
-  border-radius: 10px;
-  border: none;
-  font-family: 'Noto Sans Thai', sans-serif;
-  font-size: 0.88rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition:
-    transform 0.1s,
-    background 0.15s;
-  &:active {
-    transform: scale(0.96);
-  }
-  &--cancel {
-    background: rgba(45, 45, 138, 0.07);
-    color: $text-muted;
-    &:hover {
-      background: rgba(45, 45, 138, 0.12);
-    }
-  }
-  &--confirm {
-    background: linear-gradient(135deg, $indigo-mid, #6b5ce7);
-    color: white;
-    box-shadow: 0 3px 12px rgba(45, 45, 138, 0.3);
-    &:hover {
-      box-shadow: 0 5px 16px rgba(45, 45, 138, 0.4);
-    }
-  }
-  &--danger {
-    background: linear-gradient(135deg, #e53935, #c62828);
-    color: white;
-    box-shadow: 0 3px 12px rgba(229, 57, 53, 0.3);
-  }
-}
-
-.delete-confirm-text {
-  text-align: center;
-  font-size: 0.92rem;
-  color: $text-main;
-  line-height: 1.8;
-  margin: 0;
-}
-.delete-target {
-  color: $coral;
-  font-weight: 700;
-}
-
-// ─── Result Dialogs ───────────────────────────────────────────────────────────
-.result-dialog {
-  background: #fff;
-  border-radius: 24px;
-  overflow: hidden;
-  width: 340px;
-  max-width: 92vw;
-  box-shadow: 0 24px 64px rgba(26, 20, 96, 0.18);
-}
-
-.result-dialog-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 1.25rem 1.5rem;
-  &--success {
-    background: linear-gradient(135deg, $green-dark, $green);
-  }
-  &--error {
-    background: linear-gradient(135deg, #7f1d1d, #dc2626);
-  }
-  &--warning {
-    background: linear-gradient(135deg, $amber-dark, $amber);
-  }
-}
-.result-dialog-icon {
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.18);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-.result-dialog-title {
-  font-family: 'Prompt', sans-serif;
-  font-size: 1rem;
-  font-weight: 700;
-  color: #fff;
-  line-height: 1.2;
-}
-.result-dialog-sub {
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.72);
-  margin-top: 2px;
-}
-.result-dialog-body {
-  padding: 1.5rem 1.5rem 0.75rem;
-  text-align: center;
-}
-
-.result-dialog-emoji {
-  font-size: 3rem;
-  margin-bottom: 0.75rem;
-  display: block;
-  animation: resultPop 0.45s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
-}
-
-@keyframes resultPop {
-  0% {
-    transform: scale(0.5);
-    opacity: 0;
-  }
-  80% {
-    transform: scale(1.15);
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
-.result-dialog-msg {
-  font-size: 0.92rem;
-  font-weight: 600;
-  color: #374151;
-  border-radius: 10px;
-  padding: 10px 14px;
-  margin: 0;
-  line-height: 1.6;
-  &--success {
-    background: $green-soft;
-  }
-  &--error {
-    background: #fef2f2;
-  }
-  &--warning {
-    background: $amber-soft;
-  }
-}
-.result-dialog-footer {
-  display: flex;
-  justify-content: flex-end;
-  padding: 0.75rem 1.5rem 1.25rem;
-}
-
-.result-dialog-progress {
-  height: 4px;
-  width: 100%;
-  transform-origin: left;
-  animation: progressShrink 2s linear forwards;
-  &--success {
-    background: linear-gradient(90deg, $green-dark, $green);
-  }
-  &--error {
-    background: linear-gradient(90deg, #7f1d1d, #dc2626);
-    animation-duration: 2.5s;
-  }
-}
-
-@keyframes progressShrink {
-  from {
-    transform: scaleX(1);
-  }
-  to {
-    transform: scaleX(0);
-  }
-}
-
-// ─── Animations ───────────────────────────────────────────────────────────────
+// ─── Animate In ───────────────────────────────────────────────────────────────
 .animate-in {
   animation: slideUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
@@ -2489,33 +2312,292 @@ $error-red: #e53935;
   }
 }
 
-.err-fade-enter-active,
-.err-fade-leave-active {
-  transition: all 0.25s ease;
+// ─── Dialogs ──────────────────────────────────────────────────────────────────
+.custom-dialog {
+  background: $surface;
+  border-radius: 20px;
+  overflow: hidden;
+  min-width: 320px;
+  max-width: 420px;
+  width: 100%;
+  box-shadow: 0 20px 60px rgba(234, 88, 12, 0.16);
+
+  &--mobile {
+    border-radius: 20px 20px 0 0;
+    max-width: 100%;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+  }
 }
-.err-fade-enter-from,
-.err-fade-leave-to {
-  opacity: 0;
-  transform: translateY(-4px);
+
+.dialog-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 1rem 1.25rem;
+  font-family: 'Prompt', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: $text-main;
+  border-bottom: 1px solid rgba(249, 115, 22, 0.08);
+  background: $surface-2;
+
+  &--danger {
+    background: linear-gradient(135deg, #fee2e2, #fff1f2);
+  }
+}
+
+.dialog-header-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, #7c2d12, $orange);
+
+  &--orange {
+    background: linear-gradient(135deg, #7c2d12, $orange);
+  }
+  &--amber {
+    background: linear-gradient(135deg, #92400e, $gold);
+  }
+  &--teal {
+    background: linear-gradient(135deg, #065f46, $teal);
+  }
+}
+
+.dialog-close-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: none;
+  background: rgba(234, 88, 12, 0.07);
+  color: $text-muted;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+  &:hover {
+    background: rgba(234, 88, 12, 0.14);
+  }
+}
+
+.dialog-body {
+  padding: 1.25rem;
+}
+
+.delete-warn-text {
+  font-size: 0.9rem;
+  color: $text-main;
+  line-height: 1.7;
+  margin: 0 0 8px;
+}
+.delete-target {
+  color: $orange;
+  font-weight: 700;
+}
+.delete-warn-sub {
+  display: flex;
+  align-items: center;
+  font-size: 0.8rem;
+  color: $text-muted;
+  margin: 0;
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 0 1.25rem 1.25rem;
+}
+
+.dlg-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 9px 22px;
+  border-radius: 10px;
+  border: none;
+  font-family: 'Noto Sans Thai', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    transform 0.1s,
+    box-shadow 0.15s,
+    opacity 0.15s;
+
+  &:active {
+    transform: scale(0.96);
+  }
+  &:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+  }
+
+  &--cancel {
+    background: rgba(234, 88, 12, 0.07);
+    color: $text-muted;
+    &:hover {
+      background: rgba(234, 88, 12, 0.13);
+    }
+  }
+  &--confirm {
+    background: linear-gradient(135deg, #7c2d12, $orange);
+    color: white;
+    box-shadow: 0 3px 12px rgba(234, 88, 12, 0.3);
+    &:hover {
+      box-shadow: 0 5px 18px rgba(234, 88, 12, 0.4);
+    }
+  }
+  &--danger {
+    background: linear-gradient(135deg, #ef4444, $red);
+    color: white;
+    box-shadow: 0 3px 12px rgba(220, 38, 38, 0.3);
+  }
+}
+
+// ─── Notify Dialog ─────────────────────────────────────────────────────────────
+.notify-dialog {
+  background: #fff;
+  border-radius: 24px;
+  overflow: hidden;
+  width: 340px;
+  max-width: 92vw;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.12);
+}
+
+.notify-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 1.25rem 1.5rem;
+
+  &--success {
+    background: linear-gradient(135deg, $green-dark, $green);
+  }
+  &--error {
+    background: linear-gradient(135deg, #7f1d1d, $red);
+  }
+}
+
+.notify-header-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.notify-title {
+  font-family: 'Prompt', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.2;
+}
+.notify-sub {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.72);
+  margin-top: 2px;
+}
+.notify-body {
+  padding: 1.5rem 1.5rem 0.75rem;
+  text-align: center;
+}
+
+.notify-emoji {
+  font-size: 2.8rem;
+  margin-bottom: 0.75rem;
+  display: block;
+  animation: notifyPop 0.45s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+@keyframes notifyPop {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  80% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.notify-msg {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #374151;
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin: 0 0 1rem;
+  line-height: 1.6;
+
+  &--success {
+    background: $green-soft;
+  }
+  &--error {
+    background: $red-soft;
+  }
+}
+
+.notify-progress {
+  height: 4px;
+  width: 100%;
+  animation: progressShrink linear forwards;
+
+  &--success {
+    background: linear-gradient(90deg, $green-dark, $green);
+  }
+  &--error {
+    background: linear-gradient(90deg, #7f1d1d, $red);
+  }
+}
+
+@keyframes progressShrink {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
 }
 
 // ─── Responsive ───────────────────────────────────────────────────────────────
-@media (max-width: 599px) {
+@media (max-width: 600px) {
+  .page-hero {
+    padding: 1.5rem 1rem 3.5rem;
+  }
+  .content-wrap {
+    padding: 0 0.75rem 3rem;
+  }
   .fest-card {
     padding: 1.1rem;
   }
-  .hero-header {
-    padding: 2.25rem 1rem 3.5rem;
+  .hero-left {
+    gap: 10px;
   }
-  .form-container {
-    padding: 0 0.75rem 1rem;
-    gap: 1rem;
+  .hero-icon-wrap {
+    width: 46px;
+    height: 46px;
   }
-  .card-header-count {
-    font-size: 1.6rem;
+  .logo-row {
+    flex-direction: column;
+    align-items: flex-start;
   }
-  .wish-text {
-    max-width: 160px;
+  .logo-upload-zone {
+    width: 110px;
   }
 }
 

@@ -100,23 +100,6 @@
         <div v-for="row in rows" :key="row.fId" class="festival-card">
           <!-- Cover image -->
           <div class="card-cover">
-            <!-- <q-img
-              v-if="row.image"
-              :src="row.image"
-              :ratio="16 / 9"
-              fit="contain"
-              class="card-cover-img"
-            > -->
-            <!-- <q-img
-  v-if="row.image"
-  :src="row.image"
-  :ratio="2188 / 417"
-  fit="cover"
-  class="card-cover-img"
->
-              <div class="card-cover-overlay" />
-            </q-img> -->
-            <!-- แทนที่ q-img เดิม -->
             <div
               v-if="row.image"
               class="card-cover-img"
@@ -161,7 +144,8 @@
               v-if="
                 row.actions.update &&
                 row.isEditStartEndDate &&
-                row.createdBy === Number(LocalStorage.getItem('userId'))
+                (row.createdBy === Number(LocalStorage.getItem('userId')) ||
+                  LocalStorage.getItem('role') === 'superAdmin')
               "
               :to="`/backoffice/festival/edit/${row.fId}`"
               class="card-action-btn card-action-btn--edit"
@@ -179,7 +163,9 @@
               v-if="
                 row.actions.delete &&
                 row.isDelete &&
-                row.createdBy === Number(LocalStorage.getItem('userId'))
+                Number(row.fId) !== minFid &&
+                (row.createdBy === Number(LocalStorage.getItem('userId')) ||
+                  LocalStorage.getItem('role') === 'superAdmin')
               "
               class="card-action-btn card-action-btn--delete"
               @click="onDelete(row)"
@@ -392,6 +378,9 @@ const loading = ref(false);
 const search = ref('');
 const isSubmitting = ref(false);
 
+// fId ที่น้อยที่สุด (เทศกาลแรกสุด) — ใช้ซ่อนปุ่มลบ
+const minFid = ref<number | null>(null);
+
 const pagination = ref({
   page: 1,
   rowsPerPage: 10,
@@ -442,16 +431,17 @@ const getImageUrl = async (imagePath: string): Promise<string> => {
 
 // ─── Data Fetching ────────────────────────────────────────────────────────────
 
-// const fetchMinFestival = async(): Promise<void> => {
-//   loading.value = true;
-//   try{
-//      const response = await api.get('/backoffice/festival/min');
-//      const res = response.data;
+// ดึง fId ที่น้อยที่สุด (response: { festival: <fId>, action, message })
+const fetchMinFestival = async (): Promise<void> => {
+  try {
+    const response = await api.get('/backoffice/festival/min');
+    const raw = response.data?.festival;
+    minFid.value = raw != null && !Number.isNaN(Number(raw)) ? Number(raw) : null;
+  } catch {
+    minFid.value = null;
+  }
+};
 
-//   }catch(error){
-//     openNotify(false, 'ไม่พบข้อมูล');
-//   }
-// }
 const fetchFestival = async (): Promise<void> => {
   loading.value = true;
   try {
@@ -513,6 +503,7 @@ const confirmDelete = async () => {
     const response = await api.delete(`/backoffice/festival/${itemToDelete.value.fId}`);
     deleteDialog.value = false;
     openNotify(true, response.data.message || 'ลบเทศกาลสำเร็จ');
+    void fetchMinFestival(); // อัปเดต fId น้อยสุดใหม่หลังลบ
     void fetchFestival();
   } catch (err: unknown) {
     const error = err as AxiosError<{ message: string }>;
@@ -539,12 +530,6 @@ const onRppChange = () => {
 };
 
 // ─── Particle Constants ───────────────────────────────────────────────────────
-// const PARTICLE_COLORS = [
-//   '#e11d48', '#fbbf24', '#6366f1', '#22c55e',
-//   '#fb7185', '#f59e0b', '#a78bfa', '#34d399',
-//   '#f472b6', '#38bdf8', '#4ade80', '#facc15',
-//   '#ff6b6b', '#ffd93d', '#6bcb77', '#4d96ff',
-// ];
 const PARTICLE_COLORS = [
   '#e11d48',
   '#fbbf24',
@@ -582,19 +567,6 @@ const PARTICLE_EMOJIS = [
   '💎',
   '🏵️',
 ];
-
-// const SHAPES: ShapeType[] = ['circle', 'square', 'star', 'triangle', 'emoji'];
-// const WEIGHTS = [0.25, 0.2, 0.2, 0.15, 0.2];
-
-// const pickShape = (): ShapeType => {
-//   const r = Math.random();
-//   let cumulative = 0;
-//   for (let i = 0; i < SHAPES.length; i++) {
-//     cumulative += WEIGHTS[i] ?? 0;
-//     if (r < cumulative) return SHAPES[i] ?? 'circle';
-//   }
-//   return 'circle';
-// };
 
 // ─── Particle Spawn ───────────────────────────────────────────────────────────
 const spawnParticles = (x: number, y: number) => {
@@ -643,6 +615,7 @@ const handleGlobalClick = (e: MouseEvent) => {
 
 // ─── Lifecycle ────────────────────────────────────────────────────────────────
 onMounted(() => {
+  void fetchMinFestival();
   void fetchFestival();
   document.addEventListener('click', handleGlobalClick);
 });
@@ -682,17 +655,11 @@ $radius: 18px;
 }
 
 // ─── Hero ─────────────────────────────────────────────────────────────────────
-// .page-hero {
-//   position: relative;
-//   overflow: hidden;
-//   background: linear-gradient(135deg, #7c2d12 0%, $orange 55%, $gold 100%);
-//   padding: 2.25rem 1.5rem 4rem;
-// }
 .page-hero {
   position: relative;
   overflow: hidden;
   background: linear-gradient(135deg, #7c2d12 0%, $orange 55%, $gold 100%);
-  padding: 1rem 1.5rem 2.5rem; // เปลี่ยนจาก 2.25rem 1.5rem 4rem
+  padding: 1rem 1.5rem 2.5rem;
 }
 
 .hero-blob {
@@ -786,7 +753,7 @@ $radius: 18px;
 .hero-actions {
   display: flex;
   align-items: center;
-  gap: 12px; // ← เพิ่มบรรทัดนี้
+  gap: 12px;
 
   @media (max-width: 600px) {
     flex-direction: column;
@@ -814,17 +781,6 @@ $radius: 18px;
 }
 
 // ─── Content ──────────────────────────────────────────────────────────────────
-// .content-wrap {
-//   max-width: 1100px;
-//   // margin: -2rem auto 0;
-//     margin: -1.25rem auto 0;  // เปลี่ยนจาก -2rem
-//   padding: 0 1rem 4rem;
-//   display: flex;
-//   flex-direction: column;
-//   gap: 1.25rem;
-//    z-index: 2;
-// }
-
 .content-wrap {
   max-width: 1100px;
   margin: -1.25rem auto 0;
@@ -889,25 +845,15 @@ $radius: 18px;
 }
 
 // ─── Card Grid ────────────────────────────────────────────────────────────────
-// .card-grid {
-//   display: grid;
-//   grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-//   gap: 1.1rem;
-
-//   @media (max-width: 480px) {
-//     grid-template-columns: repeat(2, 1fr);
-//     gap: 0.75rem;
-//   }
-// }
 .card-grid {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center; // ← ทำให้อยู่กลาง
+  justify-content: center;
   gap: 1.1rem;
 
   > .festival-card {
     width: 230px;
-    flex: 0 0 230px; // ← กำหนดขนาดคงที่
+    flex: 0 0 230px;
   }
 
   @media (max-width: 480px) {
@@ -947,15 +893,6 @@ $radius: 18px;
 }
 
 // ─── Card Cover ───────────────────────────────────────────────────────────────
-// .card-cover {
-//   position: relative;
-//   background: linear-gradient(135deg, #fff7ed, #fef3c7);
-// }
-
-// .card-cover-img {
-//   display: block;
-// }
-
 .card-cover {
   position: relative;
   background: linear-gradient(135deg, #fff7ed, #fef3c7);
@@ -965,34 +902,13 @@ $radius: 18px;
   overflow: hidden;
 }
 
-// .card-cover-img {
-//   display: block;
-//   width: 100%;
-// }
-
-// .card-cover-img {
-//   display: block;
-//   width: 100%;
-//   height: 120px;
-
-//   :deep(.q-img__image) {
-//     object-fit: contain;
-//     object-position: center 60%; // ← เลื่อนลงจากกึ่งกลาง
-//     background: linear-gradient(135deg, #fff7ed, #fef3c7);
-//   }
-
-//   :deep(.q-img__container) {
-//     height: 120px;
-//   }
-// }
-
 .card-cover-img {
   width: 100%;
   height: 120px;
-  background-size: contain; // ← เห็นภาพเต็ม ไม่ตัด
-  background-position: center center; // ← กึ่งกลางทั้งแนวตั้งและแนวนอน
+  background-size: contain;
+  background-position: center center;
   background-repeat: no-repeat;
-  background-color: #fff7ed; // ← พื้นหลังส่วนว่าง
+  background-color: #fff7ed;
   position: relative;
 }
 
@@ -1003,19 +919,7 @@ $radius: 18px;
   pointer-events: none;
 }
 
-// .card-cover-placeholder {
-//   height: 140px;
-//   display: flex;
-//   align-items: center;
-//   justify-content: center;
-//   background: linear-gradient(135deg, #fff7ed, #fef3c7);
-
-//   @media (max-width: 480px) {
-//     height: 110px;
-//   }
-// }
 .card-cover-placeholder {
-  // เปลี่ยนจาก height: 140px เป็น aspect-ratio
   aspect-ratio: 2188 / 417;
   height: auto;
   display: flex;
@@ -1061,11 +965,13 @@ $radius: 18px;
   font-weight: 600;
   color: $text-main;
   text-decoration: none;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
   margin-bottom: 4px;
   transition: color 0.15s;
+
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  line-height: 1.4;
 
   &:hover {
     color: $orange;

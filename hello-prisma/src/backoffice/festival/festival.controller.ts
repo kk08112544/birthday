@@ -17,6 +17,8 @@ import { CreateFestivalDto } from './dto/create-festival.dto';
 import { UpdateFestivalDto } from './dto/update-festival.dto';
 import { PaginationFestivalDto } from './dto/pagination-festival.dto';
 import { PaginationFestivalLogDto } from './dto/pagination-festivallog.dto';
+import { PaginationWishDto } from './dto/pagination-wish.dto';
+import { PaginationCardDto } from './dto/pagination-card.dto';
 import { JwtAuthGuard } from 'src/common/guard/jwt/jwt-auth.guard';
 import type { User } from '@prisma/client';
 import { CurrentUser } from 'src/common/decorator/user.decorator';
@@ -59,8 +61,18 @@ export class AdminFestivalController {
       transformOptions: { enableImplicitConversion: true },
     }),
   )
-  async getLog(@Query() paginationDto: PaginationFestivalLogDto) {
-    return this.adminfestivalService.getLog(paginationDto);
+  findLog(@Query() paginationDto: PaginationFestivalLogDto) {
+    return this.adminfestivalService.findLog(paginationDto);
+  }
+
+  @Get('wish')
+  findManyWish(@Query() paginationDto: PaginationWishDto) {
+    return this.adminfestivalService.findManyWish(paginationDto);
+  }
+
+  @Get('card')
+  findManyCard(@Query() paginationDto: PaginationCardDto) {
+    return this.adminfestivalService.findManyCard(paginationDto);
   }
 
   @Get(':id')

@@ -16,6 +16,9 @@ interface RequestWithFile extends Request {
   uploadedFileName?: string;
 }
 
+// ✅ Pattern ของชื่อไฟล์ที่ระบบสร้างไว้แล้ว เช่น "Fileupload-1717029384123.png"
+const UPLOADED_FILENAME_PATTERN = /^Fileupload-\d+\.[a-zA-Z0-9]+$/;
+
 @Controller('upload')
 export class UploadController {
   @Post()
@@ -28,12 +31,18 @@ export class UploadController {
           file: Express.Multer.File,
           cb: (error: Error | null, filename: string) => void,
         ) => {
+          // ✅ ถ้าชื่อไฟล์เดิมตรง pattern อยู่แล้ว → ใช้ชื่อเดิมเลย ไม่ rename
+          if (UPLOADED_FILENAME_PATTERN.test(file.originalname)) {
+            req.uploadedFileName = file.originalname;
+            return cb(null, file.originalname);
+          }
+
+          // กรณีอื่น → สร้างชื่อใหม่ตามรูปแบบเดิม
           const extArray = file.mimetype.split('/');
           const extension = extArray[extArray.length - 1];
           const newFilename = `Fileupload-${Date.now()}.${extension}`;
 
-          req.uploadedFileName = newFilename; // ✅ ไม่ unsafe แล้ว
-
+          req.uploadedFileName = newFilename;
           cb(null, newFilename);
         },
       }),

@@ -99,6 +99,15 @@
             </q-td>
           </template>
 
+          <template v-slot:body-cell-festival="props">
+            <q-td :props="props">
+              <div class="fest-cell">
+                <q-icon name="celebration" size="14px" class="fest-cell-icon" />
+                <span class="fest-cell-name">{{ props.row.festivalName }}</span>
+              </div>
+            </q-td>
+          </template>
+
           <template v-slot:body-cell-actor="props">
             <q-td :props="props">
               <div class="actor-wrap">
@@ -217,6 +226,15 @@
               <q-icon :name="actionIcon(viewRow.action)" size="13px" class="q-mr-xs" />
               {{ actionLabel(viewRow.action) }}
             </span>
+          </div>
+
+          <!-- เทศกาล -->
+          <div class="view-section">
+            <div class="view-field-label">เทศกาล</div>
+            <div class="fest-cell fest-cell--view">
+              <q-icon name="celebration" size="15px" class="fest-cell-icon" />
+              <span class="fest-cell-name">{{ viewRow.festivalName }}</span>
+            </div>
           </div>
 
           <!-- ผู้ดำเนินการ -->
@@ -366,6 +384,7 @@ interface TableRow {
   rowKey: string;
   displayIndex: number;
   action: string;
+  festivalName: string;
   actorName: string;
   actorUsername: string;
   actorRole: string;
@@ -405,6 +424,13 @@ const pagination = ref({
 const columns: QTableColumn[] = [
   { name: 'no', label: '#', field: 'displayIndex', align: 'center', style: 'width: 48px' },
   { name: 'action', label: 'ประเภท', field: 'action', align: 'left', style: 'width: 100px' },
+  {
+    name: 'festival',
+    label: 'เทศกาล',
+    field: 'festivalName',
+    align: 'left',
+    style: 'width: 200px',
+  },
   { name: 'actor', label: 'Admin', field: 'actorName', align: 'left', style: 'width: 200px' },
   { name: 'diff', label: 'การเปลี่ยนแปลง', field: 'changedFields', align: 'left' },
   { name: 'ts', label: 'วันที่/เวลา', field: 'ts', align: 'left', style: 'width: 140px' },
@@ -431,20 +457,9 @@ function onView(row: TableRow): void {
   viewDialog.value = true;
 }
 
-// const AVATAR_PALETTES = [
-//   'orange',
-//   'indigo',
-//   'teal',
-//   'rose',
-//   'amber',
-//   'sky',
-//   'emerald',
-//   'fuchsia',
-// ] as const;
-
 const AVATAR_PALETTES = [
   'orange',
-  'indigo', // ← แทน indigo
+  'indigo',
   'teal',
   'rose',
   'amber',
@@ -531,6 +546,7 @@ function buildRow(entry: RawLogEntry, index: number): TableRow {
     rowKey: `${entry.timestamp}-${index}`,
     displayIndex: (serverPage.value - 1) * serverLimit.value + index + 1,
     action: entry.action,
+    festivalName: d?.festivalName ?? '-',
     actorName: actor?.firstName ?? '-',
     actorUsername: actor?.userName ?? '-',
     actorRole: actor?.role ?? '',
@@ -1027,6 +1043,37 @@ $radius: 20px;
   }
 }
 
+// ─── Festival Cell ────────────────────────────────────────────────────────────
+.fest-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, rgba(234, 88, 12, 0.08), rgba(245, 158, 11, 0.06));
+  border: 1px solid rgba(234, 88, 12, 0.18);
+  border-radius: 10px;
+  padding: 5px 11px;
+  max-width: 100%;
+
+  &--view {
+    padding: 7px 13px;
+  }
+}
+.fest-cell-icon {
+  color: $orange;
+  flex-shrink: 0;
+  opacity: 0.85;
+}
+.fest-cell-name {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: $text-main;
+  line-height: 1.35;
+  word-break: break-word;
+  .fest-cell--view & {
+    font-size: 0.88rem;
+  }
+}
+
 // ─── Action Badge ─────────────────────────────────────────────────────────────
 .action-badge {
   display: inline-flex;
@@ -1105,15 +1152,11 @@ $avatar-palettes: (
     #ea580c,
     #f97316,
     rgba(234, 88, 12, 0.4),
-    // ← เปลี่ยนจาก rgba(124, 58, 237, 0.4)
   ),
   'indigo': (
     #f97316,
-    // ← เปลี่ยนจาก #4f46e5
     #ea580c,
-    // ← เปลี่ยนจาก #3730a3
     rgba(249, 115, 22, 0.4),
-    // ← เปลี่ยนจาก rgba(79, 70, 229, 0.4)
   ),
   'teal': (
     #0d9488,
@@ -1132,11 +1175,8 @@ $avatar-palettes: (
   ),
   'sky': (
     #cc7333,
-    // ← เปลี่ยนจาก #4f46e5
     #ea580c,
-    // ← เปลี่ยนจาก #3730a3
     rgba(249, 115, 22, 0.4),
-    // ← เปลี่ยนจาก rgba(79, 70, 229, 0.4)
   ),
   'emerald': (
     #059669,

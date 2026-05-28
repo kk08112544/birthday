@@ -264,8 +264,8 @@
 
           <div v-else class="empty-state">
             <div class="empty-icon">🃏</div>
-            <div class="empty-title">ยังไม่มีการ์ด</div>
-            <div class="empty-sub">ยังไม่มีการ์ดอวยพรในเทศกาลนี้</div>
+            <div class="empty-title">ยังไม่มีบัตรอวยพร]</div>
+            <div class="empty-sub">ยังไม่มีบัตรอวยพรในเทศกาลนี้</div>
           </div>
         </div>
 

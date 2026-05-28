@@ -48,18 +48,6 @@
               }"
               @click="canEdit && fileInput?.pickFiles()"
             >
-              <!-- <q-img
-                v-if="imageFile || existingImageUrl"
-                :src="imageFile ? getFilePreview(imageFile) : existingImageUrl"
-                class="cover-img"
-                fit="contain"
-                :ratio="16 / 9"
-              >
-                <div v-if="canEdit" class="cover-overlay">
-                  <q-icon name="photo_camera" size="28px" color="white" />
-                  <span>เปลี่ยนรูป</span>
-                </div>
-              </q-img> -->
               <div
                 v-if="imageFile || existingImageUrl"
                 class="cover-img"
@@ -113,11 +101,13 @@
               :disable="!canEdit"
               label="ชื่อเทศกาล"
               placeholder="เช่น สงกรานต์-กกจ-2568"
-              hint="รูปแบบ: เทศกาล-ตัวย่อหน่วยงาน (2-5)-ปี"
+              hint="รูปแบบ: เทศกาล-ตัวย่อหน่วยงาน (2-5)-ปี(4หลัก)"
               dense
               :error="nameError"
               :error-message="
-                nameError ? 'รูปแบบต้องเป็น เทศกาล-หน่วยงาน-ปี เช่น สงกรานต์-IT-2568' : ''
+                nameError
+                  ? 'รูปแบบต้องเป็น เทศกาล-ตัวย่อหน่วยงาน (2-5)-ปี(4หลัก) เช่น สงกรานต์-IT-2568'
+                  : ''
               "
               class="custom-input"
               @update:model-value="onFestivalNameChange"
@@ -137,22 +127,14 @@
                   'upload-zone--error': logoError,
                   'upload-zone--disabled': !canEdit,
                 }"
-                @click="canEdit && logoInput?.pickFiles()"
+                @click="canEdit && !useDeptLogo && logoInput?.pickFiles()"
               >
-                <!-- v-if="logoFile "
-                  :src="getFilePreview(logoFile)" -->
-                <q-img
+                <img
                   v-if="logoFile || useDeptLogo"
                   :src="useDeptLogo ? '/logo-ldd.png' : getFilePreview(logoFile!)"
-                  class="logo-preview"
-                  :ratio="1"
-                  fit="contain"
-                >
-                  <div v-if="canEdit" class="cover-overlay">
-                    <q-icon name="photo_camera" size="20px" color="white" />
-                    <span>เปลี่ยน</span>
-                  </div>
-                </q-img>
+                  class="logo-preview-img"
+                  alt="logo preview"
+                />
                 <div v-else class="logo-placeholder">
                   <div class="logo-placeholder-icon">🏷️</div>
                   <div class="cover-placeholder-text">อัปโหลด Logo</div>
@@ -165,7 +147,11 @@
                   PNG, JPG · แนะนำสี่เหลี่ยมจัตุรัส<br />ขนาด 100 × 100 px · ไม่เกิน 2 MB
                 </div>
               </div>
-              <div class="dept-logo-option" @click="toggleDeptLogo">
+              <div
+                class="dept-logo-option"
+                :class="{ 'dept-logo-option--disabled': !canEdit }"
+                @click="canEdit && toggleDeptLogo()"
+              >
                 <img src="/logo-ldd.png" class="dept-logo-img" alt="logo กรม" />
                 <div class="dept-logo-check" :class="{ 'dept-logo-check--active': useDeptLogo }">
                   <q-icon v-if="useDeptLogo" name="check" size="14px" color="white" />
@@ -199,9 +185,10 @@
               outlined
               dense
               :error="webNameError"
-              :error-message="webNameError ? 'ชื่อเว็บไซต์จำเป็นต้องกรอก' : ''"
+              :error-message="webNameError ? 'รูปแบบต้องเป็น เทศกาล-ตัวย่อหน่วยงาน (2-5)-ปี(4หลัก) เช่น สงกรานต์-IT-2568' : ''"
               class="custom-input"
-              @update:model-value="webNameError = false"
+              @update:model-value="onWebNameChange"
+
             >
               <template v-slot:prepend>
                 <q-icon name="language" color="deep-orange-5" />
@@ -402,7 +389,7 @@
           </div>
         </div>
 
-        <!-- ===== CARD: การ์ดอวยพร ===== -->
+        <!-- ===== CARD: บัตรอวยพร ===== -->
         <div class="fest-card animate-in" style="animation-delay: 0.2s">
           <div class="card-label">
             <span class="label-dot label-dot--teal" />
@@ -411,7 +398,7 @@
           <div class="card-header-row">
             <div class="stat-chip">
               <q-icon name="photo_library" size="17px" color="teal-6" />
-              <span class="stat-num">{{ existingCards.length + cardFileList.length }}</span>
+              <span class="stat-num">{{ totalCardCount }}</span>
               <span class="stat-label">รูป</span>
             </div>
             <q-btn
@@ -425,13 +412,17 @@
             />
           </div>
 
-          <div v-if="existingCards.length > 0 || cardFileList.length > 0" class="card-grid">
+          <div v-if="totalCardCount > 0" class="card-grid">
+            <!-- บัตรเดิม (existing - มี cId + imageName) -->
             <div
               v-for="(card, i) in existingCards"
               :key="'existing-' + card.cId"
               class="card-thumb"
             >
               <q-img :src="card.previewUrl" ratio="1" fit="contain" class="card-thumb-img" />
+              <div class="card-thumb-badge card-thumb-badge--existing">
+                <q-icon name="bookmark" size="11px" />เดิม
+              </div>
               <button
                 v-if="canEdit"
                 class="card-thumb-remove"
@@ -441,8 +432,32 @@
                 <q-icon name="close" size="14px" />
               </button>
             </div>
+            <!-- บัตรที่เลือกใหม่จาก API คลัง -->
+            <div v-for="(item, i) in selectedApiCards" :key="'api-' + item.cId" class="card-thumb">
+              <q-img
+                :src="getCardImageUrl(item.imageCard)"
+                ratio="1"
+                fit="contain"
+                class="card-thumb-img"
+              />
+              <div class="card-thumb-badge card-thumb-badge--api">
+                <q-icon name="cloud_done" size="11px" />คลัง
+              </div>
+              <button
+                v-if="canEdit"
+                class="card-thumb-remove"
+                type="button"
+                @click="removeApiCard(i)"
+              >
+                <q-icon name="close" size="14px" />
+              </button>
+            </div>
+            <!-- บัตรที่อัปโหลดใหม่ -->
             <div v-for="(file, i) in cardFileList" :key="'new-' + i" class="card-thumb">
               <q-img :src="getFilePreview(file)" ratio="1" fit="contain" class="card-thumb-img" />
+              <div class="card-thumb-badge card-thumb-badge--new">
+                <q-icon name="upload" size="11px" />ใหม่
+              </div>
               <button v-if="canEdit" class="card-thumb-remove" type="button" @click="removeCard(i)">
                 <q-icon name="close" size="14px" />
               </button>
@@ -452,7 +467,7 @@
           <div v-else class="empty-state">
             <div class="empty-icon">🃏</div>
             <div class="empty-title">ยังไม่มีบัตรอวยพร</div>
-            <div class="empty-sub">อัปโหลดรูปสวยๆ เพื่อใช้เป็นบัตรอวยพร (691 × 691 px)</div>
+            <div class="empty-sub">เลือกจากคลังบัตรหรืออัปโหลดรูปสวยๆ (691 × 691 px)</div>
           </div>
         </div>
 
@@ -478,11 +493,859 @@
       </div>
     </div>
 
-    <!-- ===== DIALOG: เพิ่มคำอวยพร ===== -->
+    <!-- ===== DIALOG: เลือกคำอวยพร ===== -->
+    <q-dialog
+      v-model="wishSelectorOpen"
+      transition-show="slide-up"
+      transition-hide="slide-down"
+      :maximized="$q.screen.lt.md"
+      full-height
+      :content-style="$q.screen.gt.sm ? 'width:min(1200px,96vw);max-width:96vw' : ''"
+    >
+      <div class="wish-dlg">
+        <!-- Header -->
+        <div class="wish-dlg-header">
+          <div class="wish-dlg-header-left">
+            <div class="wish-dlg-header-icon">
+              <q-icon name="format_quote" color="white" size="20px" />
+            </div>
+            <div class="wish-dlg-header-text">
+              <div class="wish-dlg-title">เลือกคำอวยพร</div>
+              <div class="wish-dlg-sub">เลือกได้หลายรายการ · พิมพ์คำอวยพรเองได้</div>
+            </div>
+          </div>
+          <div class="wish-dlg-header-right">
+            <div class="wish-dlg-tabs">
+              <button
+                class="wish-tab-btn"
+                :class="{ 'wish-tab-btn--active': wishDlgTab === 'browse' }"
+                type="button"
+                @click="wishDlgTab = 'browse'"
+              >
+                <q-icon name="search" size="15px" />
+                <span class="wish-tab-label">เลือกจากรายการ</span>
+                <span v-if="tempSelectedWishes.size > 0" class="wish-tab-badge">{{
+                  tempSelectedWishes.size
+                }}</span>
+              </button>
+              <button
+                class="wish-tab-btn"
+                :class="{ 'wish-tab-btn--active': wishDlgTab === 'custom' }"
+                type="button"
+                @click="wishDlgTab = 'custom'"
+              >
+                <q-icon name="edit_note" size="15px" />
+                <span class="wish-tab-label">เพิ่มเอง</span>
+              </button>
+            </div>
+            <button class="wish-dlg-close" type="button" @click="closeWishSelector">
+              <q-icon name="close" size="20px" />
+            </button>
+          </div>
+        </div>
+
+        <!-- TAB: Browse -->
+        <template v-if="wishDlgTab === 'browse'">
+          <div class="wish-dlg-filters">
+            <div class="wish-filter-grid">
+              <q-input
+                v-model="wishFilterWord"
+                dense
+                outlined
+                placeholder="ค้นหาคำอวยพร..."
+                clearable
+                autofocus
+                class="custom-input wish-filter-input"
+                @update:model-value="onFilterChange"
+              >
+                <template v-slot:prepend
+                  ><q-icon name="format_quote" size="16px" color="deep-orange-5"
+                /></template>
+              </q-input>
+              <q-input
+                v-model="wishFilterFestival"
+                dense
+                outlined
+                placeholder="ค้นหาเทศกาล..."
+                clearable
+                class="custom-input wish-filter-input"
+                @update:model-value="onFilterChange"
+              >
+                <template v-slot:prepend
+                  ><q-icon name="celebration" size="16px" color="deep-orange-5"
+                /></template>
+              </q-input>
+              <q-select
+                v-model="wishFilterMonth"
+                :options="monthOptions"
+                dense
+                outlined
+                clearable
+                emit-value
+                map-options
+                option-value="value"
+                option-label="label"
+                label="เดือน"
+                class="custom-input wish-filter-input"
+                @update:model-value="onFilterChange"
+              >
+                <template v-slot:no-option>
+                  <q-item
+                    ><q-item-section class="text-grey-6">ไม่มีข้อมูลเดือน</q-item-section></q-item
+                  >
+                </template>
+              </q-select>
+              <q-select
+                v-model="wishFilterYear"
+                :options="yearFilterOptions"
+                dense
+                outlined
+                clearable
+                use-input
+                input-debounce="200"
+                hide-selected
+                fill-input
+                emit-value
+                map-options
+                option-value="value"
+                option-label="label"
+                label="ปี (พ.ศ.)"
+                placeholder="พิมพ์ค้นหาปี..."
+                class="custom-input wish-filter-input"
+                @filter="onYearFilter"
+                @update:model-value="onFilterChange"
+              >
+                <template v-slot:no-option>
+                  <q-item
+                    ><q-item-section class="text-grey-6">ไม่พบปีที่ค้นหา</q-item-section></q-item
+                  >
+                </template>
+              </q-select>
+            </div>
+            <div class="wish-filter-actions">
+              <button
+                v-if="hasActiveFilters"
+                class="wish-filter-clear"
+                type="button"
+                @click="clearFilters"
+              >
+                <q-icon name="filter_alt_off" size="15px" />ล้างตัวกรอง
+              </button>
+            </div>
+          </div>
+
+          <div class="wish-dlg-scroll">
+            <!-- Loading skeleton -->
+            <template v-if="wishApiLoading && wishApiItems.length === 0">
+              <table class="wish-table">
+                <thead>
+                  <tr>
+                    <th class="wish-table-th wish-table-th--num">#</th>
+                    <th class="wish-table-th">คำอวยพร</th>
+                    <th class="wish-table-th">เทศกาล</th>
+                    <th class="wish-table-th wish-table-th--action"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="n in 8" :key="'sk-' + n" class="wish-table-row">
+                    <td class="wish-table-td wish-table-td--num">
+                      <div class="wsp-skeleton-line" style="width: 20px; height: 12px" />
+                    </td>
+                    <td class="wish-table-td">
+                      <div
+                        class="wsp-skeleton-line"
+                        :style="{ width: 40 + (n % 4) * 15 + '%', height: '12px' }"
+                      />
+                    </td>
+                    <td class="wish-table-td">
+                      <div class="wsp-skeleton-line" style="width: 80px; height: 12px" />
+                    </td>
+                    <td class="wish-table-td"></td>
+                  </tr>
+                </tbody>
+              </table>
+            </template>
+
+            <!-- Error -->
+            <div v-else-if="wishApiError && wishApiItems.length === 0" class="wsp-api-empty">
+              <q-icon name="wifi_off" size="32px" color="grey-4" />
+              <div class="wsp-api-empty-text">โหลดข้อมูลไม่สำเร็จ</div>
+              <button class="wsp-retry-btn" type="button" @click="loadWishPage(wishApiPage)">
+                <q-icon name="refresh" size="14px" />ลองใหม่
+              </button>
+            </div>
+
+            <!-- Empty -->
+            <div v-else-if="!wishApiLoading && wishApiItems.length === 0" class="wsp-api-empty">
+              <q-icon name="search_off" size="32px" color="grey-4" />
+              <div class="wsp-api-empty-text">ไม่พบคำอวยพรที่ตรงกับเงื่อนไข</div>
+            </div>
+
+            <!-- Table -->
+            <template v-else>
+              <table class="wish-table">
+                <thead>
+                  <tr>
+                    <th class="wish-table-th wish-table-th--num">#</th>
+                    <th class="wish-table-th">คำอวยพร</th>
+                    <th class="wish-table-th wish-table-th--fest">เทศกาล</th>
+                    <th class="wish-table-th wish-table-th--action"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <template v-for="(items, festName) in groupedWishApiItems" :key="festName">
+                    <tr
+                      v-for="item in items"
+                      :key="item.wId"
+                      class="wish-table-row"
+                      :class="{
+                        'wish-table-row--selected': tempSelectedWishes.has(item.wishWord),
+                        'wish-table-row--added': isWishAdded(item.wishWord),
+                      }"
+                      @click="toggleTempWish(item.wishWord)"
+                    >
+                      <td class="wish-table-td wish-table-td--num">
+                        <div
+                          v-if="tempSelectedWishes.has(item.wishWord)"
+                          class="wish-table-check wish-table-check--on"
+                        >
+                          <q-icon name="check" size="12px" color="white" />
+                        </div>
+                        <div
+                          v-else-if="isWishAdded(item.wishWord)"
+                          class="wish-table-check wish-table-check--added"
+                        >
+                          <q-icon name="check" size="12px" color="grey-5" />
+                        </div>
+                        <span v-else class="wish-table-num-text">{{
+                          rowNumberMap.get(item.wId)
+                        }}</span>
+                      </td>
+                      <td class="wish-table-td wish-table-td--word">
+                        {{ item.wishWord }}
+                      </td>
+                      <td class="wish-table-td wish-table-td--fest">
+                        <span class="wish-fest-badge">{{
+                          item.festival?.festivalName ?? 'อื่นๆ'
+                        }}</span>
+                      </td>
+                      <td class="wish-table-td wish-table-td--action">
+                        <q-icon
+                          v-if="isWishAdded(item.wishWord)"
+                          name="check_circle"
+                          size="16px"
+                          color="grey-4"
+                        />
+                      </td>
+                    </tr>
+                  </template>
+                </tbody>
+              </table>
+              <div v-if="wishApiLoading" class="wsp-load-more">
+                <q-circular-progress indeterminate size="22px" color="deep-orange-5" />
+              </div>
+            </template>
+          </div>
+
+          <!-- ✅ Compact pagination — แบบเดียวกับ q-table ใน unpolite page -->
+          <div v-if="wishApiTotal > 0" class="compact-pg compact-pg--wish">
+            <div class="compact-pg-left">
+              <span class="compact-pg-label">รายการต่อหน้า:</span>
+              <q-select
+                v-model="wishApiLimit"
+                :options="limitOptions"
+                dense
+                borderless
+                :disable="wishApiLoading"
+                class="compact-pg-select"
+                @update:model-value="onLimitChange"
+              />
+            </div>
+            <div class="compact-pg-info">{{ wishRangeText }}</div>
+            <div class="compact-pg-nav">
+              <button
+                type="button"
+                class="compact-pg-btn"
+                :disabled="wishApiPage <= 1 || wishApiLoading"
+                aria-label="ก่อนหน้า"
+                @click="loadWishPage(wishApiPage - 1)"
+              >
+                <q-icon name="chevron_left" size="20px" />
+              </button>
+              <button
+                type="button"
+                class="compact-pg-btn"
+                :disabled="wishApiPage >= wishApiTotalPages || wishApiLoading"
+                aria-label="ถัดไป"
+                @click="loadWishPage(wishApiPage + 1)"
+              >
+                <q-icon name="chevron_right" size="20px" />
+              </button>
+            </div>
+          </div>
+
+          <div class="wish-dlg-footer">
+            <div class="wish-footer-summary">
+              <template v-if="tempSelectedWishes.size > 0">
+                <q-icon name="check_circle" size="16px" color="deep-orange-5" />
+                <span>เลือกแล้ว {{ tempSelectedWishes.size }} รายการ</span>
+              </template>
+              <span v-else class="wish-footer-empty-label">ยังไม่ได้เลือก</span>
+            </div>
+            <div class="wish-footer-actions">
+              <button type="button" class="dlg-btn dlg-btn--cancel" @click="closeWishSelector">
+                ยกเลิก
+              </button>
+              <button
+                type="button"
+                class="dlg-btn dlg-btn--secondary"
+                @click="wishDlgTab = 'custom'"
+              >
+                <q-icon name="edit_note" size="16px" /><span>เพิ่มเอง</span>
+              </button>
+              <button
+                type="button"
+                class="dlg-btn dlg-btn--confirm"
+                :disabled="tempSelectedWishes.size === 0"
+                @click="confirmWishSelection"
+              >
+                <q-icon name="add_circle" size="17px" /><span>เพิ่มในรายการ</span>
+                <span v-if="tempSelectedWishes.size > 0" class="wsp-badge">{{
+                  tempSelectedWishes.size
+                }}</span>
+              </button>
+            </div>
+          </div>
+        </template>
+
+        <!-- TAB: Custom -->
+        <template v-if="wishDlgTab === 'custom'">
+          <div class="wish-dlg-custom-body">
+            <div class="wish-custom-left">
+              <div class="wish-custom-section-title">
+                <q-icon name="edit_note" size="18px" color="deep-orange-5" />พิมพ์คำอวยพรของคุณ
+              </div>
+              <p class="wish-custom-hint">
+                พิมพ์คำอวยพรที่ต้องการ แล้วกด "เพิ่มทันที" หรือกด Ctrl+Enter
+              </p>
+              <q-input
+                v-model="customWishText"
+                type="textarea"
+                outlined
+                dense
+                placeholder="เช่น สุขสันต์วันเกิด ขอให้มีความสุขมากๆ นะคะ..."
+                class="custom-input"
+                autogrow
+                @keydown.ctrl.enter="addCustomWish"
+              />
+              <q-btn
+                unelevated
+                color="deep-orange-5"
+                icon="add"
+                label="เพิ่มทันที"
+                class="action-btn q-mt-sm full-width"
+                :disable="!customWishText.trim()"
+                @click="addCustomWish"
+              />
+              <div class="wish-custom-shortcut">Ctrl + Enter เพื่อเพิ่มเร็ว</div>
+            </div>
+            <div class="wish-custom-right">
+              <div class="wish-custom-section-title">
+                <q-icon name="checklist" size="18px" color="deep-orange-5" />รายการที่เลือกทั้งหมด
+                <span v-if="tempSelectedWishes.size > 0" class="wish-sel-badge">{{
+                  tempSelectedWishes.size
+                }}</span>
+              </div>
+              <div v-if="tempSelectedWishes.size > 0" class="wish-sel-list">
+                <div v-for="w in Array.from(tempSelectedWishes)" :key="w" class="wish-sel-item">
+                  <span class="wish-sel-text">{{ w }}</span>
+                  <div class="wish-sel-actions">
+                    <button
+                      class="wish-sel-btn wish-sel-btn--edit"
+                      type="button"
+                      @click="editSelectedWish(w)"
+                    >
+                      <q-icon name="edit" size="15px" />
+                    </button>
+                    <button
+                      class="wish-sel-btn wish-sel-btn--delete"
+                      type="button"
+                      @click="toggleTempWish(w)"
+                    >
+                      <q-icon name="delete_outline" size="15px" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div v-else class="wish-sel-empty">
+                <q-icon name="touch_app" size="26px" color="grey-4" />
+                <div>ยังไม่มีรายการที่เลือก</div>
+                <button class="wsp-retry-btn" type="button" @click="wishDlgTab = 'browse'">
+                  <q-icon name="search" size="13px" />ไปเลือกจากรายการ
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="wish-dlg-footer">
+            <div class="wish-footer-summary">
+              <template v-if="tempSelectedWishes.size > 0">
+                <q-icon name="check_circle" size="16px" color="deep-orange-5" />
+                <span>เลือกแล้ว {{ tempSelectedWishes.size }} รายการ</span>
+              </template>
+              <span v-else class="wish-footer-empty-label">ยังไม่ได้เลือก</span>
+            </div>
+            <div class="wish-footer-actions">
+              <button type="button" class="dlg-btn dlg-btn--cancel" @click="closeWishSelector">
+                ยกเลิก
+              </button>
+              <button
+                type="button"
+                class="dlg-btn dlg-btn--secondary"
+                @click="wishDlgTab = 'browse'"
+              >
+                <q-icon name="search" size="16px" /><span>กลับเลือก</span>
+              </button>
+              <button
+                type="button"
+                class="dlg-btn dlg-btn--confirm"
+                :disabled="tempSelectedWishes.size === 0"
+                @click="confirmWishSelection"
+              >
+                <q-icon name="add_circle" size="17px" /><span>เพิ่มในรายการ</span>
+                <span v-if="tempSelectedWishes.size > 0" class="wsp-badge">{{
+                  tempSelectedWishes.size
+                }}</span>
+              </button>
+            </div>
+          </div>
+        </template>
+      </div>
+    </q-dialog>
+
+    <!-- ===== DIALOG: เลือกบัตรอวยพร ===== -->
+    <q-dialog
+      v-model="cardSelectorOpen"
+      transition-show="slide-up"
+      transition-hide="slide-down"
+      :maximized="$q.screen.lt.md"
+      full-height
+      :content-style="$q.screen.gt.sm ? 'width:min(1200px,96vw);max-width:96vw' : ''"
+    >
+      <div class="wish-dlg card-dlg">
+        <!-- Header -->
+        <div class="wish-dlg-header card-dlg-header">
+          <div class="wish-dlg-header-left">
+            <div class="wish-dlg-header-icon">
+              <q-icon name="photo_library" color="white" size="20px" />
+            </div>
+            <div class="wish-dlg-header-text">
+              <div class="wish-dlg-title">เลือกบัตรอวยพร</div>
+              <div class="wish-dlg-sub">เลือกได้หลายรูป · อัปโหลดรูปใหม่ได้</div>
+            </div>
+          </div>
+          <div class="wish-dlg-header-right">
+            <div class="wish-dlg-tabs">
+              <button
+                class="wish-tab-btn"
+                :class="{ 'wish-tab-btn--active': cardDlgTab === 'browse' }"
+                type="button"
+                @click="cardDlgTab = 'browse'"
+              >
+                <q-icon name="search" size="15px" />
+                <span class="wish-tab-label">เลือกจากคลัง</span>
+                <span v-if="tempSelectedCards.size > 0" class="wish-tab-badge">{{
+                  tempSelectedCards.size
+                }}</span>
+              </button>
+              <button
+                class="wish-tab-btn"
+                :class="{ 'wish-tab-btn--active': cardDlgTab === 'upload' }"
+                type="button"
+                @click="cardDlgTab = 'upload'"
+              >
+                <q-icon name="upload" size="15px" />
+                <span class="wish-tab-label">อัปโหลดใหม่</span>
+                <span v-if="tempUploadCards.length > 0" class="wish-tab-badge">{{
+                  tempUploadCards.length
+                }}</span>
+              </button>
+            </div>
+            <button class="wish-dlg-close" type="button" @click="closeCardSelector">
+              <q-icon name="close" size="20px" />
+            </button>
+          </div>
+        </div>
+
+        <!-- TAB: Browse from API -->
+        <template v-if="cardDlgTab === 'browse'">
+          <div class="wish-dlg-filters">
+            <div class="wish-filter-grid card-filter-grid">
+              <q-input
+                v-model="cardFilterFestival"
+                dense
+                outlined
+                placeholder="ค้นหาเทศกาล..."
+                clearable
+                autofocus
+                class="custom-input wish-filter-input"
+                @update:model-value="onCardFilterChange"
+              >
+                <template v-slot:prepend
+                  ><q-icon name="celebration" size="16px" color="teal-6"
+                /></template>
+              </q-input>
+              <q-select
+                v-model="cardFilterMonth"
+                :options="cardMonthOptions"
+                dense
+                outlined
+                clearable
+                emit-value
+                map-options
+                option-value="value"
+                option-label="label"
+                label="เดือน"
+                class="custom-input wish-filter-input"
+                @update:model-value="onCardFilterChange"
+              >
+                <template v-slot:no-option>
+                  <q-item
+                    ><q-item-section class="text-grey-6">ไม่มีข้อมูลเดือน</q-item-section></q-item
+                  >
+                </template>
+              </q-select>
+              <q-select
+                v-model="cardFilterYear"
+                :options="cardYearFilterOptions"
+                dense
+                outlined
+                clearable
+                use-input
+                input-debounce="200"
+                hide-selected
+                fill-input
+                emit-value
+                map-options
+                option-value="value"
+                option-label="label"
+                label="ปี (พ.ศ.)"
+                placeholder="พิมพ์ค้นหาปี..."
+                class="custom-input wish-filter-input"
+                @filter="onCardYearFilter"
+                @update:model-value="onCardFilterChange"
+              >
+                <template v-slot:no-option>
+                  <q-item
+                    ><q-item-section class="text-grey-6">ไม่พบปีที่ค้นหา</q-item-section></q-item
+                  >
+                </template>
+              </q-select>
+            </div>
+            <div class="wish-filter-actions">
+              <button
+                v-if="hasActiveCardFilters"
+                class="wish-filter-clear card-filter-clear"
+                type="button"
+                @click="clearCardFilters"
+              >
+                <q-icon name="filter_alt_off" size="15px" />ล้างตัวกรอง
+              </button>
+            </div>
+          </div>
+
+          <div class="wish-dlg-scroll card-dlg-scroll">
+            <!-- Loading skeleton -->
+            <template v-if="cardApiLoading && cardApiItems.length === 0">
+              <div class="card-api-grid">
+                <div
+                  v-for="n in 12"
+                  :key="'csk-' + n"
+                  class="card-api-thumb card-api-thumb--skeleton"
+                >
+                  <div class="card-api-thumb-skeleton-img" />
+                </div>
+              </div>
+            </template>
+
+            <!-- Error -->
+            <div v-else-if="cardApiError && cardApiItems.length === 0" class="wsp-api-empty">
+              <q-icon name="wifi_off" size="32px" color="grey-4" />
+              <div class="wsp-api-empty-text">โหลดข้อมูลไม่สำเร็จ</div>
+              <button class="wsp-retry-btn" type="button" @click="loadCardPage(cardApiPage)">
+                <q-icon name="refresh" size="14px" />ลองใหม่
+              </button>
+            </div>
+
+            <!-- Empty -->
+            <div v-else-if="!cardApiLoading && cardApiItems.length === 0" class="wsp-api-empty">
+              <q-icon name="search_off" size="32px" color="grey-4" />
+              <div class="wsp-api-empty-text">ไม่พบบัตรอวยพรที่ตรงกับเงื่อนไข</div>
+            </div>
+
+            <!-- Grid -->
+            <template v-else>
+              <div class="card-api-grid">
+                <div
+                  v-for="item in cardApiItems"
+                  :key="item.cId"
+                  class="card-api-thumb"
+                  :class="{
+                    'card-api-thumb--selected': tempSelectedCards.has(item.cId),
+                    'card-api-thumb--added': isCardAdded(item.cId),
+                  }"
+                  @click="toggleTempCard(item)"
+                >
+                  <q-img
+                    :src="getCardImageUrl(item.imageCard)"
+                    ratio="1"
+                    fit="contain"
+                    class="card-api-thumb-img"
+                  />
+                  <div class="card-api-thumb-overlay">
+                    <div
+                      v-if="tempSelectedCards.has(item.cId)"
+                      class="card-api-check card-api-check--on"
+                    >
+                      <q-icon name="check" size="16px" color="white" />
+                    </div>
+                    <div
+                      v-else-if="isCardAdded(item.cId)"
+                      class="card-api-check card-api-check--added"
+                    >
+                      <q-icon name="check" size="14px" color="grey-5" />
+                    </div>
+                  </div>
+                  <div class="card-api-thumb-meta">
+                    <span class="card-api-fest-badge">{{
+                      item.festival?.festivalName ?? 'อื่นๆ'
+                    }}</span>
+                  </div>
+                </div>
+              </div>
+              <div v-if="cardApiLoading" class="wsp-load-more">
+                <q-circular-progress indeterminate size="22px" color="teal-6" />
+              </div>
+            </template>
+          </div>
+
+          <!-- ✅ Compact pagination — แบบเดียวกับ q-table ใน unpolite page -->
+          <div v-if="cardApiTotal > 0" class="compact-pg compact-pg--card">
+            <div class="compact-pg-left">
+              <span class="compact-pg-label">รายการต่อหน้า:</span>
+              <q-select
+                v-model="cardApiLimit"
+                :options="cardLimitOptions"
+                dense
+                borderless
+                :disable="cardApiLoading"
+                class="compact-pg-select"
+                @update:model-value="onCardLimitChange"
+              />
+            </div>
+            <div class="compact-pg-info">{{ cardRangeText }}</div>
+            <div class="compact-pg-nav">
+              <button
+                type="button"
+                class="compact-pg-btn"
+                :disabled="cardApiPage <= 1 || cardApiLoading"
+                aria-label="ก่อนหน้า"
+                @click="loadCardPage(cardApiPage - 1)"
+              >
+                <q-icon name="chevron_left" size="20px" />
+              </button>
+              <button
+                type="button"
+                class="compact-pg-btn"
+                :disabled="cardApiPage >= cardApiTotalPages || cardApiLoading"
+                aria-label="ถัดไป"
+                @click="loadCardPage(cardApiPage + 1)"
+              >
+                <q-icon name="chevron_right" size="20px" />
+              </button>
+            </div>
+          </div>
+
+          <div class="wish-dlg-footer">
+            <div class="wish-footer-summary">
+              <template v-if="tempSelectedCards.size > 0 || tempUploadCards.length > 0">
+                <q-icon name="check_circle" size="16px" color="teal-6" />
+                <span>เลือกแล้ว {{ tempSelectedCards.size + tempUploadCards.length }} รูป</span>
+              </template>
+              <span v-else class="wish-footer-empty-label">ยังไม่ได้เลือก</span>
+            </div>
+            <div class="wish-footer-actions">
+              <button type="button" class="dlg-btn dlg-btn--cancel" @click="closeCardSelector">
+                ยกเลิก
+              </button>
+              <button
+                type="button"
+                class="dlg-btn dlg-btn--secondary card-secondary-btn"
+                @click="cardDlgTab = 'upload'"
+              >
+                <q-icon name="upload" size="16px" /><span>อัปโหลดใหม่</span>
+              </button>
+              <button
+                type="button"
+                class="dlg-btn dlg-btn--confirm card-confirm-btn"
+                :disabled="tempSelectedCards.size === 0 && tempUploadCards.length === 0"
+                @click="confirmCardSelection"
+              >
+                <q-icon name="add_circle" size="17px" /><span>เพิ่มในรายการ</span>
+                <span
+                  v-if="tempSelectedCards.size + tempUploadCards.length > 0"
+                  class="wsp-badge"
+                  >{{ tempSelectedCards.size + tempUploadCards.length }}</span
+                >
+              </button>
+            </div>
+          </div>
+        </template>
+
+        <!-- TAB: Upload -->
+        <template v-if="cardDlgTab === 'upload'">
+          <div class="wish-dlg-custom-body">
+            <div class="wish-custom-left">
+              <div class="wish-custom-section-title">
+                <q-icon name="upload" size="18px" color="teal-6" />อัปโหลดบัตรของคุณ
+              </div>
+              <p class="wish-custom-hint">
+                เลือกรูปบัตรอวยพร · ขนาด 691 × 691 px · ไม่เกิน 2 MB · PNG หรือ JPG
+              </p>
+
+              <div class="card-upload-zone" @click="cardUploadInput?.pickFiles()">
+                <q-icon name="cloud_upload" size="36px" color="teal-6" />
+                <div class="card-upload-zone-text">คลิกเพื่อเลือกรูป</div>
+                <div class="card-upload-zone-sub">หรือเลือกหลายไฟล์พร้อมกัน</div>
+              </div>
+              <q-file
+                v-model="tempUploadInputFile"
+                ref="cardUploadInput"
+                accept=".jpg,.jpeg,.png,image/jpeg,image/png"
+                multiple
+                class="hidden"
+                @update:model-value="onCardFilesPicked"
+              />
+              <transition name="err-fade">
+                <div v-if="cardUploadErrorMsg" class="error-msg q-mt-sm">
+                  <q-icon name="error_outline" size="14px" />{{ cardUploadErrorMsg }}
+                </div>
+              </transition>
+
+              <a
+                href="https://www.iloveimg.com/resize-image"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="cover-resize-link q-mt-sm"
+                @click.stop
+              >
+                <q-icon name="open_in_new" size="13px" />แปลงขนาดรูปภาพที่นี่
+              </a>
+            </div>
+            <div class="wish-custom-right">
+              <div class="wish-custom-section-title">
+                <q-icon name="photo_library" size="18px" color="teal-6" />รูปที่เลือกทั้งหมด
+                <span
+                  v-if="tempSelectedCards.size + tempUploadCards.length > 0"
+                  class="wish-sel-badge card-sel-badge"
+                  >{{ tempSelectedCards.size + tempUploadCards.length }}</span
+                >
+              </div>
+
+              <div v-if="tempSelectedCards.size + tempUploadCards.length > 0" class="card-sel-grid">
+                <!-- จาก API -->
+                <div
+                  v-for="item in Array.from(tempSelectedCardsList)"
+                  :key="'sel-api-' + item.cId"
+                  class="card-sel-thumb"
+                >
+                  <q-img
+                    :src="getCardImageUrl(item.imageCard)"
+                    ratio="1"
+                    fit="contain"
+                    class="card-sel-thumb-img"
+                  />
+                  <div class="card-sel-thumb-badge card-sel-thumb-badge--api">
+                    <q-icon name="cloud_done" size="10px" />คลัง
+                  </div>
+                  <button class="card-sel-thumb-remove" type="button" @click="toggleTempCard(item)">
+                    <q-icon name="close" size="13px" />
+                  </button>
+                </div>
+                <!-- อัปโหลดใหม่ -->
+                <div v-for="(f, i) in tempUploadCards" :key="'sel-up-' + i" class="card-sel-thumb">
+                  <q-img
+                    :src="getFilePreview(f)"
+                    ratio="1"
+                    fit="contain"
+                    class="card-sel-thumb-img"
+                  />
+                  <div class="card-sel-thumb-badge card-sel-thumb-badge--new">
+                    <q-icon name="upload" size="10px" />ใหม่
+                  </div>
+                  <button
+                    class="card-sel-thumb-remove"
+                    type="button"
+                    @click="removeTempUploadCard(i)"
+                  >
+                    <q-icon name="close" size="13px" />
+                  </button>
+                </div>
+              </div>
+              <div v-else class="wish-sel-empty">
+                <q-icon name="touch_app" size="26px" color="grey-4" />
+                <div>ยังไม่มีรูปที่เลือก</div>
+                <button
+                  class="wsp-retry-btn card-retry-btn"
+                  type="button"
+                  @click="cardDlgTab = 'browse'"
+                >
+                  <q-icon name="search" size="13px" />ไปเลือกจากคลัง
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="wish-dlg-footer">
+            <div class="wish-footer-summary">
+              <template v-if="tempSelectedCards.size + tempUploadCards.length > 0">
+                <q-icon name="check_circle" size="16px" color="teal-6" />
+                <span>เลือกแล้ว {{ tempSelectedCards.size + tempUploadCards.length }} รูป</span>
+              </template>
+              <span v-else class="wish-footer-empty-label">ยังไม่ได้เลือก</span>
+            </div>
+            <div class="wish-footer-actions">
+              <button type="button" class="dlg-btn dlg-btn--cancel" @click="closeCardSelector">
+                ยกเลิก
+              </button>
+              <button
+                type="button"
+                class="dlg-btn dlg-btn--secondary card-secondary-btn"
+                @click="cardDlgTab = 'browse'"
+              >
+                <q-icon name="search" size="16px" /><span>กลับเลือก</span>
+              </button>
+              <button
+                type="button"
+                class="dlg-btn dlg-btn--confirm card-confirm-btn"
+                :disabled="tempSelectedCards.size === 0 && tempUploadCards.length === 0"
+                @click="confirmCardSelection"
+              >
+                <q-icon name="add_circle" size="17px" /><span>เพิ่มในรายการ</span>
+                <span
+                  v-if="tempSelectedCards.size + tempUploadCards.length > 0"
+                  class="wsp-badge"
+                  >{{ tempSelectedCards.size + tempUploadCards.length }}</span
+                >
+              </button>
+            </div>
+          </div>
+        </template>
+      </div>
+    </q-dialog>
+    <!-- ===== DIALOG: เพิ่มคำอวยพร (เพิ่มเอง - แบบเดียว) ===== -->
     <q-dialog v-model="addWishDialog" :maximized="$q.screen.lt.sm">
       <div class="custom-dialog" :class="{ 'custom-dialog--mobile': $q.screen.lt.sm }">
         <div class="dialog-header">
-          <div class="dialog-header-icon dialog-header-icon--orange">
+          <div class="dialog-header-icon">
             <q-icon name="format_quote" color="white" size="18px" />
           </div>
           <span>เพิ่มคำอวยพร</span>
@@ -549,6 +1412,45 @@
       </div>
     </q-dialog>
 
+    <!-- ===== DIALOG: แก้ไขคำอวยพรที่เลือก (custom tab ใน selector) ===== -->
+    <q-dialog v-model="editSelectedDialog" :maximized="$q.screen.lt.sm">
+      <div class="custom-dialog" :class="{ 'custom-dialog--mobile': $q.screen.lt.sm }">
+        <div class="dialog-header">
+          <div class="dialog-header-icon dialog-header-icon--amber">
+            <q-icon name="edit" color="white" size="18px" />
+          </div>
+          <span>แก้ไขคำอวยพร</span>
+          <q-space />
+          <button class="dialog-close-btn" type="button" @click="editSelectedDialog = false">
+            <q-icon name="close" size="18px" />
+          </button>
+        </div>
+        <q-form @submit.prevent.stop="confirmEditSelectedWish">
+          <div class="dialog-body">
+            <q-input
+              v-model="editSelectedText"
+              type="textarea"
+              label="คำอวยพร"
+              outlined
+              autofocus
+              class="custom-input"
+              :rules="[(val) => !!val.trim() || 'กรุณากรอกคำอวยพร']"
+            />
+          </div>
+          <div class="dialog-footer">
+            <button
+              type="button"
+              class="dlg-btn dlg-btn--cancel"
+              @click="editSelectedDialog = false"
+            >
+              ยกเลิก
+            </button>
+            <button type="submit" class="dlg-btn dlg-btn--confirm">อัปเดต</button>
+          </div>
+        </q-form>
+      </div>
+    </q-dialog>
+
     <!-- ===== DIALOG: ยืนยันลบคำอวยพร ===== -->
     <q-dialog v-model="deleteWishDialog" persistent>
       <div class="custom-dialog">
@@ -580,38 +1482,6 @@
           <button type="button" class="dlg-btn dlg-btn--danger" @click="confirmDeleteWish">
             ยืนยันการลบ
           </button>
-        </div>
-      </div>
-    </q-dialog>
-
-    <!-- ===== DIALOG: เพิ่มการ์ด ===== -->
-    <q-dialog v-model="showCardDialog" :maximized="$q.screen.lt.sm">
-      <div class="custom-dialog" :class="{ 'custom-dialog--mobile': $q.screen.lt.sm }">
-        <div class="dialog-header">
-          <div class="dialog-header-icon dialog-header-icon--teal">
-            <q-icon name="add_photo_alternate" color="white" size="18px" />
-          </div>
-          <span>เพิ่มรูปการ์ด</span>
-          <q-space />
-          <button class="dialog-close-btn" type="button" @click="showCardDialog = false">
-            <q-icon name="close" size="18px" />
-          </button>
-        </div>
-        <div class="dialog-body">
-          <q-file
-            v-model="tempCardFile"
-            label="เลือกรูปภาพ (691 × 691 px)"
-            outlined
-            accept=".jpg,.jpeg,.png,image/jpeg,image/png"
-            class="custom-input"
-            :error="!!cardErrorMsg"
-            :error-message="cardErrorMsg"
-            @update:model-value="addCardToList"
-          >
-            <template v-slot:prepend>
-              <q-icon name="add_photo_alternate" color="teal-6" />
-            </template>
-          </q-file>
         </div>
       </div>
     </q-dialog>
@@ -658,7 +1528,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, nextTick, onMounted, onUnmounted } from 'vue';
+import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue';
 import { LocalStorage, useQuasar } from 'quasar';
 import { api } from 'src/boot/axios';
 import { useRouter, useRoute } from 'vue-router';
@@ -667,6 +1537,7 @@ import type { AxiosError } from 'axios';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const NOTIFY_DURATION = 2000;
+const FESTIVAL_NAME_PATTERN = /^[^-]+\s*-\s*[^-\s]{2,5}\s*-\s*\d{4}$/;
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface WishItem {
@@ -704,6 +1575,20 @@ interface FestivalData {
   createdBy: number;
 }
 
+interface ResponseWishDto {
+  wId: number;
+  wishWord: string;
+  festivalId: number;
+  festival: { fId: number; festivalName: string; createdAt: string };
+}
+
+interface ResponseCardDto {
+  cId: number;
+  imageCard: string;
+  festivalId: number;
+  festival: { fId: number; festivalName: string; createdAt: string };
+}
+
 interface Particle {
   id: number;
   style: Record<string, string>;
@@ -739,11 +1624,10 @@ const loading = ref(false);
 const createdBy = ref<number>(0);
 
 const useDeptLogo = ref(false);
-
 const toggleDeptLogo = () => {
   useDeptLogo.value = !useDeptLogo.value;
   if (useDeptLogo.value) {
-    logoFile.value = null; // clear uploaded file
+    logoFile.value = null;
     logoError.value = false;
   }
 };
@@ -752,7 +1636,11 @@ const toggleDeptLogo = () => {
 const isEdit = ref(false);
 const isEditStartEndDate = ref(false);
 
-const isOwner = computed(() => createdBy.value === Number(LocalStorage.getItem('userId')));
+const isOwner = computed(
+  () =>
+    createdBy.value === Number(LocalStorage.getItem('userId')) ||
+    LocalStorage.getItem('role') === 'superAdmin',
+);
 const canEdit = computed(() => isEdit.value && isOwner.value);
 const canEditEndDate = computed(() => isEditStartEndDate.value && isOwner.value);
 
@@ -797,17 +1685,7 @@ const formatDateThai = (dateStr: string): string => {
   return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear() + 543}`;
 };
 
-// allow current date to remain selectable even if it's "today" (edit mode)
-// const startDateOptions = (dateStr: string): boolean => {
-
-//   if (dateStr === startDate.value) return true;
-//   if (dateStr < todayStr) return false;
-//   if (!endDate.value) return true;
-//   return dateStr <= endDate.value;
-// };
-
 const startDateOptions = (dateStr: string): boolean => {
-  console.log('checking:', dateStr, 'today:', todayStr, 'result:', dateStr >= todayStr);
   if (dateStr === startDate.value) return true;
   if (dateStr < todayStr) return false;
   if (!endDate.value) return true;
@@ -821,15 +1699,9 @@ const endDateOptions = (dateStr: string): boolean => {
   return dateStr >= startDate.value;
 };
 
-// const onStartDateChange = (_val: string) => {
-//   dateError.value = false;
-//   // if (endDate.value && val > endDate.value) endDate.value = '';
-// };
-
 const onStartDateChange = () => {
   dateError.value = false;
 };
-
 const onEndDateChange = () => {
   dateError.value = false;
 };
@@ -840,7 +1712,7 @@ const nameError = ref(false);
 const logoError = ref(false);
 const webNameError = ref(false);
 
-// ─── Wish State ───────────────────────────────────────────────────────────────
+// ─── Wish State (List ในหน้าหลัก) ─────────────────────────────────────────────
 const wishWordList = ref<WishItem[]>([]);
 const tempWish = ref('');
 const addWishDialog = ref(false);
@@ -850,12 +1722,16 @@ const editingIndex = ref<number | null>(null);
 const deleteIndex = ref<number | null>(null);
 const itemToDelete = ref<string | null>(null);
 
-// ─── Card State ───────────────────────────────────────────────────────────────
-const cardFileList = ref<File[]>([]);
-const existingCards = ref<ExistingCard[]>([]);
-const tempCardFile = ref<File | null>(null);
-const showCardDialog = ref(false);
-const cardErrorMsg = ref('');
+const isWishAdded = (word: string): boolean => wishWordList.value.some((w) => w.wishWord === word);
+
+// ─── Card State (List ในหน้าหลัก) ─────────────────────────────────────────────
+const cardFileList = ref<File[]>([]); // อัปโหลดใหม่
+const existingCards = ref<ExistingCard[]>([]); // บัตรเดิมที่มีอยู่
+const selectedApiCards = ref<ResponseCardDto[]>([]); // เลือกใหม่จากคลัง API
+
+const totalCardCount = computed(
+  () => existingCards.value.length + selectedApiCards.value.length + cardFileList.value.length,
+);
 
 // ─── Notify State ─────────────────────────────────────────────────────────────
 const showNotifyDialog = ref(false);
@@ -886,6 +1762,13 @@ const getImageUrl = async (imagePath: string): Promise<string> => {
   } catch {
     return '';
   }
+};
+
+const getCardImageUrl = (imageCard: string): string => {
+  if (!imageCard) return '';
+  if (/^https?:\/\//i.test(imageCard)) return imageCard;
+  const base = (api.defaults.baseURL ?? '').replace(/\/+$/, '');
+  return `${base}/upload/${imageCard}`;
 };
 
 const openNotify = (success: boolean, message: string) => {
@@ -943,14 +1826,28 @@ const onLogoSelected = (file: File | null) => {
   img.src = url;
 };
 
+// const onFestivalNameChange = (val: string | number | null) => {
+//   nameError.value = false;
+//   if (typeof val !== 'string') return;
+//   const pattern = /^[^-].*-[^-]{2,5}-\d{4}$/;
+//   if (val && !pattern.test(val.trim())) nameError.value = true;
+// };
+// const onWebNameChange = (val: string | number | null) => {
+//   webNameError.value = false;
+//   if (typeof val !== 'string') return;
+//   if (val && !/^[^-].*-[^-]{2,5}-\d{4}$/.test(val.trim())) webNameError.value = true;
+// };
 const onFestivalNameChange = (val: string | number | null) => {
   nameError.value = false;
   if (typeof val !== 'string') return;
-  // const pattern = /^[^-].*[^-]-[^-]+-\d{4}$/;
-  const pattern = /^[^-].*-[^-]{2,5}-\d{4}$/;
-  if (val && !pattern.test(val.trim())) nameError.value = true;
+  if (val && !FESTIVAL_NAME_PATTERN.test(val.trim())) nameError.value = true;
 };
 
+const onWebNameChange = (val: string | number | null) => {
+  webNameError.value = false;
+  if (typeof val !== 'string') return;
+  if (val && !FESTIVAL_NAME_PATTERN.test(val.trim())) webNameError.value = true;
+};
 // ─── Fetch Festival ───────────────────────────────────────────────────────────
 const fetchFestival = async (id: string): Promise<void> => {
   $q.loading.show();
@@ -1003,12 +1900,322 @@ const fetchFestival = async (id: string): Promise<void> => {
   }
 };
 
-// ─── Wish Actions ─────────────────────────────────────────────────────────────
-const onAddWish = () => {
-  tempWish.value = '';
-  addWishDialog.value = true;
+// ═══════════════════════════════════════════════════════════════════════════════
+//  WISH SELECTOR DIALOG
+// ═══════════════════════════════════════════════════════════════════════════════
+
+const wishSelectorOpen = ref(false);
+const wishDlgTab = ref<'browse' | 'custom'>('browse');
+const tempSelectedWishes = ref<Set<string>>(new Set());
+const customWishText = ref('');
+
+// ─── Wish Filters ─────────────────────────────────────────────────────────────
+const wishFilterWord = ref('');
+const wishFilterFestival = ref('');
+const wishFilterMonth = ref<number | null>(null);
+const wishFilterYear = ref<number | null>(null);
+
+const THAI_MONTHS = [
+  'มกราคม',
+  'กุมภาพันธ์',
+  'มีนาคม',
+  'เมษายน',
+  'พฤษภาคม',
+  'มิถุนายน',
+  'กรกฎาคม',
+  'สิงหาคม',
+  'กันยายน',
+  'ตุลาคม',
+  'พฤศจิกายน',
+  'ธันวาคม',
+];
+
+const availableMonths = ref<Set<number>>(new Set());
+const availableYears = ref<Set<number>>(new Set());
+
+const monthOptions = computed(() => {
+  const months = Array.from(availableMonths.value).sort((a, b) => a - b);
+  return months.map((m) => ({ label: THAI_MONTHS[m - 1] ?? `${m}`, value: m }));
+});
+const yearOptions = computed(() => {
+  const years = Array.from(availableYears.value).sort((a, b) => b - a);
+  return years.map((y) => ({ label: `${y + 543}`, value: y }));
+});
+
+const collectMonthYear = (items: ResponseWishDto[]) => {
+  const months = new Set(availableMonths.value);
+  const years = new Set(availableYears.value);
+  for (const it of items) {
+    const created = it.festival?.createdAt;
+    if (!created) continue;
+    const d = new Date(created);
+    if (Number.isNaN(d.getTime())) continue;
+    months.add(d.getMonth() + 1);
+    years.add(d.getFullYear());
+  }
+  availableMonths.value = months;
+  availableYears.value = years;
 };
 
+const extractWishItems = (container: Record<string, unknown>): ResponseWishDto[] => {
+  const candidates: unknown[] = [container.data, container.items, container.results, container];
+  const found = candidates.find((c): c is ResponseWishDto[] => Array.isArray(c));
+  return found ?? [];
+};
+
+const loadMonthYearOptions = async () => {
+  try {
+    const res = await api.get('/backoffice/festival/wish', { params: { page: 1, limit: 9999 } });
+    const root: Record<string, unknown> = res.data ?? {};
+    const container: Record<string, unknown> =
+      (root.festival as Record<string, unknown>) ?? (root.data as Record<string, unknown>) ?? root;
+    collectMonthYear(extractWishItems(container));
+  } catch {
+    /* เงียบไว้ */
+  }
+};
+
+const yearFilterOptions = ref<{ label: string; value: number }[]>([]);
+watch(
+  yearOptions,
+  (opts) => {
+    yearFilterOptions.value = opts;
+  },
+  { immediate: true },
+);
+
+const onYearFilter = (val: string, update: (cb: () => void) => void) => {
+  update(() => {
+    const needle = val.trim();
+    if (!needle) {
+      yearFilterOptions.value = yearOptions.value;
+      return;
+    }
+    yearFilterOptions.value = yearOptions.value.filter(
+      (o) => o.label.includes(needle) || String(o.value).includes(needle),
+    );
+  });
+};
+
+const hasActiveFilters = computed(
+  () =>
+    !!wishFilterWord.value.trim() ||
+    !!wishFilterFestival.value.trim() ||
+    wishFilterMonth.value !== null ||
+    wishFilterYear.value !== null,
+);
+
+// ─── Wish API ─────────────────────────────────────────────────────────────────
+const wishApiItems = ref<ResponseWishDto[]>([]);
+const wishApiLoading = ref(false);
+const wishApiError = ref(false);
+const wishApiPage = ref(1);
+const wishApiTotalPages = ref(1);
+const wishApiTotal = ref(0);
+const wishApiLimit = ref(10);
+const limitOptions = [10, 20, 50];
+let wishFilterTimer: ReturnType<typeof setTimeout> | null = null;
+
+const groupedWishApiItems = computed<Record<string, ResponseWishDto[]>>(() => {
+  const groups: Record<string, ResponseWishDto[]> = {};
+  for (const item of wishApiItems.value) {
+    const key = item.festival?.festivalName ?? 'อื่นๆ';
+    (groups[key] ??= []).push(item);
+  }
+  return groups;
+});
+
+const rowNumberMap = computed<Map<number, number>>(() => {
+  const map = new Map<number, number>();
+  const offset = (wishApiPage.value - 1) * wishApiLimit.value;
+  let i = 0;
+  for (const items of Object.values(groupedWishApiItems.value)) {
+    for (const item of items) {
+      map.set(item.wId, offset + i + 1);
+      i++;
+    }
+  }
+  return map;
+});
+
+const wishRangeText = computed(() => {
+  if (wishApiTotal.value === 0) return '0-0 จาก 0';
+  const start = (wishApiPage.value - 1) * wishApiLimit.value + 1;
+  const end = Math.min(start + wishApiItems.value.length - 1, wishApiTotal.value);
+  return `${start}-${end} จาก ${wishApiTotal.value}`;
+});
+
+const pickFrom = (obj: unknown, keys: string[]): number | null => {
+  if (!obj || typeof obj !== 'object') return null;
+  const o = obj as Record<string, unknown>;
+  for (const k of keys) {
+    const v = o[k];
+    if (v != null && v !== '' && !Number.isNaN(Number(v))) return Number(v);
+  }
+  return null;
+};
+
+const loadWishPage = async (page: number) => {
+  if (wishApiLoading.value) return;
+  wishApiLoading.value = true;
+  wishApiError.value = false;
+  try {
+    const params: Record<string, unknown> = {
+      page: Number(page),
+      limit: Number(wishApiLimit.value),
+    };
+    if (wishFilterWord.value.trim()) params['wishWord'] = wishFilterWord.value.trim();
+    if (wishFilterFestival.value.trim()) params['festivalName'] = wishFilterFestival.value.trim();
+    if (wishFilterMonth.value !== null) params['month'] = Number(wishFilterMonth.value);
+    if (wishFilterYear.value !== null) params['year'] = Number(wishFilterYear.value);
+    const res = await api.get('/backoffice/festival/wish', { params });
+
+    const root: Record<string, unknown> = res.data ?? {};
+    const container: Record<string, unknown> =
+      (root.festival as Record<string, unknown>) ?? (root.data as Record<string, unknown>) ?? root;
+
+    wishApiItems.value = extractWishItems(container);
+
+    const meta: Record<string, unknown> =
+      (container.meta as Record<string, unknown>) ??
+      (container.pagination as Record<string, unknown>) ??
+      container;
+
+    const pick = (keys: string[]): number | null =>
+      pickFrom(meta, keys) ?? pickFrom(container, keys) ?? pickFrom(root, keys);
+
+    const limitNum = Number(wishApiLimit.value) || 1;
+
+    const totalVal = pick([
+      'total',
+      'totalItems',
+      'totalCount',
+      'count',
+      'itemCount',
+      'totalRecords',
+      'totalData',
+      'totalRow',
+      'totalRows',
+      'recordsTotal',
+    ]);
+    const totalPagesVal = pick([
+      'totalPages',
+      'pageCount',
+      'totalPage',
+      'lastPage',
+      'pages',
+      'pageTotal',
+    ]);
+    const pageVal = pick(['page', 'currentPage', 'pageNumber', 'current']);
+
+    const rawItems = wishApiItems.value;
+    const serverIgnoredPaging = rawItems.length > limitNum;
+
+    if (serverIgnoredPaging) {
+      const total = totalVal ?? rawItems.length;
+      const pages = Math.max(1, Math.ceil(total / limitNum));
+      const curPage = Math.min(Math.max(1, Number(page)), pages);
+      const startIdx = (curPage - 1) * limitNum;
+      wishApiItems.value = rawItems.slice(startIdx, startIdx + limitNum);
+      wishApiPage.value = curPage;
+      wishApiTotal.value = total;
+      wishApiTotalPages.value = pages;
+    } else {
+      wishApiPage.value = pageVal ?? Number(page);
+      wishApiTotal.value =
+        totalVal ?? (totalPagesVal != null ? totalPagesVal * limitNum : rawItems.length);
+      wishApiTotalPages.value =
+        totalPagesVal ?? Math.max(1, Math.ceil(wishApiTotal.value / limitNum));
+    }
+
+    await nextTick();
+    document.querySelector('.wish-dlg-scroll')?.scrollTo({ top: 0 });
+  } catch {
+    wishApiError.value = true;
+  } finally {
+    wishApiLoading.value = false;
+  }
+};
+
+const onFilterChange = () => {
+  if (wishFilterTimer) clearTimeout(wishFilterTimer);
+  wishFilterTimer = setTimeout(() => void loadWishPage(1), 400);
+};
+const onLimitChange = () => void loadWishPage(1);
+const clearFilters = () => {
+  wishFilterWord.value = '';
+  wishFilterFestival.value = '';
+  wishFilterMonth.value = null;
+  wishFilterYear.value = null;
+  void loadWishPage(1);
+};
+
+const onAddWish = () => {
+  tempSelectedWishes.value = new Set();
+  wishDlgTab.value = 'browse';
+  wishFilterWord.value = '';
+  wishFilterFestival.value = '';
+  wishFilterMonth.value = null;
+  wishFilterYear.value = null;
+  customWishText.value = '';
+  wishSelectorOpen.value = true;
+  void loadMonthYearOptions();
+  void loadWishPage(1);
+};
+const closeWishSelector = () => {
+  wishSelectorOpen.value = false;
+};
+
+const toggleTempWish = (wish: string) => {
+  if (isWishAdded(wish)) return;
+  const set = new Set(tempSelectedWishes.value);
+  if (set.has(wish)) set.delete(wish);
+  else set.add(wish);
+  tempSelectedWishes.value = set;
+};
+
+const confirmWishSelection = () => {
+  tempSelectedWishes.value.forEach((w) => {
+    if (!isWishAdded(w)) {
+      wishWordList.value.push({ wishWord: w }); // ไม่มี wId = ของใหม่
+    }
+  });
+  closeWishSelector();
+};
+
+const addCustomWish = () => {
+  const text = customWishText.value.trim();
+  if (!text) return;
+  if (!isWishAdded(text)) {
+    const set = new Set(tempSelectedWishes.value);
+    set.add(text);
+    tempSelectedWishes.value = set;
+  }
+  customWishText.value = '';
+};
+
+const editSelectedDialog = ref(false);
+const editSelectedOriginal = ref('');
+const editSelectedText = ref('');
+
+const editSelectedWish = (wish: string) => {
+  editSelectedOriginal.value = wish;
+  editSelectedText.value = wish;
+  editSelectedDialog.value = true;
+};
+const confirmEditSelectedWish = () => {
+  const newText = editSelectedText.value.trim();
+  if (!newText) return;
+  const set = new Set(tempSelectedWishes.value);
+  set.delete(editSelectedOriginal.value);
+  if (!isWishAdded(newText)) {
+    set.add(newText);
+  }
+  tempSelectedWishes.value = set;
+  editSelectedDialog.value = false;
+};
+
+// ─── Wish List actions (รายการในหน้าหลัก) ─────────────────────────────────────
 const addWishToList = () => {
   if (!tempWish.value.trim()) return;
   wishWordList.value.push({ wishWord: tempWish.value.trim() });
@@ -1052,47 +2259,326 @@ const confirmDeleteWish = () => {
   deleteWishDialog.value = false;
 };
 
-// ─── Card Actions ─────────────────────────────────────────────────────────────
-const onAddCard = () => {
-  showCardDialog.value = true;
-};
+// ═══════════════════════════════════════════════════════════════════════════════
+//  CARD SELECTOR DIALOG
+// ═══════════════════════════════════════════════════════════════════════════════
 
-const addCardToList = () => {
-  const file = tempCardFile.value;
-  if (!file) return;
-  cardErrorMsg.value = '';
-  if (!['image/jpeg', 'image/png'].includes(file.type)) {
-    cardErrorMsg.value = 'รองรับเฉพาะ JPG และ PNG';
-    tempCardFile.value = null;
-    return;
-  }
-  if (file.size > 2 * 1024 * 1024) {
-    cardErrorMsg.value = 'ขนาดไฟล์ต้องไม่เกิน 2 MB';
-    tempCardFile.value = null;
-    return;
-  }
-  const url = URL.createObjectURL(file);
-  const img = new Image();
-  img.onload = () => {
-    URL.revokeObjectURL(url);
-    if (img.width !== 691 || img.height !== 691) {
-      cardErrorMsg.value = `ขนาดรูปต้องเป็น 691 × 691 px (พบ ${img.width} × ${img.height})`;
-      tempCardFile.value = null;
+const cardSelectorOpen = ref(false);
+const cardDlgTab = ref<'browse' | 'upload'>('browse');
+const cardUploadInput = ref<InstanceType<typeof QFile> | null>(null);
+
+const tempSelectedCards = ref<Set<number>>(new Set());
+const tempSelectedCardsMap = ref<Map<number, ResponseCardDto>>(new Map());
+const tempSelectedCardsList = computed(() => Array.from(tempSelectedCardsMap.value.values()));
+
+const tempUploadCards = ref<File[]>([]);
+const tempUploadInputFile = ref<File | File[] | null>(null);
+const cardUploadErrorMsg = ref('');
+
+const isCardAdded = (cId: number): boolean =>
+  selectedApiCards.value.some((c) => c.cId === cId) ||
+  existingCards.value.some((c) => c.cId === cId);
+
+// ─── Card Filters ─────────────────────────────────────────────────────────────
+const cardFilterFestival = ref('');
+const cardFilterMonth = ref<number | null>(null);
+const cardFilterYear = ref<number | null>(null);
+
+const hasActiveCardFilters = computed(
+  () =>
+    !!cardFilterFestival.value.trim() ||
+    cardFilterMonth.value !== null ||
+    cardFilterYear.value !== null,
+);
+
+const availableCardMonths = ref<Set<number>>(new Set());
+const availableCardYears = ref<Set<number>>(new Set());
+
+const cardMonthOptions = computed(() => {
+  const months = Array.from(availableCardMonths.value).sort((a, b) => a - b);
+  return months.map((m) => ({ label: THAI_MONTHS[m - 1] ?? `${m}`, value: m }));
+});
+const cardYearOptions = computed(() => {
+  const years = Array.from(availableCardYears.value).sort((a, b) => b - a);
+  return years.map((y) => ({ label: `${y + 543}`, value: y }));
+});
+const cardYearFilterOptions = ref<{ label: string; value: number }[]>([]);
+watch(
+  cardYearOptions,
+  (opts) => {
+    cardYearFilterOptions.value = opts;
+  },
+  { immediate: true },
+);
+
+const onCardYearFilter = (val: string, update: (cb: () => void) => void) => {
+  update(() => {
+    const needle = val.trim();
+    if (!needle) {
+      cardYearFilterOptions.value = cardYearOptions.value;
       return;
     }
-    cardFileList.value.push(file);
-    tempCardFile.value = null;
-    showCardDialog.value = false;
-  };
-  img.src = url;
+    cardYearFilterOptions.value = cardYearOptions.value.filter(
+      (o) => o.label.includes(needle) || String(o.value).includes(needle),
+    );
+  });
 };
 
+const extractCardItems = (container: Record<string, unknown>): ResponseCardDto[] => {
+  const candidates: unknown[] = [container.data, container.items, container.results, container];
+  const found = candidates.find((c): c is ResponseCardDto[] => Array.isArray(c));
+  return found ?? [];
+};
+
+const collectCardMonthYear = (items: ResponseCardDto[]) => {
+  const months = new Set(availableCardMonths.value);
+  const years = new Set(availableCardYears.value);
+  for (const it of items) {
+    const created = it.festival?.createdAt;
+    if (!created) continue;
+    const d = new Date(created);
+    if (Number.isNaN(d.getTime())) continue;
+    months.add(d.getMonth() + 1);
+    years.add(d.getFullYear());
+  }
+  availableCardMonths.value = months;
+  availableCardYears.value = years;
+};
+
+const loadCardMonthYearOptions = async () => {
+  try {
+    const res = await api.get('/backoffice/festival/card', { params: { page: 1, limit: 9999 } });
+    const root: Record<string, unknown> = res.data ?? {};
+    const container: Record<string, unknown> =
+      (root.festival as Record<string, unknown>) ?? (root.data as Record<string, unknown>) ?? root;
+    collectCardMonthYear(extractCardItems(container));
+  } catch {
+    /* เงียบไว้ */
+  }
+};
+
+// ─── Card API state ───────────────────────────────────────────────────────────
+const cardApiItems = ref<ResponseCardDto[]>([]);
+const cardApiLoading = ref(false);
+const cardApiError = ref(false);
+const cardApiPage = ref(1);
+const cardApiTotalPages = ref(1);
+const cardApiTotal = ref(0);
+const cardApiLimit = ref(20);
+const cardLimitOptions = [12, 20, 40];
+let cardFilterTimer: ReturnType<typeof setTimeout> | null = null;
+
+const cardRangeText = computed(() => {
+  if (cardApiTotal.value === 0) return '0-0 จาก 0';
+  const start = (cardApiPage.value - 1) * cardApiLimit.value + 1;
+  const end = Math.min(start + cardApiItems.value.length - 1, cardApiTotal.value);
+  return `${start}-${end} จาก ${cardApiTotal.value}`;
+});
+
+const loadCardPage = async (page: number) => {
+  if (cardApiLoading.value) return;
+  cardApiLoading.value = true;
+  cardApiError.value = false;
+  try {
+    const params: Record<string, unknown> = {
+      page: Number(page),
+      limit: Number(cardApiLimit.value),
+    };
+    if (cardFilterFestival.value.trim()) params['festivalName'] = cardFilterFestival.value.trim();
+    if (cardFilterMonth.value !== null) params['month'] = Number(cardFilterMonth.value);
+    if (cardFilterYear.value !== null) params['year'] = Number(cardFilterYear.value);
+    const res = await api.get('/backoffice/festival/card', { params });
+
+    const root: Record<string, unknown> = res.data ?? {};
+    const container: Record<string, unknown> =
+      (root.festival as Record<string, unknown>) ?? (root.data as Record<string, unknown>) ?? root;
+
+    cardApiItems.value = extractCardItems(container);
+
+    const meta: Record<string, unknown> =
+      (container.meta as Record<string, unknown>) ??
+      (container.pagination as Record<string, unknown>) ??
+      container;
+
+    const pick = (keys: string[]): number | null =>
+      pickFrom(meta, keys) ?? pickFrom(container, keys) ?? pickFrom(root, keys);
+
+    const limitNum = Number(cardApiLimit.value) || 1;
+
+    const totalVal = pick([
+      'total',
+      'totalItems',
+      'totalCount',
+      'count',
+      'itemCount',
+      'totalRecords',
+      'totalData',
+      'totalRow',
+      'totalRows',
+      'recordsTotal',
+    ]);
+    const totalPagesVal = pick([
+      'totalPages',
+      'pageCount',
+      'totalPage',
+      'lastPage',
+      'pages',
+      'pageTotal',
+    ]);
+    const pageVal = pick(['page', 'currentPage', 'pageNumber', 'current']);
+
+    const rawItems = cardApiItems.value;
+    const serverIgnoredPaging = rawItems.length > limitNum;
+
+    if (serverIgnoredPaging) {
+      const total = totalVal ?? rawItems.length;
+      const pages = Math.max(1, Math.ceil(total / limitNum));
+      const curPage = Math.min(Math.max(1, Number(page)), pages);
+      const startIdx = (curPage - 1) * limitNum;
+      cardApiItems.value = rawItems.slice(startIdx, startIdx + limitNum);
+      cardApiPage.value = curPage;
+      cardApiTotal.value = total;
+      cardApiTotalPages.value = pages;
+    } else {
+      cardApiPage.value = pageVal ?? Number(page);
+      cardApiTotal.value =
+        totalVal ?? (totalPagesVal != null ? totalPagesVal * limitNum : rawItems.length);
+      cardApiTotalPages.value =
+        totalPagesVal ?? Math.max(1, Math.ceil(cardApiTotal.value / limitNum));
+    }
+
+    await nextTick();
+    document.querySelector('.card-dlg-scroll')?.scrollTo({ top: 0 });
+  } catch {
+    cardApiError.value = true;
+  } finally {
+    cardApiLoading.value = false;
+  }
+};
+
+const onCardFilterChange = () => {
+  if (cardFilterTimer) clearTimeout(cardFilterTimer);
+  cardFilterTimer = setTimeout(() => void loadCardPage(1), 400);
+};
+const onCardLimitChange = () => void loadCardPage(1);
+const clearCardFilters = () => {
+  cardFilterFestival.value = '';
+  cardFilterMonth.value = null;
+  cardFilterYear.value = null;
+  void loadCardPage(1);
+};
+
+// ─── Open / Close ─────────────────────────────────────────────────────────────
+const onAddCard = () => {
+  tempSelectedCards.value = new Set();
+  tempSelectedCardsMap.value = new Map();
+  tempUploadCards.value = [];
+  cardUploadErrorMsg.value = '';
+  cardDlgTab.value = 'browse';
+  cardFilterFestival.value = '';
+  cardFilterMonth.value = null;
+  cardFilterYear.value = null;
+  cardSelectorOpen.value = true;
+  void loadCardMonthYearOptions();
+  void loadCardPage(1);
+};
+const closeCardSelector = () => {
+  cardSelectorOpen.value = false;
+};
+
+// ─── Toggle / Confirm ─────────────────────────────────────────────────────────
+const toggleTempCard = (item: ResponseCardDto) => {
+  if (isCardAdded(item.cId)) return;
+  const set = new Set(tempSelectedCards.value);
+  const map = new Map(tempSelectedCardsMap.value);
+  if (set.has(item.cId)) {
+    set.delete(item.cId);
+    map.delete(item.cId);
+  } else {
+    set.add(item.cId);
+    map.set(item.cId, item);
+  }
+  tempSelectedCards.value = set;
+  tempSelectedCardsMap.value = map;
+};
+
+const confirmCardSelection = () => {
+  tempSelectedCardsMap.value.forEach((item) => {
+    if (!isCardAdded(item.cId)) {
+      selectedApiCards.value.push(item);
+    }
+  });
+  for (const f of tempUploadCards.value) {
+    cardFileList.value.push(f);
+  }
+  closeCardSelector();
+};
+
+const removeApiCard = (i: number) => {
+  selectedApiCards.value.splice(i, 1);
+};
 const removeCard = (i: number) => {
   cardFileList.value.splice(i, 1);
 };
 const removeExistingCard = (i: number) => {
   existingCards.value.splice(i, 1);
 };
+const removeTempUploadCard = (i: number) => {
+  tempUploadCards.value.splice(i, 1);
+};
+
+// ─── Validate uploaded card file ──────────────────────────────────────────────
+const validateCardFile = (file: File): Promise<{ ok: true } | { ok: false; reason: string }> => {
+  return new Promise((resolve) => {
+    if (!['image/jpeg', 'image/png'].includes(file.type)) {
+      resolve({ ok: false, reason: `${file.name}: รองรับเฉพาะ JPG และ PNG` });
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      resolve({ ok: false, reason: `${file.name}: ขนาดไฟล์ต้องไม่เกิน 2 MB` });
+      return;
+    }
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      if (img.width !== 691 || img.height !== 691) {
+        resolve({
+          ok: false,
+          reason: `${file.name}: ขนาดต้องเป็น 691 × 691 px (พบ ${img.width} × ${img.height})`,
+        });
+      } else {
+        resolve({ ok: true });
+      }
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      resolve({ ok: false, reason: `${file.name}: อ่านรูปไม่ได้` });
+    };
+    img.src = url;
+  });
+};
+
+const onCardFilesPicked = async (val: File | File[] | null) => {
+  cardUploadErrorMsg.value = '';
+  if (!val) return;
+  const files: File[] = Array.isArray(val) ? val : [val];
+  const errors: string[] = [];
+  for (const f of files) {
+    const result = await validateCardFile(f);
+    if (result.ok) {
+      tempUploadCards.value.push(f);
+    } else {
+      errors.push(result.reason);
+    }
+  }
+  if (errors.length > 0) {
+    cardUploadErrorMsg.value = errors.join(' · ');
+  }
+  tempUploadInputFile.value = null;
+};
+
+// ═══════════════════════════════════════════════════════════════════════════════
 
 // ─── Validation ───────────────────────────────────────────────────────────────
 const validateAndScroll = async (): Promise<boolean> => {
@@ -1103,7 +2589,6 @@ const validateAndScroll = async (): Promise<boolean> => {
   dateError.value = false;
   dateErrorMsg.value = '';
 
-  // แก้ได้เฉพาะ endDate
   if (!canEdit.value) {
     if (canEditEndDate.value && startDate.value && !endDate.value) {
       dateError.value = true;
@@ -1116,11 +2601,13 @@ const validateAndScroll = async (): Promise<boolean> => {
   }
 
   const isImageValid = !!imageFile.value || !!existingImageUrl.value;
-  const isNameValid =
+   const isNameValid =
     typeof festivalName.value === 'string' &&
-    /^[^-].*-[^-]{2,5}-\d{4}$/.test(festivalName.value.trim());
+    FESTIVAL_NAME_PATTERN.test(festivalName.value.trim());
   const isLogoValid = !!logoFile.value || useDeptLogo.value;
-  const isWebNameValid = typeof webName.value === 'string' && webName.value.trim().length > 0;
+   const isWebNameValid =
+    typeof webName.value === 'string' && FESTIVAL_NAME_PATTERN.test(webName.value.trim());
+  // const isWebNameValid = typeof webName.value === 'string' && webName.value.trim().length > 0;
 
   let isDateValid = true;
   if (startDate.value && !endDate.value) {
@@ -1173,27 +2660,24 @@ const submitEdit = async () => {
 
     const getDeptLogoFile = async (): Promise<File> => {
       const res = await fetch('/logo-ldd.png');
-      console.log('status:', res.status); // ← ถ้าไม่ใช่ 200 แสดงว่าหาไฟล์ไม่เจอ
       const blob = await res.blob();
-      console.log('blob size:', blob.size, 'type:', blob.type); // ← ถ้า size = 0 คือปัญหา
-      const file = new File([blob], 'logo-ldd.png', { type: 'image/png' });
-      console.log('file:', file);
-      return file;
+      return new File([blob], 'logo-ldd.png', { type: 'image/png' });
     };
 
     const logoToUpload = useDeptLogo.value ? await getDeptLogoFile() : logoFile.value;
-    console.log('Upload :', logoToUpload);
+
     let festivalImageName = existingImageName.value;
     if (imageFile.value) festivalImageName = await uploadFile(imageFile.value);
 
     let festivalLogoName = '';
-
     if (logoToUpload) festivalLogoName = await uploadFile(logoToUpload);
 
     const newCardImageNames = await Promise.all(cardFileList.value.map(uploadFile));
 
+    // รวมทั้ง 3 source: บัตรเดิม + บัตรเลือกใหม่จาก API + บัตรอัปโหลดใหม่
     const allCards = [
       ...existingCards.value.map((c) => ({ cId: c.cId, imageCard: c.imageName })),
+      ...selectedApiCards.value.map((c) => ({ imageCard: c.imageCard })),
       ...newCardImageNames.map((imgName) => ({ imageCard: imgName })),
     ];
 
@@ -1313,19 +2797,20 @@ onMounted(async () => {
 onUnmounted(() => {
   document.removeEventListener('click', handleGlobalClick);
   if (notifyTimer) clearTimeout(notifyTimer);
+  if (wishFilterTimer) clearTimeout(wishFilterTimer);
+  if (cardFilterTimer) clearTimeout(cardFilterTimer);
 });
 </script>
 
 <style lang="scss" scoped>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&family=Prompt:wght@500;600;700&display=swap');
 
-// ─── Design Tokens (เหมือน create/list page) ──────────────────────────────────
 $orange: #ea580c;
 $orange-mid: #f97316;
 $orange-soft: #fff7ed;
 $gold: #f59e0b;
 $teal: #0d9488;
-$teal-soft: #ccfbf1;
+$teal-soft: #f0fdfa;
 $red: #dc2626;
 $red-soft: #fee2e2;
 $green: #16a34a;
@@ -1333,6 +2818,7 @@ $green-dark: #14532d;
 $green-soft: #f0fdf4;
 $surface: #ffffff;
 $surface-2: #fff9f5;
+$surface-teal: #f0fdfa;
 $text-main: #431407;
 $text-muted: #9ca3af;
 $radius: 18px;
@@ -1346,25 +2832,20 @@ $error-red: #dc2626;
 }
 
 // ─── Hero ─────────────────────────────────────────────────────────────────────
-// .page-hero {
-//   position: relative;
-//   overflow: hidden;
-//   background: linear-gradient(135deg, #7c2d12 0%, $orange 55%, $gold 100%);
-//   padding: 2.25rem 1.5rem 4rem;
-// }
 .page-hero {
   position: relative;
   overflow: hidden;
   background: linear-gradient(135deg, #7c2d12 0%, $orange 55%, $gold 100%);
-  padding: 1rem 1.5rem 2.5rem; // เปลี่ยนจาก 2.25rem 1.5rem 4rem
+  padding: 1rem 1.5rem 2.5rem;
+  @media (max-width: 599px) {
+    padding: 1rem 1rem 2.5rem;
+  }
 }
-
 .hero-blob {
   position: absolute;
   border-radius: 50%;
   opacity: 0.14;
 }
-
 .hero-blob-1 {
   width: 350px;
   height: 350px;
@@ -1373,7 +2854,6 @@ $error-red: #dc2626;
   right: -80px;
   animation: drift 7s ease-in-out infinite;
 }
-
 .hero-blob-2 {
   width: 200px;
   height: 200px;
@@ -1382,7 +2862,6 @@ $error-red: #dc2626;
   left: -50px;
   animation: drift 9s ease-in-out infinite reverse;
 }
-
 .hero-blob-3 {
   width: 130px;
   height: 130px;
@@ -1391,7 +2870,6 @@ $error-red: #dc2626;
   left: 38%;
   animation: drift 5s ease-in-out infinite 1s;
 }
-
 @keyframes drift {
   0%,
   100% {
@@ -1408,46 +2886,59 @@ $error-red: #dc2626;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  flex-wrap: wrap;
   gap: 14px;
   max-width: 1100px;
   margin: 0 auto;
+  @media (max-width: 599px) {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
 }
-
 .hero-left {
   display: flex;
   align-items: center;
   gap: 14px;
+  @media (max-width: 599px) {
+    gap: 10px;
+  }
 }
-
 .hero-icon-wrap {
   width: 54px;
   height: 54px;
   border-radius: 15px;
+  flex-shrink: 0;
   background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.22);
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
+  @media (max-width: 599px) {
+    width: 46px;
+    height: 46px;
+  }
 }
-
 .hero-title {
   font-family: 'Prompt', sans-serif;
-  font-size: clamp(1.25rem, 4vw, 1.85rem);
+  font-size: clamp(1.15rem, 4vw, 1.85rem);
   font-weight: 700;
   color: #fff;
   margin: 0 0 3px;
   line-height: 1.15;
 }
-
 .hero-sub {
-  font-size: clamp(0.75rem, 2.5vw, 0.88rem);
+  font-size: clamp(0.72rem, 2.5vw, 0.88rem);
   color: rgba(255, 255, 255, 0.68);
   margin: 0;
 }
-
+.hero-actions {
+  display: flex;
+  align-items: center;
+  @media (max-width: 599px) {
+    width: 100%;
+  }
+}
 .hero-back-btn {
   background: rgba(255, 255, 255, 0.16) !important;
   backdrop-filter: blur(8px);
@@ -1460,19 +2951,17 @@ $error-red: #dc2626;
   transition:
     background 0.2s,
     transform 0.15s !important;
-
   &:hover {
     background: rgba(255, 255, 255, 0.26) !important;
     transform: translateY(-2px);
   }
+  @media (max-width: 599px) {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
 // ─── Content ──────────────────────────────────────────────────────────────────
-// .content-wrap {
-//   max-width: 780px;
-//   margin: -2rem auto 0;
-//   padding: 0 1rem 4rem;
-// }
 .content-wrap {
   max-width: 1100px;
   margin: -1.25rem auto 0;
@@ -1482,15 +2971,17 @@ $error-red: #dc2626;
   gap: 1.25rem;
   position: relative;
   z-index: 2;
+  @media (max-width: 599px) {
+    padding: 1rem 0.75rem 3.5rem;
+  }
 }
-
 .form-container {
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
 }
 
-// ─── Festival Card ────────────────────────────────────────────────────────────
+// ─── Card ─────────────────────────────────────────────────────────────────────
 .fest-card {
   background: $surface;
   border-radius: $radius;
@@ -1499,8 +2990,11 @@ $error-red: #dc2626;
     0 3px 20px rgba(234, 88, 12, 0.08),
     0 1px 4px rgba(0, 0, 0, 0.04);
   border: 1px solid rgba(249, 115, 22, 0.1);
+  @media (max-width: 599px) {
+    padding: 1.1rem;
+    border-radius: 14px;
+  }
 }
-
 .card-label {
   display: flex;
   align-items: center;
@@ -1512,14 +3006,12 @@ $error-red: #dc2626;
   text-transform: uppercase;
   margin-bottom: 1.25rem;
 }
-
 .label-dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
   background: $orange;
   flex-shrink: 0;
-
   &--amber {
     background: $gold;
   }
@@ -1527,105 +3019,11 @@ $error-red: #dc2626;
     background: $teal;
   }
 }
-
 .field-group {
   scroll-margin-top: 80px;
 }
 
-// ─── Stat Chip ────────────────────────────────────────────────────────────────
-.stat-chip {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  background: $surface-2;
-  border-radius: 12px;
-  padding: 8px 15px;
-  box-shadow: 0 2px 12px rgba(234, 88, 12, 0.08);
-  border: 1px solid rgba(249, 115, 22, 0.12);
-}
-
-.stat-num {
-  font-family: 'Prompt', sans-serif;
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: $text-main;
-  line-height: 1;
-}
-
-.stat-label {
-  font-size: 0.78rem;
-  color: $text-muted;
-}
-
-// ─── Card Header Row ──────────────────────────────────────────────────────────
-.card-header-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 1rem;
-}
-
-.action-btn {
-  border-radius: 12px !important;
-  font-weight: 600 !important;
-  font-family: 'Noto Sans Thai', sans-serif !important;
-  letter-spacing: 0 !important;
-}
-
-// ─── Error ────────────────────────────────────────────────────────────────────
-.upload-zone--error {
-  border-color: $error-red !important;
-  border-style: solid !important;
-  background: #fff5f5 !important;
-  animation: shake 0.35s cubic-bezier(0.36, 0.07, 0.19, 0.97);
-}
-
-.upload-zone--disabled {
-  opacity: 0.55;
-  cursor: not-allowed !important;
-  pointer-events: none;
-}
-
-.error-msg {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  color: $error-red;
-  font-size: 0.78rem;
-  font-weight: 500;
-  margin-top: 6px;
-}
-
-@keyframes shake {
-  0%,
-  100% {
-    transform: translateX(0);
-  }
-  20% {
-    transform: translateX(-5px);
-  }
-  40% {
-    transform: translateX(5px);
-  }
-  60% {
-    transform: translateX(-4px);
-  }
-  80% {
-    transform: translateX(4px);
-  }
-}
-
-.err-fade-enter-active,
-.err-fade-leave-active {
-  transition: all 0.25s ease;
-}
-.err-fade-enter-from,
-.err-fade-leave-to {
-  opacity: 0;
-  transform: translateY(-4px);
-}
-
-// ─── Cover Upload ─────────────────────────────────────────────────────────────
+// ─── Cover ────────────────────────────────────────────────────────────────────
 .cover-upload-zone {
   border-radius: 14px;
   overflow: hidden;
@@ -1636,26 +3034,21 @@ $error-red: #dc2626;
     background 0.2s,
     transform 0.2s;
   background: $surface-2;
-
   &:hover {
     border-color: $orange;
     transform: translateY(-2px);
   }
 }
-
-// .cover-img {
-//   display: block;
-// }
 .cover-img {
   width: 100%;
-  aspect-ratio: 2188 / 417; // ← สัดส่วนถูกต้อง ไม่ตายตัว
+  aspect-ratio: 2188 / 417;
   background-size: contain;
   background-position: center center;
   background-repeat: no-repeat;
   background-color: $surface-2;
   position: relative;
+  display: block;
 }
-
 .cover-overlay {
   position: absolute;
   inset: 0;
@@ -1670,34 +3063,47 @@ $error-red: #dc2626;
   color: white;
   font-size: 0.85rem;
   font-weight: 500;
-
   .cover-upload-zone:hover &,
   .logo-upload-zone:hover & {
     opacity: 1;
   }
 }
-
 .cover-placeholder {
-  padding: 2.5rem 1rem;
+  padding: 2rem 1rem;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 6px;
+  min-height: 120px;
+  justify-content: center;
+  @media (max-width: 599px) {
+    padding: 1.25rem 0.75rem;
+    min-height: 90px;
+    gap: 4px;
+  }
 }
-
 .cover-placeholder-icon {
   font-size: 2.5rem;
+  @media (max-width: 599px) {
+    font-size: 1.8rem;
+  }
 }
 .cover-placeholder-text {
   font-size: 0.95rem;
   font-weight: 600;
   color: $text-main;
+  @media (max-width: 599px) {
+    font-size: 0.82rem;
+  }
 }
 .cover-placeholder-sub {
   font-size: 0.78rem;
   color: $text-muted;
+  text-align: center;
+  @media (max-width: 599px) {
+    font-size: 0.7rem;
+  }
 }
-
 .cover-resize-link {
   display: inline-flex;
   align-items: center;
@@ -1714,18 +3120,33 @@ $error-red: #dc2626;
   transition:
     background 0.2s,
     transform 0.15s;
-
   &:hover {
     background: rgba(234, 88, 12, 0.14);
     transform: translateY(-1px);
   }
 }
 
-// ─── Logo Upload ──────────────────────────────────────────────────────────────
+// ─── Logo ─────────────────────────────────────────────────────────────────────
 .logo-row {
   display: flex;
   align-items: center;
   gap: 1rem;
+  flex-wrap: wrap;
+
+  @media (max-width: 599px) {
+    gap: 0.75rem;
+    display: grid;
+    grid-template-columns: auto auto 1fr;
+    grid-template-areas: 'upload dept hint';
+    align-items: start;
+  }
+
+  @media (max-width: 399px) {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      'upload dept'
+      'hint   hint';
+  }
 }
 
 .logo-upload-zone {
@@ -1739,29 +3160,65 @@ $error-red: #dc2626;
     transform 0.2s;
   background: $surface-2;
   width: 130px;
+  height: 130px;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   &:hover {
     border-color: $orange;
     transform: translateY(-2px);
   }
+
+  @media (max-width: 599px) {
+    grid-area: upload;
+    width: 90px;
+    height: 90px;
+  }
+
+  @media (max-width: 399px) {
+    width: 100%;
+    height: 90px;
+  }
 }
 
-.logo-preview {
-  border-radius: 10px;
+.logo-preview-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  padding: 8px;
+  box-sizing: border-box;
 }
 
 .logo-placeholder {
-  padding: 1.25rem 0.75rem;
+  padding: 1rem 0.75rem;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 5px;
   text-align: center;
+
+  @media (max-width: 599px) {
+    padding: 0.5rem;
+  }
 }
 
 .logo-placeholder-icon {
   font-size: 1.8rem;
+  @media (max-width: 599px) {
+    font-size: 1.4rem;
+  }
+}
+
+.logo-hint {
+  flex: 1;
+  min-width: 0;
+
+  @media (max-width: 599px) {
+    grid-area: hint;
+  }
 }
 
 .logo-hint-title {
@@ -1770,12 +3227,20 @@ $error-red: #dc2626;
   font-weight: 600;
   color: $text-main;
   margin-bottom: 4px;
+
+  @media (max-width: 599px) {
+    font-size: 0.84rem;
+  }
 }
 
 .logo-hint-sub {
   font-size: 0.76rem;
   color: $text-muted;
   line-height: 1.6;
+
+  @media (max-width: 599px) {
+    font-size: 0.72rem;
+  }
 }
 
 .dept-logo-option {
@@ -1787,6 +3252,17 @@ $error-red: #dc2626;
   border-radius: 12px;
   overflow: hidden;
   border: 2px solid rgba(234, 88, 12, 0.2);
+
+  @media (max-width: 599px) {
+    grid-area: dept;
+    width: 90px;
+    height: 90px;
+  }
+
+  @media (max-width: 399px) {
+    width: 100%;
+    height: 90px;
+  }
 }
 
 .dept-logo-img {
@@ -1817,25 +3293,82 @@ $error-red: #dc2626;
   }
 }
 
-// ─── Custom Input ─────────────────────────────────────────────────────────────
+// ─── Inputs ───────────────────────────────────────────────────────────────────
 .custom-input :deep(.q-field__control) {
   border-radius: 12px !important;
 }
 
-// ─── Date Section ─────────────────────────────────────────────────────────────
+// ─── Errors ───────────────────────────────────────────────────────────────────
+.upload-zone--error {
+  border-color: $error-red !important;
+  border-style: solid !important;
+  background: #fff5f5 !important;
+  animation: shake 0.35s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+.upload-zone--disabled {
+  opacity: 0.55;
+  cursor: not-allowed !important;
+  pointer-events: none;
+}
+.dept-logo-option--disabled {
+  opacity: 0.55;
+  cursor: not-allowed !important;
+  pointer-events: none;
+}
+.cal-readonly {
+  pointer-events: none;
+  opacity: 0.6;
+}
+.error-msg {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: $error-red;
+  font-size: 0.78rem;
+  font-weight: 500;
+  margin-top: 6px;
+}
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-5px);
+  }
+  40% {
+    transform: translateX(5px);
+  }
+  60% {
+    transform: translateX(-4px);
+  }
+  80% {
+    transform: translateX(4px);
+  }
+}
+.err-fade-enter-active,
+.err-fade-leave-active {
+  transition: all 0.25s ease;
+}
+.err-fade-enter-from,
+.err-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-4px);
+}
+
+// ─── Date ─────────────────────────────────────────────────────────────────────
 .date-summary-row {
   display: flex;
   align-items: center;
   gap: 0.6rem;
   margin-bottom: 0.6rem;
   flex-wrap: wrap;
-
-  @media (max-width: 480px) {
+  @media (max-width: 479px) {
     flex-direction: column;
     align-items: stretch;
+    gap: 0.5rem;
   }
 }
-
 .date-chip {
   flex: 1;
   min-width: 130px;
@@ -1847,7 +3380,6 @@ $error-red: #dc2626;
   background: rgba(234, 88, 12, 0.03);
   border: 1.5px dashed rgba(234, 88, 12, 0.2);
   transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
-
   &--active {
     background: rgba(234, 88, 12, 0.05);
     border-style: solid;
@@ -1858,13 +3390,15 @@ $error-red: #dc2626;
       font-weight: 700;
     }
   }
-
   &--error {
     border-color: $error-red !important;
     background: #fff5f5 !important;
   }
+  @media (max-width: 479px) {
+    min-width: unset;
+    padding: 0.6rem 0.85rem;
+  }
 }
-
 .date-chip-icon {
   width: 30px;
   height: 30px;
@@ -1876,17 +3410,14 @@ $error-red: #dc2626;
   align-items: center;
   justify-content: center;
   box-shadow: 0 3px 10px rgba(234, 88, 12, 0.28);
-
   &--end {
     background: linear-gradient(135deg, #065f46, $teal);
   }
 }
-
 .date-chip-body {
   flex: 1;
   min-width: 0;
 }
-
 .date-chip-label {
   font-size: 0.66rem;
   font-weight: 700;
@@ -1895,7 +3426,6 @@ $error-red: #dc2626;
   color: $text-muted;
   margin-bottom: 1px;
 }
-
 .date-chip-value {
   font-size: 0.82rem;
   color: $text-muted;
@@ -1903,7 +3433,6 @@ $error-red: #dc2626;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-
 .date-chip-clear {
   width: 22px;
   height: 22px;
@@ -1919,23 +3448,19 @@ $error-red: #dc2626;
   transition:
     background 0.15s,
     transform 0.15s;
-
   &:hover {
     background: rgba(220, 38, 38, 0.15);
     color: $error-red;
     transform: scale(1.1);
   }
 }
-
 .date-range-arrow {
   color: $text-muted;
   flex-shrink: 0;
-  @media (max-width: 480px) {
-    transform: rotate(90deg);
-    align-self: center;
+  @media (max-width: 479px) {
+    display: none;
   }
 }
-
 .duration-badge {
   display: inline-flex;
   align-items: center;
@@ -1949,7 +3474,6 @@ $error-red: #dc2626;
   font-weight: 700;
   margin-bottom: 0.75rem;
 }
-
 .duration-fade-enter-active,
 .duration-fade-leave-active {
   transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -1959,23 +3483,21 @@ $error-red: #dc2626;
   opacity: 0;
   transform: scale(0.85);
 }
-
 .calendars-wrap {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
   margin-top: 0.85rem;
-  @media (max-width: 599px) {
+  @media (max-width: 767px) {
     grid-template-columns: 1fr;
+    gap: 1.25rem;
   }
 }
-
 .calendar-block {
   display: flex;
   flex-direction: column;
   gap: 0.6rem;
 }
-
 .calendar-block-label {
   display: flex;
   align-items: center;
@@ -1986,7 +3508,6 @@ $error-red: #dc2626;
   text-transform: uppercase;
   padding: 0.4rem 0.75rem;
   border-radius: 8px;
-
   &--start {
     color: $orange;
     background: rgba(234, 88, 12, 0.07);
@@ -1996,7 +3517,6 @@ $error-red: #dc2626;
     background: rgba(13, 148, 136, 0.08);
   }
 }
-
 .cal-label-dot {
   width: 8px;
   height: 8px;
@@ -2009,7 +3529,6 @@ $error-red: #dc2626;
     background: $teal;
   }
 }
-
 .cal-label-date {
   margin-left: auto;
   font-weight: 600;
@@ -2021,13 +3540,11 @@ $error-red: #dc2626;
     color: $teal;
   }
 }
-
 .cal-wrapper {
   border-radius: 18px;
   overflow: hidden;
   box-shadow: 0 4px 20px rgba(234, 88, 12, 0.1);
   transition: box-shadow 0.25s;
-
   &:hover {
     box-shadow: 0 8px 32px rgba(234, 88, 12, 0.16);
   }
@@ -2038,17 +3555,10 @@ $error-red: #dc2626;
     border: 2px solid rgba(13, 148, 136, 0.18);
   }
 }
-
-.cal-readonly {
-  pointer-events: none;
-  opacity: 0.6;
-}
-
 .fest-calendar {
   width: 100% !important;
   border-radius: 16px !important;
   font-family: 'Noto Sans Thai', 'Prompt', sans-serif !important;
-
   :deep(.q-date__header) {
     border-radius: 16px 16px 0 0 !important;
     padding: 0.85rem 1rem !important;
@@ -2069,13 +3579,49 @@ $error-red: #dc2626;
   }
 }
 
+// ─── Stat Chip / Header ───────────────────────────────────────────────────────
+.stat-chip {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: $surface-2;
+  border-radius: 12px;
+  padding: 8px 15px;
+  box-shadow: 0 2px 12px rgba(234, 88, 12, 0.08);
+  border: 1px solid rgba(249, 115, 22, 0.12);
+}
+.stat-num {
+  font-family: 'Prompt', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: $text-main;
+  line-height: 1;
+}
+.stat-label {
+  font-size: 0.78rem;
+  color: $text-muted;
+}
+.card-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.action-btn {
+  border-radius: 12px !important;
+  font-weight: 600 !important;
+  font-family: 'Noto Sans Thai', sans-serif !important;
+  letter-spacing: 0 !important;
+}
+
 // ─── Wish List ────────────────────────────────────────────────────────────────
 .wish-list-wrapper {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
-
 .wish-item {
   display: flex;
   align-items: center;
@@ -2087,13 +3633,11 @@ $error-red: #dc2626;
   transition:
     box-shadow 0.2s,
     transform 0.2s;
-
   &:hover {
     box-shadow: 0 4px 16px rgba(234, 88, 12, 0.1);
     transform: translateX(2px);
   }
 }
-
 .wish-number {
   width: 26px;
   height: 26px;
@@ -2107,20 +3651,20 @@ $error-red: #dc2626;
   justify-content: center;
   flex-shrink: 0;
 }
-
 .wish-text {
   flex: 1;
   font-size: 0.92rem;
   color: $text-main;
   font-weight: 500;
   line-height: 1.5;
+  overflow-wrap: break-word;
+  min-width: 0;
 }
 .wish-actions {
   display: flex;
   gap: 6px;
   flex-shrink: 0;
 }
-
 .wish-btn {
   width: 32px;
   height: 32px;
@@ -2133,31 +3677,24 @@ $error-red: #dc2626;
   transition:
     background 0.15s,
     transform 0.1s;
-
   &:active {
     transform: scale(0.92);
   }
-  &:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-  }
-
   &--edit {
     background: rgba(245, 158, 11, 0.1);
     color: $gold;
-    &:hover:not(:disabled) {
+    &:hover {
       background: rgba(245, 158, 11, 0.2);
     }
   }
   &--delete {
     background: rgba(220, 38, 38, 0.08);
     color: $red;
-    &:hover:not(:disabled) {
+    &:hover {
       background: rgba(220, 38, 38, 0.15);
     }
   }
 }
-
 .wish-list-enter-active,
 .wish-list-leave-active {
   transition: all 0.3s cubic-bezier(0.36, 0.07, 0.19, 0.97);
@@ -2171,16 +3708,21 @@ $error-red: #dc2626;
   transform: translateX(16px) scale(0.95);
 }
 
-// ─── Card Grid ────────────────────────────────────────────────────────────────
+// ─── Card Grid (main page) ───────────────────────────────────────────────────
 .card-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
   @media (min-width: 480px) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  @media (min-width: 768px) {
     grid-template-columns: repeat(5, 1fr);
   }
+  @media (min-width: 1024px) {
+    grid-template-columns: repeat(6, 1fr);
+  }
 }
-
 .card-thumb {
   position: relative;
   border-radius: 12px;
@@ -2191,12 +3733,10 @@ $error-red: #dc2626;
     transform: scale(1.04);
   }
 }
-
 .card-thumb-img {
   display: block;
   border-radius: 12px;
 }
-
 .card-thumb-remove {
   position: absolute;
   top: 5px;
@@ -2212,19 +3752,46 @@ $error-red: #dc2626;
   align-items: center;
   justify-content: center;
   transition: background 0.15s;
+  z-index: 2;
   &:hover {
     background: $red;
   }
 }
+.card-thumb-badge {
+  position: absolute;
+  bottom: 6px;
+  left: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 7px;
+  border-radius: 6px;
+  font-size: 0.66rem;
+  font-weight: 600;
+  color: #fff;
+  backdrop-filter: blur(4px);
+  z-index: 2;
+  &--api {
+    background: rgba(13, 148, 136, 0.85);
+  }
+  &--new {
+    background: rgba(234, 88, 12, 0.85);
+  }
+  &--existing {
+    background: rgba(124, 45, 18, 0.85);
+  }
+}
 
-// ─── Empty State ──────────────────────────────────────────────────────────────
+// ─── Empty ────────────────────────────────────────────────────────────────────
 .empty-state {
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 2rem 1rem;
+  @media (max-width: 599px) {
+    padding: 1.5rem 0.75rem;
+  }
 }
-
 .empty-icon {
   font-size: 2.5rem;
   margin-bottom: 10px;
@@ -2242,7 +3809,6 @@ $error-red: #dc2626;
   margin-top: 4px;
   text-align: center;
 }
-
 @keyframes pop {
   0% {
     transform: scale(0.5);
@@ -2274,7 +3840,6 @@ $error-red: #dc2626;
     transform 0.2s,
     box-shadow 0.2s,
     opacity 0.2s;
-
   &:hover:not(.submit-btn--loading):not(:disabled) {
     transform: translateY(-2px);
     box-shadow: 0 10px 32px rgba(234, 88, 12, 0.4);
@@ -2288,19 +3853,15 @@ $error-red: #dc2626;
     cursor: not-allowed;
   }
 }
-
 .submit-btn-inner {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
 }
-
-// ─── Animate In ───────────────────────────────────────────────────────────────
 .animate-in {
   animation: slideUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
-
 @keyframes slideUp {
   from {
     opacity: 0;
@@ -2312,23 +3873,1045 @@ $error-red: #dc2626;
   }
 }
 
-// ─── Dialogs ──────────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════
+//  WISH SELECTOR DIALOG
+// ══════════════════════════════════════════════════════════════════
+.wish-dlg {
+  background: white;
+  border-radius: 22px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 24px 80px rgba(124, 45, 18, 0.18);
+  height: 90vh;
+  max-height: 90vh;
+
+  @media (max-width: 767px) {
+    height: 100dvh;
+    max-height: 100dvh;
+    border-radius: 0;
+  }
+}
+
+// ── Header ────────────────────────────────────────────────────────
+.wish-dlg-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 20px;
+  background: linear-gradient(135deg, #7c2d12, $orange 60%, $gold);
+  flex-shrink: 0;
+  @media (max-width: 599px) {
+    padding: 12px 14px;
+    flex-wrap: wrap;
+  }
+}
+.card-dlg-header {
+  background: linear-gradient(135deg, #064e3b, $teal 60%, #14b8a6);
+}
+.wish-dlg-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.wish-dlg-header-icon {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.wish-dlg-title {
+  font-family: 'Prompt', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+}
+.wish-dlg-sub {
+  font-size: 0.74rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+.wish-dlg-header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  @media (max-width: 599px) {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+.wish-dlg-tabs {
+  display: flex;
+  gap: 5px;
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 10px;
+  padding: 3px;
+}
+.wish-tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 0.82rem;
+  font-weight: 500;
+  transition:
+    background 0.15s,
+    color 0.15s;
+  white-space: nowrap;
+  &--active {
+    background: #fff;
+    color: $orange;
+    font-weight: 700;
+  }
+  @media (max-width: 479px) {
+    padding: 5px 8px;
+    font-size: 0.76rem;
+  }
+}
+.card-dlg .wish-tab-btn--active {
+  color: $teal;
+}
+.wish-tab-label {
+  @media (max-width: 399px) {
+    display: none;
+  }
+}
+.wish-tab-badge {
+  background: $red;
+  color: #fff;
+  border-radius: 999px;
+  padding: 1px 6px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  .wish-tab-btn--active & {
+    background: $orange;
+  }
+}
+.card-dlg .wish-tab-btn--active .wish-tab-badge {
+  background: $teal;
+}
+.wish-dlg-close {
+  background: rgba(255, 255, 255, 0.18);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #fff;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  &:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+}
+
+// ── Filters ───────────────────────────────────────────────────────
+.wish-dlg-filters {
+  padding: 12px 20px;
+  border-bottom: 1px solid rgba(249, 115, 22, 0.08);
+  flex-shrink: 0;
+  @media (max-width: 599px) {
+    padding: 10px 14px;
+  }
+}
+.wish-filter-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 8px;
+  @media (max-width: 767px) {
+    grid-template-columns: 1fr 1fr;
+  }
+  @media (max-width: 479px) {
+    grid-template-columns: 1fr;
+  }
+}
+.card-filter-grid {
+  grid-template-columns: 1.4fr 1fr 1fr;
+  @media (max-width: 767px) {
+    grid-template-columns: 1fr 1fr;
+  }
+  @media (max-width: 479px) {
+    grid-template-columns: 1fr;
+  }
+}
+.wish-filter-input :deep(.q-field__control) {
+  border-radius: 10px !important;
+}
+.wish-filter-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+.wish-filter-clear {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: 1px solid rgba(234, 88, 12, 0.2);
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-size: 0.76rem;
+  color: $orange;
+  cursor: pointer;
+  transition: background 0.15s;
+  &:hover {
+    background: rgba(234, 88, 12, 0.07);
+  }
+}
+.card-filter-clear {
+  border-color: rgba(13, 148, 136, 0.25);
+  color: $teal;
+  &:hover {
+    background: rgba(13, 148, 136, 0.07);
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════
+// ✅ NEW — Compact Pagination (เหมือน q-table footer ใน unpolite)
+// ══════════════════════════════════════════════════════════════════
+.compact-pg {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 18px;
+  padding: 6px 20px;
+  border-top: 1px solid rgba(249, 115, 22, 0.08);
+  flex-shrink: 0;
+  background: $surface-2;
+  font-size: 0.82rem;
+  color: $text-main;
+  flex-wrap: wrap;
+  row-gap: 6px;
+
+  @media (max-width: 599px) {
+    padding: 6px 14px;
+    gap: 12px;
+    justify-content: space-between;
+  }
+}
+
+.compact-pg--card {
+  background: $surface-teal;
+  border-top-color: rgba(13, 148, 136, 0.1);
+}
+
+.compact-pg-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.compact-pg-label {
+  color: $text-muted;
+  white-space: nowrap;
+}
+
+.compact-pg-select {
+  min-width: 56px;
+
+  :deep(.q-field__control) {
+    min-height: 28px !important;
+    padding: 0 4px !important;
+  }
+  :deep(.q-field__native) {
+    min-height: 28px !important;
+    padding: 0 !important;
+    font-size: 0.82rem !important;
+    font-weight: 600;
+    color: $text-main;
+  }
+  :deep(.q-field__append) {
+    min-height: 28px !important;
+    height: 28px !important;
+    padding-left: 0 !important;
+  }
+  :deep(.q-field__marginal) {
+    height: 28px !important;
+  }
+}
+
+.compact-pg-info {
+  color: $text-muted;
+  white-space: nowrap;
+}
+
+.compact-pg-nav {
+  display: flex;
+  gap: 2px;
+}
+
+.compact-pg-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: $text-main;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background 0.15s,
+    opacity 0.15s;
+
+  &:hover:not(:disabled) {
+    background: rgba(234, 88, 12, 0.08);
+  }
+
+  &:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+
+  .compact-pg--card & {
+    &:hover:not(:disabled) {
+      background: rgba(13, 148, 136, 0.08);
+    }
+  }
+}
+
+// ── Scroll / Table (wish) ─────────────────────────────────────────
+.wish-dlg-scroll {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: auto;
+  padding: 0;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.wish-table {
+  width: 100%;
+  min-width: 720px;
+  border-collapse: collapse;
+  font-size: 0.86rem;
+
+  @media (max-width: 599px) {
+    font-size: 0.82rem;
+  }
+}
+
+.wish-table-th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: $surface-2;
+  padding: 9px 14px;
+  text-align: left;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: $text-muted;
+  border-bottom: 1.5px solid rgba(234, 88, 12, 0.12);
+  white-space: nowrap;
+
+  &--num {
+    width: 46px;
+    text-align: center;
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+  &--word {
+    min-width: 280px;
+  }
+  &--fest {
+    width: 220px;
+    min-width: 180px;
+  }
+  &--action {
+    width: 36px;
+    text-align: center;
+    padding-left: 4px;
+    padding-right: 8px;
+  }
+
+  @media (max-width: 599px) {
+    padding: 8px 10px;
+  }
+}
+
+.wish-table-row {
+  cursor: pointer;
+  transition: background 0.12s;
+  border-bottom: 0.5px solid rgba(234, 88, 12, 0.07);
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &:hover:not(.wish-table-row--added) {
+    background: rgba(234, 88, 12, 0.04);
+  }
+  &--selected {
+    background: rgba(234, 88, 12, 0.07) !important;
+    .wish-table-td--word {
+      color: $orange;
+      font-weight: 600;
+    }
+  }
+  &--added {
+    cursor: default;
+    opacity: 0.5;
+    &:hover {
+      background: transparent;
+    }
+  }
+}
+
+.wish-table-td {
+  padding: 11px 14px;
+  color: $text-main;
+  vertical-align: middle;
+
+  &--num {
+    width: 46px;
+    text-align: center;
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+  &--word {
+    min-width: 280px;
+    line-height: 1.55;
+    word-break: break-word;
+  }
+  &--fest {
+    width: 220px;
+    min-width: 180px;
+  }
+  &--action {
+    width: 36px;
+    text-align: center;
+    padding-left: 4px;
+    padding-right: 8px;
+  }
+
+  @media (max-width: 599px) {
+    padding: 10px 10px;
+  }
+}
+
+.wish-table-num-text {
+  font-size: 0.76rem;
+  color: $text-muted;
+  display: block;
+}
+
+.wish-table-check {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  flex-shrink: 0;
+
+  &--on {
+    background: $orange;
+    box-shadow: 0 2px 6px rgba(234, 88, 12, 0.3);
+  }
+  &--added {
+    background: #e5e7eb;
+  }
+}
+
+.wish-fest-badge {
+  display: inline-block;
+  font-size: 0.72rem;
+  background: rgba(234, 88, 12, 0.07);
+  color: $orange;
+  border-radius: 6px;
+  padding: 2px 8px;
+  white-space: nowrap;
+  line-height: 1.4;
+}
+
+.wsp-skeleton-line {
+  height: 12px;
+  background: linear-gradient(
+    90deg,
+    rgba(234, 88, 12, 0.08) 25%,
+    rgba(234, 88, 12, 0.04) 50%,
+    rgba(234, 88, 12, 0.08) 75%
+  );
+  background-size: 200% 100%;
+  border-radius: 6px;
+  animation: shimmer 1.4s infinite;
+}
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+.wsp-api-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 32px 16px;
+  color: $text-muted;
+  font-size: 0.84rem;
+}
+.wsp-api-empty-text {
+  color: #6b7280;
+}
+.wsp-retry-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: 1px solid rgba(234, 88, 12, 0.2);
+  border-radius: 8px;
+  padding: 5px 12px;
+  font-size: 0.78rem;
+  cursor: pointer;
+  color: $orange;
+  transition: background 0.15s;
+  &:hover {
+    background: rgba(234, 88, 12, 0.07);
+  }
+}
+.card-retry-btn {
+  border-color: rgba(13, 148, 136, 0.22) !important;
+  color: $teal !important;
+  &:hover {
+    background: $surface-teal !important;
+  }
+}
+.wsp-load-more {
+  display: flex;
+  justify-content: center;
+  padding: 12px;
+}
+
+// ── Card API Grid (inside dialog) ─────────────────────────────────
+.card-dlg-scroll {
+  padding: 12px;
+  @media (max-width: 599px) {
+    padding: 10px;
+  }
+}
+.card-api-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(2, 1fr);
+  @media (min-width: 480px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  @media (min-width: 1024px) {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+.card-api-thumb {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  background: $surface-teal;
+  border: 2px solid transparent;
+  transition:
+    transform 0.15s,
+    border-color 0.15s,
+    box-shadow 0.15s;
+  box-shadow: 0 1px 4px rgba(13, 148, 136, 0.08);
+
+  &:hover:not(.card-api-thumb--added) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(13, 148, 136, 0.16);
+  }
+
+  &--selected {
+    border-color: $teal;
+    box-shadow: 0 4px 16px rgba(13, 148, 136, 0.28);
+  }
+  &--added {
+    cursor: default;
+    opacity: 0.45;
+    .card-api-thumb-img {
+      filter: grayscale(60%);
+    }
+  }
+  &--skeleton {
+    pointer-events: none;
+    cursor: default;
+  }
+}
+.card-api-thumb-img {
+  display: block;
+  border-radius: 0;
+}
+.card-api-thumb-skeleton-img {
+  width: 100%;
+  padding-top: 100%;
+  background: linear-gradient(
+    90deg,
+    rgba(13, 148, 136, 0.08) 25%,
+    rgba(13, 148, 136, 0.04) 50%,
+    rgba(13, 148, 136, 0.08) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+}
+.card-api-thumb-overlay {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 2;
+}
+.card-api-check {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  &--on {
+    background: $teal;
+    box-shadow: 0 2px 6px rgba(13, 148, 136, 0.4);
+  }
+  &--added {
+    background: #e5e7eb;
+  }
+}
+.card-api-thumb-meta {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 5px 8px;
+  background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.55));
+  display: flex;
+  justify-content: flex-start;
+  pointer-events: none;
+}
+.card-api-fest-badge {
+  display: inline-block;
+  max-width: 100%;
+  font-size: 0.66rem;
+  background: rgba(255, 255, 255, 0.95);
+  color: $teal;
+  border-radius: 5px;
+  padding: 2px 6px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+}
+
+// ── Footer ────────────────────────────────────────────────────────
+.wish-dlg-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 20px;
+  border-top: 1px solid rgba(249, 115, 22, 0.08);
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  row-gap: 8px;
+  @media (max-width: 599px) {
+    padding: 10px 14px;
+  }
+  @media (max-width: 479px) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+.wish-footer-summary {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.84rem;
+  color: $text-main;
+}
+.wish-footer-empty-label {
+  font-size: 0.82rem;
+  color: $text-muted;
+}
+.wish-footer-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  @media (max-width: 479px) {
+    width: 100%;
+    > * {
+      flex: 1;
+      justify-content: center;
+    }
+  }
+}
+
+// ── Card dialog secondary/confirm buttons (teal) ─────────────────
+.card-secondary-btn {
+  background: $surface-teal !important;
+  color: $teal !important;
+  border: 1.5px solid rgba(13, 148, 136, 0.22) !important;
+  &:hover {
+    background: rgba(13, 148, 136, 0.1) !important;
+  }
+}
+.card-confirm-btn {
+  background: linear-gradient(135deg, #064e3b, $teal) !important;
+  color: #fff !important;
+  box-shadow: 0 3px 12px rgba(13, 148, 136, 0.3) !important;
+  &:hover:not(:disabled) {
+    box-shadow: 0 5px 18px rgba(13, 148, 136, 0.4) !important;
+  }
+}
+
+// ── Custom Tab (wish & card upload) ───────────────────────────────
+.wish-dlg-custom-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  padding: 20px;
+  flex: 1;
+  overflow-y: auto;
+  @media (max-width: 767px) {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 16px 14px;
+  }
+}
+.wish-custom-section-title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: $text-main;
+  margin-bottom: 10px;
+}
+.wish-custom-hint {
+  font-size: 0.78rem;
+  color: $text-muted;
+  margin: 0 0 10px;
+  line-height: 1.5;
+}
+.wish-custom-shortcut {
+  font-size: 0.72rem;
+  color: $text-muted;
+  margin-top: 6px;
+}
+.wish-sel-badge {
+  margin-left: 4px;
+  background: $orange;
+  color: #fff;
+  border-radius: 999px;
+  padding: 1px 7px;
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+.card-sel-badge {
+  background: $teal !important;
+}
+
+// ── Card upload zone ──────────────────────────────────────────────
+.card-upload-zone {
+  border: 2px dashed rgba(13, 148, 136, 0.3);
+  background: $surface-teal;
+  border-radius: 12px;
+  padding: 22px 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  transition:
+    border-color 0.2s,
+    background 0.2s,
+    transform 0.15s;
+
+  &:hover {
+    border-color: $teal;
+    background: rgba(13, 148, 136, 0.06);
+    transform: translateY(-1px);
+  }
+}
+.card-upload-zone-text {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: $text-main;
+  margin-top: 4px;
+}
+.card-upload-zone-sub {
+  font-size: 0.74rem;
+  color: $text-muted;
+}
+
+.wish-sel-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 260px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  @media (max-width: 767px) {
+    max-height: 300px;
+  }
+  @media (max-width: 599px) {
+    max-height: 220px;
+  }
+}
+.wish-sel-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: $surface-2;
+  border: 1px solid rgba(249, 115, 22, 0.1);
+  border-radius: 9px;
+  padding: 8px 10px;
+
+  @media (max-width: 599px) {
+    padding: 9px 10px;
+    gap: 6px;
+  }
+}
+.wish-sel-text {
+  flex: 1;
+  font-size: 0.84rem;
+  color: $text-main;
+  line-height: 1.45;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  min-width: 0;
+  @media (max-width: 599px) {
+    font-size: 0.82rem;
+  }
+}
+
+.wish-sel-actions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+  align-self: center;
+
+  @media (max-width: 599px) {
+    gap: 6px;
+  }
+}
+.wish-sel-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition:
+    background 0.15s,
+    transform 0.1s;
+  -webkit-tap-highlight-color: transparent;
+  &:active {
+    transform: scale(0.92);
+  }
+
+  @media (max-width: 599px) {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+  }
+
+  &--edit {
+    background: rgba(245, 158, 11, 0.1);
+    color: $gold;
+    &:hover {
+      background: rgba(245, 158, 11, 0.2);
+    }
+  }
+  &--delete {
+    background: rgba(220, 38, 38, 0.08);
+    color: $red;
+    &:hover {
+      background: rgba(220, 38, 38, 0.15);
+    }
+  }
+}
+
+// ── Card sel grid (right panel of upload tab) ─────────────────────
+.card-sel-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  max-height: 340px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 2px;
+
+  @media (max-width: 599px) {
+    max-height: 280px;
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+.card-sel-thumb {
+  position: relative;
+  border-radius: 10px;
+  overflow: hidden;
+  background: $surface-teal;
+  box-shadow: 0 1px 4px rgba(13, 148, 136, 0.1);
+}
+.card-sel-thumb-img {
+  display: block;
+}
+.card-sel-thumb-badge {
+  position: absolute;
+  bottom: 4px;
+  left: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-size: 0.6rem;
+  font-weight: 600;
+  color: #fff;
+  z-index: 2;
+  &--api {
+    background: rgba(13, 148, 136, 0.9);
+  }
+  &--new {
+    background: rgba(234, 88, 12, 0.9);
+  }
+}
+.card-sel-thumb-remove {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(124, 45, 18, 0.78);
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+  z-index: 2;
+  &:hover {
+    background: $red;
+  }
+}
+
+.wish-sel-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 24px 12px;
+  color: $text-muted;
+  font-size: 0.82rem;
+  text-align: center;
+}
+.wsp-badge {
+  background: rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  padding: 0 6px;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+// ── Shared Dialog Buttons ─────────────────────────────────────────
+.dlg-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 8px 18px;
+  border-radius: 10px;
+  border: none;
+  font-family: 'Noto Sans Thai', sans-serif;
+  font-size: 0.86rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    transform 0.1s,
+    box-shadow 0.15s,
+    opacity 0.15s;
+  white-space: nowrap;
+  &:active {
+    transform: scale(0.96);
+  }
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+  &--cancel {
+    background: rgba(234, 88, 12, 0.07);
+    color: $text-muted;
+    &:hover {
+      background: rgba(234, 88, 12, 0.13);
+    }
+  }
+  &--confirm {
+    background: linear-gradient(135deg, #7c2d12, $orange);
+    color: #fff;
+    box-shadow: 0 3px 12px rgba(234, 88, 12, 0.3);
+    &:hover:not(:disabled) {
+      box-shadow: 0 5px 18px rgba(234, 88, 12, 0.4);
+    }
+  }
+  &--secondary {
+    background: $orange-soft;
+    color: $orange;
+    border: 1.5px solid rgba(234, 88, 12, 0.22);
+    &:hover {
+      background: rgba(234, 88, 12, 0.1);
+    }
+  }
+  &--danger {
+    background: linear-gradient(135deg, #ef4444, $red);
+    color: #fff;
+    box-shadow: 0 3px 12px rgba(220, 38, 38, 0.3);
+  }
+}
+
+// ─── Simple Dialogs ───────────────────────────────────────────────────────────
 .custom-dialog {
   background: $surface;
   border-radius: 20px;
   overflow: hidden;
-  min-width: 320px;
-  max-width: 420px;
-  width: 100%;
-  box-shadow: 0 20px 60px rgba(234, 88, 12, 0.16);
+  width: min(600px, 96vw);
+  min-width: 0;
+  max-height: 85vh;
+  box-shadow: 0 20px 60px rgba(234, 88, 12, 0.18);
+  display: flex;
+  flex-direction: column;
 
   &--mobile {
-    border-radius: 20px 20px 0 0;
-    max-width: 100%;
+    border-radius: 22px 22px 0 0;
+    width: 100vw;
+    max-width: 100vw;
     position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
+    max-height: 92dvh;
   }
 }
 
@@ -2343,9 +4926,27 @@ $error-red: #dc2626;
   color: $text-main;
   border-bottom: 1px solid rgba(249, 115, 22, 0.08);
   background: $surface-2;
+  flex-shrink: 0;
 
   &--danger {
     background: linear-gradient(135deg, #fee2e2, #fff1f2);
+  }
+
+  .custom-dialog--mobile &::before {
+    content: '';
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 4px;
+    border-radius: 2px;
+    background: rgba(234, 88, 12, 0.2);
+  }
+
+  @media (max-width: 599px) {
+    position: relative;
+    padding: 1.25rem 1rem 1rem;
   }
 }
 
@@ -2359,9 +4960,6 @@ $error-red: #dc2626;
   flex-shrink: 0;
   background: linear-gradient(135deg, #7c2d12, $orange);
 
-  &--orange {
-    background: linear-gradient(135deg, #7c2d12, $orange);
-  }
   &--amber {
     background: linear-gradient(135deg, #92400e, $gold);
   }
@@ -2382,6 +4980,7 @@ $error-red: #dc2626;
   align-items: center;
   justify-content: center;
   transition: background 0.15s;
+  flex-shrink: 0;
   &:hover {
     background: rgba(234, 88, 12, 0.14);
   }
@@ -2389,6 +4988,13 @@ $error-red: #dc2626;
 
 .dialog-body {
   padding: 1.25rem;
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+
+  @media (max-width: 599px) {
+    padding: 1rem;
+  }
 }
 
 .delete-warn-text {
@@ -2414,54 +5020,22 @@ $error-red: #dc2626;
   justify-content: flex-end;
   gap: 10px;
   padding: 0 1.25rem 1.25rem;
-}
+  flex-wrap: wrap;
+  flex-shrink: 0;
 
-.dlg-btn {
-  display: inline-flex;
-  align-items: center;
-  padding: 9px 22px;
-  border-radius: 10px;
-  border: none;
-  font-family: 'Noto Sans Thai', sans-serif;
-  font-size: 0.88rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition:
-    transform 0.1s,
-    box-shadow 0.15s,
-    opacity 0.15s;
-
-  &:active {
-    transform: scale(0.96);
+  @media (max-width: 599px) {
+    padding: 0 1rem 1.25rem;
+    padding-bottom: max(1.25rem, env(safe-area-inset-bottom));
   }
-  &:disabled {
-    opacity: 0.65;
-    cursor: not-allowed;
-  }
-
-  &--cancel {
-    background: rgba(234, 88, 12, 0.07);
-    color: $text-muted;
-    &:hover {
-      background: rgba(234, 88, 12, 0.13);
+  @media (max-width: 399px) {
+    > * {
+      flex: 1;
+      justify-content: center;
     }
-  }
-  &--confirm {
-    background: linear-gradient(135deg, #7c2d12, $orange);
-    color: white;
-    box-shadow: 0 3px 12px rgba(234, 88, 12, 0.3);
-    &:hover {
-      box-shadow: 0 5px 18px rgba(234, 88, 12, 0.4);
-    }
-  }
-  &--danger {
-    background: linear-gradient(135deg, #ef4444, $red);
-    color: white;
-    box-shadow: 0 3px 12px rgba(220, 38, 38, 0.3);
   }
 }
 
-// ─── Notify Dialog ─────────────────────────────────────────────────────────────
+// ─── Notify ───────────────────────────────────────────────────────────────────
 .notify-dialog {
   background: #fff;
   border-radius: 24px;
@@ -2470,13 +5044,11 @@ $error-red: #dc2626;
   max-width: 92vw;
   box-shadow: 0 24px 64px rgba(0, 0, 0, 0.12);
 }
-
 .notify-header {
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 1.25rem 1.5rem;
-
   &--success {
     background: linear-gradient(135deg, $green-dark, $green);
   }
@@ -2484,7 +5056,6 @@ $error-red: #dc2626;
     background: linear-gradient(135deg, #7f1d1d, $red);
   }
 }
-
 .notify-header-icon {
   width: 44px;
   height: 44px;
@@ -2496,7 +5067,6 @@ $error-red: #dc2626;
   justify-content: center;
   flex-shrink: 0;
 }
-
 .notify-title {
   font-family: 'Prompt', sans-serif;
   font-size: 1rem;
@@ -2513,14 +5083,12 @@ $error-red: #dc2626;
   padding: 1.5rem 1.5rem 0.75rem;
   text-align: center;
 }
-
 .notify-emoji {
   font-size: 2.8rem;
   margin-bottom: 0.75rem;
   display: block;
   animation: notifyPop 0.45s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
 }
-
 @keyframes notifyPop {
   0% {
     transform: scale(0.5);
@@ -2534,7 +5102,6 @@ $error-red: #dc2626;
     opacity: 1;
   }
 }
-
 .notify-msg {
   font-size: 0.92rem;
   font-weight: 600;
@@ -2543,7 +5110,6 @@ $error-red: #dc2626;
   padding: 10px 14px;
   margin: 0 0 1rem;
   line-height: 1.6;
-
   &--success {
     background: $green-soft;
   }
@@ -2551,12 +5117,10 @@ $error-red: #dc2626;
     background: $red-soft;
   }
 }
-
 .notify-progress {
   height: 4px;
   width: 100%;
   animation: progressShrink linear forwards;
-
   &--success {
     background: linear-gradient(90deg, $green-dark, $green);
   }
@@ -2564,7 +5128,6 @@ $error-red: #dc2626;
     background: linear-gradient(90deg, #7f1d1d, $red);
   }
 }
-
 @keyframes progressShrink {
   from {
     width: 100%;
@@ -2574,41 +5137,13 @@ $error-red: #dc2626;
   }
 }
 
-// ─── Responsive ───────────────────────────────────────────────────────────────
-@media (max-width: 600px) {
-  .page-hero {
-    padding: 1.5rem 1rem 3.5rem;
-  }
-  .content-wrap {
-    padding: 0 0.75rem 3rem;
-  }
-  .fest-card {
-    padding: 1.1rem;
-  }
-  .hero-left {
-    gap: 10px;
-  }
-  .hero-icon-wrap {
-    width: 46px;
-    height: 46px;
-  }
-  .logo-row {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  .logo-upload-zone {
-    width: 110px;
-  }
-}
-
-// ─── Click Particles ──────────────────────────────────────────────────────────
+// ─── Particles ────────────────────────────────────────────────────────────────
 .click-particles-root {
   position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: 99999;
 }
-
 .click-particle {
   position: fixed;
   left: var(--x);
@@ -2620,7 +5155,6 @@ $error-red: #dc2626;
   will-change: transform, opacity;
   animation: clickFall var(--dur) cubic-bezier(0.2, 0.9, 0.4, 1) forwards;
   border-radius: 50%;
-
   &[style*='--shape: square'] {
     border-radius: 3px;
   }
@@ -2661,7 +5195,6 @@ $error-red: #dc2626;
     }
   }
 }
-
 @keyframes clickFall {
   0% {
     opacity: 1;
@@ -2675,6 +5208,23 @@ $error-red: #dc2626;
   100% {
     opacity: 0;
     transform: translate(-50%, -50%) translate(var(--dx), var(--dy)) rotate(var(--rot)) scale(0.1);
+  }
+}
+</style>
+
+<style lang="scss">
+/* global — wish/card dialogs teleport outside component, scoped won't reach it */
+.wish-dlg {
+  width: min(1200px, 96vw) !important;
+  max-width: 96vw !important;
+
+  @media (max-width: 1023px) {
+    width: min(900px, 96vw) !important;
+  }
+
+  @media (max-width: 767px) {
+    width: 100vw !important;
+    max-width: 100vw !important;
   }
 }
 </style>

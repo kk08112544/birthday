@@ -9,6 +9,8 @@ export const MESSAGE = {
     NOT_EDIT_DELETE: 'ผู้สร้างหรือซุปเปอร์แอดมินสามารถลบหรือแก้ไขเทศกาลนี้ได้',
     FESTIVAL_NOT_EXCEPT: 'คุณไม่มีสิทธิ์แก้ไขหรือลบเทศกาลนี้',
     NOT_FOUND: 'ไม่มีเทศกาลนี้ในระบบ',
+    GET_WISH_SUCCESS: 'ดึงข้อมูลคำอวยพรสำเร็จ',
+    GET_CARD_SUCCESS: 'ดึงข้อมูลบัตรอวยพรสำเร็จ',
     // FESTIVAL_CONFLICT: 'มีข้อมูลเทศกาลแล้ว',
   },
   SENDER: {

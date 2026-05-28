@@ -2,16 +2,20 @@ import { Injectable } from '@nestjs/common';
 import { CreateFestivalDto } from './dto/create-festival.dto';
 import { UpdateFestivalDto } from './dto/update-festival.dto';
 import { PaginationFestivalDto } from './dto/pagination-festival.dto';
+import { PaginationWishDto } from './dto/pagination-wish.dto';
+import { PaginationCardDto } from './dto/pagination-card.dto';
 import { PaginationFestivalLogDto } from './dto/pagination-festivallog.dto';
 import { ExceptionsService } from 'src/common/exception/exception.service';
 import { STATUS } from 'src/common/status';
 import { MESSAGE } from 'src/common/message';
 import { AdminFestivalRepositories } from './festival.repositories';
+import { AdminRepositories } from '../admin/admin.repositories';
 import { AppLoggerService } from 'src/common/logger/app-logger.service';
 @Injectable()
 export class AdminFestivalService {
   constructor(
     private adminFestivalRepositories: AdminFestivalRepositories,
+    private adminRepositories: AdminRepositories,
     private exceptionService: ExceptionsService,
     private loggerService: AppLoggerService,
   ) {}
@@ -69,6 +73,44 @@ export class AdminFestivalService {
     };
   }
 
+  async findManyWish(dto: PaginationWishDto) {
+    const { page, limit, search, festivalName, wishWord, month, year } = dto;
+
+    const data = await this.adminFestivalRepositories.findManyPaginatedWish({
+      page,
+      limit,
+      search,
+      festivalName,
+      wishWord,
+      month,
+      year,
+    });
+
+    return {
+      festival: data,
+      action: STATUS.SUCCESS,
+      message: MESSAGE.FESTIVAL.GET_WISH_SUCCESS, // ใช้ตัวแปร MESSAGE
+    };
+  }
+
+  async findManyCard(dto: PaginationCardDto) {
+    const { page, limit, search, festivalName, month, year } = dto;
+    const data = await this.adminFestivalRepositories.findManyPaginatedCard({
+      page,
+      limit,
+      search,
+      festivalName,
+      month,
+      year,
+    });
+
+    return {
+      festival: data,
+      action: STATUS.SUCCESS,
+      message: MESSAGE.FESTIVAL.GET_CARD_SUCCESS, // ใช้ตัวแปร MESSAGE
+    };
+  }
+
   async findMin() {
     const data = await this.adminFestivalRepositories.findMin();
     return {
@@ -78,7 +120,7 @@ export class AdminFestivalService {
     };
   }
 
-  async getLog(paginationDto: PaginationFestivalLogDto) {
+  async findLog(paginationDto: PaginationFestivalLogDto) {
     const result = await this.adminFestivalRepositories.getLog(paginationDto);
     console.log(result);
     return {
@@ -98,8 +140,10 @@ export class AdminFestivalService {
     if (!checkId) {
       this.exceptionService.throwFestivalNotFound();
     }
+    console.log('updatedBy:', updatedBy);
     if (Number(checkId.createdBy) !== updatedBy) {
-      if (checkId.createdByUser.role !== 'superAdmin') {
+      const checkRole = await this.adminRepositories.findById(updatedBy);
+      if (checkRole?.role !== 'superAdmin') {
         this.exceptionService.throwFestivalNotExceptedChange();
       }
     }
@@ -130,7 +174,8 @@ export class AdminFestivalService {
     }
 
     if (Number(checkId.createdBy) !== deletedBy) {
-      if (checkId.createdByUser.role !== 'superAdmin') {
+      const checkRole = await this.adminRepositories.findById(deletedBy);
+      if (checkRole?.role !== 'superAdmin') {
         this.exceptionService.throwFestivalNotExceptedChange();
       }
     }
@@ -139,6 +184,7 @@ export class AdminFestivalService {
       this.exceptionService.throwFestivalNotExceptedChange();
     }
     const data = await this.adminFestivalRepositories.delete(id, deletedBy);
+    this.loggerService.delete('FESTIVAL', data);
     return {
       festival: data,
       action: STATUS.SUCCESS,

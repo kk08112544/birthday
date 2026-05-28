@@ -4,7 +4,11 @@ import { UpdateFestivalDto } from './dto/update-festival.dto';
 import { PrismaService } from 'src/prisma.service';
 import { ResponseFestivalDto } from './dto/response-festival.dto';
 import { ResponseFestivalLog } from './dto/response-festivallog.dto';
+import { ResponseWishDto } from './dto/response-wish.dto';
+import { ResponseCardDto } from './dto/response-card.dto';
 import { PaginationFestivalDto } from './dto/pagination-festival.dto';
+import { PaginationWishDto } from './dto/pagination-wish.dto';
+import { PaginationCardDto } from './dto/pagination-card.dto';
 import { PaginationFestivalLogDto } from './dto/pagination-festivallog.dto';
 import { PaginatedResult } from 'src/common/pagination/paginate.interface';
 import { Prisma } from '@prisma/client';
@@ -247,6 +251,502 @@ export class AdminFestivalRepositories {
 
     return Number(data._min.fId);
   }
+
+  async findManyPaginatedWish(
+    options: PaginationWishDto,
+  ): Promise<PaginatedResult<ResponseWishDto>> {
+    const andConditions: Prisma.WisherWhereInput[] = [];
+
+    const whereCondition: Prisma.WisherWhereInput = {
+      deletedAt: null,
+
+      festival: {
+        deletedAt: null,
+      },
+    };
+
+    if (options.wishWord || options.festivalName) {
+      andConditions.push({
+        OR: [
+          ...(options.wishWord
+            ? [
+                {
+                  wishWord: {
+                    contains: options.wishWord,
+                  },
+                },
+              ]
+            : []),
+
+          ...(options.festivalName
+            ? [
+                {
+                  festival: {
+                    festivalName: {
+                      contains: options.festivalName,
+                    },
+                  },
+                },
+              ]
+            : []),
+        ],
+      });
+    }
+
+    // ✅ month only
+    if (options.month && !options.year) {
+      const month = Number(options.month);
+      const year = new Date().getFullYear();
+
+      andConditions.push({
+        createdAt: {
+          gte: new Date(year, month - 1, 1),
+          lt: new Date(year, month, 1),
+        },
+      });
+    }
+
+    // ✅ month + year
+    if (options.month && options.year) {
+      const month = Number(options.month);
+      const year = Number(options.year);
+
+      andConditions.push({
+        createdAt: {
+          gte: new Date(year, month - 1, 1),
+          lt: new Date(year, month, 1),
+        },
+      });
+    }
+
+    // ✅ year only
+    if (options.year && !options.month) {
+      const year = Number(options.year);
+
+      andConditions.push({
+        createdAt: {
+          gte: new Date(year, 0, 1),
+          lt: new Date(year + 1, 0, 1),
+        },
+      });
+    }
+
+    // ✅ ใส่ AND ทีเดียว
+    if (andConditions.length > 0) {
+      whereCondition.AND = andConditions;
+    }
+
+    const queryFn = (skip: number, take: number) =>
+      this.prisma.wisher.findMany({
+        where: whereCondition,
+        skip,
+        take,
+        orderBy: { createdAt: 'desc' },
+
+        include: {
+          festival: {
+            select: {
+              fId: true,
+              festivalName: true,
+              createdAt: true,
+            },
+          },
+        },
+      }) as unknown as Promise<ResponseWishDto[]>;
+
+    const countFn = () =>
+      this.prisma.wisher.count({
+        where: whereCondition,
+      });
+
+    return paginate(queryFn, countFn, options) as unknown as Promise<
+      PaginatedResult<ResponseWishDto>
+    >;
+  }
+
+  // async findManyPaginatedWish(
+  //   options: PaginationWishDto,
+  // ): Promise<PaginatedResult<ResponseWishDto>> {
+  //   const andConditions: Prisma.WisherWhereInput[] = [];
+
+  //   const whereCondition: Prisma.WisherWhereInput = {
+  //     deletedAt: null,
+
+  //     festival: {
+  //       deletedAt: null,
+  //     },
+  //   };
+
+  //   if (options.wishWord || options.festivalName) {
+  //     andConditions.push({
+  //       OR: [
+  //         ...(options.wishWord
+  //           ? [
+  //               {
+  //                 wishWord: {
+  //                   contains: options.wishWord,
+  //                 },
+  //               },
+  //             ]
+  //           : []),
+
+  //         ...(options.festivalName
+  //           ? [
+  //               {
+  //                 festival: {
+  //                   festivalName: {
+  //                     contains: options.festivalName,
+  //                   },
+  //                 },
+  //               },
+  //             ]
+  //           : []),
+  //       ],
+  //     });
+  //   }
+
+  //   // ✅ month only
+  //   if (options.month && !options.year) {
+  //     const month = Number(options.month);
+  //     const year = new Date().getFullYear();
+
+  //     andConditions.push({
+  //       createdAt: {
+  //         gte: new Date(year, month - 1, 1),
+  //         lt: new Date(year, month, 1),
+  //       },
+  //     });
+  //   }
+
+  //   // ✅ month + year
+  //   if (options.month && options.year) {
+  //     const month = Number(options.month);
+  //     const year = Number(options.year);
+
+  //     andConditions.push({
+  //       createdAt: {
+  //         gte: new Date(year, month - 1, 1),
+  //         lt: new Date(year, month, 1),
+  //       },
+  //     });
+  //   }
+
+  //   // ✅ year only
+  //   if (options.year && !options.month) {
+  //     const year = Number(options.year);
+
+  //     andConditions.push({
+  //       createdAt: {
+  //         gte: new Date(year, 0, 1),
+  //         lt: new Date(year + 1, 0, 1),
+  //       },
+  //     });
+  //   }
+
+  //   // ✅ ใส่ AND ทีเดียว
+  //   if (andConditions.length > 0) {
+  //     whereCondition.AND = andConditions;
+  //   }
+
+  //   // ✅ DEDUPE: ใช้ groupBy หา wishWord ที่ไม่ซ้ำ + เรคคอร์ดล่าสุดของแต่ละคำ
+  //   const queryFn = async (skip: number, take: number) => {
+  //     // หา wishWord ที่ไม่ซ้ำ + wId สูงสุด (เรคคอร์ดล่าสุด) ของแต่ละคำ
+  //     const grouped = await this.prisma.wisher.groupBy({
+  //       by: ['wishWord'],
+  //       where: whereCondition,
+  //       _max: {
+  //         wId: true,
+  //         createdAt: true,
+  //       },
+  //       orderBy: {
+  //         _max: {
+  //           createdAt: 'desc',
+  //         },
+  //       },
+  //       skip,
+  //       take,
+  //     });
+
+  //     // ดึง id ของเรคคอร์ดล่าสุดที่ต้องการ
+  //     const wIds = grouped
+  //       .map((g) => g._max.wId)
+  //       .filter((id): id is number => id !== null);
+
+  //     if (wIds.length === 0) return [] as ResponseWishDto[];
+
+  //     // ดึงข้อมูลเต็มของเรคคอร์ดเหล่านั้น
+  //     const items = await this.prisma.wisher.findMany({
+  //       where: { wId: { in: wIds } },
+  //       include: {
+  //         festival: {
+  //           select: {
+  //             fId: true,
+  //             festivalName: true,
+  //             createdAt: true,
+  //           },
+  //         },
+  //       },
+  //     });
+
+  //     // เรียงตามลำดับเดียวกับ groupBy (createdAt desc)
+  //     const orderMap = new Map(wIds.map((id, idx) => [id, idx]));
+  //     items.sort(
+  //       (a, b) =>
+  //         (orderMap.get(a.wId) ?? 0) - (orderMap.get(b.wId) ?? 0),
+  //     );
+
+  //     return items as unknown as ResponseWishDto[];
+  //   };
+
+  //   // ✅ COUNT: นับจำนวน wishWord ที่ไม่ซ้ำ (ไม่ใช่จำนวนแถวทั้งหมด)
+  //   const countFn = async () => {
+  //     const distinct = await this.prisma.wisher.groupBy({
+  //       by: ['wishWord'],
+  //       where: whereCondition,
+  //     });
+  //     return distinct.length;
+  //   };
+
+  //   return paginate(queryFn, countFn, options) as unknown as Promise<
+  //     PaginatedResult<ResponseWishDto>
+  //   >;
+  // }
+  async findManyPaginatedCard(
+    options: PaginationCardDto,
+  ): Promise<PaginatedResult<ResponseCardDto>> {
+    const andConditions: Prisma.CardWhereInput[] = [];
+
+    const whereCondition: Prisma.CardWhereInput = {
+      deletedAt: null,
+
+      festival: {
+        deletedAt: null,
+      },
+    };
+
+    if (options.festivalName) {
+      andConditions.push({
+        OR: [
+          ...(options.festivalName
+            ? [
+                {
+                  festival: {
+                    festivalName: {
+                      contains: options.festivalName,
+                    },
+                  },
+                },
+              ]
+            : []),
+        ],
+      });
+    }
+
+    // ✅ month only
+    if (options.month && !options.year) {
+      const month = Number(options.month);
+      const year = new Date().getFullYear();
+
+      andConditions.push({
+        createdAt: {
+          gte: new Date(year, month - 1, 1),
+          lt: new Date(year, month, 1),
+        },
+      });
+    }
+
+    // ✅ month + year
+    if (options.month && options.year) {
+      const month = Number(options.month);
+      const year = Number(options.year);
+
+      andConditions.push({
+        createdAt: {
+          gte: new Date(year, month - 1, 1),
+          lt: new Date(year, month, 1),
+        },
+      });
+    }
+
+    // ✅ year only
+    if (options.year && !options.month) {
+      const year = Number(options.year);
+
+      andConditions.push({
+        createdAt: {
+          gte: new Date(year, 0, 1),
+          lt: new Date(year + 1, 0, 1),
+        },
+      });
+    }
+
+    // ✅ ใส่ AND ทีเดียว
+    if (andConditions.length > 0) {
+      whereCondition.AND = andConditions;
+    }
+
+    const queryFn = (skip: number, take: number) =>
+      this.prisma.card.findMany({
+        where: whereCondition,
+        skip,
+        take,
+        orderBy: { createdAt: 'desc' },
+
+        include: {
+          festival: {
+            select: {
+              fId: true,
+              festivalName: true,
+              createdAt: true,
+            },
+          },
+        },
+      }) as unknown as Promise<ResponseCardDto[]>;
+
+    const countFn = () =>
+      this.prisma.card.count({
+        where: whereCondition,
+      });
+
+    return paginate(queryFn, countFn, options) as unknown as Promise<
+      PaginatedResult<ResponseCardDto>
+    >;
+  }
+
+  // async findManyPaginatedCard(
+  //   options: PaginationCardDto,
+  // ): Promise<PaginatedResult<ResponseCardDto>> {
+  //   const andConditions: Prisma.CardWhereInput[] = [];
+
+  //   const whereCondition: Prisma.CardWhereInput = {
+  //     deletedAt: null,
+
+  //     festival: {
+  //       deletedAt: null,
+  //     },
+  //   };
+
+  //   if (options.festivalName) {
+  //     andConditions.push({
+  //       OR: [
+  //         ...(options.festivalName
+  //           ? [
+  //               {
+  //                 festival: {
+  //                   festivalName: {
+  //                     contains: options.festivalName,
+  //                   },
+  //                 },
+  //               },
+  //             ]
+  //           : []),
+  //       ],
+  //     });
+  //   }
+
+  //   // ✅ month only
+  //   if (options.month && !options.year) {
+  //     const month = Number(options.month);
+  //     const year = new Date().getFullYear();
+
+  //     andConditions.push({
+  //       createdAt: {
+  //         gte: new Date(year, month - 1, 1),
+  //         lt: new Date(year, month, 1),
+  //       },
+  //     });
+  //   }
+
+  //   // ✅ month + year
+  //   if (options.month && options.year) {
+  //     const month = Number(options.month);
+  //     const year = Number(options.year);
+
+  //     andConditions.push({
+  //       createdAt: {
+  //         gte: new Date(year, month - 1, 1),
+  //         lt: new Date(year, month, 1),
+  //       },
+  //     });
+  //   }
+
+  //   // ✅ year only
+  //   if (options.year && !options.month) {
+  //     const year = Number(options.year);
+
+  //     andConditions.push({
+  //       createdAt: {
+  //         gte: new Date(year, 0, 1),
+  //         lt: new Date(year + 1, 0, 1),
+  //       },
+  //     });
+  //   }
+
+  //   // ✅ ใส่ AND ทีเดียว
+  //   if (andConditions.length > 0) {
+  //     whereCondition.AND = andConditions;
+  //   }
+
+  //   // ✅ DEDUPE: groupBy ด้วย [imageCard, festivalId] — dedupe เฉพาะรูปซ้ำใน festival เดียวกัน
+  //   //    รูปเดียวกันที่อยู่คนละ festival ยังแสดงครบทุกอัน
+  //   const queryFn = async (skip: number, take: number) => {
+  //     const grouped = await this.prisma.card.groupBy({
+  //       by: ['imageCard', 'festivalId'],
+  //       where: whereCondition,
+  //       _max: {
+  //         cId: true,
+  //         createdAt: true,
+  //       },
+  //       orderBy: {
+  //         _max: {
+  //           createdAt: 'desc',
+  //         },
+  //       },
+  //       skip,
+  //       take,
+  //     });
+
+  //     const cIds = grouped
+  //       .map((g) => g._max.cId)
+  //       .filter((id): id is number => id !== null);
+
+  //     if (cIds.length === 0) return [] as ResponseCardDto[];
+
+  //     const items = await this.prisma.card.findMany({
+  //       where: { cId: { in: cIds } },
+  //       include: {
+  //         festival: {
+  //           select: {
+  //             fId: true,
+  //             festivalName: true,
+  //             createdAt: true,
+  //           },
+  //         },
+  //       },
+  //     });
+
+  //     const orderMap = new Map(cIds.map((id, idx) => [id, idx]));
+  //     items.sort(
+  //       (a, b) =>
+  //         (orderMap.get(a.cId) ?? 0) - (orderMap.get(b.cId) ?? 0),
+  //     );
+
+  //     return items as unknown as ResponseCardDto[];
+  //   };
+
+  //   // ✅ COUNT: นับจำนวน (imageCard, festivalId) combination ที่ไม่ซ้ำ
+  //   const countFn = async () => {
+  //     const distinct = await this.prisma.card.groupBy({
+  //       by: ['imageCard', 'festivalId'],
+  //       where: whereCondition,
+  //     });
+  //     return distinct.length;
+  //   };
+
+  //   return paginate(queryFn, countFn, options) as unknown as Promise<
+  //     PaginatedResult<ResponseCardDto>
+  //   >;
+  // }
 
   async update(
     id: number,

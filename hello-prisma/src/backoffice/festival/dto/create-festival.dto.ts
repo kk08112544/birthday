@@ -8,13 +8,20 @@ import {
   IsNumber,
   Matches,
 } from 'class-validator';
+import { Transform } from 'class-transformer';
 import { CreateWisherDto } from './create-wisher.dto';
 import { CreateCardDto } from './create-card.dto';
 export class CreateFestivalDto {
   @IsNotEmpty()
   @IsString()
+  // @Transform(({ value }) =>
+  //   typeof value === 'string' ? value.replace(/\s/g, '') : value,
+  // )
+  @Transform(({ value }: { value: unknown }) =>
+    typeof value === 'string' ? value.replace(/\s/g, '') : value,
+  )
   @Matches(/^[ก-๙A-Za-z0-9]+-[ก-๙A-Za-z0-9]{2,5}-\d{4}$/, {
-    message: 'รูปแบบต้องเป็น ชื่อเทศกาล-ตัวย่อหน่วยงาน-ปี',
+    message: 'รูปแบบต้องเป็น ชื่อเทศกาล-ตัวย่อหน่วยงาน (2-5) -ปี(4)',
   })
   festivalName!: string;
 
@@ -28,6 +35,15 @@ export class CreateFestivalDto {
 
   @IsNotEmpty()
   @IsString()
+  // @Transform(({ value }) =>
+  //   typeof value === 'string' ? value.replace(/\s/g, '') : value,
+  // )
+  @Transform(({ value }: { value: unknown }) =>
+    typeof value === 'string' ? value.replace(/\s/g, '') : value,
+  )
+  @Matches(/^[ก-๙A-Za-z0-9]+-[ก-๙A-Za-z0-9]{2,5}-\d{4}$/, {
+    message: 'รูปแบบต้องเป็น ชื่อเว็บไซต์-ตัวย่อหน่วยงาน (2-5) -ปี(4)',
+  })
   webName!: string;
 
   @IsNotEmpty()

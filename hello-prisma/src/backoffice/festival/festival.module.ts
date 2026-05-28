@@ -4,10 +4,16 @@ import { AdminFestivalService } from './festival.service';
 import { AdminFestivalController } from './festival.controller';
 import { PrismaService } from 'src/prisma.service';
 import { AdminFestivalRepositories } from './festival.repositories';
+import { AdminRepositories } from '../admin/admin.repositories';
 
 @Module({
   imports: [LoggerModule],
   controllers: [AdminFestivalController],
-  providers: [AdminFestivalService, PrismaService, AdminFestivalRepositories],
+  providers: [
+    AdminFestivalService,
+    PrismaService,
+    AdminFestivalRepositories,
+    AdminRepositories,
+  ],
 })
 export class AdminFestivalModule {}
