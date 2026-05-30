@@ -82,7 +82,7 @@
           :loading="loading"
           binary-state-sort
           @request="onTableRequest"
-          :rows-per-page-options="[10, 20, 50]"
+          :rows-per-page-options="[5, 10, 20, 50]"
           :table-style="$q.screen.xs ? 'font-size: 0.8rem' : ''"
           class="styled-table"
         >

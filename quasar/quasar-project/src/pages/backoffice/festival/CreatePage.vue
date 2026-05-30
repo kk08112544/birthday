@@ -410,9 +410,7 @@
               >
                 <q-icon name="search" size="15px" />
                 <span class="wish-tab-label">เลือกจากรายการ</span>
-                <span v-if="tempSelectedWishes.size > 0" class="wish-tab-badge">{{
-                  tempSelectedWishes.size
-                }}</span>
+                <span v-if="browseWishCount > 0" class="wish-tab-badge">{{ browseWishCount }}</span>
               </button>
               <button
                 class="wish-tab-btn"
@@ -422,6 +420,7 @@
               >
                 <q-icon name="edit_note" size="15px" />
                 <span class="wish-tab-label">เพิ่มเอง</span>
+                <span v-if="customWishCount > 0" class="wish-tab-badge">{{ customWishCount }}</span>
               </button>
             </div>
             <button class="wish-dlg-close" type="button" @click="closeWishSelector">
@@ -1493,6 +1492,7 @@ const dateRef = ref<HTMLElement | null>(null);
 const wishSelectorOpen = ref(false);
 const wishDlgTab = ref<'browse' | 'custom'>('browse');
 const tempSelectedWishes = ref<Set<string>>(new Set());
+const tempCustomWishes = ref<Set<string>>(new Set()); // คำที่ "เพิ่มเอง"
 const customWishText = ref('');
 const editWishDialog = ref(false);
 const deleteWishDialog = ref(false);
@@ -1501,6 +1501,16 @@ const deleteIndex = ref<number | null>(null);
 const itemToDelete = ref<string | null>(null);
 const tempWish = ref('');
 const wishWordList = ref<string[]>([]);
+
+// ─── Badge counts (แยกแท็บ) ────────────────────────────────────────────────────
+const customWishCount = computed(() => tempCustomWishes.value.size);
+const browseWishCount = computed(() => {
+  let n = 0;
+  for (const w of tempSelectedWishes.value) {
+    if (!tempCustomWishes.value.has(w)) n++;
+  }
+  return n;
+});
 
 // ─── Wish Filters ─────────────────────────────────────────────────────────────
 const wishFilterWord = ref('');
@@ -1749,6 +1759,7 @@ const clearFilters = () => {
 
 const onAddWish = () => {
   tempSelectedWishes.value = new Set();
+  tempCustomWishes.value = new Set();
   wishDlgTab.value = 'browse';
   wishFilterWord.value = '';
   wishFilterFestival.value = '';
@@ -1766,8 +1777,16 @@ const closeWishSelector = () => {
 const toggleTempWish = (wish: string) => {
   if (wishWordList.value.includes(wish)) return;
   const set = new Set(tempSelectedWishes.value);
-  if (set.has(wish)) set.delete(wish);
-  else set.add(wish);
+  if (set.has(wish)) {
+    set.delete(wish);
+    if (tempCustomWishes.value.has(wish)) {
+      const customSet = new Set(tempCustomWishes.value);
+      customSet.delete(wish);
+      tempCustomWishes.value = customSet;
+    }
+  } else {
+    set.add(wish);
+  }
   tempSelectedWishes.value = set;
 };
 const confirmWishSelection = () => {
@@ -1781,8 +1800,11 @@ const addCustomWish = () => {
   if (!text) return;
   if (!wishWordList.value.includes(text)) {
     const set = new Set(tempSelectedWishes.value);
+    const customSet = new Set(tempCustomWishes.value);
     set.add(text);
+    customSet.add(text);
     tempSelectedWishes.value = set;
+    tempCustomWishes.value = customSet;
   }
   customWishText.value = '';
 };
@@ -1800,11 +1822,18 @@ const confirmEditSelectedWish = () => {
   const newText = editSelectedText.value.trim();
   if (!newText) return;
   const set = new Set(tempSelectedWishes.value);
+  const customSet = new Set(tempCustomWishes.value);
+  const wasCustom = customSet.has(editSelectedOriginal.value);
+
   set.delete(editSelectedOriginal.value);
+  customSet.delete(editSelectedOriginal.value);
+
   if (!wishWordList.value.includes(newText)) {
     set.add(newText);
+    if (wasCustom) customSet.add(newText);
   }
   tempSelectedWishes.value = set;
+  tempCustomWishes.value = customSet;
   editSelectedDialog.value = false;
 };
 
@@ -2227,17 +2256,6 @@ const onLogoSelected = (file: File | null) => {
   };
   img.src = url;
 };
-// const onFestivalNameChange = (val: string | number | null) => {
-//   nameError.value = false;
-//   if (typeof val !== 'string') return;
-//   if (val && !/^[^-].*-[^-]{2,5}-\d{4}$/.test(val.trim())) nameError.value = true;
-// };
-
-// const onWebNameChange = (val: string | number | null) => {
-//   webNameError.value = false;
-//   if (typeof val !== 'string') return;
-//   if (val && !/^[^-].*-[^-]{2,5}-\d{4}$/.test(val.trim())) webNameError.value = true;
-// };
 
 const onFestivalNameChange = (val: string | number | null) => {
   nameError.value = false;
@@ -2260,12 +2278,10 @@ const validateAndScroll = async (): Promise<boolean> => {
   dateError.value = false;
   dateErrorMsg.value = '';
   const isImageValid = !!imageFile.value;
-   const isNameValid =
-    typeof festivalName.value === 'string' &&
-    FESTIVAL_NAME_PATTERN.test(festivalName.value.trim());
+  const isNameValid =
+    typeof festivalName.value === 'string' && FESTIVAL_NAME_PATTERN.test(festivalName.value.trim());
   const isLogoValid = !!logoFile.value || useDeptLogo.value;
-  // const isWebNameValid = typeof webName.value === 'string' && webName.value.trim().length > 0;
-   const isWebNameValid =
+  const isWebNameValid =
     typeof webName.value === 'string' && FESTIVAL_NAME_PATTERN.test(webName.value.trim());
   let isDateValid = true;
   if (startDate.value && !endDate.value) {
