@@ -149,6 +149,7 @@
               "
               :to="`/backoffice/festival/edit/${row.fId}`"
               class="card-action-btn card-action-btn--edit"
+              @click="LocalStorage.setItem('createdBy', row.createdBy)"
             >
               <q-icon name="edit" size="15px" />
             </router-link>

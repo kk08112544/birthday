@@ -1310,7 +1310,8 @@ $error-red: #dc2626;
 // ─── Content ─────────────────────────────────────────────────────────────────
 .content-wrap {
   max-width: 1100px;
-  margin: -1.25rem auto 0;
+  // margin: -1.25rem auto 0;
+  margin: 1.5rem auto 0; // ปรับให้เลื่อนลง (เพิ่มเลขยิ่งลงมามาก)
   padding: 1.5rem 1rem 4rem;
   display: flex;
   flex-direction: column;

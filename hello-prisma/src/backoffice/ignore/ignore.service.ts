@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateIgnoreDto } from './dto/create-ignore.dto';
 import { UpdateIgnoreDto } from './dto/update-ignore.dto';
 import { PaginationIgnoreLogDto } from './dto/pagination-ignorelog.dto';
-import { AdminIgnoreRepositories } from './ignore-repositories';
+import { AdminIgnoreRepositories } from './ignore.repositories';
 import { STATUS } from 'src/common/status';
 import { MESSAGE } from 'src/common/message';
 import { ExceptionsService } from 'src/common/exception/exception.service';

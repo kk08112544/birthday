@@ -7,19 +7,22 @@ const router = createRouter({
 });
 
 router.beforeEach((to, from, next) => {
+  console.log('[guard] going to:', to.path); // <-- เพิ่มบรรทัดนี้
   const accessToken = localStorage.getItem('accessToken');
-
-  // เช็คว่ามีตัวใดตัวหนึ่งในลำดับชั้นของ Route มี meta.requiresAuth หรือไม่
+  const role = localStorage.getItem('role');
   const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
 
+  const isSuperAdmin = role === 'superAdmin';
   if (requiresAuth && !accessToken) {
-    // ไม่มี Token และหน้าที่จะไปต้องการ Auth -> ส่งไป Login
+    console.log('[guard] -> redirect login'); // <--
     next('/backoffice/login');
   } else if (to.path === '/backoffice/login' && accessToken) {
-    // มี Token อยู่แล้วแต่อยากเข้าหน้า Login -> ส่งไป Admin
+    console.log('[guard] -> redirect festival'); // <--
+    next('/backoffice/festival');
+  } else if (to.path.startsWith('/backoffice/admin') && !isSuperAdmin) {
     next('/backoffice/festival');
   } else {
-    // กรณีอื่นๆ เช่น หน้าทั่วไป หรือมี Token ครบถ้วน -> อนุญาตให้ผ่าน
+    console.log('[guard] -> next() pass'); // <--
     next();
   }
 });

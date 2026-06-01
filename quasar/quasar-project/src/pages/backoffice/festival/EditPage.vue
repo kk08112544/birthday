@@ -1905,6 +1905,14 @@ const fetchFestival = async (id: string): Promise<void> => {
         ),
       );
     }
+    const userId = Number(localStorage.getItem('userId'));
+    const role = localStorage.getItem('role');
+    const isOwner = Number(data.createdBy) === userId;
+    const isSuperAdmin = role === 'superAdmin';
+    if (!isOwner && !isSuperAdmin) {
+      void router.replace('/backoffice/festival'); // ไม่มีสิทธิ์ -> เด้งกลับ
+      return;
+    }
 
     LocalStorage.set('festivalId', id);
   } catch {
