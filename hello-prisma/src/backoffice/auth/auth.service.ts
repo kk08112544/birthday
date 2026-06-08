@@ -26,6 +26,7 @@ export class AuthService {
     }
 
     const isMatches = await comparePassword(loginDto.password, user.password);
+    console.log(isMatches);
     if (!isMatches) {
       this.exceptionsService.throwInvalidPassword();
     }

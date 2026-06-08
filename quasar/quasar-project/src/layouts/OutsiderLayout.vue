@@ -10,7 +10,9 @@
         <q-toolbar-title class="festival-title">
           <span class="festival-title-text">{{ festivalName || 'เทศกาลอวยพร' }}</span>
         </q-toolbar-title>
-
+   <a href="/คู่มือระบบบริหารจัดการส่งคำอวยพรเนื่องในโอกาสต่างๆของกรมฯ-ผู้อวยพร.pdf" download="คู่มือการใช้งาน.pdf" target="_blank" class="footer-link">
+  <q-icon name="download" size="14px" class="q-mr-xs" />คู่มือการใช้งาน
+</a>
         <div class="header-dots gt-xs">
           <span class="dot dot-1" />
           <span class="dot dot-2" />
