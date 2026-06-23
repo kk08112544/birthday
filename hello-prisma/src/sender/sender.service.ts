@@ -21,6 +21,14 @@ export class SenderService {
   ) {}
 
   async create(createSenderDto: CreateSenderDto) {
+    const today = new Date();
+    const checkDate = await this.festivalRepositories.checkDate(
+      Number(createSenderDto.festivalId),
+      today,
+    );
+    if (!checkDate) {
+      this.exceptionsService.throwInvalidDate();
+    }
     const checkWord = await this.unpoliteRepositories.findWord(createSenderDto);
     if (checkWord) {
       // return {

@@ -18,6 +18,11 @@ export class ExceptionsService {
   throwSenderNotFound(): never {
     throw new NotFoundException(MESSAGE.SENDER.NOT_FOUND);
   }
+
+  throwInvalidDate(): never {
+    throw new ForbiddenException(MESSAGE.SENDER.INVALID_DATE);
+  }
+
   throwFoundBadWord(): never {
     throw new BadRequestException(MESSAGE.SENDER.BAD_WORD_FOUND);
   }

@@ -20,6 +20,7 @@ export const MESSAGE = {
     NOT_FOUND: 'ไม่พบผู้ส่งคำอวยพร',
     BAD_WORD_FOUND: 'ไม่บันทึกคำไม่สุภาพ',
     NOT_SERVICE: ' ไม่อยู่ในช่วงเทศกาล',
+    INVALID_DATE: 'ไม่อยู่ระหว่างวันที่อวยพร',
   },
   UNPOLITE: {
     CREATE_SUCCESS: 'สร้างคำไม่สุภาพสำเร็จ',

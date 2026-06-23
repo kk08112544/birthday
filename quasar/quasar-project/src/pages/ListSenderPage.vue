@@ -535,28 +535,10 @@ const festivalPeriod = ref<FestivalPeriod | null>(null);
  * รองรับ period ที่ข้ามปี เช่น ธ.ค. 2568 → ม.ค. 2569
  */
 const monthOptions = computed((): SelectOption<number>[] => {
-  if (!festivalPeriod.value) return [];
-
-  const start = new Date(festivalPeriod.value.startDate);
-  const end = new Date(festivalPeriod.value.endDate);
-
-  // normalize to first day of month เพื่อ compare ได้ถูกต้อง
-  const cursor = new Date(start.getFullYear(), start.getMonth(), 1);
-  const endMonth = new Date(end.getFullYear(), end.getMonth(), 1);
-
-  const seen = new Set<number>();
-  const options: SelectOption<number>[] = [];
-
-  while (cursor <= endMonth) {
-    const month = cursor.getMonth() + 1; // 1-12
-    if (!seen.has(month)) {
-      seen.add(month);
-      options.push({ label: THAI_MONTHS[month - 1]!, value: month });
-    }
-    cursor.setMonth(cursor.getMonth() + 1);
-  }
-
-  return options;
+  return THAI_MONTHS.map((label, index) => ({
+    label,
+    value: index + 1,
+  }));
 });
 
 /**
@@ -564,11 +546,8 @@ const monthOptions = computed((): SelectOption<number>[] => {
  * แสดงเป็น พ.ศ. ใน label (+543)
  */
 const yearOptions = computed((): SelectOption<number>[] => {
-  if (!festivalPeriod.value) return [];
-
-  const startYear = new Date(festivalPeriod.value.startDate).getFullYear();
-  const endYear = new Date(festivalPeriod.value.endDate).getFullYear();
-
+  const startYear = 2026; // พ.ศ. 2569
+  const endYear = new Date().getFullYear(); // ปีปัจจุบัน (ค.ศ.)
   const options: SelectOption<number>[] = [];
   for (let y = startYear; y <= endYear; y++) {
     options.push({ label: `${y + 543}`, value: y });

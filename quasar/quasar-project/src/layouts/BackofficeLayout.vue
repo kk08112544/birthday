@@ -272,38 +272,43 @@
           >
         </q-item>
         <!-- 📄 คู่มือการใช้งาน (Download) -->
-<q-item
-  clickable
-  tag="a"
-  href="/คู่มือการใช้งานระบบบริหารจัดการส่งคำอวยพรเนื่องในเทศกาลต่างๆของกรม1.pdf"
-  download="คู่มือการใช้งาน.pdf"
-  target="_blank"
-  style="border-radius: 12px; margin-bottom: 2px"
-  @mouseover="
-    (e: MouseEvent) => {
-      (e.currentTarget as HTMLElement).style.background = 'rgba(225,29,72,0.08)';
-    }
-  "
-  @mouseleave="
-    (e: MouseEvent) => {
-      (e.currentTarget as HTMLElement).style.background = '';
-    }
-  "
->
-  <q-item-section avatar>
-    <q-icon name="download" size="22px" color="pink-8" />
-  </q-item-section>
-  <q-item-section v-if="!sidebarMini || sidebarHovered">
-    <span
-      style="color:#1a1a1a; font-family:Sarabun,sans-serif; font-size:0.93rem; font-weight:600;"
-    >
-      คู่มือการใช้งาน
-    </span>
-  </q-item-section>
-  <q-tooltip v-if="sidebarMini && !sidebarHovered" anchor="center right" self="center left"
-    >คู่มือการใช้งาน</q-tooltip
-  >
-</q-item>
+        <q-item
+          clickable
+          tag="a"
+          href="/คู่มือการใช้งานระบบบริหารจัดการส่งคำอวยพรเนื่องในเทศกาลต่างๆของกรม1.pdf"
+          download="คู่มือการใช้งาน.pdf"
+          target="_blank"
+          style="border-radius: 12px; margin-bottom: 2px"
+          @mouseover="
+            (e: MouseEvent) => {
+              (e.currentTarget as HTMLElement).style.background = 'rgba(225,29,72,0.08)';
+            }
+          "
+          @mouseleave="
+            (e: MouseEvent) => {
+              (e.currentTarget as HTMLElement).style.background = '';
+            }
+          "
+        >
+          <q-item-section avatar>
+            <q-icon name="download" size="22px" color="pink-8" />
+          </q-item-section>
+          <q-item-section v-if="!sidebarMini || sidebarHovered">
+            <span
+              style="
+                color: #1a1a1a;
+                font-family: Sarabun, sans-serif;
+                font-size: 0.93rem;
+                font-weight: 600;
+              "
+            >
+              คู่มือการใช้งาน
+            </span>
+          </q-item-section>
+          <q-tooltip v-if="sidebarMini && !sidebarHovered" anchor="center right" self="center left"
+            >คู่มือการใช้งาน</q-tooltip
+          >
+        </q-item>
 
         <!-- Divider -->
         <q-separator style="background: rgba(0, 0, 0, 0.08); margin: 6px 4px" />
@@ -445,9 +450,14 @@
               <router-link to="/backoffice/ignore" class="footer-link">
                 <q-icon name="visibility_off" size="14px" class="q-mr-xs" />คำที่ถูกละเว้น
               </router-link>
-              <a href="/คู่มือการใช้งานระบบบริหารจัดการส่งคำอวยพรเนื่องในเทศกาลต่างๆของกรม1.pdf" download="คู่มือการใช้งาน.pdf" target="_blank" class="footer-link">
-  <q-icon name="download" size="14px" class="q-mr-xs" />คู่มือการใช้งาน
-</a>
+              <a
+                href="/คู่มือการใช้งานระบบบริหารจัดการส่งคำอวยพรเนื่องในเทศกาลต่างๆของกรม1.pdf"
+                download="คู่มือการใช้งาน.pdf"
+                target="_blank"
+                class="footer-link"
+              >
+                <q-icon name="download" size="14px" class="q-mr-xs" />คู่มือการใช้งาน
+              </a>
               <router-link v-if="isSuperAdmin" to="/backoffice/admin" class="footer-link">
                 <q-icon name="manage_accounts" size="14px" class="q-mr-xs" />จัดการผู้ใช้
                 <q-icon name="workspace_premium" size="12px" class="q-ml-xs" color="amber-4" />

@@ -48,6 +48,18 @@ export class FestivalRepositories {
     return result as unknown as ResponseFestivalDto[];
   }
 
+  async checkDate(festivalId: number, today: Date): Promise<boolean> {
+    const check = await this.prisma.festival.findFirst({
+      where: {
+        deletedAt: null,
+        fId: Number(festivalId),
+        startDate: { lte: today },
+        endDate: { gte: today },
+      },
+    });
+
+    return !!check;
+  }
   async findById(id: number): Promise<ResponseFestivalDto | null> {
     const data = await this.prisma.festival.findUnique({
       where: {
